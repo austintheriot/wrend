@@ -1,2 +1,2 @@
-#[derive(Default, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Example;
+pub mod utils;
+pub mod constants;
