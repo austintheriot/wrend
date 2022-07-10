@@ -13,9 +13,10 @@ const getStaticFilesOutputDir = (isProduction) => isProduction ? distPath : devP
 // 
 // See https://github.com/rafgraph/spa-github-pages for detailed instructions
 //
-// This config deviates from the instructions slightly from the instructions in the
-// dev server setup, which is probably because the inclusion of a `<base />` tag
-// in the index.html, which allows us not to have to specify the base url for every route
+// This config deviates from the instructions slightly in the dev server setup, 
+// which is probably necessary because the inclusion of a `<base />` tag
+// in the index.html. This allows us not to have to specify the base url for every route
+// in our Yew app
 const REPO_SLUG = '/webgl-rust/';
 
 module.exports = (env, argv) => {
