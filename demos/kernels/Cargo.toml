@@ -1,5 +1,5 @@
 [package]
-name = "test"
+name = "kernels"
 description = "Demo of bespoke granular synthesis on the web"
 version = "0.1.0"
 edition = "2021"
@@ -30,7 +30,7 @@ cpal = { version = "0.13.5", features = ["wasm-bindgen"] }
 wasm-bindgen = "0.2.78"
 wasm-bindgen-futures = "0.4.31"
 js-sys = "0.3.55"
-utils = { path = '../utils' }
+webgl = { path = '../../webgl' }
 anyhow = "1.0.58"
 thiserror = "1.0.31"
 rand = { version = "0.8.4" }

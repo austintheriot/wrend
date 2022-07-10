@@ -233,6 +233,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "entry"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "console_error_panic_hook",
+ "cpal",
+ "getrandom",
+ "js-sys",
+ "kernels",
+ "lazy_static",
+ "log",
+ "rand",
+ "thiserror",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "webgl",
+ "wee_alloc",
+ "yew",
+ "yew-router",
+]
+
+[[package]]
 name = "fnv"
 version = "1.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -464,6 +488,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c3fac17f7123a73ca62df411b1bf727ccc805daa070338fda671c86dac1bdc27"
 dependencies = [
  "wasm-bindgen",
+]
+
+[[package]]
+name = "kernels"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "console_error_panic_hook",
+ "cpal",
+ "getrandom",
+ "js-sys",
+ "lazy_static",
+ "log",
+ "rand",
+ "thiserror",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "webgl",
+ "wee_alloc",
+ "yew",
+ "yew-router",
 ]
 
 [[package]]
@@ -989,29 +1036,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "test"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "console_error_panic_hook",
- "cpal",
- "getrandom",
- "js-sys",
- "lazy_static",
- "log",
- "rand",
- "thiserror",
- "utils",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "wasm-logger",
- "web-sys",
- "wee_alloc",
- "yew",
- "yew-router",
-]
-
-[[package]]
 name = "thiserror"
 version = "1.0.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1045,16 +1069,6 @@ name = "unicode-ident"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d22af068fba1eb5edcb4aea19d382b2a3deb4c8f9d475c589b6ada9e0fd493ee"
-
-[[package]]
-name = "utils"
-version = "0.1.0"
-dependencies = [
- "getrandom",
- "log",
- "rand",
- "wasm-logger",
-]
 
 [[package]]
 name = "version_check"
@@ -1166,6 +1180,16 @@ checksum = "7b17e741662c70c8bd24ac5c5b18de314a2c26c32bf8346ee1e6f53de919c283"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "webgl"
+version = "0.1.0"
+dependencies = [
+ "getrandom",
+ "log",
+ "rand",
+ "wasm-logger",
 ]
 
 [[package]]

@@ -2,8 +2,6 @@ use wasm_bindgen::prelude::*;
 
 pub mod components;
 pub mod state;
-pub mod pages;
-pub mod route;
 
 // When the `wee_alloc` feature is enabled, this uses `wee_alloc` as the global
 // allocator.
@@ -13,6 +11,7 @@ pub mod route;
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
+/// This main function is only used for testing this portion of the app in isolation
 #[wasm_bindgen(start)]
 pub fn main() -> Result<(), JsValue> {
     // This provides better error messages in debug mode.
@@ -32,7 +31,7 @@ pub fn main() -> Result<(), JsValue> {
         .unwrap()
         .unwrap();
 
-    yew::start_app_in_element::<components::app::App>(app_div);
+    yew::start_app_in_element::<components::kernels_app::KernelsApp>(app_div);
 
     Ok(())
 }
