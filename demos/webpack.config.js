@@ -26,6 +26,7 @@ module.exports = (env, argv) => {
       (warning) => true,
     ],
     output: {
+      publicPath: "/",
       path: distPath,
       filename: "main.js",
       webassemblyModuleFilename: "main.wasm",
