@@ -1,11 +1,12 @@
-use yew::{function_component, html, prelude::*};
-use crate::state::app_context::AppContext;
+use yew::{function_component, html};
+use yew_router::prelude::*;
+use crate::pages::routes::{switch, Route};
 
 #[function_component(App)]
 pub fn app() -> Html {
     html! {
-        <ContextProvider<AppContext> context={AppContext::default()}>
-            <p>{"Test 1"}</p>
-        </ContextProvider<AppContext>>
+        <BrowserRouter>
+            <Switch<Route> render={Switch::render(switch)} />
+        </BrowserRouter>
     }
 }

@@ -2,6 +2,7 @@ use wasm_bindgen::prelude::*;
 
 pub mod components;
 pub mod state;
+pub mod pages;
 
 // When the `wee_alloc` feature is enabled, this uses `wee_alloc` as the global
 // allocator.

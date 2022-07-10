@@ -42,9 +42,7 @@ log = "0.4"
 wasm-logger = "0.2.0"
 lazy_static = "1.4.0"
 yew = { version = "0.19" }
-uuid = { version = "1.1.2", features = ["v4"] }
-gloo-net = { version = "0.2.0", features = ["http"]}
-hound = "3.4.0"
+yew-router = "0.16.0"
 
 # `wee_alloc` is a tiny allocator for wasm that is only ~1K in code size
 # compared to the default allocator's ~10K. However, it is slower than the default

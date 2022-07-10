@@ -12,15 +12,19 @@ module.exports = (env, argv) => {
   return {
     devServer: {
       static: {
-        directory:  isProduction ? distPath : devPath,
+        directory: isProduction ? distPath : devPath,
       },
       compress: isProduction,
       port: 8000,
+      historyApiFallback: true,
     },
     experiments: {
       syncWebAssembly: true,
     },
     entry: './index.js',
+    ignoreWarnings: [
+      (warning) => true,
+    ],
     output: {
       path: distPath,
       filename: "main.js",
