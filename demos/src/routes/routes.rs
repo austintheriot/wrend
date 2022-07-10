@@ -6,12 +6,12 @@ use yew_router::prelude::*;
 
 #[derive(Clone, Routable, PartialEq)]
 pub enum Route {
-    #[at("/")]
+    #[at("/webgl-rust/")]
     Home,
-    #[at("/test")]
+    #[at("/webgl-rust/test")]
     Test,
     #[not_found]
-    #[at("/404")]
+    #[at("/webgl-rust/404")]
     NotFound,
 }
 
