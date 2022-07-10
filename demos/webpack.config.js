@@ -11,9 +11,14 @@ module.exports = (env, argv) => {
   const isProduction = argv.mode === 'production';
   return {
     devServer: {
-      contentBase: isProduction ? distPath : devPath,
+      static: {
+        directory:  isProduction ? distPath : devPath,
+      },
       compress: isProduction,
       port: 8000,
+    },
+    experiments: {
+      syncWebAssembly: true,
     },
     entry: './index.js',
     output: {
