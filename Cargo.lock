@@ -1277,6 +1277,7 @@ dependencies = [
  "js-sys",
  "log",
  "rand",
+ "thiserror",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
