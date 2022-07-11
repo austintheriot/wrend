@@ -1,8 +1,10 @@
 use super::id::Id;
+use super::id_name::IdName;
 use super::render_callback::RenderCallback;
 use super::uniform::Uniform;
 use super::uniform_link::UniformLink;
 use super::{program_link::ProgramLink, shader_type::ShaderType};
+use js_sys::Date;
 use std::fmt::Debug;
 use std::{
     collections::{HashMap, HashSet},
@@ -10,14 +12,14 @@ use std::{
 };
 use thiserror::Error;
 use wasm_bindgen::JsCast;
-use web_sys::{window, HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram, WebGlShader};
+use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram, WebGlShader};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Renderer<
     VertexShaderId: Id,
     FragmentShaderId: Id,
     ProgramId: Id,
-    UniformId: Id,
+    UniformId: Id + IdName,
     UserCtx = (),
 > {
     canvas: HtmlCanvasElement,
@@ -27,12 +29,12 @@ pub struct Renderer<
     programs: HashMap<ProgramId, WebGlProgram>,
     render_callback:
         RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>,
-    uniforms: HashSet<Uniform<UniformId, UserCtx>>,
+    uniforms: HashSet<Uniform<ProgramId, UniformId, UserCtx>>,
     user_ctx: Option<UserCtx>,
 }
 
 /// Public API
-impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id, UserCtx>
+impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + IdName, UserCtx>
     Renderer<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>
 {
     pub fn builder(
@@ -66,10 +68,18 @@ impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id, Use
     }
 
     /// Iterates through all saved uniforms and updates them using their associated update callbacks
+    ///
+    /// Automatically calls "use_program" on the appropriate program before each uniform's update function
+    /// (so this is not necessary to do within the callback itself, unless you need to change programs, for
+    /// whatever reason).
     pub fn update_uniforms(&self) -> &Self {
-        let now = window().unwrap().performance().unwrap().now();
+        let now = Date::now();
 
         for uniform in &self.uniforms {
+            let program_id = uniform.program_id();
+            let program = self.programs().get(program_id);
+            self.gl().use_program(program);
+
             uniform.update(self.gl(), now, self.user_ctx())
         }
 
@@ -82,7 +92,7 @@ impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id, Use
 }
 
 /// Private API
-impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id, UserCtx>
+impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + IdName, UserCtx>
     Renderer<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>
 {
 }
@@ -151,7 +161,7 @@ pub struct RendererBuilder<
     VertexShaderId: Id,
     FragmentShaderId: Id,
     ProgramId: Id,
-    UniformId: Id,
+    UniformId: Id + IdName,
     UserCtx,
 > {
     canvas: Option<HtmlCanvasElement>,
@@ -163,14 +173,14 @@ pub struct RendererBuilder<
     program_links: HashSet<ProgramLink<ProgramId, VertexShaderId, FragmentShaderId>>,
     programs: HashMap<ProgramId, WebGlProgram>,
     uniform_links: HashSet<UniformLink<ProgramId, UniformId, UserCtx>>,
-    uniforms: HashSet<Uniform<UniformId, UserCtx>>,
+    uniforms: HashSet<Uniform<ProgramId, UniformId, UserCtx>>,
     render_callback:
         Option<RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>>,
     user_ctx: Option<UserCtx>,
 }
 
 /// Public API
-impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id, UserCtx>
+impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + IdName, UserCtx>
     RendererBuilder<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>
 {
     /// Save the canvas that will be rendered to and get its associated WebGL2 rendering context
@@ -293,7 +303,7 @@ impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id, Use
 }
 
 /// Private API
-impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id, UserCtx>
+impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + IdName, UserCtx>
     RendererBuilder<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>
 {
     /// Get the WebGL2 rendering context from a canvas
@@ -365,11 +375,11 @@ impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id, Use
     fn build_uniform(
         &self,
         program_uniform_link: &UniformLink<ProgramId, UniformId, UserCtx>,
-    ) -> Result<Uniform<UniformId, UserCtx>, RendererBuilderError> {
-        let program_id = program_uniform_link.program_id();
+    ) -> Result<Uniform<ProgramId, UniformId, UserCtx>, RendererBuilderError> {
+        let program_id = program_uniform_link.program_id().clone();
         let program = self
             .programs
-            .get(program_id)
+            .get(&program_id)
             .ok_or(RendererBuilderError::ProgramNotFoundBuildUniformsError)?;
 
         let gl = self
@@ -379,10 +389,11 @@ impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id, Use
 
         let uniform_id = program_uniform_link.uniform_id().clone();
         let uniform_location = gl
-            .get_uniform_location(program, &uniform_id.to_string())
+            .get_uniform_location(program, &uniform_id.name())
             .ok_or(RendererBuilderError::UniformLocationNotFoundLinkBuildUniformError)?;
         let update_callback = program_uniform_link.update_callback();
-        let uniform = Uniform::new(uniform_id, uniform_location, update_callback);
+        let uniform = Uniform::new(program_id, uniform_id, uniform_location, update_callback);
+
         Ok(uniform)
     }
 
@@ -463,8 +474,8 @@ impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id, Use
     }
 }
 
-impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id, UserCtx> Default
-    for RendererBuilder<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>
+impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + IdName, UserCtx>
+    Default for RendererBuilder<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>
 {
     fn default() -> Self {
         Self {

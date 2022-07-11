@@ -1,5 +1,6 @@
 use web_sys::{WebGl2RenderingContext, WebGlUniformLocation};
 
+#[derive(Debug, Clone)]
 /// This is the context object that is passed to each uniform's update callback
 pub struct UniformContext<'a, UserCtx> {
     gl: &'a WebGl2RenderingContext,

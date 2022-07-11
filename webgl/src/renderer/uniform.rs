@@ -6,28 +6,33 @@ use web_sys::{WebGl2RenderingContext, WebGlUniformLocation};
 pub type UniformUpdateCallback<UserCtx> = Rc<dyn Fn(&UniformContext<UserCtx>)>;
 
 #[derive(Clone)]
-pub struct Uniform<UniformId: Id, UserCtx> {
-    id: UniformId,
+pub struct Uniform<ProgramId: Id, UniformId: Id, UserCtx> {
+    program_id: ProgramId,
+    uniform_id: UniformId,
     uniform_location: WebGlUniformLocation,
     update_callback: UniformUpdateCallback<UserCtx>,
 }
 
-impl<UniformId: Id, UserCtx> Uniform<UniformId, UserCtx> {
+impl<ProgramId: Id, UniformId: Id, UserCtx> Uniform<ProgramId, UniformId, UserCtx> {
     // @todo move into builder pattern
     pub fn new(
-        id: UniformId,
+        program_id: ProgramId,
+        uniform_id: UniformId,
         uniform_location: WebGlUniformLocation,
         update_callback: UniformUpdateCallback<UserCtx>,
     ) -> Self {
         Self {
-            id,
+            program_id,
+            uniform_id,
             uniform_location,
             update_callback,
         }
     }
-
-    pub fn id(&self) -> &UniformId {
-        &self.id
+    pub fn program_id(&self) -> &ProgramId {
+        &self.program_id
+    }
+    pub fn uniform_id(&self) -> &UniformId {
+        &self.uniform_id
     }
     pub fn uniform_location(&self) -> &WebGlUniformLocation {
         &self.uniform_location
@@ -38,26 +43,26 @@ impl<UniformId: Id, UserCtx> Uniform<UniformId, UserCtx> {
     }
 }
 
-impl<UniformId: Id, UserCtx> Debug for Uniform<UniformId, UserCtx> {
+impl<ProgramId: Id, UniformId: Id, UserCtx> Debug for Uniform<ProgramId, UniformId, UserCtx> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Uniform")
-            .field("id", &self.id)
+            .field("id", &self.uniform_id)
             .field("uniform_location", &self.uniform_location)
             .finish()
     }
 }
-impl<UniformId: Id, UserCtx> Hash for Uniform<UniformId, UserCtx> {
+impl<ProgramId: Id, UniformId: Id, UserCtx> Hash for Uniform<ProgramId, UniformId, UserCtx> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.id.hash(state);
+        self.uniform_id.hash(state);
     }
 }
 
-impl<UniformId: Id, UserCtx> PartialEq for Uniform<UniformId, UserCtx> {
+impl<ProgramId: Id, UniformId: Id, UserCtx> PartialEq for Uniform<ProgramId, UniformId, UserCtx> {
     fn eq(&self, other: &Self) -> bool {
-            self.id == other.id
+        self.uniform_id == other.uniform_id
             && self.uniform_location == other.uniform_location
             && Rc::ptr_eq(&self.update_callback, &other.update_callback)
     }
 }
 
-impl<UniformId: Id, UserCtx> Eq for Uniform<UniformId, UserCtx> {}
+impl<ProgramId: Id, UniformId: Id, UserCtx> Eq for Uniform<ProgramId, UniformId, UserCtx> {}
