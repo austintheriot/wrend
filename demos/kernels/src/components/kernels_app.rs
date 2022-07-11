@@ -1,8 +1,9 @@
 use log::info;
-use std::{rc::Rc, fmt::Display};
+use std::rc::Rc;
 use web_sys::HtmlCanvasElement;
 use webgl::renderer::{
-    id::Id, program_link::ProgramLink, render_callback::RenderCallback, renderer::Renderer,
+    id::Id, id_name::IdName, program_link::ProgramLink, render_callback::RenderCallback,
+    renderer::Renderer, uniform_link::UniformLink,
 };
 use yew::{
     function_component, html, use_effect_with_deps, use_node_ref, use_state_eq, UseStateHandle,
@@ -14,22 +15,26 @@ const FRAGMENT_SHADER: &'static str = include_str!("../shaders/fragment.glsl");
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Default)]
 pub struct ProgramId;
 
-impl Display for ProgramId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "ProgramId")
-    }
-}
-
 impl Id for ProgramId {}
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Default)]
-pub struct UniformId;
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+pub enum UniformId {
+    Example
+}
 
 impl Id for UniformId {}
 
-impl Display for UniformId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "UniformId")
+impl Default for UniformId {
+    fn default() -> Self {
+        Self::Example
+    }
+}
+
+impl IdName for UniformId {
+    fn name(&self) -> String {
+        match self {
+            UniformId::Example => "u_example".to_string(),
+        }
     }
 }
 
@@ -47,12 +52,6 @@ impl Default for ShaderId {
     }
 }
 
-impl Display for ShaderId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
-
 #[function_component(KernelsApp)]
 pub fn kernels_app() -> Html {
     let canvas_ref = use_node_ref();
@@ -66,7 +65,13 @@ pub fn kernels_app() -> Html {
                     .cast()
                     .expect("Canvas ref should point to a canvas in the use_effect hook");
 
-                let program_link = ProgramLink::new(ProgramId, ShaderId::Vertex, ShaderId::Fragment);
+                let program_link =
+                    ProgramLink::new(ProgramId, ShaderId::Vertex, ShaderId::Fragment);
+                
+                let uniform_link = UniformLink::new(ProgramId, UniformId::Example, Rc::new(|ctx| {
+                    ctx.gl().uniform1f(Some(ctx.uniform_location()), 1.0);
+                    info!("Uniform updater called! {:?}", ctx);
+                }));
 
                 let mut renderer_builder = Renderer::builder();
 
@@ -93,7 +98,8 @@ pub fn kernels_app() -> Html {
                     .set_canvas(canvas)
                     .expect("Canvas should have a WebGL2RenderingContext")
                     .set_user_ctx(example_state)
-                    .set_render_callback(render_callback);
+                    .set_render_callback(render_callback)
+                    .add_uniform_link(uniform_link);
 
                 let renderer = renderer_builder
                     .build()
@@ -102,6 +108,10 @@ pub fn kernels_app() -> Html {
                 info!("{:?}", renderer);
 
                 renderer.render();
+
+                renderer.update_uniforms();
+
+                
                 renderer.render();
 
                 return || {};
