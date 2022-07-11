@@ -15,5 +15,4 @@ The following use cases should guide the development of this library:
 - Ray tracing?
 
 ## Todo
-- Move getting the WebGL2RenderingContext into the build function call
 - Return error when a duplicate item is added to HashMap

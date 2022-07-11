@@ -154,6 +154,10 @@ pub enum RendererBuilderError {
     NoContextLinkBuildUniformError,
     #[error("Could not build uniform because the associated program_id could no be found")]
     ProgramNotFoundBuildUniformsError,
+
+      // @todo: move this into its own sub-error
+      #[error("Could not get WebGl2RenderingContext from canvas, because None was returned")]
+      CanvasReturnedNoContext
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -184,16 +188,10 @@ impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + Id
     RendererBuilder<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>
 {
     /// Save the canvas that will be rendered to and get its associated WebGL2 rendering context
-    pub fn set_canvas(
-        &mut self,
-        canvas: HtmlCanvasElement,
-    ) -> Result<&mut Self, RendererBuilderError> {
-        let gl = Self::context(&canvas)?;
-
-        self.gl = Some(gl);
+    pub fn set_canvas(&mut self, canvas: HtmlCanvasElement) -> &mut Self {
         self.canvas = Some(canvas);
 
-        Ok(self)
+        self
     }
 
     /// Saves a fragment shader source and its corresponding id
@@ -278,6 +276,7 @@ impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + Id
         Renderer<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>,
         RendererBuilderError,
     > {
+        self.save_webgl_context_from_canvas()?;
         self.compile_fragment_shaders()?;
         self.compile_vertex_shaders()?;
         self.link_programs()?;
@@ -306,8 +305,20 @@ impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + Id
 impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + IdName, UserCtx>
     RendererBuilder<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>
 {
+    /// Gets the WebGL2 context from the canvas saved in state and saves the context in state
+    fn save_webgl_context_from_canvas(&mut self) -> Result<&mut Self, RendererBuilderError> {
+        let canvas = self
+            .canvas
+            .as_ref()
+            .ok_or(RendererBuilderError::CanvasReturnedNoContext)?;
+        let gl = Self::context_from_canvas(&canvas)?;
+        self.gl = Some(gl);
+
+        Ok(self)
+    }
+
     /// Get the WebGL2 rendering context from a canvas
-    fn context(canvas: &HtmlCanvasElement) -> Result<WebGl2RenderingContext, RendererBuilderError> {
+    fn context_from_canvas(canvas: &HtmlCanvasElement) -> Result<WebGl2RenderingContext, RendererBuilderError> {
         let gl = canvas
             .get_context("webgl2")
             .map_err(|_| RendererBuilderError::WebGL2ContextRetrievalError)?;

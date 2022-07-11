@@ -96,7 +96,6 @@ pub fn kernels_app() -> Html {
                     .add_vertex_shader_src(ShaderId::Vertex, VERTEX_SHADER.to_string())
                     .add_fragment_shader_src(ShaderId::Fragment, FRAGMENT_SHADER.to_string())
                     .set_canvas(canvas)
-                    .expect("Canvas should have a WebGL2RenderingContext")
                     .set_user_ctx(example_state)
                     .set_render_callback(render_callback)
                     .add_uniform_link(uniform_link);
