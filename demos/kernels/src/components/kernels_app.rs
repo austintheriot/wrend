@@ -2,7 +2,7 @@ use log::info;
 use std::rc::Rc;
 use web_sys::HtmlCanvasElement;
 use webgl::renderer::{
-    program_link::ProgramLink, render_callback::RenderCallback, renderer::Renderer,
+    id::Id, program_link::ProgramLink, render_callback::RenderCallback, renderer::Renderer,
 };
 use yew::{
     function_component, html, use_effect_with_deps, use_node_ref, use_state_eq, UseStateHandle,
@@ -11,11 +11,18 @@ use yew::{
 const VERTEX_SHADER: &'static str = include_str!("../shaders/vertex.glsl");
 const FRAGMENT_SHADER: &'static str = include_str!("../shaders/fragment.glsl");
 
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Default)]
+pub struct ProgramId;
+
+impl Id for ProgramId {}
+
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum ShaderId {
     Vertex,
     Fragment,
 }
+
+impl Id for ShaderId {}
 
 impl Default for ShaderId {
     fn default() -> Self {
@@ -41,7 +48,7 @@ pub fn kernels_app() -> Html {
                 let mut renderer_builder = Renderer::builder();
 
                 let render_callback = RenderCallback::new(Rc::new(
-                    |renderer: &Renderer<ShaderId, UseStateHandle<i32>>| {
+                    |renderer: &Renderer<ShaderId, ShaderId, ProgramId, UseStateHandle<i32>>| {
                         info!("Render callback was called! Called with {:?}", renderer);
                         if let Some(ctx) = renderer.user_ctx() {
                             let current_value = **ctx;
