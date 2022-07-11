@@ -5,42 +5,42 @@ use std::rc::Rc;
 use uuid::Uuid;
 
 #[derive(Clone)]
-pub struct RenderCallback<I>
+pub struct RenderCallback<Id, UserCtx>
 where
-    I: Hash + Eq + Clone + Debug + Default,
+    Id: Hash + Eq + Clone + Debug + Default,
 {
-    callback: Rc<dyn Fn(&Renderer<I>)>,
+    callback: Rc<dyn Fn(&Renderer<Id, UserCtx>)>,
     uuid: Uuid,
 }
 
-impl<I> RenderCallback<I>
+impl<Id, UserCtx> RenderCallback<Id, UserCtx>
 where
-    I: Hash + Eq + Clone + Debug + Default,
+    Id: Hash + Eq + Clone + Debug + Default,
 {
-    pub fn new(render_callback: Rc<dyn Fn(&Renderer<I>)>) -> Self {
+    pub fn new(render_callback: Rc<dyn Fn(&Renderer<Id, UserCtx>)>) -> Self {
         Self {
             callback: render_callback,
             uuid: Uuid::new_v4(),
         }
     }
 
-    pub fn call(&self, renderer: &Renderer<I>) {
+    pub fn call(&self, renderer: &Renderer<Id, UserCtx>) {
         (self.callback)(renderer);
     }
 }
 
-impl<I> Hash for RenderCallback<I>
+impl<Id, UserCtx> Hash for RenderCallback<Id, UserCtx>
 where
-    I: Hash + Eq + Clone + Debug + Default,
+    Id: Hash + Eq + Clone + Debug + Default,
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.uuid.hash(state);
     }
 }
 
-impl<I> Debug for RenderCallback<I>
+impl<Id, UserCtx> Debug for RenderCallback<Id, UserCtx>
 where
-    I: Hash + Eq + Clone + Debug + Default,
+    Id: Hash + Eq + Clone + Debug + Default,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("RenderCallback")
@@ -49,9 +49,9 @@ where
     }
 }
 
-impl<I> Default for RenderCallback<I>
+impl<Id, UserCtx> Default for RenderCallback<Id, UserCtx>
 where
-    I: Hash + Eq + Clone + Debug + Default,
+    Id: Hash + Eq + Clone + Debug + Default,
 {
     fn default() -> Self {
         Self {
@@ -61,13 +61,13 @@ where
     }
 }
 
-impl<I> PartialEq for RenderCallback<I>
+impl<Id, UserCtx> PartialEq for RenderCallback<Id, UserCtx>
 where
-    I: Hash + Eq + Clone + Debug + Default,
+    Id: Hash + Eq + Clone + Debug + Default,
 {
     fn eq(&self, other: &Self) -> bool {
         self.uuid == other.uuid
     }
 }
 
-impl<I> Eq for RenderCallback<I> where I: Hash + Eq + Clone + Debug + Default {}
+impl<Id, UserCtx> Eq for RenderCallback<Id, UserCtx> where Id: Hash + Eq + Clone + Debug + Default {}

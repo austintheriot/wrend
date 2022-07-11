@@ -1,13 +1,12 @@
-use std::rc::Rc;
-
 use log::info;
+use std::rc::Rc;
 use web_sys::HtmlCanvasElement;
 use webgl::renderer::{
-    program_link::ProgramLink,
-    render_callback::{self, RenderCallback},
-    renderer::Renderer,
+    program_link::ProgramLink, render_callback::RenderCallback, renderer::Renderer,
 };
-use yew::{function_component, html, use_effect_with_deps, use_node_ref};
+use yew::{
+    function_component, html, use_effect_with_deps, use_node_ref, use_state_eq, UseStateHandle,
+};
 
 const VERTEX_SHADER: &'static str = include_str!("../shaders/vertex.glsl");
 const FRAGMENT_SHADER: &'static str = include_str!("../shaders/fragment.glsl");
@@ -27,6 +26,7 @@ impl Default for ShaderId {
 #[function_component(KernelsApp)]
 pub fn kernels_app() -> Html {
     let canvas_ref = use_node_ref();
+    let example_state = use_state_eq(|| 0);
 
     use_effect_with_deps(
         {
@@ -40,9 +40,15 @@ pub fn kernels_app() -> Html {
 
                 let mut renderer_builder = Renderer::builder();
 
-                let render_callback = RenderCallback::new(Rc::new(|renderer| {
-                    info!("Render callback was called! Called with {:?}", renderer);
-                }));
+                let render_callback = RenderCallback::new(Rc::new(
+                    |renderer: &Renderer<ShaderId, UseStateHandle<i32>>| {
+                        info!("Render callback was called! Called with {:?}", renderer);
+                        if let Some(ctx) = renderer.user_ctx() {
+                            let current_value = **ctx;
+                            info!("Current count is {:?}", current_value);
+                        }
+                    },
+                ));
 
                 renderer_builder
                     .add_program_link(program_link)
@@ -50,12 +56,16 @@ pub fn kernels_app() -> Html {
                     .add_fragment_shader_src(ShaderId::Fragment, FRAGMENT_SHADER.to_string())
                     .set_canvas(canvas)
                     .expect("Canvas should have a WebGL2RenderingContext")
+                    .set_user_ctx(example_state)
                     .set_render_callback(render_callback);
 
-                let renderer = renderer_builder.build().expect("Renderer should successfully build");
+                let renderer = renderer_builder
+                    .build()
+                    .expect("Renderer should successfully build");
 
                 info!("{:?}", renderer);
 
+                renderer.render();
                 renderer.render();
 
                 return || {};

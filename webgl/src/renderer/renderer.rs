@@ -10,24 +10,25 @@ use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram, WebGlShader};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Renderer<I>
+pub struct Renderer<Id, UserCtx = ()>
 where
-    I: Hash + Eq + Clone + Debug + Default,
+    Id: Hash + Eq + Clone + Debug + Default,
 {
     canvas: HtmlCanvasElement,
     gl: WebGl2RenderingContext,
-    fragment_shaders: HashMap<I, WebGlShader>,
-    vertex_shaders: HashMap<I, WebGlShader>,
-    programs: HashMap<ProgramLink<I>, WebGlProgram>,
-    render_callback: RenderCallback<I>,
+    fragment_shaders: HashMap<Id, WebGlShader>,
+    vertex_shaders: HashMap<Id, WebGlShader>,
+    programs: HashMap<ProgramLink<Id>, WebGlProgram>,
+    render_callback: RenderCallback<Id, UserCtx>,
+    user_ctx: Option<UserCtx>,
 }
 
 /// Public API
-impl<I> Renderer<I>
+impl<Id, UserCtx> Renderer<Id, UserCtx>
 where
-    I: Hash + Eq + Clone + Debug + Default,
+    Id: Hash + Eq + Clone + Debug + Default,
 {
-    pub fn builder() -> RendererBuilder<I> {
+    pub fn builder() -> RendererBuilder<Id, UserCtx> {
         RendererBuilder::default()
     }
 
@@ -39,16 +40,21 @@ where
         &self.gl
     }
 
-    pub fn fragment_shaders(&self) -> &HashMap<I, WebGlShader> {
+    pub fn fragment_shaders(&self) -> &HashMap<Id, WebGlShader> {
         &self.fragment_shaders
     }
 
-    pub fn vertex_shaders(&self) -> &HashMap<I, WebGlShader> {
+    pub fn vertex_shaders(&self) -> &HashMap<Id, WebGlShader> {
         &self.vertex_shaders
     }
 
-    pub fn programs(&self) -> &HashMap<ProgramLink<I>, WebGlProgram> {
+    pub fn programs(&self) -> &HashMap<ProgramLink<Id>, WebGlProgram> {
         &self.programs
+    }
+
+    // @todo - enable ctx to be returned unconditionally (depending on if it's set or not)
+    pub fn user_ctx(&self) -> Option<&UserCtx> {
+        self.user_ctx.as_ref()
     }
 
     pub fn render(&self) {
@@ -57,7 +63,7 @@ where
 }
 
 /// Private API
-impl<I> Renderer<I> where I: Hash + Eq + Clone + Debug + Default {}
+impl<Id, UserCtx> Renderer<Id, UserCtx> where Id: Hash + Eq + Clone + Debug + Default {}
 
 #[derive(Error, Debug, PartialEq, Eq, Clone, Hash)]
 pub enum RendererBuilderError {
@@ -108,26 +114,27 @@ pub enum RendererBuilderError {
     UnknownErrorLinkProgramError,
 }
 
-#[derive(Debug, Default, PartialEq, Eq, Clone)]
-pub struct RendererBuilder<I>
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub struct RendererBuilder<Id, UserCtx>
 where
-    I: Hash + Eq + Clone + Debug + Default,
+    Id: Hash + Eq + Clone + Debug + Default,
 {
     canvas: Option<HtmlCanvasElement>,
     gl: Option<WebGl2RenderingContext>,
-    vertex_shader_sources: HashMap<I, String>,
-    fragment_shader_sources: HashMap<I, String>,
-    vertex_shaders: HashMap<I, WebGlShader>,
-    fragment_shaders: HashMap<I, WebGlShader>,
-    program_ids_to_link: HashSet<ProgramLink<I>>,
-    programs: HashMap<ProgramLink<I>, WebGlProgram>,
-    render_callback: Option<RenderCallback<I>>,
+    vertex_shader_sources: HashMap<Id, String>,
+    fragment_shader_sources: HashMap<Id, String>,
+    vertex_shaders: HashMap<Id, WebGlShader>,
+    fragment_shaders: HashMap<Id, WebGlShader>,
+    program_ids_to_link: HashSet<ProgramLink<Id>>,
+    programs: HashMap<ProgramLink<Id>, WebGlProgram>,
+    render_callback: Option<RenderCallback<Id, UserCtx>>,
+    user_ctx: Option<UserCtx>,
 }
 
 /// Public API
-impl<I> RendererBuilder<I>
+impl<Id, UserCtx> RendererBuilder<Id, UserCtx>
 where
-    I: Hash + Eq + Clone + Debug + Default,
+    Id: Hash + Eq + Clone + Debug + Default,
 {
     /// Save the canvas that will be rendered to and get its associated WebGL2 rendering context
     pub fn set_canvas(
@@ -143,14 +150,14 @@ where
     }
 
     /// Saves a fragment shader source and its corresponding id
-    pub fn add_fragment_shader_src(&mut self, id: I, fragment_shader_src: String) -> &mut Self {
+    pub fn add_fragment_shader_src(&mut self, id: Id, fragment_shader_src: String) -> &mut Self {
         self.fragment_shader_sources.insert(id, fragment_shader_src);
 
         self
     }
 
     /// Saves a vertex shader source and its corresponding id
-    pub fn add_vertex_shader_src(&mut self, id: I, vertex_shader_src: String) -> &mut Self {
+    pub fn add_vertex_shader_src(&mut self, id: Id, vertex_shader_src: String) -> &mut Self {
         self.vertex_shader_sources.insert(id, vertex_shader_src);
 
         self
@@ -160,7 +167,7 @@ where
     ///
     /// During the Renderer build process, this `program_link` is used to link a new WebGL2 program
     /// together by associating the vertex shader id and the fragment shader id with their corresponding compiled shaders.
-    pub fn add_program_link(&mut self, program_link: impl Into<ProgramLink<I>>) -> &mut Self {
+    pub fn add_program_link(&mut self, program_link: impl Into<ProgramLink<Id>>) -> &mut Self {
         self.program_ids_to_link.insert(program_link.into());
 
         self
@@ -169,9 +176,22 @@ where
     /// Save a callback that will be called each time it is time to render a new frame
     pub fn set_render_callback(
         &mut self,
-        render_callback: impl Into<RenderCallback<I>>,
+        render_callback: impl Into<RenderCallback<Id, UserCtx>>,
     ) -> &mut Self {
         self.render_callback = Some(render_callback.into());
+
+        self
+    }
+
+    /// Save as arbitrary user context that can be accessed from within the render callback
+    /// 
+    /// This can include stateful data and anything else that might be necessary to access
+    /// while performing a render.
+    pub fn set_user_ctx(
+        &mut self,
+        ctx: impl Into<UserCtx>,
+    ) -> &mut Self {
+        self.user_ctx = Some(ctx.into());
 
         self
     }
@@ -179,7 +199,7 @@ where
     /// Compiles all vertex shaders and fragment shaders.
     /// Links together any programs that have been specified.
     /// Outputs the final Renderer.
-    pub fn build(mut self) -> Result<Renderer<I>, RendererBuilderError> {
+    pub fn build(mut self) -> Result<Renderer<Id, UserCtx>, RendererBuilderError> {
         self.compile_fragment_shaders()?;
         self.compile_vertex_shaders()?;
         self.link_programs()?;
@@ -195,6 +215,7 @@ where
             render_callback: self
                 .render_callback
                 .ok_or(RendererBuilderError::NoRenderCallbackBuildError)?,
+            user_ctx: self.user_ctx,
         };
 
         Ok(renderer)
@@ -202,9 +223,9 @@ where
 }
 
 /// Private API
-impl<I> RendererBuilder<I>
+impl<Id, UserCtx> RendererBuilder<Id, UserCtx>
 where
-    I: Hash + Eq + Clone + Debug + Default,
+    Id: Hash + Eq + Clone + Debug + Default,
 {
     /// Get the WebGL2 rendering context from a canvas
     fn context(canvas: &HtmlCanvasElement) -> Result<WebGl2RenderingContext, RendererBuilderError> {
@@ -331,6 +352,26 @@ where
                 }
                 None => RendererBuilderError::UnknownErrorCompilerShaderError,
             })
+        }
+    }
+}
+
+impl<Id, UserCtx> Default for RendererBuilder<Id, UserCtx>
+where
+    Id: Hash + Eq + Clone + Debug + Default,
+{
+    fn default() -> Self {
+        Self {
+            canvas: Default::default(),
+            gl: Default::default(),
+            vertex_shader_sources: Default::default(),
+            fragment_shader_sources: Default::default(),
+            vertex_shaders: Default::default(),
+            fragment_shaders: Default::default(),
+            program_ids_to_link: Default::default(),
+            programs: Default::default(),
+            render_callback: Default::default(),
+            user_ctx: Default::default(),
         }
     }
 }
