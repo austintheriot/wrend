@@ -1,4 +1,5 @@
 use super::{program_link::ProgramLink, shader_type::ShaderType};
+use std::fmt::Debug;
 use std::{
     collections::{HashMap, HashSet},
     hash::Hash,
@@ -7,9 +8,10 @@ use thiserror::Error;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram, WebGlShader};
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Renderer<I>
 where
-    I: Hash + Eq + Clone,
+    I: Hash + Eq + Clone + Debug + Default,
 {
     canvas: HtmlCanvasElement,
     gl: WebGl2RenderingContext,
@@ -18,11 +20,19 @@ where
     programs: HashMap<ProgramLink<I>, WebGlProgram>,
 }
 
-impl<I> Renderer<I> where I: Hash + Eq + Clone {}
+impl<I> Renderer<I>
+where
+    I: Hash + Eq + Clone + Debug + Default,
+{
+    pub fn builder() -> RendererBuilder<I> {
+        RendererBuilder::default()
+    }
+}
 
+#[derive(Debug, Default, PartialEq, Eq, Clone)]
 pub struct RendererBuilder<I>
 where
-    I: Hash + Eq + Clone,
+    I: Hash + Eq + Clone + Debug + Default,
 {
     canvas: Option<HtmlCanvasElement>,
     gl: Option<WebGl2RenderingContext>,
@@ -34,7 +44,7 @@ where
     programs: HashMap<ProgramLink<I>, WebGlProgram>,
 }
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, PartialEq, Eq, Clone, Hash)]
 pub enum RendererBuilderError {
     // @todo: move this into its own sub-error
     #[error(
@@ -83,7 +93,7 @@ pub enum RendererBuilderError {
 
 impl<I> RendererBuilder<I>
 where
-    I: Hash + Eq + Clone,
+    I: Hash + Eq + Clone + Debug + Default,
 {
     /// Get the WebGL2 rendering context from a canvas
     fn context(canvas: &HtmlCanvasElement) -> Result<WebGl2RenderingContext, RendererBuilderError> {
@@ -155,7 +165,7 @@ where
 
     /// Links together all of the vertex & fragment shaders that have been saved
     /// according to any ProgramLinks that were provided.
-    /// 
+    ///
     /// If a ProgramLink does not correspond to an actual shader, returns an Error.
     fn link_programs(&mut self) -> Result<&mut Self, RendererBuilderError> {
         for program_link in self.program_ids_to_link.iter() {
