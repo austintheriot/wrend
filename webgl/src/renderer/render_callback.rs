@@ -6,17 +6,24 @@ use std::rc::Rc;
 use uuid::Uuid;
 
 #[derive(Clone)]
-pub struct RenderCallback<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UserCtx> {
-    callback: Rc<dyn Fn(&Renderer<VertexShaderId, FragmentShaderId, ProgramId, UserCtx>)>,
+pub struct RenderCallback<
+    VertexShaderId: Id,
+    FragmentShaderId: Id,
+    ProgramId: Id,
+    UniformId: Id,
+    UserCtx,
+> {
+    callback:
+        Rc<dyn Fn(&Renderer<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>)>,
     uuid: Uuid,
 }
 
-impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UserCtx>
-    RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UserCtx>
+impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id, UserCtx>
+    RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>
 {
     pub fn new(
         render_callback: Rc<
-            dyn Fn(&Renderer<VertexShaderId, FragmentShaderId, ProgramId, UserCtx>),
+            dyn Fn(&Renderer<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>),
         >,
     ) -> Self {
         Self {
@@ -25,21 +32,24 @@ impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UserCtx>
         }
     }
 
-    pub fn call(&self, renderer: &Renderer<VertexShaderId, FragmentShaderId, ProgramId, UserCtx>) {
+    pub fn call(
+        &self,
+        renderer: &Renderer<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>,
+    ) {
         (self.callback)(renderer);
     }
 }
 
-impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UserCtx> Hash
-    for RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UserCtx>
+impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id, UserCtx> Hash
+    for RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.uuid.hash(state);
     }
 }
 
-impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UserCtx> Debug
-    for RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UserCtx>
+impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id, UserCtx> Debug
+    for RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("RenderCallback")
@@ -48,8 +58,8 @@ impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UserCtx> Debug
     }
 }
 
-impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UserCtx> Default
-    for RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UserCtx>
+impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id, UserCtx> Default
+    for RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>
 {
     fn default() -> Self {
         Self {
@@ -59,15 +69,15 @@ impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UserCtx> Default
     }
 }
 
-impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UserCtx> PartialEq
-    for RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UserCtx>
+impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id, UserCtx> PartialEq
+    for RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>
 {
     fn eq(&self, other: &Self) -> bool {
         self.uuid == other.uuid
     }
 }
 
-impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UserCtx> Eq
-    for RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UserCtx>
+impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id, UserCtx> Eq
+    for RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>
 {
 }

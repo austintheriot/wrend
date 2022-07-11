@@ -1,5 +1,5 @@
 use log::info;
-use std::rc::Rc;
+use std::{rc::Rc, fmt::Display};
 use web_sys::HtmlCanvasElement;
 use webgl::renderer::{
     id::Id, program_link::ProgramLink, render_callback::RenderCallback, renderer::Renderer,
@@ -14,7 +14,24 @@ const FRAGMENT_SHADER: &'static str = include_str!("../shaders/fragment.glsl");
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Default)]
 pub struct ProgramId;
 
+impl Display for ProgramId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "ProgramId")
+    }
+}
+
 impl Id for ProgramId {}
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Default)]
+pub struct UniformId;
+
+impl Id for UniformId {}
+
+impl Display for UniformId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "UniformId")
+    }
+}
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum ShaderId {
@@ -27,6 +44,12 @@ impl Id for ShaderId {}
 impl Default for ShaderId {
     fn default() -> Self {
         Self::Vertex
+    }
+}
+
+impl Display for ShaderId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
     }
 }
 
@@ -43,12 +66,18 @@ pub fn kernels_app() -> Html {
                     .cast()
                     .expect("Canvas ref should point to a canvas in the use_effect hook");
 
-                let program_link = ProgramLink::new(ShaderId::Vertex, ShaderId::Fragment);
+                let program_link = ProgramLink::new(ProgramId, ShaderId::Vertex, ShaderId::Fragment);
 
                 let mut renderer_builder = Renderer::builder();
 
                 let render_callback = RenderCallback::new(Rc::new(
-                    |renderer: &Renderer<ShaderId, ShaderId, ProgramId, UseStateHandle<i32>>| {
+                    |renderer: &Renderer<
+                        ShaderId,
+                        ShaderId,
+                        ProgramId,
+                        UniformId,
+                        UseStateHandle<i32>,
+                    >| {
                         info!("Render callback was called! Called with {:?}", renderer);
                         if let Some(ctx) = renderer.user_ctx() {
                             let current_value = **ctx;

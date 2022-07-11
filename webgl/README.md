@@ -13,3 +13,7 @@ The following use cases should guide the development of this library:
     - Conway's Game of Life
     - Any iterative kernel-based rendering
 - Ray tracing?
+
+## Todo
+
+- Return error when a duplicate item is added to HashMap
