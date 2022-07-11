@@ -1,3 +1,4 @@
+use super::render_callback::RenderCallback;
 use super::{program_link::ProgramLink, shader_type::ShaderType};
 use std::fmt::Debug;
 use std::{
@@ -18,8 +19,10 @@ where
     fragment_shaders: HashMap<I, WebGlShader>,
     vertex_shaders: HashMap<I, WebGlShader>,
     programs: HashMap<ProgramLink<I>, WebGlProgram>,
+    render_callback: RenderCallback<I>,
 }
 
+/// Public API
 impl<I> Renderer<I>
 where
     I: Hash + Eq + Clone + Debug + Default,
@@ -27,22 +30,34 @@ where
     pub fn builder() -> RendererBuilder<I> {
         RendererBuilder::default()
     }
+
+    pub fn canvas(&self) -> &HtmlCanvasElement {
+        &self.canvas
+    }
+
+    pub fn gl(&self) -> &WebGl2RenderingContext {
+        &self.gl
+    }
+
+    pub fn fragment_shaders(&self) -> &HashMap<I, WebGlShader> {
+        &self.fragment_shaders
+    }
+
+    pub fn vertex_shaders(&self) -> &HashMap<I, WebGlShader> {
+        &self.vertex_shaders
+    }
+
+    pub fn programs(&self) -> &HashMap<ProgramLink<I>, WebGlProgram> {
+        &self.programs
+    }
+
+    pub fn render(&self) {
+        self.render_callback.call(self);
+    }
 }
 
-#[derive(Debug, Default, PartialEq, Eq, Clone)]
-pub struct RendererBuilder<I>
-where
-    I: Hash + Eq + Clone + Debug + Default,
-{
-    canvas: Option<HtmlCanvasElement>,
-    gl: Option<WebGl2RenderingContext>,
-    vertex_shader_sources: HashMap<I, String>,
-    fragment_shader_sources: HashMap<I, String>,
-    vertex_shaders: HashMap<I, WebGlShader>,
-    fragment_shaders: HashMap<I, WebGlShader>,
-    program_ids_to_link: HashSet<ProgramLink<I>>,
-    programs: HashMap<ProgramLink<I>, WebGlProgram>,
-}
+/// Private API
+impl<I> Renderer<I> where I: Hash + Eq + Clone + Debug + Default {}
 
 #[derive(Error, Debug, PartialEq, Eq, Clone, Hash)]
 pub enum RendererBuilderError {
@@ -63,6 +78,8 @@ pub enum RendererBuilderError {
         "Renderer could not be built with WebGL2RenderingContext, because no canvas was supplied"
     )]
     NoContextBuildError,
+    #[error("Renderer could not be built, because no `RenderCallback` was supplied")]
+    NoRenderCallbackBuildError,
 
     // @todo: move this into its own sub-error
     #[error("Could not compile shader, because no canvas or its associated context were supplied")]
@@ -89,6 +106,22 @@ pub enum RendererBuilderError {
     KnownErrorLinkProgramError(String),
     #[error("Could not link program. An unknown error occurred.")]
     UnknownErrorLinkProgramError,
+}
+
+#[derive(Debug, Default, PartialEq, Eq, Clone)]
+pub struct RendererBuilder<I>
+where
+    I: Hash + Eq + Clone + Debug + Default,
+{
+    canvas: Option<HtmlCanvasElement>,
+    gl: Option<WebGl2RenderingContext>,
+    vertex_shader_sources: HashMap<I, String>,
+    fragment_shader_sources: HashMap<I, String>,
+    vertex_shaders: HashMap<I, WebGlShader>,
+    fragment_shaders: HashMap<I, WebGlShader>,
+    program_ids_to_link: HashSet<ProgramLink<I>>,
+    programs: HashMap<ProgramLink<I>, WebGlProgram>,
+    render_callback: Option<RenderCallback<I>>,
 }
 
 /// Public API
@@ -133,6 +166,16 @@ where
         self
     }
 
+    /// Save a callback that will be called each time it is time to render a new frame
+    pub fn set_render_callback(
+        &mut self,
+        render_callback: impl Into<RenderCallback<I>>,
+    ) -> &mut Self {
+        self.render_callback = Some(render_callback.into());
+
+        self
+    }
+
     /// Compiles all vertex shaders and fragment shaders.
     /// Links together any programs that have been specified.
     /// Outputs the final Renderer.
@@ -149,12 +192,14 @@ where
             fragment_shaders: self.fragment_shaders,
             vertex_shaders: self.vertex_shaders,
             programs: self.programs,
+            render_callback: self
+                .render_callback
+                .ok_or(RendererBuilderError::NoRenderCallbackBuildError)?,
         };
 
         Ok(renderer)
     }
 }
-
 
 /// Private API
 impl<I> RendererBuilder<I>
