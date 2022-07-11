@@ -91,6 +91,72 @@ pub enum RendererBuilderError {
     UnknownErrorLinkProgramError,
 }
 
+/// Public API
+impl<I> RendererBuilder<I>
+where
+    I: Hash + Eq + Clone + Debug + Default,
+{
+    /// Save the canvas that will be rendered to and get its associated WebGL2 rendering context
+    pub fn set_canvas(
+        &mut self,
+        canvas: HtmlCanvasElement,
+    ) -> Result<&mut Self, RendererBuilderError> {
+        let gl = Self::context(&canvas)?;
+
+        self.gl = Some(gl);
+        self.canvas = Some(canvas);
+
+        Ok(self)
+    }
+
+    /// Saves a fragment shader source and its corresponding id
+    pub fn add_fragment_shader_src(&mut self, id: I, fragment_shader_src: String) -> &mut Self {
+        self.fragment_shader_sources.insert(id, fragment_shader_src);
+
+        self
+    }
+
+    /// Saves a vertex shader source and its corresponding id
+    pub fn add_vertex_shader_src(&mut self, id: I, vertex_shader_src: String) -> &mut Self {
+        self.vertex_shader_sources.insert(id, vertex_shader_src);
+
+        self
+    }
+
+    /// Saves a link between a vertex shader id and a fragment shader id.
+    ///
+    /// During the Renderer build process, this `program_link` is used to link a new WebGL2 program
+    /// together by associating the vertex shader id and the fragment shader id with their corresponding compiled shaders.
+    pub fn add_program_link(&mut self, program_link: impl Into<ProgramLink<I>>) -> &mut Self {
+        self.program_ids_to_link.insert(program_link.into());
+
+        self
+    }
+
+    /// Compiles all vertex shaders and fragment shaders.
+    /// Links together any programs that have been specified.
+    /// Outputs the final Renderer.
+    pub fn build(mut self) -> Result<Renderer<I>, RendererBuilderError> {
+        self.compile_fragment_shaders()?;
+        self.compile_vertex_shaders()?;
+        self.link_programs()?;
+
+        let renderer = Renderer {
+            canvas: self
+                .canvas
+                .ok_or(RendererBuilderError::NoCanvasBuildError)?,
+            gl: self.gl.ok_or(RendererBuilderError::NoContextBuildError)?,
+            fragment_shaders: self.fragment_shaders,
+            vertex_shaders: self.vertex_shaders,
+            programs: self.programs,
+        };
+
+        Ok(renderer)
+    }
+}
+
+
+/// Private API
 impl<I> RendererBuilder<I>
 where
     I: Hash + Eq + Clone + Debug + Default,
@@ -108,37 +174,6 @@ where
             .map_err(|_| RendererBuilderError::WebGL2TypeConversionError)?;
 
         Ok(gl)
-    }
-
-    /// Save the canvas that will be rendered to and get its associated WebGL2 rendering context
-    pub fn set_canvas(
-        &mut self,
-        canvas: HtmlCanvasElement,
-    ) -> Result<&mut Self, RendererBuilderError> {
-        let gl = Self::context(&canvas)?;
-
-        self.gl = Some(gl);
-        self.canvas = Some(canvas);
-
-        Ok(self)
-    }
-
-    pub fn add_fragment_shader_src(&mut self, id: I, fragment_shader_src: String) -> &mut Self {
-        self.fragment_shader_sources.insert(id, fragment_shader_src);
-
-        self
-    }
-
-    pub fn add_vertex_shader_src(&mut self, id: I, vertex_shader_src: String) -> &mut Self {
-        self.vertex_shader_sources.insert(id, vertex_shader_src);
-
-        self
-    }
-
-    pub fn add_program_link(&mut self, program_link: impl Into<ProgramLink<I>>) -> &mut Self {
-        self.program_ids_to_link.insert(program_link.into());
-
-        self
     }
 
     /// Takes the list of fragment shader sources and their ids and saves compiled `WebGlShader`s to state
@@ -186,25 +221,6 @@ where
         }
 
         Ok(self)
-    }
-
-    /// Compiles all shaders, links them together into any programs that have been specified, and outputs the result
-    pub fn build(mut self) -> Result<Renderer<I>, RendererBuilderError> {
-        self.compile_fragment_shaders()?;
-        self.compile_vertex_shaders()?;
-        self.link_programs()?;
-
-        let renderer = Renderer {
-            canvas: self
-                .canvas
-                .ok_or(RendererBuilderError::NoCanvasBuildError)?,
-            gl: self.gl.ok_or(RendererBuilderError::NoContextBuildError)?,
-            fragment_shaders: self.fragment_shaders,
-            vertex_shaders: self.vertex_shaders,
-            programs: self.programs,
-        };
-
-        Ok(renderer)
     }
 
     fn link_program(
