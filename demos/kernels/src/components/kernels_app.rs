@@ -1,11 +1,12 @@
 use log::info;
 use std::rc::Rc;
+use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 use webgl::{
     constants::quad::QUAD,
     renderer::{
         buffer_link::BufferLink, id::Id, id_name::IdName, program_link::ProgramLink,
-        render_callback::RenderCallback, renderer::Renderer, uniform_link::UniformLink,
+        render_callback::RenderCallback, renderer::Renderer,
     },
 };
 use yew::{
@@ -22,42 +23,42 @@ impl Id for ProgramId {}
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum UniformId {
-    ExampleUniform,
+    Resolution,
 }
 
 impl Id for UniformId {}
 
 impl Default for UniformId {
     fn default() -> Self {
-        Self::ExampleUniform
+        Self::Resolution
     }
 }
 
 impl IdName for UniformId {
     fn name(&self) -> String {
         match self {
-            UniformId::ExampleUniform => "u_example".to_string(),
+            UniformId::Resolution => "u_resolution".to_string(),
         }
     }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum BufferId {
-    ExampleBuffer,
+    VertexBuffer,
 }
 
 impl Id for BufferId {}
 
 impl Default for BufferId {
     fn default() -> Self {
-        Self::ExampleBuffer
+        Self::VertexBuffer
     }
 }
 
 impl IdName for BufferId {
     fn name(&self) -> String {
         match self {
-            BufferId::ExampleBuffer => "a_example".to_string(),
+            BufferId::VertexBuffer => "a_position".to_string(),
         }
     }
 }
@@ -92,20 +93,9 @@ pub fn kernels_app() -> Html {
                 let program_link =
                     ProgramLink::new(ProgramId, ShaderId::Vertex, ShaderId::Fragment);
 
-                let uniform_link = UniformLink::new(
+                let a_position_link = BufferLink::new(
                     ProgramId,
-                    UniformId::ExampleUniform,
-                    Rc::new(|ctx| {
-                        ctx.gl().uniform1f(Some(ctx.uniform_location()), 1.0);
-                        info!("Uniform updater called!");
-                    }),
-                );
-
-                let mut renderer_builder = Renderer::builder();
-
-                let buffer_link = BufferLink::new(
-                    ProgramId,
-                    BufferId::ExampleBuffer,
+                    BufferId::VertexBuffer,
                     Rc::new(|ctx| {
                         let gl = ctx.gl();
                         let attribute_location = ctx.attribute_location();
@@ -121,7 +111,6 @@ pub fn kernels_app() -> Html {
                             &vertex_array,
                             WebGl2RenderingContext::STATIC_DRAW,
                         );
-                        gl.enable_vertex_attrib_array(attribute_location.into());
                         gl.vertex_attrib_pointer_with_i32(
                             attribute_location.into(),
                             2,
@@ -133,17 +122,12 @@ pub fn kernels_app() -> Html {
 
                         buffer
                     }),
-                    Rc::new(|_| {
-                        info!("Renderer update callback called!");
-                    }),
-                    Rc::new(|_| {
-                        info!("Should update buffer callback called");
-                        true
-                    }),
+                    Rc::new(|_| {}),
+                    Rc::new(|_| false),
                 );
 
                 let render_callback = RenderCallback::new(Rc::new(
-                    |_: &Renderer<
+                    |renderer: &Renderer<
                         ShaderId,
                         ShaderId,
                         ProgramId,
@@ -151,32 +135,45 @@ pub fn kernels_app() -> Html {
                         BufferId,
                         UseStateHandle<i32>,
                     >| {
-                        info!("Render callback was called!",);
+                        info!("Calling render callback");
+                        let gl = renderer.gl();
+                        let canvas: HtmlCanvasElement = gl.canvas().unwrap().dyn_into().unwrap();
+
+                        // use the appropriate program
+                        gl.use_program(renderer.programs().get(&ProgramId));
+
+                        // sync canvas dimensions with viewport
+                        gl.viewport(0, 0, canvas.width() as i32, canvas.height() as i32);
+
+                        // clear canvas
+                        gl.clear_color(0.0, 0.0, 0.0, 0.0);
+                        gl.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT);
+
+                        // draw
+                        let primitive_type = WebGl2RenderingContext::TRIANGLES; // draws a triangle after shader is run every 3 times
+                        let offset = 0;
+                        let count = 6; // this will execute vertex shader 3 times
+                        gl.draw_arrays(primitive_type, offset, count);
                     },
                 ));
 
+                let mut renderer_builder = Renderer::builder();
+
                 renderer_builder
-                    .add_program_link(program_link)
-                    .add_vertex_shader_src(ShaderId::Vertex, VERTEX_SHADER.to_string())
-                    .add_fragment_shader_src(ShaderId::Fragment, FRAGMENT_SHADER.to_string())
                     .set_canvas(canvas)
                     .set_user_ctx(example_state)
                     .set_render_callback(render_callback)
-                    .add_uniform_link(uniform_link)
-                    .add_buffer_link(buffer_link);
+                    .add_program_link(program_link)
+                    .add_vertex_shader_src(ShaderId::Vertex, VERTEX_SHADER.to_string())
+                    .add_fragment_shader_src(ShaderId::Fragment, FRAGMENT_SHADER.to_string())
+                    .add_buffer_link(a_position_link);
 
                 let renderer = renderer_builder
                     .build()
                     .expect("Renderer should successfully build");
 
-                info!("Renderer successfully built!");
-
-                renderer.render();
-
-                renderer.update_uniforms();
-
                 renderer.update_buffers();
-
+                renderer.update_uniforms();
                 renderer.render();
 
                 return || {};
@@ -186,9 +183,6 @@ pub fn kernels_app() -> Html {
     );
 
     html! {
-        <>
-            <p>{"This is the top-level of the Kernels portion of the app"}</p>
-            <canvas ref={canvas_ref} />
-        </>
+        <canvas ref={canvas_ref} />
     }
 }

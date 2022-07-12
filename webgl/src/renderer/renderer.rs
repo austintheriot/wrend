@@ -536,6 +536,8 @@ impl<
                 };
 
             let webgl_buffer = buffer_link.create_buffer(gl, now, &attribute_location, user_ctx);
+            gl.enable_vertex_attrib_array(attribute_location.into());
+
             let update_callback = buffer_link.update_callback();
             let should_update_callback = buffer_link.should_update_callback();
 
