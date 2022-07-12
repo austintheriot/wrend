@@ -15,4 +15,12 @@ The following use cases should guide the development of this library:
 - Ray tracing?
 
 ## Todo
+- Upload buffers
+
+- Create framebuffer
+- Create texture
+
+- Add an optional callback to see if uniform should update
+- Make passing in buffer update / should_update callbacks optional
+
 - Return error when a duplicate item is added to HashMap

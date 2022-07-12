@@ -1,3 +1,7 @@
+use super::attribute_location::AttributeLocation;
+use super::buffer::Buffer;
+use super::buffer_link::BufferLink;
+use super::default_id::DefaultId;
 use super::id::Id;
 use super::id_name::IdName;
 use super::render_callback::RenderCallback;
@@ -16,10 +20,11 @@ use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram, WebGlShad
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Renderer<
-    VertexShaderId: Id,
-    FragmentShaderId: Id,
-    ProgramId: Id,
-    UniformId: Id + IdName,
+    VertexShaderId: Id = DefaultId,
+    FragmentShaderId: Id = DefaultId,
+    ProgramId: Id = DefaultId,
+    UniformId: Id + IdName = DefaultId,
+    BufferId: Id + IdName = DefaultId,
     UserCtx = (),
 > {
     canvas: HtmlCanvasElement,
@@ -28,17 +33,25 @@ pub struct Renderer<
     vertex_shaders: HashMap<VertexShaderId, WebGlShader>,
     programs: HashMap<ProgramId, WebGlProgram>,
     render_callback:
-        RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>,
+        RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>,
     uniforms: HashSet<Uniform<ProgramId, UniformId, UserCtx>>,
     user_ctx: Option<UserCtx>,
+    buffers: HashSet<Buffer<ProgramId, BufferId, UserCtx>>,
 }
 
 /// Public API
-impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + IdName, UserCtx>
-    Renderer<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>
+impl<
+        VertexShaderId: Id,
+        FragmentShaderId: Id,
+        ProgramId: Id,
+        UniformId: Id + IdName,
+        BufferId: Id + IdName,
+        UserCtx,
+    > Renderer<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
 {
     pub fn builder(
-    ) -> RendererBuilder<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx> {
+    ) -> RendererBuilder<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
+    {
         RendererBuilder::default()
     }
 
@@ -74,13 +87,49 @@ impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + Id
     /// whatever reason).
     pub fn update_uniforms(&self) -> &Self {
         let now = Date::now();
+        let user_ctx = self.user_ctx();
+        let gl = self.gl();
 
         for uniform in &self.uniforms {
             let program_id = uniform.program_id();
             let program = self.programs().get(program_id);
+            gl.use_program(program);
+
+            uniform.update(gl, now, user_ctx);
+
+            gl.use_program(None);
+        }
+
+        self
+    }
+
+    /// Iterates through all saved buffers and updates them using their associated update callbacks
+    ///
+    /// Automatically calls "use_program" on the appropriate program before each uniform's update function
+    /// (so this is not necessary to do within the callback itself, unless you need to change programs, for
+    /// whatever reason).
+    ///
+    /// Also automatically binds the correct buffer before the update callback is called, so this may be omitted.
+    pub fn update_buffers(&self) -> &Self {
+        let now = Date::now();
+        let user_ctx = self.user_ctx();
+        let gl = self.gl();
+
+        for buffer in &self.buffers {
+            // bind the corresponding program
+            let program_id = buffer.program_id();
+            let program = self.programs().get(program_id);
             self.gl().use_program(program);
 
-            uniform.update(self.gl(), now, self.user_ctx())
+            // bind the corresponding buffer
+            let webgl_buffer = buffer.webgl_buffer();
+            gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(webgl_buffer));
+
+            if buffer.should_update(gl, now, user_ctx) {
+                buffer.update(self.gl(), now, user_ctx);
+            }
+
+            gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, None);
         }
 
         self
@@ -92,8 +141,14 @@ impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + Id
 }
 
 /// Private API
-impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + IdName, UserCtx>
-    Renderer<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>
+impl<
+        VertexShaderId: Id,
+        FragmentShaderId: Id,
+        ProgramId: Id,
+        UniformId: Id + IdName,
+        BufferId: Id + IdName,
+        UserCtx,
+    > Renderer<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
 {
 }
 
@@ -155,18 +210,29 @@ pub enum RendererBuilderError {
     #[error("Could not build uniform because the associated program_id could no be found")]
     ProgramNotFoundBuildUniformsError,
 
-      // @todo: move this into its own sub-error
-      #[error("Could not get WebGl2RenderingContext from canvas, because None was returned")]
-      CanvasReturnedNoContext
+    // @todo: move this into its own sub-error
+    #[error("Could not get WebGl2RenderingContext from canvas, because None was returned")]
+    CanvasReturnedNoContext,
+
+    // @todo: move this into its own sub-error
+    #[error(
+        "Could not create buffer because the attribute's location was not found in the program"
+    )]
+    AttributeLocationNotFoundCreateBufferError,
+    #[error("Could not create buffer because no WebGL2RenderingContext was provided")]
+    NoContextCreateBufferError,
+    #[error("Could not create buffer because buffer link's associated program was not found from the program_id")]
+    ProgramNotFoundCreateBufferError,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct RendererBuilder<
-    VertexShaderId: Id,
-    FragmentShaderId: Id,
-    ProgramId: Id,
-    UniformId: Id + IdName,
-    UserCtx,
+    VertexShaderId: Id = DefaultId,
+    FragmentShaderId: Id = DefaultId,
+    ProgramId: Id = DefaultId,
+    UniformId: Id + IdName = DefaultId,
+    BufferId: Id + IdName = DefaultId,
+    UserCtx = (),
 > {
     canvas: Option<HtmlCanvasElement>,
     gl: Option<WebGl2RenderingContext>,
@@ -178,14 +244,23 @@ pub struct RendererBuilder<
     programs: HashMap<ProgramId, WebGlProgram>,
     uniform_links: HashSet<UniformLink<ProgramId, UniformId, UserCtx>>,
     uniforms: HashSet<Uniform<ProgramId, UniformId, UserCtx>>,
-    render_callback:
-        Option<RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>>,
+    buffer_links: HashSet<BufferLink<ProgramId, BufferId, UserCtx>>,
+    buffers: HashSet<Buffer<ProgramId, BufferId, UserCtx>>,
+    render_callback: Option<
+        RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>,
+    >,
     user_ctx: Option<UserCtx>,
 }
 
 /// Public API
-impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + IdName, UserCtx>
-    RendererBuilder<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>
+impl<
+        VertexShaderId: Id,
+        FragmentShaderId: Id,
+        ProgramId: Id,
+        UniformId: Id + IdName,
+        BufferId: Id + IdName,
+        UserCtx,
+    > RendererBuilder<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
 {
     /// Save the canvas that will be rendered to and get its associated WebGL2 rendering context
     pub fn set_canvas(&mut self, canvas: HtmlCanvasElement) -> &mut Self {
@@ -235,7 +310,14 @@ impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + Id
     pub fn set_render_callback(
         &mut self,
         render_callback: impl Into<
-            RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>,
+            RenderCallback<
+                VertexShaderId,
+                FragmentShaderId,
+                ProgramId,
+                UniformId,
+                BufferId,
+                UserCtx,
+            >,
         >,
     ) -> &mut Self {
         self.render_callback = Some(render_callback.into());
@@ -267,13 +349,23 @@ impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + Id
         self
     }
 
+    /// Saves a link that will be used to build a buffer/attribute pair at build time.
+    pub fn add_buffer_link(
+        &mut self,
+        buffer_link: impl Into<BufferLink<ProgramId, BufferId, UserCtx>>,
+    ) -> &mut Self {
+        self.buffer_links.insert(buffer_link.into());
+
+        self
+    }
+
     /// Compiles all vertex shaders and fragment shaders.
     /// Links together any programs that have been specified.
     /// Outputs the final Renderer.
     pub fn build(
         mut self,
     ) -> Result<
-        Renderer<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>,
+        Renderer<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>,
         RendererBuilderError,
     > {
         self.save_webgl_context_from_canvas()?;
@@ -281,6 +373,7 @@ impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + Id
         self.compile_vertex_shaders()?;
         self.link_programs()?;
         self.build_uniforms()?;
+        self.create_buffers()?;
 
         let renderer = Renderer {
             canvas: self
@@ -295,6 +388,7 @@ impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + Id
                 .ok_or(RendererBuilderError::NoRenderCallbackBuildError)?,
             user_ctx: self.user_ctx,
             uniforms: self.uniforms,
+            buffers: self.buffers,
         };
 
         Ok(renderer)
@@ -302,8 +396,14 @@ impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + Id
 }
 
 /// Private API
-impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + IdName, UserCtx>
-    RendererBuilder<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>
+impl<
+        VertexShaderId: Id,
+        FragmentShaderId: Id,
+        ProgramId: Id,
+        UniformId: Id + IdName,
+        BufferId: Id + IdName,
+        UserCtx,
+    > RendererBuilder<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
 {
     /// Gets the WebGL2 context from the canvas saved in state and saves the context in state
     fn save_webgl_context_from_canvas(&mut self) -> Result<&mut Self, RendererBuilderError> {
@@ -318,7 +418,9 @@ impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + Id
     }
 
     /// Get the WebGL2 rendering context from a canvas
-    fn context_from_canvas(canvas: &HtmlCanvasElement) -> Result<WebGl2RenderingContext, RendererBuilderError> {
+    fn context_from_canvas(
+        canvas: &HtmlCanvasElement,
+    ) -> Result<WebGl2RenderingContext, RendererBuilderError> {
         let gl = canvas
             .get_context("webgl2")
             .map_err(|_| RendererBuilderError::WebGL2ContextRetrievalError)?;
@@ -408,6 +510,50 @@ impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + Id
         Ok(uniform)
     }
 
+    /// Creates a WebGL buffer for each BufferLink that was supplied using the create_callback.
+    fn create_buffers(&mut self) -> Result<&mut Self, RendererBuilderError> {
+        let gl = self
+            .gl
+            .as_ref()
+            .ok_or(RendererBuilderError::NoContextCreateBufferError)?;
+        let now = Date::now();
+        let user_ctx = self.user_ctx.as_ref();
+
+        for buffer_link in &self.buffer_links {
+            let program_id = buffer_link.program_id().clone();
+            let buffer_id = buffer_link.buffer_id().clone();
+
+            let program = self
+                .programs
+                .get(&program_id)
+                .ok_or(RendererBuilderError::ProgramNotFoundCreateBufferError)?;
+
+            // webgl returns `-1` if the attribute location was not found
+            let attribute_location: AttributeLocation =
+                match gl.get_attrib_location(program, &buffer_id.name()) {
+                    -1 => Err(RendererBuilderError::AttributeLocationNotFoundCreateBufferError)?,
+                    attribute_location => attribute_location.into(),
+                };
+
+            let webgl_buffer = buffer_link.create_buffer(gl, now, &attribute_location, user_ctx);
+            let update_callback = buffer_link.update_callback();
+            let should_update_callback = buffer_link.should_update_callback();
+
+            let buffer = Buffer::new(
+                program_id,
+                buffer_id,
+                webgl_buffer,
+                attribute_location,
+                update_callback,
+                should_update_callback,
+            );
+
+            self.buffers.insert(buffer);
+        }
+
+        Ok(self)
+    }
+
     /// Finds all uniform's position in its corresponding program and builds a wrapper for it
     fn build_uniforms(&mut self) -> Result<&mut Self, RendererBuilderError> {
         for program_uniform_link in self.uniform_links.iter() {
@@ -485,8 +631,15 @@ impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + Id
     }
 }
 
-impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + IdName, UserCtx>
-    Default for RendererBuilder<VertexShaderId, FragmentShaderId, ProgramId, UniformId, UserCtx>
+impl<
+        VertexShaderId: Id,
+        FragmentShaderId: Id,
+        ProgramId: Id,
+        UniformId: Id + IdName,
+        BufferId: Id + IdName,
+        UserCtx,
+    > Default
+    for RendererBuilder<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
 {
     fn default() -> Self {
         Self {
@@ -502,6 +655,8 @@ impl<VertexShaderId: Id, FragmentShaderId: Id, ProgramId: Id, UniformId: Id + Id
             user_ctx: Default::default(),
             uniform_links: Default::default(),
             uniforms: Default::default(),
+            buffer_links: Default::default(),
+            buffers: Default::default(),
         }
     }
 }
