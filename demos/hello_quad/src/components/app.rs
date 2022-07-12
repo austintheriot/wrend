@@ -77,8 +77,8 @@ impl Default for ShaderId {
     }
 }
 
-#[function_component(KernelsApp)]
-pub fn kernels_app() -> Html {
+#[function_component(App)]
+pub fn app() -> Html {
     let canvas_ref = use_node_ref();
     let example_state = use_state_eq(|| 0);
 

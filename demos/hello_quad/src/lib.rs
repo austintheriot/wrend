@@ -12,8 +12,8 @@ pub mod state;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 /// This main function is only used for testing this portion of the app in isolation
-#[wasm_bindgen(start)]
-pub fn main() -> Result<(), JsValue> {
+#[wasm_bindgen]
+pub fn hello_quad() -> Result<(), JsValue> {
     // This provides better error messages in debug mode.
     // It's disabled in release mode, so it doesn't bloat up the file size.
     #[cfg(debug_assertions)]
@@ -31,7 +31,7 @@ pub fn main() -> Result<(), JsValue> {
         .unwrap()
         .unwrap();
 
-    yew::start_app_in_element::<components::kernels_app::KernelsApp>(app_div);
+    yew::start_app_in_element::<components::app::App>(app_div);
 
     Ok(())
 }

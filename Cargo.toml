@@ -3,5 +3,5 @@
 members = [
     "webgl",
     "demos/entry",
-    "demos/kernels"
+    "demos/hello_quad"
 ]

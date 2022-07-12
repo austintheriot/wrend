@@ -1,6 +1,6 @@
 use crate::pages::home::Home;
 use crate::pages::not_found::NotFound;
-use kernels::components::kernels_app::KernelsApp;
+use hello_quad::components::app::{App as HelloQuadApp};
 use yew::{html, Html};
 use yew_router::prelude::*;
 
@@ -8,8 +8,8 @@ use yew_router::prelude::*;
 pub enum Route {
     #[at("/")]
     Home,
-    #[at("/kernels")]
-    Kernels,
+    #[at("/hello_quad")]
+    HelloQuad,
     #[not_found]
     #[at("/404")]
     NotFound,
@@ -18,7 +18,7 @@ pub enum Route {
 pub fn switch(routes: &Route) -> Html {
     match routes {
         Route::Home => html! { <Home /> },
-        Route::Kernels => html! { <KernelsApp /> },
+        Route::HelloQuad => html! { <HelloQuadApp /> },
         Route::NotFound => html! { <NotFound /> },
     }
 }

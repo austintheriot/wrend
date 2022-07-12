@@ -1,5 +1,5 @@
 [package]
-name = "kernels"
+name = "hello_quad"
 description = "Demo of bespoke granular synthesis on the web"
 version = "0.1.0"
 edition = "2021"

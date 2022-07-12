@@ -7,7 +7,7 @@ pub fn home() -> Html {
     html! {
      <>
         <h1>{"Demos"}</h1>
-        <Link<Route> to={Route::Kernels}>{"Kernels"}</Link<Route>>
+        <Link<Route> to={Route::HelloQuad}>{"Hello Quad"}</Link<Route>>
      </>
     }
 }

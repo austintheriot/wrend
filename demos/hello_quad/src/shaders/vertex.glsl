@@ -9,6 +9,7 @@ void main() {
 
     // map to (0. -> 2.)
     vec2 zero_to_two = a_position + 1.0;
+    
     // map to (0. -> 1.)
     vec2 zero_to_one = zero_to_two * 0.5;
 
