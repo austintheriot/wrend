@@ -1,6 +1,6 @@
 [package]
 name = "entry"
-description = "Demo of bespoke granular synthesis on the web"
+description = ""
 version = "0.1.0"
 edition = "2021"
 authors = ["Austin Theriot"]

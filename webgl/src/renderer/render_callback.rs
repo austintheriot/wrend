@@ -14,7 +14,7 @@ pub struct RenderCallback<
     ProgramId: Id = DefaultId,
     UniformId: Id + IdName = DefaultId,
     BufferId: Id + IdName = DefaultId,
-    UserCtx = (),
+    UserCtx: 'static = (),
 > {
     callback: Rc<
         dyn Fn(

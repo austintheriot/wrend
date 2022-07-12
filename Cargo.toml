@@ -3,5 +3,6 @@
 members = [
     "webgl",
     "demos/entry",
-    "demos/hello_quad"
+    "demos/hello_quad",
+    "demos/hello_quad_animated",
 ]

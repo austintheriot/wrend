@@ -519,6 +519,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "hello_quad_animated"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "console_error_panic_hook",
+ "cpal",
+ "getrandom",
+ "js-sys",
+ "lazy_static",
+ "log",
+ "rand",
+ "thiserror",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "webgl",
+ "wee_alloc",
+ "yew",
+ "yew-router",
+]
+
+[[package]]
 name = "ident_case"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

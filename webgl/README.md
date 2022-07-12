@@ -15,7 +15,13 @@ The following use cases should guide the development of this library:
 - Ray tracing?
 
 ## Todo
-- Upload buffers
+
+- Animations:
+    - Move animation logic OUTSIDE of Renderer, so that the animation callback has access to the renderer context?
+
+- Start / stop animation
+    - Implement Drop for Renderer such that the animation frame gets canceled when the object is dropped
+    - Check if should be animating before calling animation callback
 
 - Create framebuffer
 - Create texture

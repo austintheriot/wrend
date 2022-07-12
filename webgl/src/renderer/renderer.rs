@@ -1,3 +1,5 @@
+use super::animation_callback::AnimationCallback;
+use super::animation_handle::AnimationHandle;
 use super::attribute_location::AttributeLocation;
 use super::buffer::Buffer;
 use super::buffer_link::BufferLink;
@@ -25,7 +27,7 @@ pub struct Renderer<
     ProgramId: Id = DefaultId,
     UniformId: Id + IdName = DefaultId,
     BufferId: Id + IdName = DefaultId,
-    UserCtx = (),
+    UserCtx: 'static = (),
 > {
     canvas: HtmlCanvasElement,
     gl: WebGl2RenderingContext,
@@ -135,21 +137,29 @@ impl<
         self
     }
 
-    pub fn render(&self) {
+    pub fn render(&self) -> &Self {
         self.render_callback.call(self);
-    }
-}
 
-/// Private API
-impl<
-        VertexShaderId: Id,
-        FragmentShaderId: Id,
-        ProgramId: Id,
-        UniformId: Id + IdName,
-        BufferId: Id + IdName,
-        UserCtx,
-    > Renderer<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
-{
+        self
+    }
+
+    /// Begins the animation process.
+    ///
+    /// If no animation callback has been provided, then the empty animation callback is run.
+    pub fn into_animation_handle(
+        self,
+        animation_callback: AnimationCallback<
+            VertexShaderId,
+            FragmentShaderId,
+            ProgramId,
+            UniformId,
+            BufferId,
+            UserCtx,
+        >,
+    ) -> AnimationHandle<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
+    {
+        AnimationHandle::new(animation_callback, self)
+    }
 }
 
 #[derive(Error, Debug, PartialEq, Eq, Clone, Hash)]
@@ -232,7 +242,7 @@ pub struct RendererBuilder<
     ProgramId: Id = DefaultId,
     UniformId: Id + IdName = DefaultId,
     BufferId: Id + IdName = DefaultId,
-    UserCtx = (),
+    UserCtx: 'static = (),
 > {
     canvas: Option<HtmlCanvasElement>,
     gl: Option<WebGl2RenderingContext>,
@@ -259,7 +269,7 @@ impl<
         ProgramId: Id,
         UniformId: Id + IdName,
         BufferId: Id + IdName,
-        UserCtx,
+        UserCtx: 'static,
     > RendererBuilder<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
 {
     /// Save the canvas that will be rendered to and get its associated WebGL2 rendering context

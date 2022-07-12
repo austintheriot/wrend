@@ -1,0 +1,117 @@
+use super::animation_callback::AnimationCallback;
+use super::animation_data::AnimationData;
+use super::id::Id;
+use super::id_name::IdName;
+use super::renderer::Renderer;
+use std::cell::RefCell;
+use std::rc::Rc;
+use wasm_bindgen::prelude::Closure;
+use wasm_bindgen::JsCast;
+use web_sys::window;
+
+#[derive(Clone)]
+pub struct AnimationHandle<
+    VertexShaderId: Id,
+    FragmentShaderId: Id,
+    ProgramId: Id,
+    UniformId: Id + IdName,
+    BufferId: Id + IdName,
+    UserCtx: 'static,
+> {
+    animation_data: Rc<
+        RefCell<
+            AnimationData<
+                VertexShaderId,
+                FragmentShaderId,
+                ProgramId,
+                UniformId,
+                BufferId,
+                UserCtx,
+            >,
+        >,
+    >,
+}
+
+impl<
+        VertexShaderId: 'static + Id,
+        FragmentShaderId: 'static + Id,
+        ProgramId: 'static + Id,
+        UniformId: 'static + Id + IdName,
+        BufferId: 'static + Id + IdName,
+        UserCtx: 'static,
+    > AnimationHandle<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
+{
+    pub fn new(
+        callback: AnimationCallback<
+            VertexShaderId,
+            FragmentShaderId,
+            ProgramId,
+            UniformId,
+            BufferId,
+            UserCtx,
+        >,
+        renderer: Renderer<
+            VertexShaderId,
+            FragmentShaderId,
+            ProgramId,
+            UniformId,
+            BufferId,
+            UserCtx,
+        >,
+    ) -> Self {
+        Self {
+            animation_data: Rc::new(RefCell::new(AnimationData::new(callback, renderer))),
+        }
+    }
+
+    pub fn start_animating(&self) {
+        // cancel previous animation before starting a new one
+        self.stop_animating();
+
+        let f = Rc::new(RefCell::new(None));
+        let g = f.clone();
+        let animation_data = Rc::clone(&self.animation_data);
+        {
+            let animation_data = Rc::clone(&self.animation_data);
+            *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
+                animation_data.borrow().run_callback();
+
+                // Schedule another requestAnimationFrame callback.
+                let animation_id = Self::request_animation_frame(f.borrow().as_ref().unwrap());
+                animation_data.borrow_mut().set_id(animation_id);
+            }) as Box<dyn Fn()>));
+        }
+
+        let id = Self::request_animation_frame(g.borrow().as_ref().unwrap());
+        animation_data.borrow_mut().set_id(id);
+    }
+
+    pub fn stop_animating(&self) {
+        window()
+            .unwrap()
+            .cancel_animation_frame(self.animation_data.borrow().id())
+            .expect("Should be able to cancel animation frame")
+    }
+
+    fn request_animation_frame(f: &Closure<dyn Fn()>) -> i32 {
+        window()
+            .unwrap()
+            .request_animation_frame(f.as_ref().unchecked_ref())
+            .expect("should register `requestAnimationFrame` ok")
+    }
+}
+
+impl<
+        VertexShaderId: Id,
+        FragmentShaderId: Id,
+        ProgramId: Id,
+        UniformId: Id + IdName,
+        BufferId: Id + IdName,
+        UserCtx,
+    > Drop
+    for AnimationHandle<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
+{
+    fn drop(&mut self) {
+        self.stop_animating();
+    }
+}

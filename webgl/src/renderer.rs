@@ -1,3 +1,6 @@
+pub mod animation_callback;
+pub mod animation_data;
+pub mod animation_handle;
 pub mod attribute_location;
 pub mod buffer;
 pub mod buffer_context;
