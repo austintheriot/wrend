@@ -10,7 +10,6 @@ use super::render_callback::RenderCallback;
 use super::uniform::Uniform;
 use super::uniform_link::UniformLink;
 use super::{program_link::ProgramLink, shader_type::ShaderType};
-use js_sys::Date;
 use std::fmt::Debug;
 use std::{
     collections::{HashMap, HashSet},
@@ -18,7 +17,7 @@ use std::{
 };
 use thiserror::Error;
 use wasm_bindgen::JsCast;
-use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram, WebGlShader};
+use web_sys::{window, HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram, WebGlShader};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Renderer<
@@ -88,7 +87,7 @@ impl<
     /// (so this is not necessary to do within the callback itself, unless you need to change programs, for
     /// whatever reason).
     pub fn update_uniforms(&self) -> &Self {
-        let now = Date::now();
+        let now = Self::now();
         let user_ctx = self.user_ctx();
         let gl = self.gl();
 
@@ -113,7 +112,7 @@ impl<
     ///
     /// Also automatically binds the correct buffer before the update callback is called, so this may be omitted.
     pub fn update_buffers(&self) -> &Self {
-        let now = Date::now();
+        let now = Self::now();
         let user_ctx = self.user_ctx();
         let gl = self.gl();
 
@@ -159,6 +158,13 @@ impl<
     ) -> AnimationHandle<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
     {
         AnimationHandle::new(animation_callback, self)
+    }
+
+    /// Gets current DOMHighResTimeStamp from performance.now()
+    ///
+    /// WebGL is limited to an f32, so using performance.now() (for now) to limit the size of the f64
+    fn now() -> f64 {
+        window().unwrap().performance().unwrap().now()
     }
 }
 
@@ -526,7 +532,7 @@ impl<
             .gl
             .as_ref()
             .ok_or(RendererBuilderError::NoContextCreateBufferError)?;
-        let now = Date::now();
+        let now = Self::now();
         let user_ctx = self.user_ctx.as_ref();
 
         for buffer_link in &self.buffer_links {
@@ -606,6 +612,13 @@ impl<
                 None => RendererBuilderError::UnknownErrorLinkProgramError,
             })
         }
+    }
+
+    /// Gets current DOMHighResTimeStamp from performance.now()
+    ///
+    /// WebGL is limited to an f32, so using performance.now() (for now) to limit the size of the f64
+    fn now() -> f64 {
+        window().unwrap().performance().unwrap().now()
     }
 
     /// Takes the string source of a shader and compiles to using the current WebGL2RenderingContext

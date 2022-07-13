@@ -10,6 +10,6 @@ uniform float u_now;
 out vec4 out_color;
 
 void main() {
-  float red = (sin(u_now) + 1.0) * 0.5;
+  float red = (sin(u_now / 1000.0) * 0.5) + 0.5;
   out_color = vec4(red, v_position.x, v_position.y, 1.0);
 }

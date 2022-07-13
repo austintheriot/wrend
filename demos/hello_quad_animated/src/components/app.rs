@@ -1,5 +1,5 @@
 use std::rc::Rc;
-use log::info;
+use ui::route::Route;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 use webgl::{
@@ -14,8 +14,7 @@ use yew::{
     function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, use_state_eq,
     UseStateHandle,
 };
-use ui::route::Route;
-use yew_router::{prelude::*};
+use yew_router::prelude::*;
 
 const VERTEX_SHADER: &'static str = include_str!("../shaders/vertex.glsl");
 const FRAGMENT_SHADER: &'static str = include_str!("../shaders/fragment.glsl");
@@ -169,9 +168,8 @@ pub fn app() -> Html {
                     UniformId::UNow,
                     Rc::new(|ctx| {
                         let gl = ctx.gl();
-                        let now = ctx.now();
                         let uniform_location = ctx.uniform_location();
-                        gl.uniform1f(Some(uniform_location), now as f32);
+                        gl.uniform1f(Some(uniform_location), ctx.now() as f32);
                     }),
                 );
 
@@ -191,7 +189,6 @@ pub fn app() -> Html {
 
                 let new_animation_handle =
                     renderer.into_animation_handle(AnimationCallback::new(Rc::new(|renderer| {
-                        info!("Calling animation callback");
                         renderer.update_uniforms();
                         renderer.render();
                     })));
