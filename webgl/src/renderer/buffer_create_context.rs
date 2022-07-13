@@ -3,14 +3,14 @@ use super::attribute_location::AttributeLocation;
 
 /// This is the context object that is passed to the create_buffer callback function
 #[derive(Debug, Clone)]
-pub struct CreateBufferContext<'a, UserCtx> {
+pub struct BufferCreateContext<'a, UserCtx> {
     gl: &'a WebGl2RenderingContext,
     now: f64,
     attribute_location: &'a AttributeLocation,
     user_ctx: Option<&'a UserCtx>,
 }
 
-impl<'a, UserCtx> CreateBufferContext<'a, UserCtx> {
+impl<'a, UserCtx> BufferCreateContext<'a, UserCtx> {
     /// @todo: make this into a builder pattern
     pub fn new(
         gl: &'a WebGl2RenderingContext,

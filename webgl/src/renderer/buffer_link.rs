@@ -1,13 +1,13 @@
 use super::attribute_location::AttributeLocation;
 use super::buffer::{BufferShouldUpdateCallback, BufferUpdateCallback};
-use super::create_buffer_context::CreateBufferContext;
+use super::buffer_create_context::BufferCreateContext;
 use super::id::Id;
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::rc::Rc;
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
-pub type CreateBufferCallback<UserCtx> = Rc<dyn Fn(CreateBufferContext<UserCtx>) -> WebGlBuffer>;
+pub type CreateBufferCallback<UserCtx> = Rc<dyn Fn(BufferCreateContext<UserCtx>) -> WebGlBuffer>;
 
 #[derive(Clone)]
 pub struct BufferLink<ProgramId, BufferId, UserCtx>
@@ -58,8 +58,8 @@ where
         attribute_location: &AttributeLocation,
         user_ctx: Option<&UserCtx>,
     ) -> WebGlBuffer {
-        let create_buffer_context = CreateBufferContext::new(gl, now, attribute_location, user_ctx);
-        (self.create_buffer_callback)(create_buffer_context)
+        let buffer_create_context = BufferCreateContext::new(gl, now, attribute_location, user_ctx);
+        (self.create_buffer_callback)(buffer_create_context)
     }
 
     pub fn update_callback(&self) -> BufferUpdateCallback<UserCtx> {

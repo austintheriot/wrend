@@ -7,6 +7,8 @@ use super::default_id::DefaultId;
 use super::id::Id;
 use super::id_name::IdName;
 use super::render_callback::RenderCallback;
+use super::texture::Texture;
+use super::texture_link::TextureLink;
 use super::uniform::Uniform;
 use super::uniform_link::UniformLink;
 use super::{program_link::ProgramLink, shader_type::ShaderType};
@@ -48,6 +50,7 @@ pub struct Renderer<
     uniforms: HashSet<Uniform<ProgramId, UniformId, UserCtx>>,
     user_ctx: Option<UserCtx>,
     buffers: HashSet<Buffer<ProgramId, BufferId, UserCtx>>,
+    textures: HashSet<Texture<ProgramId, TextureId>>,
 }
 
 /// Public API
@@ -303,6 +306,8 @@ pub struct RendererBuilder<
     uniforms: HashSet<Uniform<ProgramId, UniformId, UserCtx>>,
     buffer_links: HashSet<BufferLink<ProgramId, BufferId, UserCtx>>,
     buffers: HashSet<Buffer<ProgramId, BufferId, UserCtx>>,
+    texture_links: HashSet<TextureLink<ProgramId, TextureId, UserCtx>>,
+    textures: HashSet<Texture<ProgramId, TextureId>>,
     render_callback: Option<
         RenderCallback<
             VertexShaderId,
@@ -478,6 +483,7 @@ impl<
             user_ctx: self.user_ctx,
             uniforms: self.uniforms,
             buffers: self.buffers,
+            textures: self.textures,
         };
 
         Ok(renderer)
@@ -778,6 +784,8 @@ impl<
             uniforms: Default::default(),
             buffer_links: Default::default(),
             buffers: Default::default(),
+            texture_links: Default::default(),
+            textures: Default::default(),
         }
     }
 }
