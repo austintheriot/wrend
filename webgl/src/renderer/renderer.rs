@@ -26,6 +26,8 @@ pub struct Renderer<
     ProgramId: Id = DefaultId,
     UniformId: Id + IdName = DefaultId,
     BufferId: Id + IdName = DefaultId,
+    TextureId: Id = DefaultId,
+    FramebufferId: Id = DefaultId,
     UserCtx: 'static = (),
 > {
     canvas: HtmlCanvasElement,
@@ -33,8 +35,16 @@ pub struct Renderer<
     fragment_shaders: HashMap<FragmentShaderId, WebGlShader>,
     vertex_shaders: HashMap<VertexShaderId, WebGlShader>,
     programs: HashMap<ProgramId, WebGlProgram>,
-    render_callback:
-        RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>,
+    render_callback: RenderCallback<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        TextureId,
+        FramebufferId,
+        UserCtx,
+    >,
     uniforms: HashSet<Uniform<ProgramId, UniformId, UserCtx>>,
     user_ctx: Option<UserCtx>,
     buffers: HashSet<Buffer<ProgramId, BufferId, UserCtx>>,
@@ -47,12 +57,31 @@ impl<
         ProgramId: Id,
         UniformId: Id + IdName,
         BufferId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
         UserCtx,
-    > Renderer<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
+    >
+    Renderer<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        TextureId,
+        FramebufferId,
+        UserCtx,
+    >
 {
-    pub fn builder(
-    ) -> RendererBuilder<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
-    {
+    pub fn builder() -> RendererBuilder<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        TextureId,
+        FramebufferId,
+        UserCtx,
+    > {
         RendererBuilder::default()
     }
 
@@ -153,10 +182,20 @@ impl<
             ProgramId,
             UniformId,
             BufferId,
+            TextureId,
+            FramebufferId,
             UserCtx,
         >,
-    ) -> AnimationHandle<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
-    {
+    ) -> AnimationHandle<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        TextureId,
+        FramebufferId,
+        UserCtx,
+    > {
         AnimationHandle::new(animation_callback, self)
     }
 
@@ -248,6 +287,8 @@ pub struct RendererBuilder<
     ProgramId: Id = DefaultId,
     UniformId: Id + IdName = DefaultId,
     BufferId: Id + IdName = DefaultId,
+    TextureId: Id = DefaultId,
+    FramebufferId: Id = DefaultId,
     UserCtx: 'static = (),
 > {
     canvas: Option<HtmlCanvasElement>,
@@ -263,7 +304,16 @@ pub struct RendererBuilder<
     buffer_links: HashSet<BufferLink<ProgramId, BufferId, UserCtx>>,
     buffers: HashSet<Buffer<ProgramId, BufferId, UserCtx>>,
     render_callback: Option<
-        RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>,
+        RenderCallback<
+            VertexShaderId,
+            FragmentShaderId,
+            ProgramId,
+            UniformId,
+            BufferId,
+            TextureId,
+            FramebufferId,
+            UserCtx,
+        >,
     >,
     user_ctx: Option<UserCtx>,
 }
@@ -275,8 +325,20 @@ impl<
         ProgramId: Id,
         UniformId: Id + IdName,
         BufferId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
         UserCtx: 'static,
-    > RendererBuilder<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
+    >
+    RendererBuilder<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        TextureId,
+        FramebufferId,
+        UserCtx,
+    >
 {
     /// Save the canvas that will be rendered to and get its associated WebGL2 rendering context
     pub fn set_canvas(&mut self, canvas: HtmlCanvasElement) -> &mut Self {
@@ -332,6 +394,8 @@ impl<
                 ProgramId,
                 UniformId,
                 BufferId,
+                TextureId,
+                FramebufferId,
                 UserCtx,
             >,
         >,
@@ -381,7 +445,16 @@ impl<
     pub fn build(
         mut self,
     ) -> Result<
-        Renderer<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>,
+        Renderer<
+            VertexShaderId,
+            FragmentShaderId,
+            ProgramId,
+            UniformId,
+            BufferId,
+            TextureId,
+            FramebufferId,
+            UserCtx,
+        >,
         RendererBuilderError,
     > {
         self.save_webgl_context_from_canvas()?;
@@ -418,8 +491,20 @@ impl<
         ProgramId: Id,
         UniformId: Id + IdName,
         BufferId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
         UserCtx,
-    > RendererBuilder<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
+    >
+    RendererBuilder<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        TextureId,
+        FramebufferId,
+        UserCtx,
+    >
 {
     /// Gets the WebGL2 context from the canvas saved in state and saves the context in state
     fn save_webgl_context_from_canvas(&mut self) -> Result<&mut Self, RendererBuilderError> {
@@ -662,9 +747,20 @@ impl<
         ProgramId: Id,
         UniformId: Id + IdName,
         BufferId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
         UserCtx,
     > Default
-    for RendererBuilder<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
+    for RendererBuilder<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        TextureId,
+        FramebufferId,
+        UserCtx,
+    >
 {
     fn default() -> Self {
         Self {

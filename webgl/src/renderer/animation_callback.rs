@@ -11,11 +11,22 @@ pub struct AnimationCallback<
     ProgramId: Id = DefaultId,
     UniformId: Id + IdName = DefaultId,
     BufferId: Id + IdName = DefaultId,
+    TextureId: Id = DefaultId,
+    FramebufferId: Id = DefaultId,
     UserCtx: 'static = (),
 > {
     callback: Rc<
         dyn Fn(
-            &Renderer<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>,
+            &Renderer<
+                VertexShaderId,
+                FragmentShaderId,
+                ProgramId,
+                UniformId,
+                BufferId,
+                TextureId,
+                FramebufferId,
+                UserCtx,
+            >,
         ),
     >,
 }
@@ -26,13 +37,34 @@ impl<
         ProgramId: Id,
         UniformId: Id + IdName,
         BufferId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
         UserCtx: 'static,
-    > AnimationCallback<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
+    >
+    AnimationCallback<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        TextureId,
+        FramebufferId,
+        UserCtx,
+    >
 {
     pub fn new(
         callback: Rc<
             dyn Fn(
-                &Renderer<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>,
+                &Renderer<
+                    VertexShaderId,
+                    FragmentShaderId,
+                    ProgramId,
+                    UniformId,
+                    BufferId,
+                    TextureId,
+                    FramebufferId,
+                    UserCtx,
+                >,
             ),
         >,
     ) -> Self {
@@ -47,6 +79,8 @@ impl<
             ProgramId,
             UniformId,
             BufferId,
+            TextureId,
+            FramebufferId,
             UserCtx,
         >,
     ) {

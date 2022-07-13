@@ -14,11 +14,22 @@ pub struct RenderCallback<
     ProgramId: Id = DefaultId,
     UniformId: Id + IdName = DefaultId,
     BufferId: Id + IdName = DefaultId,
+    TextureId: Id = DefaultId,
+    FramebufferId: Id = DefaultId,
     UserCtx: 'static = (),
 > {
     callback: Rc<
         dyn Fn(
-            &Renderer<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>,
+            &Renderer<
+                VertexShaderId,
+                FragmentShaderId,
+                ProgramId,
+                UniformId,
+                BufferId,
+                TextureId,
+                FramebufferId,
+                UserCtx,
+            >,
         ),
     >,
     uuid: Uuid,
@@ -30,13 +41,34 @@ impl<
         ProgramId: Id,
         UniformId: Id + IdName,
         BufferId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
         UserCtx,
-    > RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
+    >
+    RenderCallback<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        TextureId,
+        FramebufferId,
+        UserCtx,
+    >
 {
     pub fn new(
         render_callback: Rc<
             dyn Fn(
-                &Renderer<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>,
+                &Renderer<
+                    VertexShaderId,
+                    FragmentShaderId,
+                    ProgramId,
+                    UniformId,
+                    BufferId,
+                    TextureId,
+                    FramebufferId,
+                    UserCtx,
+                >,
             ),
         >,
     ) -> Self {
@@ -54,6 +86,8 @@ impl<
             ProgramId,
             UniformId,
             BufferId,
+            TextureId,
+            FramebufferId,
             UserCtx,
         >,
     ) {
@@ -67,9 +101,20 @@ impl<
         ProgramId: Id,
         UniformId: Id + IdName,
         BufferId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
         UserCtx,
     > Hash
-    for RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
+    for RenderCallback<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        TextureId,
+        FramebufferId,
+        UserCtx,
+    >
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.uuid.hash(state);
@@ -82,9 +127,20 @@ impl<
         ProgramId: Id,
         UniformId: Id + IdName,
         BufferId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
         UserCtx,
     > Debug
-    for RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
+    for RenderCallback<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        TextureId,
+        FramebufferId,
+        UserCtx,
+    >
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("RenderCallback")
@@ -99,9 +155,20 @@ impl<
         ProgramId: Id,
         UniformId: Id + IdName,
         BufferId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
         UserCtx,
     > Default
-    for RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
+    for RenderCallback<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        TextureId,
+        FramebufferId,
+        UserCtx,
+    >
 {
     fn default() -> Self {
         Self {
@@ -117,9 +184,20 @@ impl<
         ProgramId: Id,
         UniformId: Id + IdName,
         BufferId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
         UserCtx,
     > PartialEq
-    for RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
+    for RenderCallback<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        TextureId,
+        FramebufferId,
+        UserCtx,
+    >
 {
     fn eq(&self, other: &Self) -> bool {
         self.uuid == other.uuid
@@ -132,8 +210,19 @@ impl<
         ProgramId: Id,
         UniformId: Id + IdName,
         BufferId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
         UserCtx,
     > Eq
-    for RenderCallback<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
+    for RenderCallback<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        TextureId,
+        FramebufferId,
+        UserCtx,
+    >
 {
 }

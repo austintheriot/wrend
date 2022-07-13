@@ -16,6 +16,8 @@ pub struct AnimationHandle<
     ProgramId: Id,
     UniformId: Id + IdName,
     BufferId: Id + IdName,
+    TextureId: Id,
+    FramebufferId: Id,
     UserCtx: 'static,
 > {
     animation_data: Rc<
@@ -26,6 +28,8 @@ pub struct AnimationHandle<
                 ProgramId,
                 UniformId,
                 BufferId,
+                TextureId,
+                FramebufferId,
                 UserCtx,
             >,
         >,
@@ -38,8 +42,20 @@ impl<
         ProgramId: 'static + Id,
         UniformId: 'static + Id + IdName,
         BufferId: 'static + Id + IdName,
+        TextureId: 'static + Id,
+        FramebufferId: 'static + Id,
         UserCtx: 'static,
-    > AnimationHandle<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
+    >
+    AnimationHandle<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        TextureId,
+        FramebufferId,
+        UserCtx,
+    >
 {
     pub fn new(
         callback: AnimationCallback<
@@ -48,6 +64,8 @@ impl<
             ProgramId,
             UniformId,
             BufferId,
+            TextureId,
+            FramebufferId,
             UserCtx,
         >,
         renderer: Renderer<
@@ -56,6 +74,8 @@ impl<
             ProgramId,
             UniformId,
             BufferId,
+            TextureId,
+            FramebufferId,
             UserCtx,
         >,
     ) -> Self {
@@ -115,9 +135,20 @@ impl<
         ProgramId: Id,
         UniformId: Id + IdName,
         BufferId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
         UserCtx,
     > Drop
-    for AnimationHandle<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
+    for AnimationHandle<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        TextureId,
+        FramebufferId,
+        UserCtx,
+    >
 {
     fn drop(&mut self) {
         self.stop_animating();

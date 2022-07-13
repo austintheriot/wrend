@@ -11,6 +11,8 @@ pub struct AnimationData<
     ProgramId: Id = DefaultId,
     UniformId: Id + IdName = DefaultId,
     BufferId: Id + IdName = DefaultId,
+    TextureId: Id = DefaultId,
+    FramebufferId: Id = DefaultId,
     UserCtx: 'static = (),
 > {
     id: i32,
@@ -20,9 +22,20 @@ pub struct AnimationData<
         ProgramId,
         UniformId,
         BufferId,
+        TextureId,
+        FramebufferId,
         UserCtx,
     >,
-    renderer: Renderer<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>,
+    renderer: Renderer<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        TextureId,
+        FramebufferId,
+        UserCtx,
+    >,
     is_animating: bool,
 }
 
@@ -32,8 +45,20 @@ impl<
         ProgramId: Id,
         UniformId: Id + IdName,
         BufferId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
         UserCtx: 'static,
-    > AnimationData<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>
+    >
+    AnimationData<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        TextureId,
+        FramebufferId,
+        UserCtx,
+    >
 {
     pub fn set_id(&mut self, id: i32) {
         self.id = id;
@@ -63,6 +88,8 @@ impl<
             ProgramId,
             UniformId,
             BufferId,
+            TextureId,
+            FramebufferId,
             UserCtx,
         >,
         renderer: Renderer<
@@ -71,6 +98,8 @@ impl<
             ProgramId,
             UniformId,
             BufferId,
+            TextureId,
+            FramebufferId,
             UserCtx,
         >,
     ) -> Self {
