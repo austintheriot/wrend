@@ -1,6 +1,7 @@
+use crate::switch::switch;
+use ui::route::Route;
 use yew::{function_component, html};
 use yew_router::prelude::*;
-use crate::route::route::{switch, Route};
 
 #[function_component(App)]
 pub fn app() -> Html {

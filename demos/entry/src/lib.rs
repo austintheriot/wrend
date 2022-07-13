@@ -2,7 +2,7 @@ use wasm_bindgen::prelude::*;
 
 pub mod components;
 pub mod pages;
-pub mod route;
+pub mod switch;
 
 // When the `wee_alloc` feature is enabled, this uses `wee_alloc` as the global
 // allocator.
@@ -13,7 +13,7 @@ pub mod route;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
-pub fn kernels_main() -> Result<(), JsValue> {
+pub fn entry() -> Result<(), JsValue> {
     // This provides better error messages in debug mode.
     // It's disabled in release mode, so it doesn't bloat up the file size.
     #[cfg(debug_assertions)]

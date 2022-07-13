@@ -241,11 +241,13 @@ dependencies = [
  "cpal",
  "getrandom",
  "hello_quad",
+ "hello_quad_animated",
  "js-sys",
  "lazy_static",
  "log",
  "rand",
  "thiserror",
+ "ui",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -531,6 +533,7 @@ dependencies = [
  "log",
  "rand",
  "thiserror",
+ "ui",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -1171,6 +1174,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8d82e1a7758622a465f8cee077614c73484dac5b836c02ff6a40d5d1010324d7"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "ui"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "console_error_panic_hook",
+ "cpal",
+ "getrandom",
+ "hello_quad",
+ "js-sys",
+ "lazy_static",
+ "log",
+ "rand",
+ "thiserror",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "webgl",
+ "wee_alloc",
+ "yew",
+ "yew-router",
 ]
 
 [[package]]

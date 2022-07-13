@@ -68,15 +68,22 @@ impl<
         // cancel previous animation before starting a new one
         self.stop_animating();
 
+        self.animation_data.borrow_mut().set_is_animating(true);
         let f = Rc::new(RefCell::new(None));
         let g = f.clone();
         let animation_data = Rc::clone(&self.animation_data);
         {
             let animation_data = Rc::clone(&self.animation_data);
             *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
-                animation_data.borrow().run_callback();
+                // do not run callback if not animating
+                if !animation_data.borrow().is_animating() {
+                    return;
+                }
 
-                // Schedule another requestAnimationFrame callback.
+                // run animation callback
+                animation_data.borrow().call_animation_callback();
+
+                // schedule another requestAnimationFrame callback
                 let animation_id = Self::request_animation_frame(f.borrow().as_ref().unwrap());
                 animation_data.borrow_mut().set_id(animation_id);
             }) as Box<dyn Fn()>));
@@ -87,6 +94,7 @@ impl<
     }
 
     pub fn stop_animating(&self) {
+        self.animation_data.borrow_mut().set_is_animating(false);
         window()
             .unwrap()
             .cancel_animation_frame(self.animation_data.borrow().id())

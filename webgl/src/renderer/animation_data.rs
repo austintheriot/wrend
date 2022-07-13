@@ -23,6 +23,7 @@ pub struct AnimationData<
         UserCtx,
     >,
     renderer: Renderer<VertexShaderId, FragmentShaderId, ProgramId, UniformId, BufferId, UserCtx>,
+    is_animating: bool,
 }
 
 impl<
@@ -42,8 +43,17 @@ impl<
         self.id
     }
 
-    pub fn run_callback(&self) {
+    pub fn call_animation_callback(&self) {
         self.callback.call(&self.renderer);
+    }
+
+    pub fn set_is_animating(&mut self, is_animating: bool) -> &mut Self {
+        self.is_animating = is_animating;
+        self
+    }
+
+    pub fn is_animating(&self) -> bool {
+        self.is_animating
     }
 
     pub fn new(
@@ -65,9 +75,10 @@ impl<
         >,
     ) -> Self {
         Self {
-            id: Default::default(),
             callback,
             renderer,
+            id: 0,
+            is_animating: false,
         }
     }
 }

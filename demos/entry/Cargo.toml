@@ -31,7 +31,9 @@ wasm-bindgen = "0.2.78"
 wasm-bindgen-futures = "0.4.31"
 js-sys = "0.3.55"
 hello_quad = { path = '../hello_quad' }
+hello_quad_animated = { path = '../hello_quad_animated' }
 webgl = { path = '../../webgl' }
+ui = { path = '../ui' }
 anyhow = "1.0.58"
 thiserror = "1.0.31"
 rand = { version = "0.8.4" }

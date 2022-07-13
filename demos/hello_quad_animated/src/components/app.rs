@@ -1,5 +1,5 @@
-use log::info;
 use std::rc::Rc;
+use log::info;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 use webgl::{
@@ -7,12 +7,15 @@ use webgl::{
     renderer::{
         animation_callback::AnimationCallback, buffer_link::BufferLink, id::Id, id_name::IdName,
         program_link::ProgramLink, render_callback::RenderCallback, renderer::Renderer,
+        uniform_link::UniformLink,
     },
 };
 use yew::{
     function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, use_state_eq,
     UseStateHandle,
 };
+use ui::route::Route;
+use yew_router::{prelude::*};
 
 const VERTEX_SHADER: &'static str = include_str!("../shaders/vertex.glsl");
 const FRAGMENT_SHADER: &'static str = include_str!("../shaders/fragment.glsl");
@@ -24,21 +27,21 @@ impl Id for ProgramId {}
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum UniformId {
-    Resolution,
+    UNow,
 }
 
 impl Id for UniformId {}
 
 impl Default for UniformId {
     fn default() -> Self {
-        Self::Resolution
+        Self::UNow
     }
 }
 
 impl IdName for UniformId {
     fn name(&self) -> String {
         match self {
-            UniformId::Resolution => "u_resolution".to_string(),
+            UniformId::UNow => "u_now".to_string(),
         }
     }
 }
@@ -138,7 +141,6 @@ pub fn app() -> Html {
                         BufferId,
                         UseStateHandle<i32>,
                     >| {
-                        info!("Calling render callback");
                         let gl = renderer.gl();
                         let canvas: HtmlCanvasElement = gl.canvas().unwrap().dyn_into().unwrap();
 
@@ -162,6 +164,17 @@ pub fn app() -> Html {
 
                 let mut renderer_builder = Renderer::builder();
 
+                let u_now_link = UniformLink::new(
+                    ProgramId,
+                    UniformId::UNow,
+                    Rc::new(|ctx| {
+                        let gl = ctx.gl();
+                        let now = ctx.now();
+                        let uniform_location = ctx.uniform_location();
+                        gl.uniform1f(Some(uniform_location), now as f32);
+                    }),
+                );
+
                 renderer_builder
                     .set_canvas(canvas)
                     .set_user_ctx(example_state)
@@ -169,19 +182,18 @@ pub fn app() -> Html {
                     .add_program_link(program_link)
                     .add_vertex_shader_src(ShaderId::Vertex, VERTEX_SHADER.to_string())
                     .add_fragment_shader_src(ShaderId::Fragment, FRAGMENT_SHADER.to_string())
-                    .add_buffer_link(a_position_link);
+                    .add_buffer_link(a_position_link)
+                    .add_uniform_link(u_now_link);
 
                 let renderer = renderer_builder
                     .build()
                     .expect("Renderer should successfully build");
 
-                renderer.update_buffers();
-                renderer.update_uniforms();
-                renderer.render();
-
                 let new_animation_handle =
                     renderer.into_animation_handle(AnimationCallback::new(Rc::new(|renderer| {
-                        info!("Animation callback called!");
+                        info!("Calling animation callback");
+                        renderer.update_uniforms();
+                        renderer.render();
                     })));
 
                 new_animation_handle.start_animating();
@@ -196,6 +208,9 @@ pub fn app() -> Html {
     );
 
     html! {
-        <canvas ref={canvas_ref} />
+        <>
+            <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
+            <canvas ref={canvas_ref} />
+        </>
     }
 }

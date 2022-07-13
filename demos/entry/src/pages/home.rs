@@ -1,6 +1,6 @@
 use yew::prelude::*;
 use yew_router::prelude::*;
-use crate::route::route::Route;
+use ui::route::Route;
 
 #[function_component(Home)]
 pub fn home() -> Html {
@@ -8,6 +8,7 @@ pub fn home() -> Html {
      <>
         <h1>{"Demos"}</h1>
         <Link<Route> to={Route::HelloQuad}>{"Hello Quad"}</Link<Route>>
+        <Link<Route> to={Route::HelloQuadAnimated}>{"Hello Quad Animated"}</Link<Route>>
      </>
     }
 }
