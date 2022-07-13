@@ -444,6 +444,17 @@ impl<
         self
     }
 
+
+    /// Saves a link that will be used to build a buffer/attribute pair at build time.
+    pub fn add_texture_link(
+        &mut self,
+        texture_link: impl Into<TextureLink<ProgramId, TextureId, UserCtx>>,
+    ) -> &mut Self {
+        self.texture_links.insert(texture_link.into());
+
+        self
+    }
+
     /// Compiles all vertex shaders and fragment shaders.
     /// Links together any programs that have been specified.
     /// Outputs the final Renderer.
@@ -468,6 +479,7 @@ impl<
         self.link_programs()?;
         self.build_uniforms()?;
         self.create_buffers()?;
+        self.create_textures()?;
 
         let renderer = Renderer {
             canvas: self
@@ -658,6 +670,27 @@ impl<
             );
 
             self.buffers.insert(buffer);
+        }
+
+        Ok(self)
+    }
+
+    /// Creates a WebGL texture for each Texture that was supplied using the create_texture callback
+    fn create_textures(&mut self) -> Result<&mut Self, RendererBuilderError> {
+        let gl = self
+            .gl
+            .as_ref()
+            .ok_or(RendererBuilderError::NoContextCreateBufferError)?;
+        let now = Self::now();
+        let user_ctx = self.user_ctx.as_ref();
+
+        for texture_link in &self.texture_links {
+            let program_id = texture_link.program_id().clone();
+            let texture_id = texture_link.texture_id().clone();
+            let webgl_texture = texture_link.create_texture(gl, now, user_ctx);
+            let texture = Texture::new(program_id, texture_id, webgl_texture);
+
+            self.textures.insert(texture);
         }
 
         Ok(self)

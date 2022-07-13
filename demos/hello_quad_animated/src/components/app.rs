@@ -7,7 +7,7 @@ use webgl::{
     renderer::{
         animation_callback::AnimationCallback, buffer_link::BufferLink, id::Id, id_name::IdName,
         program_link::ProgramLink, render_callback::RenderCallback, renderer::Renderer,
-        uniform_link::UniformLink,
+        uniform_link::UniformLink, default_id::DefaultId,
     },
 };
 use yew::{
@@ -138,6 +138,8 @@ pub fn app() -> Html {
                         ProgramId,
                         UniformId,
                         BufferId,
+                        DefaultId,
+                        DefaultId,
                         UseStateHandle<i32>,
                     >| {
                         let gl = renderer.gl();

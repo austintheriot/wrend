@@ -6,7 +6,7 @@ use webgl::{
     constants::quad::QUAD,
     renderer::{
         buffer_link::BufferLink, id::Id, id_name::IdName, program_link::ProgramLink,
-        render_callback::RenderCallback, renderer::Renderer,
+        render_callback::RenderCallback, renderer::Renderer, default_id::DefaultId,
     },
 };
 use yew::{
@@ -21,26 +21,6 @@ pub struct ProgramId;
 
 impl Id for ProgramId {}
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
-pub enum UniformId {
-    Resolution,
-}
-
-impl Id for UniformId {}
-
-impl Default for UniformId {
-    fn default() -> Self {
-        Self::Resolution
-    }
-}
-
-impl IdName for UniformId {
-    fn name(&self) -> String {
-        match self {
-            UniformId::Resolution => "u_resolution".to_string(),
-        }
-    }
-}
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum BufferId {
@@ -131,8 +111,10 @@ pub fn app() -> Html {
                         ShaderId,
                         ShaderId,
                         ProgramId,
-                        UniformId,
+                        DefaultId,
                         BufferId,
+                        DefaultId,
+                        DefaultId,
                         UseStateHandle<i32>,
                     >| {
                         info!("Calling render callback");
