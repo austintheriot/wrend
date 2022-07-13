@@ -1,5 +1,5 @@
 [package]
-name = "entry"
+name = "game_of_life"
 description = ""
 version = "0.1.0"
 edition = "2021"
@@ -30,9 +30,6 @@ cpal = { version = "0.13.5", features = ["wasm-bindgen"] }
 wasm-bindgen = "0.2.78"
 wasm-bindgen-futures = "0.4.31"
 js-sys = "0.3.55"
-hello_quad = { path = '../hello_quad' }
-hello_quad_animated = { path = '../hello_quad_animated' }
-game_of_life = { path = '../game_of_life' }
 webgl = { path = '../../webgl' }
 ui = { path = '../ui' }
 anyhow = "1.0.58"
@@ -79,7 +76,7 @@ features = [
   "HtmlCanvasElement",
   "CanvasRenderingContext2d",
   "File",
-  "FileList"
+  "FileList",
 ]
 
 # The `console_error_panic_hook` crate provides better debugging of panics by

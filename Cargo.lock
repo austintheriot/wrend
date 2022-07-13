@@ -239,6 +239,7 @@ dependencies = [
  "anyhow",
  "console_error_panic_hook",
  "cpal",
+ "game_of_life",
  "getrandom",
  "hello_quad",
  "hello_quad_animated",
@@ -361,6 +362,30 @@ dependencies = [
  "pin-project-lite",
  "pin-utils",
  "slab",
+]
+
+[[package]]
+name = "game_of_life"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "console_error_panic_hook",
+ "cpal",
+ "getrandom",
+ "js-sys",
+ "lazy_static",
+ "log",
+ "rand",
+ "thiserror",
+ "ui",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "webgl",
+ "wee_alloc",
+ "yew",
+ "yew-router",
 ]
 
 [[package]]

@@ -6,4 +6,5 @@ members = [
     "demos/entry",
     "demos/hello_quad",
     "demos/hello_quad_animated",
+    "demos/game_of_life",
 ]
