@@ -30,10 +30,13 @@ void main() {
     }
   }
 
-  if (0.0 <= sum && sum <= 60.0) {
-    out_color = vec4(0.0, 0.0, 0.0, 1.0);
+  vec4 current_color = texture(u_texture, v_tex_coord);
+  const vec3 increment = vec3(0.01);
+
+  if (sum <= 60.0) {
+    out_color = vec4((current_color.rgb + increment), 1.0);
   }
   else {
-    out_color = vec4(1.0, 1.0, 1.0, 1.0);
+    out_color = vec4((current_color.rgb - increment), 1.0);
   }
 }
