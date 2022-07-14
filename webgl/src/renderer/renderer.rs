@@ -32,7 +32,7 @@ pub struct Renderer<
     BufferId: Id + IdName = DefaultId,
     TextureId: Id = DefaultId,
     FramebufferId: Id = DefaultId,
-    UserCtx: 'static = (),
+    UserCtx: Clone + 'static = (),
 > {
     canvas: HtmlCanvasElement,
     gl: WebGl2RenderingContext,
@@ -65,7 +65,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx,
+        UserCtx: Clone,
     >
     Renderer<
         VertexShaderId,
@@ -111,9 +111,30 @@ impl<
         &self.programs
     }
 
+    pub fn uniforms(&self) -> &HashMap<UniformId, Uniform<ProgramId, UniformId, UserCtx>> {
+        &self.uniforms
+    }
+
+    pub fn buffers(&self) -> &HashMap<BufferId, Buffer<ProgramId, BufferId, UserCtx>> {
+        &self.buffers
+    }
+
+    pub fn textures(&self) -> &HashMap<TextureId, Texture<ProgramId, TextureId>> {
+        &self.textures
+    }
+
+    pub fn framebuffers(&self) -> &HashMap<FramebufferId, Framebuffer<ProgramId, FramebufferId>> {
+        &self.framebuffers
+    }
+
     // @todo - enable ctx to be returned unconditionally (depending on if it's set or not)
     pub fn user_ctx(&self) -> Option<&UserCtx> {
         self.user_ctx.as_ref()
+    }
+
+    // @todo - enable ctx to be returned unconditionally (depending on if it's set or not)
+    pub fn user_ctx_mut(&mut self) -> Option<&mut UserCtx> {
+        self.user_ctx.as_mut()
     }
 
     /// Iterates through all saved uniforms and updates them using their associated update callbacks
@@ -171,8 +192,9 @@ impl<
         self
     }
 
-    pub fn render(&self) -> &Self {
-        self.render_callback.call(self);
+    pub fn render(&mut self) -> &mut Self {
+        // must clone here to prevent conflicts between borrowing mutably and immutably
+        self.render_callback.clone().call(self);
 
         self
     }
@@ -303,7 +325,7 @@ pub struct RendererBuilder<
     BufferId: Id + IdName = DefaultId,
     TextureId: Id = DefaultId,
     FramebufferId: Id = DefaultId,
-    UserCtx: 'static = (),
+    UserCtx: Clone + 'static = (),
 > {
     canvas: Option<HtmlCanvasElement>,
     gl: Option<WebGl2RenderingContext>,
@@ -356,7 +378,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx: 'static,
+        UserCtx: Clone + 'static,
     >
     RendererBuilder<
         VertexShaderId,
@@ -564,7 +586,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx,
+        UserCtx: Clone,
     >
     RendererBuilder<
         VertexShaderId,
@@ -864,7 +886,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx,
+        UserCtx: Clone,
     > Default
     for RendererBuilder<
         VertexShaderId,

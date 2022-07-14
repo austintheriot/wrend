@@ -107,7 +107,7 @@ pub fn app() -> Html {
                 );
 
                 let render_callback = RenderCallback::new(Rc::new(
-                    |renderer: &Renderer<
+                    |renderer: &mut Renderer<
                         ShaderId,
                         ShaderId,
                         ProgramId,
@@ -150,7 +150,7 @@ pub fn app() -> Html {
                     .add_fragment_shader_src(ShaderId::Fragment, FRAGMENT_SHADER.to_string())
                     .add_buffer_link(a_position_link);
 
-                let renderer = renderer_builder
+                let mut renderer = renderer_builder
                     .build()
                     .expect("Renderer should successfully build");
 

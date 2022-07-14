@@ -1,8 +1,11 @@
-use crate::graphics::{
-    buffer_id::BufferId, create_buffer::create_vertex_buffer,
-    create_framebuffer::make_create_frame_buffer, create_texture::create_texture,
-    framebuffer_id::FramebufferId, program_id::ProgramId, render::render, shader_id::ShaderId,
-    texture_id::TextureId, uniform_id::UniformId,
+use crate::{
+    graphics::{
+        buffer_id::BufferId, create_buffer::create_vertex_buffer,
+        create_framebuffer::make_create_frame_buffer, create_texture::create_texture,
+        framebuffer_id::FramebufferId, program_id::ProgramId, render::render, shader_id::ShaderId,
+        texture_id::TextureId, uniform_id::UniformId,
+    },
+    state::render_state::RenderState,
 };
 use log::info;
 use std::rc::Rc;
@@ -13,9 +16,7 @@ use webgl::renderer::{
     framebuffer_link::FramebufferLink, program_link::ProgramLink, render_callback::RenderCallback,
     renderer::Renderer, texture_link::TextureLink, uniform_link::UniformLink,
 };
-use yew::{
-    function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, use_state_eq,
-};
+use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
 use yew_router::prelude::*;
 
 const VERTEX_SHADER: &'static str = include_str!("../shaders/vertex.glsl");
@@ -24,7 +25,7 @@ const FRAGMENT_SHADER: &'static str = include_str!("../shaders/fragment.glsl");
 #[function_component(App)]
 pub fn app() -> Html {
     let canvas_ref = use_node_ref();
-    let example_state = use_state_eq(|| 0);
+    let render_state = use_mut_ref(RenderState::default);
     let animation_handle = use_mut_ref(|| None);
 
     use_effect_with_deps(
@@ -81,7 +82,7 @@ pub fn app() -> Html {
 
                 renderer_builder
                     .set_canvas(canvas)
-                    .set_user_ctx(example_state)
+                    .set_user_ctx(render_state)
                     .set_render_callback(render_callback)
                     .add_program_link(program_link)
                     .add_vertex_shader_src(ShaderId::Vertex, VERTEX_SHADER.to_string())

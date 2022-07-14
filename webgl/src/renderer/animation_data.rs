@@ -13,7 +13,7 @@ pub struct AnimationData<
     BufferId: Id + IdName = DefaultId,
     TextureId: Id = DefaultId,
     FramebufferId: Id = DefaultId,
-    UserCtx: 'static = (),
+    UserCtx: Clone + 'static = (),
 > {
     id: i32,
     callback: AnimationCallback<
@@ -47,7 +47,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx: 'static,
+        UserCtx: Clone + 'static,
     >
     AnimationData<
         VertexShaderId,
@@ -68,8 +68,8 @@ impl<
         self.id
     }
 
-    pub fn call_animation_callback(&self) {
-        self.callback.call(&self.renderer);
+    pub fn call_animation_callback(&mut self) {
+        self.callback.call(&mut self.renderer);
     }
 
     pub fn set_is_animating(&mut self, is_animating: bool) -> &mut Self {

@@ -13,11 +13,11 @@ pub struct AnimationCallback<
     BufferId: Id + IdName = DefaultId,
     TextureId: Id = DefaultId,
     FramebufferId: Id = DefaultId,
-    UserCtx: 'static = (),
+    UserCtx: Clone + 'static = (),
 > {
     callback: Rc<
         dyn Fn(
-            &Renderer<
+            &mut Renderer<
                 VertexShaderId,
                 FragmentShaderId,
                 ProgramId,
@@ -39,7 +39,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx: 'static,
+        UserCtx: Clone + 'static,
     >
     AnimationCallback<
         VertexShaderId,
@@ -55,7 +55,7 @@ impl<
     pub fn new(
         callback: Rc<
             dyn Fn(
-                &Renderer<
+                &mut Renderer<
                     VertexShaderId,
                     FragmentShaderId,
                     ProgramId,
@@ -73,7 +73,7 @@ impl<
 
     pub fn call(
         &self,
-        renderer: &Renderer<
+        renderer: &mut Renderer<
             VertexShaderId,
             FragmentShaderId,
             ProgramId,

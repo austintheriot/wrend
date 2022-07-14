@@ -16,11 +16,11 @@ pub struct RenderCallback<
     BufferId: Id + IdName = DefaultId,
     TextureId: Id = DefaultId,
     FramebufferId: Id = DefaultId,
-    UserCtx: 'static = (),
+    UserCtx: Clone + 'static = (),
 > {
     callback: Rc<
         dyn Fn(
-            &Renderer<
+            &mut Renderer<
                 VertexShaderId,
                 FragmentShaderId,
                 ProgramId,
@@ -43,7 +43,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx,
+        UserCtx: Clone,
     >
     RenderCallback<
         VertexShaderId,
@@ -59,7 +59,7 @@ impl<
     pub fn new(
         render_callback: Rc<
             dyn Fn(
-                &Renderer<
+                &mut Renderer<
                     VertexShaderId,
                     FragmentShaderId,
                     ProgramId,
@@ -80,7 +80,7 @@ impl<
 
     pub fn call(
         &self,
-        renderer: &Renderer<
+        renderer: &mut Renderer<
             VertexShaderId,
             FragmentShaderId,
             ProgramId,
@@ -103,7 +103,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx,
+        UserCtx: Clone,
     > Hash
     for RenderCallback<
         VertexShaderId,
@@ -129,7 +129,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx,
+        UserCtx: Clone,
     > Debug
     for RenderCallback<
         VertexShaderId,
@@ -157,7 +157,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx,
+        UserCtx: Clone,
     > Default
     for RenderCallback<
         VertexShaderId,
@@ -186,7 +186,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx,
+        UserCtx: Clone,
     > PartialEq
     for RenderCallback<
         VertexShaderId,
@@ -212,7 +212,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx,
+        UserCtx: Clone,
     > Eq
     for RenderCallback<
         VertexShaderId,

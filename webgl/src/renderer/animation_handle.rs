@@ -18,7 +18,7 @@ pub struct AnimationHandle<
     BufferId: Id + IdName,
     TextureId: Id,
     FramebufferId: Id,
-    UserCtx: 'static,
+    UserCtx: Clone + 'static,
 > {
     animation_data: Rc<
         RefCell<
@@ -44,7 +44,7 @@ impl<
         BufferId: 'static + Id + IdName,
         TextureId: 'static + Id,
         FramebufferId: 'static + Id,
-        UserCtx: 'static,
+        UserCtx: Clone + 'static,
     >
     AnimationHandle<
         VertexShaderId,
@@ -101,7 +101,7 @@ impl<
                 }
 
                 // run animation callback
-                animation_data.borrow().call_animation_callback();
+                animation_data.borrow_mut().call_animation_callback();
 
                 // schedule another requestAnimationFrame callback
                 let animation_id = Self::request_animation_frame(f.borrow().as_ref().unwrap());
@@ -137,7 +137,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx,
+        UserCtx: Clone,
     > Drop
     for AnimationHandle<
         VertexShaderId,
