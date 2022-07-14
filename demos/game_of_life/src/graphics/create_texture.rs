@@ -19,12 +19,12 @@ pub fn create_texture<UserCtx>(ctx: TextureCreateContext<UserCtx>) -> WebGlTextu
     gl.tex_parameteri(
         WebGl2RenderingContext::TEXTURE_2D,
         WebGl2RenderingContext::TEXTURE_WRAP_S,
-        WebGl2RenderingContext::CLAMP_TO_EDGE as i32,
+        WebGl2RenderingContext::REPEAT as i32,
     );
     gl.tex_parameteri(
         WebGl2RenderingContext::TEXTURE_2D,
         WebGl2RenderingContext::TEXTURE_WRAP_T,
-        WebGl2RenderingContext::CLAMP_TO_EDGE as i32,
+        WebGl2RenderingContext::REPEAT as i32,
     );
     gl.tex_parameteri(
         WebGl2RenderingContext::TEXTURE_2D,

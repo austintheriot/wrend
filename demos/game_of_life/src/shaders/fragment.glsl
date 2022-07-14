@@ -10,11 +10,13 @@ uniform sampler2D u_texture;
 
 out vec4 out_color;
 
-const int KERNEL_SIZE = 3;
+const int KERNEL_SIZE = 15;
 
 void main() {
   // the size of one pixel-- (0 --> 1) divided by the width of the texture
   vec2 one_pixel = vec2(1) / vec2(textureSize(u_texture, 0));
+
+  const float KERNEL_SIZE_FLOAT = float(KERNEL_SIZE);
 
   // programmatically run convolution with kernel of any size
   vec4 surrounding_color_sum_vec4 = vec4(0);
@@ -34,19 +36,21 @@ void main() {
 
   vec4 current_color = texture(u_texture, v_tex_coord);
   float current_color_sum = current_color.r + current_color.g + current_color.b;
+  
+  const float MODIFICATION_DAMPER = 0.01;
 
   // alive ones stay alive
-  if (6.0 <= surrounding_color_sum && surrounding_color_sum <= 9.0) {
+  if (2.0 * KERNEL_SIZE_FLOAT <= surrounding_color_sum && surrounding_color_sum <= 3.0 * KERNEL_SIZE_FLOAT) {
     out_color = vec4(current_color.rgb, 1.0);
   } 
 
   // dead ones come alive
-  else if (current_color_sum < 0.5 && surrounding_color_sum >= 7.0) {
-    out_color = vec4((current_color + surrounding_color_sum_vec4 * 0.01).rgb, 1.0);
+  else if (current_color_sum < 0.5 && surrounding_color_sum >= KERNEL_SIZE_FLOAT * 0.5) {
+    out_color = vec4((current_color + surrounding_color_sum_vec4 * MODIFICATION_DAMPER).rgb, 1.0);
   } 
 
   // alive ones die
   else {
-    out_color = vec4((current_color - surrounding_color_sum_vec4 * 0.01).rgb, 1.0);
+    out_color = vec4((current_color - surrounding_color_sum_vec4 * MODIFICATION_DAMPER).rgb, 1.0);
   }
 }
