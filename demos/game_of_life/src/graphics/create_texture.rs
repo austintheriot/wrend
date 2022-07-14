@@ -1,5 +1,4 @@
-use rand::prelude::StdRng;
-use rand::{Rng, SeedableRng};
+use js_sys::Math;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlTexture};
 use webgl::renderer::texture_create_context::TextureCreateContext;
@@ -47,16 +46,14 @@ pub fn create_texture<UserCtx>(ctx: TextureCreateContext<UserCtx>) -> WebGlTextu
     for _ in 0..length_of_noise_array {
         noise_image.push(0u8);
     }
-    let mut rng = StdRng::from_entropy();
     for rgba in noise_image.chunks_mut(bytes_per_pixel as usize) {
-        for (i, byte) in rgba.iter_mut().enumerate() {
-            if i != bytes_per_pixel as usize {
-                *byte = rng.gen();
-            } else {
-                // keep opacity at maximum
-                *byte = u8::MAX;
-            }
-        }
+        let random_float = Math::random();
+        let black_or_white = if random_float < 0.5 { u8::MIN } else { u8::MAX };
+
+        rgba[0] = black_or_white;
+        rgba[1] = black_or_white;
+        rgba[2] = black_or_white;
+        rgba[3] = u8::MAX;
     }
 
     gl.tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_u8_array_and_src_offset(
