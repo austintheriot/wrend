@@ -7,7 +7,7 @@ use std::hash::Hash;
 use std::rc::Rc;
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
-pub type CreateBufferCallback<UserCtx> = Rc<dyn Fn(BufferCreateContext<UserCtx>) -> WebGlBuffer>;
+pub type BufferCreateCallback<UserCtx> = Rc<dyn Fn(BufferCreateContext<UserCtx>) -> WebGlBuffer>;
 
 #[derive(Clone)]
 pub struct BufferLink<ProgramId, BufferId, UserCtx>
@@ -17,7 +17,7 @@ where
 {
     program_id: ProgramId,
     buffer_id: BufferId,
-    create_buffer_callback: CreateBufferCallback<UserCtx>,
+    create_buffer_callback: BufferCreateCallback<UserCtx>,
     update_callback: BufferUpdateCallback<UserCtx>,
     should_update_callback: BufferShouldUpdateCallback<UserCtx>,
 }
@@ -30,7 +30,7 @@ where
     pub fn new(
         program_id: ProgramId,
         buffer_id: BufferId,
-        create_buffer_callback: CreateBufferCallback<UserCtx>,
+        create_buffer_callback: BufferCreateCallback<UserCtx>,
         update_callback: BufferUpdateCallback<UserCtx>,
         should_update_callback: BufferShouldUpdateCallback<UserCtx>,
     ) -> Self {

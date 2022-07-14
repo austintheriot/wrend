@@ -1,9 +1,8 @@
+use super::id::Id;
+use super::uniform::UniformUpdateCallback;
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::rc::Rc;
-
-use super::id::Id;
-use super::uniform::UniformUpdateCallback;
 
 /// This contains an id for a program and and id for a uniform that is associated with it
 /// At build time, these get linked together to find the uniform's associated location in the program

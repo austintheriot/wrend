@@ -5,7 +5,7 @@ use std::hash::Hash;
 use std::rc::Rc;
 use web_sys::{WebGl2RenderingContext, WebGlTexture};
 
-pub type CreateTextureCallback<UserCtx> = Rc<dyn Fn(TextureCreateContext<UserCtx>) -> WebGlTexture>;
+pub type TextureCreateCallback<UserCtx> = Rc<dyn Fn(TextureCreateContext<UserCtx>) -> WebGlTexture>;
 
 #[derive(Clone)]
 pub struct TextureLink<ProgramId, TextureId, UserCtx>
@@ -15,7 +15,7 @@ where
 {
     program_id: ProgramId,
     texture_id: TextureId,
-    create_texture_callback: CreateTextureCallback<UserCtx>,
+    create_texture_callback: TextureCreateCallback<UserCtx>,
 }
 
 impl<ProgramId, TextureId, UserCtx> TextureLink<ProgramId, TextureId, UserCtx>
@@ -26,7 +26,7 @@ where
     pub fn new(
         program_id: ProgramId,
         texture_id: TextureId,
-        create_texture_callback: CreateTextureCallback<UserCtx>,
+        create_texture_callback: TextureCreateCallback<UserCtx>,
     ) -> Self {
         Self {
             program_id,
@@ -62,8 +62,7 @@ where
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("TextureLink")
             .field("program_id", &self.program_id)
-            .field("update_callback", &"[not shown]")
-            .field("should_update_callback", &"[not shown]")
+            .field("texture_id", &self.texture_id)
             .finish()
     }
 }
