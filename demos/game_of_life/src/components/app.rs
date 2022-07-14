@@ -1,12 +1,13 @@
 use crate::graphics::{
-    buffer_id::BufferId, create_buffer::create_vertex_buffer, create_texture::create_texture,
+    buffer_id::BufferId, create_buffer::create_vertex_buffer,
+    create_framebuffer::make_create_frame_buffer, create_texture::create_texture,
     framebuffer_id::FramebufferId, program_id::ProgramId, render::render, shader_id::ShaderId,
     texture_id::TextureId, uniform_id::UniformId,
 };
 use log::info;
 use std::rc::Rc;
 use ui::route::Route;
-use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
+use web_sys::HtmlCanvasElement;
 use webgl::renderer::{
     animation_callback::AnimationCallback, buffer_link::BufferLink,
     framebuffer_link::FramebufferLink, program_link::ProgramLink, render_callback::RenderCallback,
@@ -59,31 +60,19 @@ pub fn app() -> Html {
                 let texture_a_link =
                     TextureLink::new(ProgramId, TextureId::A, Rc::new(create_texture));
 
+                let texture_b_link =
+                    TextureLink::new(ProgramId, TextureId::B, Rc::new(create_texture));
+
                 let framebuffer_a_link = FramebufferLink::new(
                     ProgramId,
                     FramebufferId::A,
-                    Rc::new(|ctx| {
-                        let texture_a = ctx.renderer_builder()
-                            .texture(&TextureId::A)
-                            .expect("RendererBuilder should have Texture A built when creating framebuffers");
-                        let gl = ctx.gl();
+                    make_create_frame_buffer(TextureId::A),
+                );
 
-                        let framebuffer_object = gl
-                            .create_framebuffer()
-                            .expect("WebGL2 should be able to create a WebGlFramebuffer object");
-                        gl.bind_framebuffer(
-                            WebGl2RenderingContext::FRAMEBUFFER,
-                            Some(&framebuffer_object),
-                        );
-                        gl.framebuffer_texture_2d(
-                            WebGl2RenderingContext::FRAMEBUFFER,
-                            WebGl2RenderingContext::COLOR_ATTACHMENT0,
-                            WebGl2RenderingContext::TEXTURE_2D,
-                            Some(texture_a.webgl_texture()),
-                            0,
-                        );
-                        framebuffer_object
-                    }),
+                let framebuffer_b_link = FramebufferLink::new(
+                    ProgramId,
+                    FramebufferId::B,
+                    make_create_frame_buffer(TextureId::B),
                 );
 
                 let render_callback = RenderCallback::new(Rc::new(render));
@@ -100,7 +89,9 @@ pub fn app() -> Html {
                     .add_buffer_link(a_position_link)
                     .add_uniform_link(u_now_link)
                     .add_texture_link(texture_a_link)
-                    .add_framebuffer_link(framebuffer_a_link);
+                    .add_texture_link(texture_b_link)
+                    .add_framebuffer_link(framebuffer_a_link)
+                    .add_framebuffer_link(framebuffer_b_link);
 
                 let renderer = renderer_builder
                     .build()
