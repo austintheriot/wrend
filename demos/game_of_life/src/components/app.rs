@@ -100,9 +100,10 @@ pub fn app() -> Html {
 
                 info!("Renderer: {:#?}", renderer);
 
+                renderer.update_uniforms();
+
                 let new_animation_handle =
                     renderer.into_animation_handle(AnimationCallback::new(Rc::new(|renderer| {
-                        renderer.update_uniforms();
                         renderer.render();
                     })));
 
@@ -120,7 +121,7 @@ pub fn app() -> Html {
     html! {
         <>
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
-            <canvas ref={canvas_ref} height={50} width={50} />
+            <canvas ref={canvas_ref} height={500} width={500} />
         </>
     }
 }
