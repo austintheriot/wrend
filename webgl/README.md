@@ -16,6 +16,12 @@ The following use cases should guide the development of this library:
 
 ## Todo
 
+- Fix: make callbacks receive &Renderer instead of &mut Renderer
+
+- Enable Vertex Array Object (VAO)
+
+- Enable other lifetime callbacks for uniforms (create, should update, update)
+
 - Animations:
     - Move animation logic OUTSIDE of Renderer, so that the animation callback has access to the renderer context?
 

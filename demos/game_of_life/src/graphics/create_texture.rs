@@ -1,3 +1,5 @@
+use rand::prelude::StdRng;
+use rand::{Rng, SeedableRng};
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlTexture};
 use webgl::renderer::texture_create_context::TextureCreateContext;
@@ -8,6 +10,9 @@ pub fn create_texture<UserCtx>(ctx: TextureCreateContext<UserCtx>) -> WebGlTextu
         .create_texture()
         .expect("Should be able to create textures from WebGL context");
     let canvas: HtmlCanvasElement = gl.canvas().unwrap().dyn_into().unwrap();
+
+    gl.active_texture(WebGl2RenderingContext::TEXTURE0);
+
     gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(&webgl_texture));
 
     // Set the parameters so we don't need mips, we're not filtering, and we don't repeat
@@ -32,8 +37,29 @@ pub fn create_texture<UserCtx>(ctx: TextureCreateContext<UserCtx>) -> WebGlTextu
         WebGl2RenderingContext::LINEAR as i32,
     );
 
-    // load empty texture into gpu -- this will get rendered into later
-    gl.tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_u8_array(
+    let canvas_width = canvas.width() as i32;
+    let canvas_height = canvas.height() as i32;
+
+    // generate a texture of noise
+    let bytes_per_pixel = 4;
+    let length_of_noise_array = (canvas_width * canvas_height * bytes_per_pixel) as usize;
+    let mut noise_image = Vec::with_capacity(length_of_noise_array);
+    for _ in 0..length_of_noise_array {
+        noise_image.push(0u8);
+    }
+    let mut rng = StdRng::from_entropy();
+    for rgba in noise_image.chunks_mut(bytes_per_pixel as usize) {
+        for (i, byte) in rgba.iter_mut().enumerate() {
+            if i != bytes_per_pixel as usize {
+                *byte = rng.gen();
+            } else {
+                // keep opacity at maximum
+                *byte = u8::MAX;
+            }
+        }
+    }
+
+    gl.tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_u8_array_and_src_offset(
         WebGl2RenderingContext::TEXTURE_2D,
         0,
         WebGl2RenderingContext::RGBA as i32,
@@ -42,7 +68,8 @@ pub fn create_texture<UserCtx>(ctx: TextureCreateContext<UserCtx>) -> WebGlTextu
         0,
         WebGl2RenderingContext::RGBA,
         WebGl2RenderingContext::UNSIGNED_BYTE,
-        None,
+        &noise_image,
+        0,
     )
     .unwrap();
 

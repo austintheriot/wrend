@@ -4,3 +4,10 @@
   margin: 0;
   padding: 0;
 }
+
+canvas {
+  display: block;
+  width: 100vmin;
+  height: 100vmin;
+  image-rendering: pixelated;
+}

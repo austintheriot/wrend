@@ -48,13 +48,13 @@ pub fn app() -> Html {
                     Rc::new(|_| false),
                 );
 
-                let u_now_link = UniformLink::new(
+                let u_texture = UniformLink::new(
                     ProgramId,
-                    UniformId::UNow,
+                    UniformId::UTexture,
                     Rc::new(|ctx| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
-                        gl.uniform1f(Some(uniform_location), ctx.now() as f32);
+                        gl.uniform1i(Some(uniform_location), 0);
                     }),
                 );
 
@@ -88,7 +88,7 @@ pub fn app() -> Html {
                     .add_vertex_shader_src(ShaderId::Vertex, VERTEX_SHADER.to_string())
                     .add_fragment_shader_src(ShaderId::Fragment, FRAGMENT_SHADER.to_string())
                     .add_buffer_link(a_position_link)
-                    .add_uniform_link(u_now_link)
+                    .add_uniform_link(u_texture)
                     .add_texture_link(texture_a_link)
                     .add_texture_link(texture_b_link)
                     .add_framebuffer_link(framebuffer_a_link)
@@ -120,7 +120,7 @@ pub fn app() -> Html {
     html! {
         <>
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
-            <canvas ref={canvas_ref} />
+            <canvas ref={canvas_ref} height={50} width={50} />
         </>
     }
 }
