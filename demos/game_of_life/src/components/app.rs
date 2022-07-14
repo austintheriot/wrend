@@ -1,15 +1,16 @@
 use crate::graphics::{
     buffer_id::BufferId, create_buffer::create_vertex_buffer, create_texture::create_texture,
-    program_id::ProgramId, render::render, shader_id::ShaderId, texture_id::TextureId,
-    uniform_id::UniformId,
+    framebuffer_id::FramebufferId, program_id::ProgramId, render::render, shader_id::ShaderId,
+    texture_id::TextureId, uniform_id::UniformId,
 };
+use log::info;
 use std::rc::Rc;
 use ui::route::Route;
-use web_sys::HtmlCanvasElement;
+use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 use webgl::renderer::{
-    animation_callback::AnimationCallback, buffer_link::BufferLink, program_link::ProgramLink,
-    render_callback::RenderCallback, renderer::Renderer, texture_link::TextureLink,
-    uniform_link::UniformLink,
+    animation_callback::AnimationCallback, buffer_link::BufferLink,
+    framebuffer_link::FramebufferLink, program_link::ProgramLink, render_callback::RenderCallback,
+    renderer::Renderer, texture_link::TextureLink, uniform_link::UniformLink,
 };
 use yew::{
     function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, use_state_eq,
@@ -58,6 +59,33 @@ pub fn app() -> Html {
                 let texture_a_link =
                     TextureLink::new(ProgramId, TextureId::A, Rc::new(create_texture));
 
+                let framebuffer_a_link = FramebufferLink::new(
+                    ProgramId,
+                    FramebufferId::A,
+                    Rc::new(|ctx| {
+                        let texture_a = ctx.renderer_builder()
+                            .texture(&TextureId::A)
+                            .expect("RendererBuilder should have Texture A built when creating framebuffers");
+                        let gl = ctx.gl();
+
+                        let framebuffer_object = gl
+                            .create_framebuffer()
+                            .expect("WebGL2 should be able to create a WebGlFramebuffer object");
+                        gl.bind_framebuffer(
+                            WebGl2RenderingContext::FRAMEBUFFER,
+                            Some(&framebuffer_object),
+                        );
+                        gl.framebuffer_texture_2d(
+                            WebGl2RenderingContext::FRAMEBUFFER,
+                            WebGl2RenderingContext::COLOR_ATTACHMENT0,
+                            WebGl2RenderingContext::TEXTURE_2D,
+                            Some(texture_a.webgl_texture()),
+                            0,
+                        );
+                        framebuffer_object
+                    }),
+                );
+
                 let render_callback = RenderCallback::new(Rc::new(render));
 
                 let mut renderer_builder = Renderer::builder();
@@ -71,11 +99,14 @@ pub fn app() -> Html {
                     .add_fragment_shader_src(ShaderId::Fragment, FRAGMENT_SHADER.to_string())
                     .add_buffer_link(a_position_link)
                     .add_uniform_link(u_now_link)
-                    .add_texture_link(texture_a_link);
+                    .add_texture_link(texture_a_link)
+                    .add_framebuffer_link(framebuffer_a_link);
 
                 let renderer = renderer_builder
                     .build()
                     .expect("Renderer should successfully build");
+
+                info!("Renderer: {:#?}", renderer);
 
                 let new_animation_handle =
                     renderer.into_animation_handle(AnimationCallback::new(Rc::new(|renderer| {

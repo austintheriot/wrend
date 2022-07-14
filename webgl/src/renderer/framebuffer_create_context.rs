@@ -1,6 +1,6 @@
 use web_sys::WebGl2RenderingContext;
 
-use super::{id::Id, id_name::IdName, renderer::Renderer};
+use super::{id::Id, id_name::IdName, renderer::RendererBuilder};
 
 /// This is the context object that is passed to the create_texture callback function
 #[derive(Debug, Clone)]
@@ -17,7 +17,7 @@ pub struct FramebufferCreateContext<
 > {
     gl: &'a WebGl2RenderingContext,
     now: f64,
-    renderer: &'a Renderer<
+    renderer_builder: &'a RendererBuilder<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -57,7 +57,7 @@ impl<
     pub fn new(
         gl: &'a WebGl2RenderingContext,
         now: f64,
-        renderer: &'a Renderer<
+        renderer_builder: &'a RendererBuilder<
             VertexShaderId,
             FragmentShaderId,
             ProgramId,
@@ -73,7 +73,7 @@ impl<
             gl,
             now,
             user_ctx,
-            renderer,
+            renderer_builder,
         }
     }
 
@@ -89,9 +89,9 @@ impl<
         self.user_ctx
     }
 
-    pub fn renderer(
+    pub fn renderer_builder(
         &self,
-    ) -> &'a Renderer<
+    ) -> &'a RendererBuilder<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -101,6 +101,6 @@ impl<
         FramebufferId,
         UserCtx,
     > {
-        self.renderer
+        self.renderer_builder
     }
 }

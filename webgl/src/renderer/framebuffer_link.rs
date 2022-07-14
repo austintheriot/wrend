@@ -1,11 +1,11 @@
 use super::{
     framebuffer_create_context::FramebufferCreateContext, id::Id, id_name::IdName,
-    renderer::Renderer,
+    renderer::RendererBuilder,
 };
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::rc::Rc;
-use web_sys::{WebGl2RenderingContext, WebGlTexture};
+use web_sys::{WebGl2RenderingContext, WebGlFramebuffer};
 
 pub type CreateFramebufferCallback<
     VertexShaderId,
@@ -28,7 +28,7 @@ pub type CreateFramebufferCallback<
             FramebufferId,
             UserCtx,
         >,
-    ) -> WebGlTexture,
+    ) -> WebGlFramebuffer,
 >;
 
 #[derive(Clone)]
@@ -113,7 +113,7 @@ where
         &self,
         gl: &WebGl2RenderingContext,
         now: f64,
-        renderer: &Renderer<
+        renderer_builder: &RendererBuilder<
             VertexShaderId,
             FragmentShaderId,
             ProgramId,
@@ -124,8 +124,9 @@ where
             UserCtx,
         >,
         user_ctx: Option<&UserCtx>,
-    ) -> WebGlTexture {
-        let framebuffer_create_context = FramebufferCreateContext::new(gl, now, renderer, user_ctx);
+    ) -> WebGlFramebuffer {
+        let framebuffer_create_context =
+            FramebufferCreateContext::new(gl, now, renderer_builder, user_ctx);
         (self.create_framebuffer_callback)(framebuffer_create_context)
     }
 }

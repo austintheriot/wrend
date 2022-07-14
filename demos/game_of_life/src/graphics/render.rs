@@ -25,6 +25,9 @@ pub fn render(
     // use the appropriate program
     gl.use_program(renderer.programs().get(&ProgramId));
 
+    // draw to canvas (instead of framebuffer)
+    gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, None);
+
     // sync canvas dimensions with viewport
     gl.viewport(0, 0, canvas.width() as i32, canvas.height() as i32);
 

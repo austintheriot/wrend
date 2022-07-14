@@ -4,6 +4,8 @@ use super::attribute_location::AttributeLocation;
 use super::buffer::Buffer;
 use super::buffer_link::BufferLink;
 use super::default_id::DefaultId;
+use super::framebuffer::Framebuffer;
+use super::framebuffer_link::FramebufferLink;
 use super::id::Id;
 use super::id_name::IdName;
 use super::render_callback::RenderCallback;
@@ -47,10 +49,11 @@ pub struct Renderer<
         FramebufferId,
         UserCtx,
     >,
-    uniforms: HashSet<Uniform<ProgramId, UniformId, UserCtx>>,
+    uniforms: HashMap<UniformId, Uniform<ProgramId, UniformId, UserCtx>>,
     user_ctx: Option<UserCtx>,
-    buffers: HashSet<Buffer<ProgramId, BufferId, UserCtx>>,
-    textures: HashSet<Texture<ProgramId, TextureId>>,
+    buffers: HashMap<BufferId, Buffer<ProgramId, BufferId, UserCtx>>,
+    textures: HashMap<TextureId, Texture<ProgramId, TextureId>>,
+    framebuffers: HashMap<FramebufferId, Framebuffer<ProgramId, FramebufferId>>,
 }
 
 /// Public API
@@ -123,7 +126,7 @@ impl<
         let user_ctx = self.user_ctx();
         let gl = self.gl();
 
-        for uniform in &self.uniforms {
+        for (_, uniform) in &self.uniforms {
             let program_id = uniform.program_id();
             let program = self.programs().get(program_id);
             gl.use_program(program);
@@ -148,7 +151,7 @@ impl<
         let user_ctx = self.user_ctx();
         let gl = self.gl();
 
-        for buffer in &self.buffers {
+        for (_, buffer) in &self.buffers {
             // bind the corresponding program
             let program_id = buffer.program_id();
             let program = self.programs().get(program_id);
@@ -259,14 +262,16 @@ pub enum RendererBuilderError {
     UnknownErrorLinkProgramError,
 
     // @todo: move this into its own sub-error
-    #[error("Could not build uniform because the uniform's location was not found in the program")]
-    UniformLocationNotFoundLinkBuildUniformError,
 
     // @todo: move this into its own sub-error
-    #[error("Could not build uniform because no WebGL2RenderingContext was provided")]
-    NoContextLinkBuildUniformError,
-    #[error("Could not build uniform because the associated program_id could no be found")]
+    #[error("Could not build uniforms because no WebGL2RenderingContext was provided")]
+    NoContextBuildUniformsError,
+    #[error("Could not build uniforms because the associated program_id could no be found")]
     ProgramNotFoundBuildUniformsError,
+    #[error(
+        "Could not build uniforms because the uniform's location was not found in the program"
+    )]
+    UniformLocationNotFoundBuildUniformsError,
 
     // @todo: move this into its own sub-error
     #[error("Could not get WebGl2RenderingContext from canvas, because None was returned")]
@@ -281,6 +286,12 @@ pub enum RendererBuilderError {
     NoContextCreateBufferError,
     #[error("Could not create buffer because buffer link's associated program was not found from the program_id")]
     ProgramNotFoundCreateBufferError,
+
+    #[error("Could not create texture because no WebGL2RenderingContext was provided")]
+    NoContextCreateTextureError,
+
+    #[error("Could not create framebuffer because no WebGL2RenderingContext was provided")]
+    NoContextCreateFramebufferError,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -303,11 +314,24 @@ pub struct RendererBuilder<
     program_links: HashSet<ProgramLink<ProgramId, VertexShaderId, FragmentShaderId>>,
     programs: HashMap<ProgramId, WebGlProgram>,
     uniform_links: HashSet<UniformLink<ProgramId, UniformId, UserCtx>>,
-    uniforms: HashSet<Uniform<ProgramId, UniformId, UserCtx>>,
+    uniforms: HashMap<UniformId, Uniform<ProgramId, UniformId, UserCtx>>,
     buffer_links: HashSet<BufferLink<ProgramId, BufferId, UserCtx>>,
-    buffers: HashSet<Buffer<ProgramId, BufferId, UserCtx>>,
+    buffers: HashMap<BufferId, Buffer<ProgramId, BufferId, UserCtx>>,
     texture_links: HashSet<TextureLink<ProgramId, TextureId, UserCtx>>,
-    textures: HashSet<Texture<ProgramId, TextureId>>,
+    textures: HashMap<TextureId, Texture<ProgramId, TextureId>>,
+    framebuffer_links: HashSet<
+        FramebufferLink<
+            VertexShaderId,
+            FragmentShaderId,
+            ProgramId,
+            UniformId,
+            BufferId,
+            TextureId,
+            FramebufferId,
+            UserCtx,
+        >,
+    >,
+    framebuffers: HashMap<FramebufferId, Framebuffer<ProgramId, FramebufferId>>,
     render_callback: Option<
         RenderCallback<
             VertexShaderId,
@@ -345,6 +369,12 @@ impl<
         UserCtx,
     >
 {
+    /// This is the only internal storage available publicly from the builder,
+    /// because it is necessary to use it during the build process for framebuffers.
+    pub fn texture(&self, texture_id: &TextureId) -> Option<&Texture<ProgramId, TextureId>> {
+        self.textures.get(texture_id)
+    }
+
     /// Save the canvas that will be rendered to and get its associated WebGL2 rendering context
     pub fn set_canvas(&mut self, canvas: HtmlCanvasElement) -> &mut Self {
         self.canvas = Some(canvas);
@@ -444,13 +474,33 @@ impl<
         self
     }
 
-
     /// Saves a link that will be used to build a buffer/attribute pair at build time.
     pub fn add_texture_link(
         &mut self,
         texture_link: impl Into<TextureLink<ProgramId, TextureId, UserCtx>>,
     ) -> &mut Self {
         self.texture_links.insert(texture_link.into());
+
+        self
+    }
+
+    /// Saves a link that will be used to build a buffer/attribute pair at build time.
+    pub fn add_framebuffer_link(
+        &mut self,
+        framebuffer_link: impl Into<
+            FramebufferLink<
+                VertexShaderId,
+                FragmentShaderId,
+                ProgramId,
+                UniformId,
+                BufferId,
+                TextureId,
+                FramebufferId,
+                UserCtx,
+            >,
+        >,
+    ) -> &mut Self {
+        self.framebuffer_links.insert(framebuffer_link.into());
 
         self
     }
@@ -473,6 +523,7 @@ impl<
         >,
         RendererBuilderError,
     > {
+        // the order here is fairly important
         self.save_webgl_context_from_canvas()?;
         self.compile_fragment_shaders()?;
         self.compile_vertex_shaders()?;
@@ -480,6 +531,7 @@ impl<
         self.build_uniforms()?;
         self.create_buffers()?;
         self.create_textures()?;
+        self.create_framebuffers()?;
 
         let renderer = Renderer {
             canvas: self
@@ -496,6 +548,7 @@ impl<
             uniforms: self.uniforms,
             buffers: self.buffers,
             textures: self.textures,
+            framebuffers: self.framebuffers,
         };
 
         Ok(renderer)
@@ -617,12 +670,12 @@ impl<
         let gl = self
             .gl
             .as_ref()
-            .ok_or(RendererBuilderError::NoContextBuildError)?;
+            .ok_or(RendererBuilderError::NoContextBuildUniformsError)?;
 
         let uniform_id = program_uniform_link.uniform_id().clone();
         let uniform_location = gl
             .get_uniform_location(program, &uniform_id.name())
-            .ok_or(RendererBuilderError::UniformLocationNotFoundLinkBuildUniformError)?;
+            .ok_or(RendererBuilderError::UniformLocationNotFoundBuildUniformsError)?;
         let update_callback = program_uniform_link.update_callback();
         let uniform = Uniform::new(program_id, uniform_id, uniform_location, update_callback);
 
@@ -662,14 +715,14 @@ impl<
 
             let buffer = Buffer::new(
                 program_id,
-                buffer_id,
+                buffer_id.clone(),
                 webgl_buffer,
                 attribute_location,
                 update_callback,
                 should_update_callback,
             );
 
-            self.buffers.insert(buffer);
+            self.buffers.insert(buffer_id, buffer);
         }
 
         Ok(self)
@@ -680,7 +733,7 @@ impl<
         let gl = self
             .gl
             .as_ref()
-            .ok_or(RendererBuilderError::NoContextCreateBufferError)?;
+            .ok_or(RendererBuilderError::NoContextCreateTextureError)?;
         let now = Self::now();
         let user_ctx = self.user_ctx.as_ref();
 
@@ -688,9 +741,31 @@ impl<
             let program_id = texture_link.program_id().clone();
             let texture_id = texture_link.texture_id().clone();
             let webgl_texture = texture_link.create_texture(gl, now, user_ctx);
-            let texture = Texture::new(program_id, texture_id, webgl_texture);
+            let texture = Texture::new(program_id, texture_id.clone(), webgl_texture);
 
-            self.textures.insert(texture);
+            self.textures.insert(texture_id, texture);
+        }
+
+        Ok(self)
+    }
+
+    /// Creates a WebGL Framebuffer for each FramebufferLink that was supplied using the callback
+    fn create_framebuffers(&mut self) -> Result<&mut Self, RendererBuilderError> {
+        let gl = self
+            .gl
+            .as_ref()
+            .ok_or(RendererBuilderError::NoContextCreateFramebufferError)?;
+        let now = Self::now();
+        let user_ctx = self.user_ctx.as_ref();
+
+        for framebuffer_link in &self.framebuffer_links {
+            let program_id = framebuffer_link.program_id().clone();
+            let framebuffer_id = framebuffer_link.framebuffer_id().clone();
+            let webgl_framebuffer = framebuffer_link.create_framebuffer(gl, now, self, user_ctx);
+            let framebuffer =
+                Framebuffer::new(program_id, framebuffer_id.clone(), webgl_framebuffer);
+
+            self.framebuffers.insert(framebuffer_id, framebuffer);
         }
 
         Ok(self)
@@ -699,8 +774,9 @@ impl<
     /// Finds all uniform's position in its corresponding program and builds a wrapper for it
     fn build_uniforms(&mut self) -> Result<&mut Self, RendererBuilderError> {
         for program_uniform_link in self.uniform_links.iter() {
+            let uniform_id = program_uniform_link.uniform_id().clone();
             let uniform = self.build_uniform(program_uniform_link)?;
-            self.uniforms.insert(uniform);
+            self.uniforms.insert(uniform_id, uniform);
         }
 
         Ok(self)
@@ -819,6 +895,8 @@ impl<
             buffers: Default::default(),
             texture_links: Default::default(),
             textures: Default::default(),
+            framebuffer_links: Default::default(),
+            framebuffers: Default::default(),
         }
     }
 }
