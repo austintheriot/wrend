@@ -166,11 +166,12 @@ pub fn app() -> Html {
 
                 let mut renderer_builder = Renderer::builder();
 
-                let u_now_link_init_and_update_callback = Rc::new(|ctx: UniformContext<UseStateHandle<i32>>| {
-                    let gl = ctx.gl();
-                    let uniform_location = ctx.uniform_location();
-                    gl.uniform1f(Some(uniform_location), ctx.now() as f32);
-                });
+                let u_now_link_init_and_update_callback =
+                    Rc::new(|ctx: UniformContext<UseStateHandle<i32>>| {
+                        let gl = ctx.gl();
+                        let uniform_location = ctx.uniform_location();
+                        gl.uniform1f(Some(uniform_location), ctx.now() as f32);
+                    });
 
                 let mut u_now_link = UniformLink::new(
                     ProgramId,
@@ -178,7 +179,9 @@ pub fn app() -> Html {
                     UniformCallback::new(u_now_link_init_and_update_callback.clone()),
                 );
 
-                u_now_link.set_update_callback(UniformCallback::new(u_now_link_init_and_update_callback.clone()));
+                u_now_link.set_update_callback(UniformCallback::new(
+                    u_now_link_init_and_update_callback.clone(),
+                ));
 
                 renderer_builder
                     .set_canvas(canvas)
@@ -212,9 +215,9 @@ pub fn app() -> Html {
     );
 
     html! {
-        <>
+        <div class="hello-quad-animated">
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
             <canvas ref={canvas_ref} />
-        </>
+        </div>
     }
 }

@@ -150,7 +150,7 @@ pub fn app() -> Html {
                     .add_fragment_shader_src(ShaderId::Fragment, FRAGMENT_SHADER.to_string())
                     .add_buffer_link(a_position_link);
 
-                let mut renderer = renderer_builder
+                let renderer = renderer_builder
                     .build()
                     .expect("Renderer should successfully build");
 
@@ -165,6 +165,6 @@ pub fn app() -> Html {
     );
 
     html! {
-        <canvas ref={canvas_ref} />
+        <canvas class="hello-quad" ref={canvas_ref} />
     }
 }
