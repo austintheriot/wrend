@@ -12,6 +12,9 @@ module.exports = (env, argv) => {
   const isProduction = argv.mode === 'production';
   return {
     devServer: {
+      static: {
+        directory: getStaticFilesOutputDir(isProduction),
+      },
       port: 8000,
     },
     experiments: {

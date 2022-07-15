@@ -24,6 +24,9 @@ module.exports = (env, argv) => {
   return {
     devServer: {
       port: 8000,
+      static: {
+        directory: getStaticFilesOutputDir(isProduction),
+      },
       historyApiFallback: {
         index: REPO_SLUG
       },

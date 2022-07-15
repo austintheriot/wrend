@@ -98,10 +98,6 @@ pub fn app() -> Html {
                     .build()
                     .expect("Renderer should successfully build");
 
-                info!("Renderer: {:#?}", renderer);
-
-                renderer.update_uniforms();
-
                 let new_animation_handle =
                     renderer.into_animation_handle(AnimationCallback::new(Rc::new(|renderer| {
                         renderer.render();
