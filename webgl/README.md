@@ -19,6 +19,8 @@ The following use cases should guide the development of this library:
     - Allow passing in multiple program ids that should reuse the same uniforms / buffers?
     - Should HashMap's be nested by Program?
 
+- Rename MNCA to Evans larger than life
+
 - Enable Vertex Array Object (VAO)
 
 - Clean up buffer callback implementation (based off of uniform implementation)
