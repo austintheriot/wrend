@@ -24,7 +24,7 @@ fn draw(gl: &WebGl2RenderingContext, canvas: &HtmlCanvasElement) {
 }
 
 pub fn render(
-    renderer: &mut Renderer<
+    renderer: &Renderer<
         ShaderId,
         ShaderId,
         ProgramId,
@@ -37,7 +37,7 @@ pub fn render(
 ) {
     // get current count from state and update it
     let user_ctx = renderer
-        .user_ctx_mut()
+        .user_ctx()
         .expect("Should have user_ctx available in render");
     let current_count = user_ctx.borrow().count();
     user_ctx.borrow_mut().inc_count();

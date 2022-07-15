@@ -32,7 +32,7 @@ pub struct Renderer<
     BufferId: Id + IdName = DefaultId,
     TextureId: Id = DefaultId,
     FramebufferId: Id = DefaultId,
-    UserCtx: Clone + 'static = (),
+    UserCtx: 'static = (),
 > {
     canvas: HtmlCanvasElement,
     gl: WebGl2RenderingContext,
@@ -65,7 +65,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx: Clone,
+        UserCtx,
     >
     Renderer<
         VertexShaderId,
@@ -132,11 +132,6 @@ impl<
         self.user_ctx.as_ref()
     }
 
-    // @todo - enable ctx to be returned unconditionally (depending on if it's set or not)
-    pub fn user_ctx_mut(&mut self) -> Option<&mut UserCtx> {
-        self.user_ctx.as_mut()
-    }
-
     /// Iterates through all saved uniforms and updates them using their associated update callbacks
     ///
     /// Automatically calls "use_program" on the appropriate program before each uniform's update function
@@ -192,9 +187,8 @@ impl<
         self
     }
 
-    pub fn render(&mut self) -> &mut Self {
-        // must clone here to prevent conflicts between borrowing mutably and immutably
-        self.render_callback.clone().call(self);
+    pub fn render(&self) -> &Self {
+        self.render_callback.call(self);
 
         self
     }
@@ -325,7 +319,7 @@ pub struct RendererBuilder<
     BufferId: Id + IdName = DefaultId,
     TextureId: Id = DefaultId,
     FramebufferId: Id = DefaultId,
-    UserCtx: Clone + 'static = (),
+    UserCtx: 'static = (),
 > {
     canvas: Option<HtmlCanvasElement>,
     gl: Option<WebGl2RenderingContext>,
@@ -378,7 +372,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx: Clone + 'static,
+        UserCtx: 'static,
     >
     RendererBuilder<
         VertexShaderId,
@@ -586,7 +580,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx: Clone,
+        UserCtx,
     >
     RendererBuilder<
         VertexShaderId,
@@ -886,7 +880,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx: Clone,
+        UserCtx,
     > Default
     for RendererBuilder<
         VertexShaderId,

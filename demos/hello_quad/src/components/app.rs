@@ -107,7 +107,7 @@ pub fn app() -> Html {
                 );
 
                 let render_callback = RenderCallback::new(Rc::new(
-                    |renderer: &mut Renderer<
+                    |renderer: &Renderer<
                         ShaderId,
                         ShaderId,
                         ProgramId,
