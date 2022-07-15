@@ -14,7 +14,7 @@ use web_sys::HtmlCanvasElement;
 use webgl::renderer::{
     animation_callback::AnimationCallback, buffer_link::BufferLink,
     framebuffer_link::FramebufferLink, program_link::ProgramLink, render_callback::RenderCallback,
-    renderer::Renderer, texture_link::TextureLink, uniform_link::UniformLink,
+    renderer::Renderer, texture_link::TextureLink, uniform_link::UniformLink, uniform_callback::UniformCallback,
 };
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
 use yew_router::prelude::*;
@@ -51,11 +51,11 @@ pub fn app() -> Html {
                 let u_texture = UniformLink::new(
                     ProgramId,
                     UniformId::UTexture,
-                    Rc::new(|ctx| {
+                    UniformCallback::new(Rc::new(|ctx| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
                         gl.uniform1i(Some(uniform_location), 0);
-                    }),
+                    })),
                 );
 
                 let texture_a_link =

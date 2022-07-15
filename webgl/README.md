@@ -17,6 +17,14 @@ The following use cases should guide the development of this library:
 ## Todo
 - Enable Vertex Array Object (VAO)
 
+- Clean up buffer callback implementation (based off of uniform implementation)
+    - Use separate callback structs
+
+
+- In the micro apps, use style.scss from /entry
+
+- Rename webgl library to wrend
+
 - Enable other lifetime callbacks for uniforms (create, should update, update)
 
 - Animations:

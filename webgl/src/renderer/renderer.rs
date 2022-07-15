@@ -12,6 +12,7 @@ use super::render_callback::RenderCallback;
 use super::texture::Texture;
 use super::texture_link::TextureLink;
 use super::uniform::Uniform;
+use super::uniform_context::UniformContext;
 use super::uniform_link::UniformLink;
 use super::{program_link::ProgramLink, shader_type::ShaderType};
 use std::fmt::Debug;
@@ -132,56 +133,106 @@ impl<
         self.user_ctx.as_ref()
     }
 
-    /// Iterates through all saved uniforms and updates them using their associated update callbacks
+    /// Updates a single uniform using the previously given update function. If no function was supplied,
+    /// then this is a no-op.
     ///
-    /// Automatically calls "use_program" on the appropriate program before each uniform's update function
-    /// (so this is not necessary to do within the callback itself, unless you need to change programs, for
-    /// whatever reason).
+    /// This function does NOT check whether a uniform SHOULD be updated or not before calling that uniform's update function.
+    ///
+    /// Calls "use_program" on the appropriate program before each uniform's update function (so this is not
+    /// necessary to do within the callback itself, unless you need to change programs, for whatever reason).
+    pub fn update_uniform(&self, uniform_id: &UniformId) -> &Self {
+        let now = Self::now();
+        let user_ctx = self.user_ctx();
+        let gl = self.gl();
+
+        let uniform = self
+            .uniforms
+            .get(&uniform_id)
+            .expect("UniformId should exist in registered uniforms");
+
+        let program_id = uniform.program_id();
+        let program = self.programs().get(program_id);
+        gl.use_program(program);
+
+        uniform.update(gl, now, user_ctx);
+
+        gl.use_program(None);
+
+        self
+    }
+
+    /// Iterates through all saved uniforms and updates them using their associated update callbacks.
+    ///
+    /// Checks whether a uniform SHOULD be updated before performing the update.
     pub fn update_uniforms(&self) -> &Self {
         let now = Self::now();
         let user_ctx = self.user_ctx();
         let gl = self.gl();
 
-        for (_, uniform) in &self.uniforms {
-            let program_id = uniform.program_id();
-            let program = self.programs().get(program_id);
-            gl.use_program(program);
+        for (uniform_id, uniform) in &self.uniforms {
+            let uniform_location = uniform.uniform_location();
+            let uniform_context = UniformContext::new(gl, now, uniform_location, user_ctx);
+            let should_update_callback = uniform.should_update_callback().unwrap_or_default();
 
-            uniform.update(gl, now, user_ctx);
+            if !should_update_callback(uniform_context) {
+                continue;
+            }
 
-            gl.use_program(None);
+            self.update_uniform(uniform_id);
         }
 
         self
     }
 
-    /// Iterates through all saved buffers and updates them using their associated update callbacks
+    /// Updates a single buffer using the passed-in update callback.
     ///
-    /// Automatically calls "use_program" on the appropriate program before each uniform's update function
+    /// This function does NOT check whether the buffer SHOULD be updated before making the update call.
+    ///
+    /// Calls "use_program" on the appropriate program before each uniform's update function
     /// (so this is not necessary to do within the callback itself, unless you need to change programs, for
     /// whatever reason).
     ///
-    /// Also automatically binds the correct buffer before the update callback is called, so this may be omitted.
+    /// Binds the correct buffer before the update callback is called, so this may be omitted.
+    pub fn update_buffer(&self, buffer_id: &BufferId) -> &Self {
+        let now = Self::now();
+        let user_ctx = self.user_ctx();
+        let gl = self.gl();
+
+        let buffer = self
+            .buffers
+            .get(buffer_id)
+            .expect("BufferId should exist in registered buffers");
+
+        // bind the corresponding program
+        let program_id = buffer.program_id();
+        let program = self.programs().get(program_id);
+        self.gl().use_program(program);
+
+        // bind the corresponding buffer
+        let webgl_buffer = buffer.webgl_buffer();
+        gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(webgl_buffer));
+        buffer.update(self.gl(), now, user_ctx);
+        gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, None);
+
+        self
+    }
+
+    /// Iterates through all saved buffers and updates them using their associated update callbacks.
+    ///
+    /// This function DOES check whether a buffer SHOULD be updated before calling its associated updated callback.
+    ///
+    /// If no should_update_callback was provided, then it is assumed that the buffer should be updated.
     pub fn update_buffers(&self) -> &Self {
         let now = Self::now();
         let user_ctx = self.user_ctx();
         let gl = self.gl();
 
-        for (_, buffer) in &self.buffers {
-            // bind the corresponding program
-            let program_id = buffer.program_id();
-            let program = self.programs().get(program_id);
-            self.gl().use_program(program);
-
-            // bind the corresponding buffer
-            let webgl_buffer = buffer.webgl_buffer();
-            gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(webgl_buffer));
-
-            if buffer.should_update(gl, now, user_ctx) {
-                buffer.update(self.gl(), now, user_ctx);
+        for (buffer_id, buffer) in &self.buffers {
+            if !buffer.should_update(gl, now, user_ctx) {
+                continue;
             }
 
-            gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, None);
+            self.update_buffer(buffer_id);
         }
 
         self
@@ -278,8 +329,6 @@ pub enum RendererBuilderError {
     UnknownErrorLinkProgramError,
 
     // @todo: move this into its own sub-error
-
-    // @todo: move this into its own sub-error
     #[error("Could not build uniforms because no WebGL2RenderingContext was provided")]
     NoContextBuildUniformsError,
     #[error("Could not build uniforms because the associated program_id could no be found")]
@@ -288,6 +337,10 @@ pub enum RendererBuilderError {
         "Could not build uniforms because the uniform's location was not found in the program"
     )]
     UniformLocationNotFoundBuildUniformsError,
+
+    // @todo: move this into its own sub-error
+    #[error("Could not initialize uniforms because no WebGL2RenderingContext was provided")]
+    NoContextInitializeUniformsError,
 
     // @todo: move this into its own sub-error
     #[error("Could not get WebGl2RenderingContext from canvas, because None was returned")]
@@ -675,9 +728,9 @@ impl<
     /// Find the uniform's position in a shader and constructs necessary data for each uniform.
     fn build_uniform(
         &self,
-        program_uniform_link: &UniformLink<ProgramId, UniformId, UserCtx>,
+        uniform_link: &UniformLink<ProgramId, UniformId, UserCtx>,
     ) -> Result<Uniform<ProgramId, UniformId, UserCtx>, RendererBuilderError> {
-        let program_id = program_uniform_link.program_id().clone();
+        let program_id = uniform_link.program_id().clone();
         let program = self
             .programs
             .get(&program_id)
@@ -688,12 +741,32 @@ impl<
             .as_ref()
             .ok_or(RendererBuilderError::NoContextBuildUniformsError)?;
 
-        let uniform_id = program_uniform_link.uniform_id().clone();
+        gl.use_program(Some(program));
+
+        let now = Self::now();
+        let user_ctx = self.user_ctx.as_ref();
+
+        let uniform_id = uniform_link.uniform_id().clone();
         let uniform_location = gl
             .get_uniform_location(program, &uniform_id.name())
             .ok_or(RendererBuilderError::UniformLocationNotFoundBuildUniformsError)?;
-        let update_callback = program_uniform_link.update_callback();
-        let uniform = Uniform::new(program_id, uniform_id, uniform_location, update_callback);
+
+        let initialize_callback = uniform_link.initialize_callback();
+        let uniform_context = UniformContext::new(gl, now, &uniform_location, user_ctx);
+
+        (initialize_callback)(uniform_context);
+
+        let should_update_callback = uniform_link.should_update_callback();
+        let update_callback = uniform_link.update_callback();
+
+        let uniform = Uniform::new(
+            program_id,
+            uniform_id,
+            uniform_location,
+            initialize_callback,
+            update_callback,
+            should_update_callback,
+        );
 
         Ok(uniform)
     }
@@ -789,9 +862,9 @@ impl<
 
     /// Finds all uniform's position in its corresponding program and builds a wrapper for it
     fn build_uniforms(&mut self) -> Result<&mut Self, RendererBuilderError> {
-        for program_uniform_link in self.uniform_links.iter() {
-            let uniform_id = program_uniform_link.uniform_id().clone();
-            let uniform = self.build_uniform(program_uniform_link)?;
+        for uniform_link in self.uniform_links.iter() {
+            let uniform_id = uniform_link.uniform_id().clone();
+            let uniform = self.build_uniform(uniform_link)?;
             self.uniforms.insert(uniform_id, uniform);
         }
 
