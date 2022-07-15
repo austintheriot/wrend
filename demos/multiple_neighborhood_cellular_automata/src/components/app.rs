@@ -122,7 +122,7 @@ pub fn app() -> Html {
     html! {
         <div class="multiple-neighborhood-cellular-automata">
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
-            <canvas ref={canvas_ref} height={1000} width={1000} />
+            <canvas ref={canvas_ref} height={500} width={500} />
         </div>
     }
 }

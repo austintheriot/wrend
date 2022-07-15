@@ -33,13 +33,17 @@ void main() {
     }
   }
 
-  if (sum >= 0 && sum <= 33) {
+   vec4 current_color = texture(u_texture, v_tex_coord);
+   bool is_alive = int(round(current_color.r)) == 1;
+
+
+  if (is_alive && (sum < 34 || sum > 58)) {
     out_color = vec4(0.0, 0.0, 0.0, 1.0);
   }
-  else if (sum > 33 && sum <= 58) {
+  else if (!is_alive &&  34 <= sum && sum <= 45) {
     out_color = vec4(1.0, 1.0, 1.0, 1.0);
   }
-  else if (sum > 58 && sum <= 121) {
-    out_color = vec4(0.0, 0.0, 0.0, 1.0);
+  else {
+    out_color = current_color;
   } 
 }
