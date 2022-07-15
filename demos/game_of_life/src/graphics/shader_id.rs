@@ -3,7 +3,8 @@ use webgl::renderer::id::Id;
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum ShaderId {
     Vertex,
-    Fragment,
+    GameOfLife,
+    PassThrough
 }
 
 impl Id for ShaderId {}

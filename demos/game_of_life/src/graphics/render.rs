@@ -46,14 +46,14 @@ pub fn render(
     let canvas = renderer.canvas();
 
     // use the appropriate program
-    gl.use_program(renderer.programs().get(&ProgramId));
+    gl.use_program(renderer.programs().get(&ProgramId::GameOfLife));
 
     // sample from texture previously rendered to
     // and render to the opposite framebuffer
-    let (previous_texture_id, next_frame_buffer_id) = if current_count % 2 == 0 {
-        (TextureId::A, FramebufferId::B)
+    let (previous_texture_id, next_frame_buffer_id, next_texture_id) = if current_count % 2 == 0 {
+        (TextureId::A, FramebufferId::B, TextureId::B)
     } else {
-        (TextureId::B, FramebufferId::A)
+        (TextureId::B, FramebufferId::A, TextureId::A)
     };
     let previous_webgl_texture = renderer
         .textures()
@@ -61,7 +61,7 @@ pub fn render(
         .map(|texture| texture.webgl_texture());
     gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, previous_webgl_texture);
 
-    // draw to framebuffer
+    // render to framebuffer
     let next_frame_buffer = renderer
         .framebuffers()
         .get(&next_frame_buffer_id)
@@ -69,7 +69,15 @@ pub fn render(
     gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, next_frame_buffer);
     draw(gl, canvas);
 
-    // draw to the canvas
+    // pull from the framebuffer just drawn to and copy to the canvas
+    gl.use_program(renderer.programs().get(&ProgramId::PassThrough));
+
+    let next_webgl_texture = renderer
+        .textures()
+        .get(&next_texture_id)
+        .map(|texture| texture.webgl_texture());
+    gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, next_webgl_texture);
+
     gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, None);
     draw(gl, canvas);
 }

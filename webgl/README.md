@@ -15,6 +15,10 @@ The following use cases should guide the development of this library:
 - Ray tracing?
 
 ## Todo
+-> *** Think through how linking for multiple programs should wokr
+    - Allow passing in multiple program ids that should reuse the same uniforms / buffers?
+    - Should HashMap's be nested by Program?
+
 - Enable Vertex Array Object (VAO)
 
 - Clean up buffer callback implementation (based off of uniform implementation)

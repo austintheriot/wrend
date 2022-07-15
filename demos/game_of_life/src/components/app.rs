@@ -7,7 +7,6 @@ use crate::{
     },
     state::render_state::RenderState,
 };
-use log::info;
 use std::rc::Rc;
 use ui::route::Route;
 use web_sys::HtmlCanvasElement;
@@ -20,7 +19,8 @@ use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_
 use yew_router::prelude::*;
 
 const VERTEX_SHADER: &'static str = include_str!("../shaders/vertex.glsl");
-const FRAGMENT_SHADER: &'static str = include_str!("../shaders/fragment.glsl");
+const GAME_OF_LIFE_FRAGMENT_SHADER: &'static str = include_str!("../shaders/game_of_life.glsl");
+const PASS_THROUGH_FRAGMENT_SHADER: &'static str = include_str!("../shaders/pass_through.glsl");
 
 #[function_component(App)]
 pub fn app() -> Html {
@@ -37,11 +37,14 @@ pub fn app() -> Html {
                     .cast()
                     .expect("Canvas ref should point to a canvas in the use_effect hook");
 
-                let program_link =
-                    ProgramLink::new(ProgramId, ShaderId::Vertex, ShaderId::Fragment);
+                let game_of_life_program_link =
+                    ProgramLink::new(ProgramId::GameOfLife, ShaderId::Vertex, ShaderId::GameOfLife);
+
+                    let pass_through_program_link =
+                    ProgramLink::new(ProgramId::PassThrough, ShaderId::Vertex, ShaderId::PassThrough);
 
                 let a_position_link = BufferLink::new(
-                    ProgramId,
+                    ProgramId::GameOfLife,
                     BufferId::VertexBuffer,
                     Rc::new(create_vertex_buffer),
                     Rc::new(|_| {}),
@@ -49,7 +52,7 @@ pub fn app() -> Html {
                 );
 
                 let u_texture = UniformLink::new(
-                    ProgramId,
+                    ProgramId::GameOfLife,
                     UniformId::UTexture,
                     UniformCallback::new(Rc::new(|ctx| {
                         let gl = ctx.gl();
@@ -59,19 +62,19 @@ pub fn app() -> Html {
                 );
 
                 let texture_a_link =
-                    TextureLink::new(ProgramId, TextureId::A, Rc::new(create_texture));
+                    TextureLink::new(ProgramId::GameOfLife, TextureId::A, Rc::new(create_texture));
 
                 let texture_b_link =
-                    TextureLink::new(ProgramId, TextureId::B, Rc::new(create_texture));
+                    TextureLink::new(ProgramId::GameOfLife, TextureId::B, Rc::new(create_texture));
 
                 let framebuffer_a_link = FramebufferLink::new(
-                    ProgramId,
+                    ProgramId::GameOfLife,
                     FramebufferId::A,
                     make_create_frame_buffer(TextureId::A),
                 );
 
                 let framebuffer_b_link = FramebufferLink::new(
-                    ProgramId,
+                    ProgramId::GameOfLife,
                     FramebufferId::B,
                     make_create_frame_buffer(TextureId::B),
                 );
@@ -84,9 +87,11 @@ pub fn app() -> Html {
                     .set_canvas(canvas)
                     .set_user_ctx(render_state)
                     .set_render_callback(render_callback)
-                    .add_program_link(program_link)
                     .add_vertex_shader_src(ShaderId::Vertex, VERTEX_SHADER.to_string())
-                    .add_fragment_shader_src(ShaderId::Fragment, FRAGMENT_SHADER.to_string())
+                    .add_fragment_shader_src(ShaderId::GameOfLife, GAME_OF_LIFE_FRAGMENT_SHADER.to_string())
+                    .add_fragment_shader_src(ShaderId::PassThrough, PASS_THROUGH_FRAGMENT_SHADER.to_string())
+                    .add_program_link(game_of_life_program_link)
+                    .add_program_link(pass_through_program_link)
                     .add_buffer_link(a_position_link)
                     .add_uniform_link(u_texture)
                     .add_texture_link(texture_a_link)
@@ -117,7 +122,7 @@ pub fn app() -> Html {
     html! {
         <div class="game-of-life">
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
-            <canvas ref={canvas_ref} height={100} width={100} />
+            <canvas ref={canvas_ref} height={1000} width={1000} />
         </div>
     }
 }

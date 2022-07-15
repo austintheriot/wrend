@@ -10,7 +10,7 @@ uniform sampler2D u_texture;
 
 out vec4 out_color;
 
-const int KERNEL_SIZE = 3;
+const int KERNEL_SIZE = 11;
 
 void main() {
   // the size of one pixel-- (0 --> 1) divided by the width of the texture
@@ -33,13 +33,13 @@ void main() {
     }
   }
 
-  bool is_alive = int(round(texture(u_texture, v_tex_coord).r)) == 1;
-
-  if (is_alive && (sum == 2 || sum == 3)) {
+  if (sum >= 0 && sum <= 33) {
+    out_color = vec4(0.0, 0.0, 0.0, 1.0);
+  }
+  if (sum > 33 && sum <= 58) {
     out_color = vec4(1.0, 1.0, 1.0, 1.0);
-  } else if (!is_alive && sum == 3) {
-    out_color = vec4(1.0, 1.0, 1.0, 1.0);
-  } else {
+  }
+  if (sum > 58 && sum <= 122) {
     out_color = vec4(0.0, 0.0, 0.0, 1.0);
   }
 }
