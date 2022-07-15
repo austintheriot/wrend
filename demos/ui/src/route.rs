@@ -7,10 +7,12 @@ pub enum Route {
     #[not_found]
     #[at("/404")]
     NotFound,
-    #[at("/hello_quad")]
+    #[at("/hello-quad")]
     HelloQuad,
-    #[at("/hello_quad_animated")]
+    #[at("/hello-quad-animated")]
     HelloQuadAnimated,
-    #[at("/game_of_life")]
+    #[at("/game-of-life")]
     GameOfLife,
+    #[at("/multiple-neighborhood-cellular-automata")]
+    MultipleNeighborhoodCellularAutomata,
 }

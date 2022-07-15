@@ -10,6 +10,7 @@ pub fn home() -> Html {
         <Link<Route> to={Route::HelloQuad}>{"Hello Quad"}</Link<Route>>
         <Link<Route> to={Route::HelloQuadAnimated}>{"Hello Quad Animated"}</Link<Route>>
         <Link<Route> to={Route::GameOfLife}>{"Game of Life"}</Link<Route>>
+        <Link<Route> to={Route::MultipleNeighborhoodCellularAutomata}>{"Multiple Neighborhood Cellular Automata"}</Link<Route>>
      </>
     }
 }
