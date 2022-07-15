@@ -36,10 +36,10 @@ void main() {
   if (sum >= 0 && sum <= 33) {
     out_color = vec4(0.0, 0.0, 0.0, 1.0);
   }
-  if (sum > 33 && sum <= 58) {
+  else if (sum > 33 && sum <= 58) {
     out_color = vec4(1.0, 1.0, 1.0, 1.0);
   }
-  if (sum > 58 && sum <= 122) {
+  else if (sum > 58 && sum <= 121) {
     out_color = vec4(0.0, 0.0, 0.0, 1.0);
-  }
+  } 
 }
