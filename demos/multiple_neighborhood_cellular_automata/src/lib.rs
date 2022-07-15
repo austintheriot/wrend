@@ -14,7 +14,7 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 /// This main function is only used for testing this portion of the app in isolation
 #[wasm_bindgen]
-pub fn game_of_life() -> Result<(), JsValue> {
+pub fn multiple_neighborhood_cellular_automata() -> Result<(), JsValue> {
     // This provides better error messages in debug mode.
     // It's disabled in release mode, so it doesn't bloat up the file size.
     #[cfg(debug_assertions)]

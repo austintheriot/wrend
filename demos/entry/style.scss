@@ -1,10 +1,15 @@
 @use '../game_of_life/style.scss' as game-of-life-style;
 @use '../hello_quad/style.scss' as hello-quad-style;
 @use '../hello_quad_animated/style.scss' as hello-quad-animated-style;
+@use '../multiple_neighborhood_cellular_automata/style.scss' as multiple-neighborhood-cellular-automata;
 
 * {
   font-family: 'Roboto', sans-serif;
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+a { 
+  display: block;
 }

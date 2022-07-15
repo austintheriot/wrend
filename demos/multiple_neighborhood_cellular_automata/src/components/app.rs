@@ -120,7 +120,7 @@ pub fn app() -> Html {
     );
 
     html! {
-        <div class="game-of-life">
+        <div class="multiple-neighborhood-cellular-automata">
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
             <canvas ref={canvas_ref} height={1000} width={1000} />
         </div>
