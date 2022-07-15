@@ -28,12 +28,12 @@ pub fn create_texture<UserCtx>(ctx: TextureCreateContext<UserCtx>) -> WebGlTextu
     gl.tex_parameteri(
         WebGl2RenderingContext::TEXTURE_2D,
         WebGl2RenderingContext::TEXTURE_MIN_FILTER,
-        WebGl2RenderingContext::LINEAR as i32,
+        WebGl2RenderingContext::NEAREST as i32,
     );
     gl.tex_parameteri(
         WebGl2RenderingContext::TEXTURE_2D,
         WebGl2RenderingContext::TEXTURE_MAG_FILTER,
-        WebGl2RenderingContext::LINEAR as i32,
+        WebGl2RenderingContext::NEAREST as i32,
     );
 
     let canvas_width = canvas.width() as i32;
