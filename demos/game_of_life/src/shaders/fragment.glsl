@@ -21,7 +21,7 @@ void main() {
   int half_of_kernel_size = KERNEL_SIZE / 2;
   for(int x = -half_of_kernel_size; x < half_of_kernel_size + 1; x++) {
     for(int y = -half_of_kernel_size; y < half_of_kernel_size + 1; y++) {
-      if (x == 0 || y == 0) {
+      if (x == 0 && y == 0) {
         continue;
       }
 
