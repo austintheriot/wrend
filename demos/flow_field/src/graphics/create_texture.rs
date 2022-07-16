@@ -1,4 +1,5 @@
-use noise::{NoiseFn, Perlin};
+use js_sys::Math;
+use noise::{NoiseFn, Perlin, Seedable};
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlTexture};
 use wrend::renderer::texture_create_context::TextureCreateContext;
@@ -38,7 +39,6 @@ pub fn create_texture<UserCtx>(ctx: TextureCreateContext<UserCtx>) -> WebGlTextu
 
     let canvas_width = canvas.width() as i32;
     let canvas_height = canvas.height() as i32;
-
     let perlin = Perlin::new();
 
     // generate a texture of noise
