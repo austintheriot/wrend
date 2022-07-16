@@ -40,6 +40,7 @@ pub fn create_texture<UserCtx>(ctx: TextureCreateContext<UserCtx>) -> WebGlTextu
     let canvas_width = canvas.width() as i32;
     let canvas_height = canvas.height() as i32;
     let perlin = Perlin::new();
+    let random_offset = Math::random() * 1000.0;
 
     // generate a texture of noise
     let bytes_per_pixel = 4;
@@ -49,8 +50,8 @@ pub fn create_texture<UserCtx>(ctx: TextureCreateContext<UserCtx>) -> WebGlTextu
     for x in 0..canvas_width {
         for y in 0..canvas_height {
             // input is expected to be between (0 and 1 ?)
-            let x = x as f64 / (canvas_width as f64 / SECTIONS);
-            let y = y as f64 / (canvas_height as f64 / SECTIONS);
+            let x = x as f64 / (canvas_width as f64 / SECTIONS) + random_offset;
+            let y = y as f64 / (canvas_height as f64 / SECTIONS) + random_offset;
             let perlin_noise = perlin.get([x, y]);
             // map to (0, 1)
             let perlin_noise = perlin_noise * 0.5 + 0.5;
