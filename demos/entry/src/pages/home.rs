@@ -1,6 +1,6 @@
+use ui::route::Route;
 use yew::prelude::*;
 use yew_router::prelude::*;
-use ui::route::Route;
 
 #[function_component(Home)]
 pub fn home() -> Html {

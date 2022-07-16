@@ -4,7 +4,7 @@ use wrend::renderer::id::Id;
 pub enum ShaderId {
     Vertex,
     GameOfLife,
-    PassThrough
+    PassThrough,
 }
 
 impl Id for ShaderId {}

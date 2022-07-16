@@ -8,35 +8,20 @@ use web_sys::{WebGl2RenderingContext, WebGlTexture};
 pub type TextureCreateCallback<UserCtx> = Rc<dyn Fn(TextureCreateContext<UserCtx>) -> WebGlTexture>;
 
 #[derive(Clone)]
-pub struct TextureLink<ProgramId, TextureId, UserCtx>
-where
-    ProgramId: Id,
-    TextureId: Id,
-{
-    program_id: ProgramId,
+pub struct TextureLink<TextureId: Id, UserCtx> {
     texture_id: TextureId,
     create_texture_callback: TextureCreateCallback<UserCtx>,
 }
 
-impl<ProgramId, TextureId, UserCtx> TextureLink<ProgramId, TextureId, UserCtx>
-where
-    ProgramId: Id,
-    TextureId: Id,
-{
+impl<TextureId: Id, UserCtx> TextureLink<TextureId, UserCtx> {
     pub fn new(
-        program_id: ProgramId,
         texture_id: TextureId,
         create_texture_callback: TextureCreateCallback<UserCtx>,
     ) -> Self {
         Self {
-            program_id,
             texture_id,
             create_texture_callback,
         }
-    }
-
-    pub fn program_id(&self) -> &ProgramId {
-        &self.program_id
     }
 
     pub fn texture_id(&self) -> &TextureId {
@@ -54,43 +39,24 @@ where
     }
 }
 
-impl<ProgramId, TextureId, UserCtx> Debug for TextureLink<ProgramId, TextureId, UserCtx>
-where
-    ProgramId: Id,
-    TextureId: Id,
-{
+impl<TextureId: Id, UserCtx> Debug for TextureLink<TextureId, UserCtx> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("TextureLink")
-            .field("program_id", &self.program_id)
             .field("texture_id", &self.texture_id)
             .finish()
     }
 }
 
-impl<ProgramId, TextureId, UserCtx> Hash for TextureLink<ProgramId, TextureId, UserCtx>
-where
-    ProgramId: Id,
-    TextureId: Id,
-{
+impl<TextureId: Id, UserCtx> Hash for TextureLink<TextureId, UserCtx> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.program_id.hash(state);
         self.texture_id.hash(state);
     }
 }
 
-impl<ProgramId, TextureId, UserCtx> PartialEq for TextureLink<ProgramId, TextureId, UserCtx>
-where
-    ProgramId: Id,
-    TextureId: Id,
-{
+impl<TextureId: Id, UserCtx> PartialEq for TextureLink<TextureId, UserCtx> {
     fn eq(&self, other: &Self) -> bool {
-        self.program_id == other.program_id && self.texture_id == other.texture_id
+        self.texture_id == other.texture_id
     }
 }
 
-impl<ProgramId, TextureId, UserCtx> Eq for TextureLink<ProgramId, TextureId, UserCtx>
-where
-    ProgramId: Id,
-    TextureId: Id,
-{
-}
+impl<TextureId: Id, UserCtx> Eq for TextureLink<TextureId, UserCtx> {}

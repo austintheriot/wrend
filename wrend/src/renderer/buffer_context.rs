@@ -1,5 +1,5 @@
-use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 use super::attribute_location::AttributeLocation;
+use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
 /// This is the context object that is passed to each buffer's update callback
 #[derive(Debug, Clone)]

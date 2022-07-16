@@ -13,4 +13,3 @@ impl Default for TextureId {
         Self::A
     }
 }
-

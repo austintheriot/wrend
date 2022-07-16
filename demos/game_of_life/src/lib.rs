@@ -1,8 +1,8 @@
 use wasm_bindgen::prelude::*;
 
 pub mod components;
-pub mod state;
 pub mod graphics;
+pub mod state;
 
 // When the `wee_alloc` feature is enabled, this uses `wee_alloc` as the global
 // allocator.

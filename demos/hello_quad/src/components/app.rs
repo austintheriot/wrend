@@ -5,8 +5,8 @@ use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 use wrend::{
     constants::quad::QUAD,
     renderer::{
-        buffer_link::BufferLink, id::Id, id_name::IdName, program_link::ProgramLink,
-        render_callback::RenderCallback, renderer::Renderer, default_id::DefaultId,
+        buffer_link::BufferLink, default_id::DefaultId, id::Id, id_name::IdName,
+        program_link::ProgramLink, render_callback::RenderCallback, renderer::Renderer,
     },
 };
 use yew::{
@@ -20,7 +20,6 @@ const FRAGMENT_SHADER: &'static str = include_str!("../shaders/fragment.glsl");
 pub struct ProgramId;
 
 impl Id for ProgramId {}
-
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum BufferId {

@@ -1,8 +1,8 @@
 use std::rc::Rc;
 
-use yew::Reducible;
-use crate::state::app_state::AppState;
 use crate::state::app_action::AppAction;
+use crate::state::app_state::AppState;
+use yew::Reducible;
 
 impl Reducible for AppState {
     type Action = AppAction;

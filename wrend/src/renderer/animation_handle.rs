@@ -137,7 +137,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx:,
+        UserCtx,
     > Drop
     for AnimationHandle<
         VertexShaderId,

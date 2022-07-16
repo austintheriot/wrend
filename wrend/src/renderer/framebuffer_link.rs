@@ -42,7 +42,6 @@ pub struct FramebufferLink<
     FramebufferId: Id,
     UserCtx: 'static,
 > {
-    program_id: ProgramId,
     framebuffer_id: FramebufferId,
     create_framebuffer_callback: CreateFramebufferCallback<
         VertexShaderId,
@@ -64,7 +63,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx:,
+        UserCtx,
     >
     FramebufferLink<
         VertexShaderId,
@@ -81,7 +80,6 @@ where
     FramebufferId: Id,
 {
     pub fn new(
-        program_id: ProgramId,
         framebuffer_id: FramebufferId,
         create_framebuffer_callback: CreateFramebufferCallback<
             VertexShaderId,
@@ -95,14 +93,9 @@ where
         >,
     ) -> Self {
         Self {
-            program_id,
             framebuffer_id,
             create_framebuffer_callback,
         }
-    }
-
-    pub fn program_id(&self) -> &ProgramId {
-        &self.program_id
     }
 
     pub fn framebuffer_id(&self) -> &FramebufferId {
@@ -139,7 +132,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx:,
+        UserCtx,
     > Debug
     for FramebufferLink<
         VertexShaderId,
@@ -154,7 +147,6 @@ impl<
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("FramebufferLink")
-            .field("program_id", &self.program_id)
             .field("framebuffer_id", &self.framebuffer_id)
             .finish()
     }
@@ -168,7 +160,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx:,
+        UserCtx,
     > Hash
     for FramebufferLink<
         VertexShaderId,
@@ -182,7 +174,6 @@ impl<
     >
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.program_id.hash(state);
         self.framebuffer_id.hash(state);
     }
 }
@@ -195,7 +186,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx:,
+        UserCtx,
     > PartialEq
     for FramebufferLink<
         VertexShaderId,
@@ -209,7 +200,7 @@ impl<
     >
 {
     fn eq(&self, other: &Self) -> bool {
-        self.program_id == other.program_id && self.framebuffer_id == other.framebuffer_id
+        self.framebuffer_id == other.framebuffer_id
     }
 }
 
@@ -221,7 +212,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx:,
+        UserCtx,
     > Eq
     for FramebufferLink<
         VertexShaderId,

@@ -62,7 +62,10 @@ where
         self.should_update_callback.as_ref().map(Clone::clone)
     }
 
-    pub fn set_should_update_callback(&mut self, callback: UniformShouldUpdateCallback<UserCtx>) -> &mut Self {
+    pub fn set_should_update_callback(
+        &mut self,
+        callback: UniformShouldUpdateCallback<UserCtx>,
+    ) -> &mut Self {
         self.should_update_callback.replace(callback);
         self
     }

@@ -1,5 +1,5 @@
-use web_sys::{WebGl2RenderingContext};
 use super::attribute_location::AttributeLocation;
+use web_sys::WebGl2RenderingContext;
 
 /// This is the context object that is passed to the create_buffer callback function
 #[derive(Debug, Clone)]

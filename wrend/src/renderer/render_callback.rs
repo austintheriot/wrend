@@ -43,7 +43,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx:,
+        UserCtx,
     >
     RenderCallback<
         VertexShaderId,
@@ -103,7 +103,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx:,
+        UserCtx,
     > Hash
     for RenderCallback<
         VertexShaderId,
@@ -129,7 +129,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx:,
+        UserCtx,
     > Debug
     for RenderCallback<
         VertexShaderId,
@@ -157,7 +157,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx:,
+        UserCtx,
     > Default
     for RenderCallback<
         VertexShaderId,
@@ -186,7 +186,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx:,
+        UserCtx,
     > PartialEq
     for RenderCallback<
         VertexShaderId,
@@ -212,7 +212,7 @@ impl<
         BufferId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx:,
+        UserCtx,
     > Eq
     for RenderCallback<
         VertexShaderId,

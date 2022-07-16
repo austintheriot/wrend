@@ -53,8 +53,8 @@ pub struct Renderer<
     uniforms: HashMap<UniformId, Uniform<ProgramId, UniformId, UserCtx>>,
     user_ctx: Option<UserCtx>,
     buffers: HashMap<BufferId, Buffer<ProgramId, BufferId, UserCtx>>,
-    textures: HashMap<TextureId, Texture<ProgramId, TextureId>>,
-    framebuffers: HashMap<FramebufferId, Framebuffer<ProgramId, FramebufferId>>,
+    textures: HashMap<TextureId, Texture<TextureId>>,
+    framebuffers: HashMap<FramebufferId, Framebuffer<FramebufferId>>,
 }
 
 /// Public API
@@ -120,11 +120,11 @@ impl<
         &self.buffers
     }
 
-    pub fn textures(&self) -> &HashMap<TextureId, Texture<ProgramId, TextureId>> {
+    pub fn textures(&self) -> &HashMap<TextureId, Texture<TextureId>> {
         &self.textures
     }
 
-    pub fn framebuffers(&self) -> &HashMap<FramebufferId, Framebuffer<ProgramId, FramebufferId>> {
+    pub fn framebuffers(&self) -> &HashMap<FramebufferId, Framebuffer<FramebufferId>> {
         &self.framebuffers
     }
 
@@ -147,7 +147,6 @@ impl<
             .uniforms
             .get(&uniform_id)
             .expect("UniformId should exist in registered uniforms");
-        
 
         uniform.update(gl, now, user_ctx, programs);
 
@@ -365,8 +364,8 @@ pub struct RendererBuilder<
     uniforms: HashMap<UniformId, Uniform<ProgramId, UniformId, UserCtx>>,
     buffer_links: HashSet<BufferLink<ProgramId, BufferId, UserCtx>>,
     buffers: HashMap<BufferId, Buffer<ProgramId, BufferId, UserCtx>>,
-    texture_links: HashSet<TextureLink<ProgramId, TextureId, UserCtx>>,
-    textures: HashMap<TextureId, Texture<ProgramId, TextureId>>,
+    texture_links: HashSet<TextureLink<TextureId, UserCtx>>,
+    textures: HashMap<TextureId, Texture<TextureId>>,
     framebuffer_links: HashSet<
         FramebufferLink<
             VertexShaderId,
@@ -379,7 +378,7 @@ pub struct RendererBuilder<
             UserCtx,
         >,
     >,
-    framebuffers: HashMap<FramebufferId, Framebuffer<ProgramId, FramebufferId>>,
+    framebuffers: HashMap<FramebufferId, Framebuffer<FramebufferId>>,
     render_callback: Option<
         RenderCallback<
             VertexShaderId,
@@ -419,7 +418,7 @@ impl<
 {
     /// This is the only internal storage available publicly from the builder,
     /// because it is necessary to use it during the build process for framebuffers.
-    pub fn texture(&self, texture_id: &TextureId) -> Option<&Texture<ProgramId, TextureId>> {
+    pub fn texture(&self, texture_id: &TextureId) -> Option<&Texture<TextureId>> {
         self.textures.get(texture_id)
     }
 
@@ -525,7 +524,7 @@ impl<
     /// Saves a link that will be used to build a buffer/attribute pair at build time.
     pub fn add_texture_link(
         &mut self,
-        texture_link: impl Into<TextureLink<ProgramId, TextureId, UserCtx>>,
+        texture_link: impl Into<TextureLink<TextureId, UserCtx>>,
     ) -> &mut Self {
         self.texture_links.insert(texture_link.into());
 
@@ -808,10 +807,9 @@ impl<
         let user_ctx = self.user_ctx.as_ref();
 
         for texture_link in &self.texture_links {
-            let program_id = texture_link.program_id().clone();
             let texture_id = texture_link.texture_id().clone();
             let webgl_texture = texture_link.create_texture(gl, now, user_ctx);
-            let texture = Texture::new(program_id, texture_id.clone(), webgl_texture);
+            let texture = Texture::new(texture_id.clone(), webgl_texture);
 
             self.textures.insert(texture_id, texture);
         }
@@ -829,11 +827,9 @@ impl<
         let user_ctx = self.user_ctx.as_ref();
 
         for framebuffer_link in &self.framebuffer_links {
-            let program_id = framebuffer_link.program_id().clone();
             let framebuffer_id = framebuffer_link.framebuffer_id().clone();
             let webgl_framebuffer = framebuffer_link.create_framebuffer(gl, now, self, user_ctx);
-            let framebuffer =
-                Framebuffer::new(program_id, framebuffer_id.clone(), webgl_framebuffer);
+            let framebuffer = Framebuffer::new(framebuffer_id.clone(), webgl_framebuffer);
 
             self.framebuffers.insert(framebuffer_id, framebuffer);
         }

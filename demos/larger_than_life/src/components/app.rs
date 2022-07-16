@@ -13,7 +13,8 @@ use web_sys::HtmlCanvasElement;
 use wrend::renderer::{
     animation_callback::AnimationCallback, buffer_link::BufferLink,
     framebuffer_link::FramebufferLink, program_link::ProgramLink, render_callback::RenderCallback,
-    renderer::Renderer, texture_link::TextureLink, uniform_link::UniformLink, uniform_callback::UniformCallback,
+    renderer::Renderer, texture_link::TextureLink, uniform_callback::UniformCallback,
+    uniform_link::UniformLink,
 };
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
 use yew_router::prelude::*;
@@ -37,11 +38,17 @@ pub fn app() -> Html {
                     .cast()
                     .expect("Canvas ref should point to a canvas in the use_effect hook");
 
-                let game_of_life_program_link =
-                    ProgramLink::new(ProgramId::GameOfLife, ShaderId::Vertex, ShaderId::GameOfLife);
+                let game_of_life_program_link = ProgramLink::new(
+                    ProgramId::GameOfLife,
+                    ShaderId::Vertex,
+                    ShaderId::GameOfLife,
+                );
 
-                    let pass_through_program_link =
-                    ProgramLink::new(ProgramId::PassThrough, ShaderId::Vertex, ShaderId::PassThrough);
+                let pass_through_program_link = ProgramLink::new(
+                    ProgramId::PassThrough,
+                    ShaderId::Vertex,
+                    ShaderId::PassThrough,
+                );
 
                 let a_position_link = BufferLink::new(
                     ProgramId::GameOfLife,
@@ -61,23 +68,15 @@ pub fn app() -> Html {
                     })),
                 );
 
-                let texture_a_link =
-                    TextureLink::new(ProgramId::GameOfLife, TextureId::A, Rc::new(create_texture));
+                let texture_a_link = TextureLink::new(TextureId::A, Rc::new(create_texture));
 
-                let texture_b_link =
-                    TextureLink::new(ProgramId::GameOfLife, TextureId::B, Rc::new(create_texture));
+                let texture_b_link = TextureLink::new(TextureId::B, Rc::new(create_texture));
 
-                let framebuffer_a_link = FramebufferLink::new(
-                    ProgramId::GameOfLife,
-                    FramebufferId::A,
-                    make_create_frame_buffer(TextureId::A),
-                );
+                let framebuffer_a_link =
+                    FramebufferLink::new(FramebufferId::A, make_create_frame_buffer(TextureId::A));
 
-                let framebuffer_b_link = FramebufferLink::new(
-                    ProgramId::GameOfLife,
-                    FramebufferId::B,
-                    make_create_frame_buffer(TextureId::B),
-                );
+                let framebuffer_b_link =
+                    FramebufferLink::new(FramebufferId::B, make_create_frame_buffer(TextureId::B));
 
                 let render_callback = RenderCallback::new(Rc::new(render));
 
@@ -88,8 +87,14 @@ pub fn app() -> Html {
                     .set_user_ctx(render_state)
                     .set_render_callback(render_callback)
                     .add_vertex_shader_src(ShaderId::Vertex, VERTEX_SHADER.to_string())
-                    .add_fragment_shader_src(ShaderId::GameOfLife, GAME_OF_LIFE_FRAGMENT_SHADER.to_string())
-                    .add_fragment_shader_src(ShaderId::PassThrough, PASS_THROUGH_FRAGMENT_SHADER.to_string())
+                    .add_fragment_shader_src(
+                        ShaderId::GameOfLife,
+                        GAME_OF_LIFE_FRAGMENT_SHADER.to_string(),
+                    )
+                    .add_fragment_shader_src(
+                        ShaderId::PassThrough,
+                        PASS_THROUGH_FRAGMENT_SHADER.to_string(),
+                    )
                     .add_program_link(game_of_life_program_link)
                     .add_program_link(pass_through_program_link)
                     .add_buffer_link(a_position_link)
