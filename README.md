@@ -1,4 +1,4 @@
-# Wrend
+# wrend
 
 **W**ebGL2 **Rend**er Library
 
