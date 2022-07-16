@@ -1,5 +1,5 @@
 [package]
-name = "entry"
+name = "flow_field"
 description = ""
 version = "0.1.0"
 edition = "2021"
@@ -30,6 +30,8 @@ cpal = { version = "0.13.5", features = ["wasm-bindgen"] }
 wasm-bindgen = "0.2.78"
 wasm-bindgen-futures = "0.4.31"
 js-sys = "0.3.55"
+wrend = { path = '../../wrend' }
+ui = { path = '../ui' }
 anyhow = "1.0.58"
 thiserror = "1.0.31"
 rand = { version = "0.8.4" }
@@ -42,15 +44,6 @@ wasm-logger = "0.2.0"
 lazy_static = "1.4.0"
 yew = { version = "0.19" }
 yew-router = "0.16.0"
-
-# Micro apps
-hello_quad = { path = '../hello_quad' }
-hello_quad_animated = { path = '../hello_quad_animated' }
-game_of_life = { path = '../game_of_life' }
-wrend = { path = '../../wrend' }
-ui = { path = '../ui' }
-larger_than_life = { path = '../larger_than_life' }
-flow_field = { path = '../flow_field' }
 
 # `wee_alloc` is a tiny allocator for wasm that is only ~1K in code size
 # compared to the default allocator's ~10K. However, it is slower than the default
@@ -83,7 +76,7 @@ features = [
   "HtmlCanvasElement",
   "CanvasRenderingContext2d",
   "File",
-  "FileList"
+  "FileList",
 ]
 
 # The `console_error_panic_hook` crate provides better debugging of panics by

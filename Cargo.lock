@@ -239,12 +239,37 @@ dependencies = [
  "anyhow",
  "console_error_panic_hook",
  "cpal",
+ "flow_field",
  "game_of_life",
  "getrandom",
  "hello_quad",
  "hello_quad_animated",
  "js-sys",
  "larger_than_life",
+ "lazy_static",
+ "log",
+ "rand",
+ "thiserror",
+ "ui",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wee_alloc",
+ "wrend",
+ "yew",
+ "yew-router",
+]
+
+[[package]]
+name = "flow_field"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "console_error_panic_hook",
+ "cpal",
+ "getrandom",
+ "js-sys",
  "lazy_static",
  "log",
  "rand",

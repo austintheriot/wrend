@@ -15,4 +15,6 @@ pub enum Route {
     GameOfLife,
     #[at("/larger-than-life")]
     LargerThanLife,
+    #[at("/flow-field")]
+    FlowField,
 }
