@@ -49,7 +49,7 @@ hello_quad_animated = { path = '../hello_quad_animated' }
 game_of_life = { path = '../game_of_life' }
 webgl = { path = '../../webgl' }
 ui = { path = '../ui' }
-multiple_neighborhood_cellular_automata = { path = '../multiple_neighborhood_cellular_automata' }
+larger_than_life = { path = '../larger_than_life' }
 
 # `wee_alloc` is a tiny allocator for wasm that is only ~1K in code size
 # compared to the default allocator's ~10K. However, it is slower than the default

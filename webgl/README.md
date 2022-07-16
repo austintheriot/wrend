@@ -19,14 +19,11 @@ The following use cases should guide the development of this library:
     - Allow passing in multiple program ids that should reuse the same uniforms / buffers?
     - Should HashMap's be nested by Program?
     - Buffer:
-        - Only needs to be created ONCE 
+        - Only needs to be created & initialized ONCE 
         - Attribute location must be saved for each ProgramID
-    - Uniform:
-        - Must be initialized once for EACH program
-        - Save UniformLocation for each ProgramId that was passed in
-
-
-- Rename MNCA to larger_than_life
+        - Ways to edit:
+            - ATTRIBUTES can be adjusted to change how to pull data from buffers (unlikely)
+            - New data can be uploaded to BUFFER (possible)
 
 - Enable Vertex Array Object (VAO)
 

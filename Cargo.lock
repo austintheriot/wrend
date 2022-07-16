@@ -244,9 +244,9 @@ dependencies = [
  "hello_quad",
  "hello_quad_animated",
  "js-sys",
+ "larger_than_life",
  "lazy_static",
  "log",
- "multiple_neighborhood_cellular_automata",
  "rand",
  "thiserror",
  "ui",
@@ -640,6 +640,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "larger_than_life"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "console_error_panic_hook",
+ "cpal",
+ "getrandom",
+ "js-sys",
+ "lazy_static",
+ "log",
+ "rand",
+ "thiserror",
+ "ui",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "webgl",
+ "wee_alloc",
+ "yew",
+ "yew-router",
+]
+
+[[package]]
 name = "lazy_static"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -727,30 +751,6 @@ name = "minimal-lexical"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
-
-[[package]]
-name = "multiple_neighborhood_cellular_automata"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "console_error_panic_hook",
- "cpal",
- "getrandom",
- "js-sys",
- "lazy_static",
- "log",
- "rand",
- "thiserror",
- "ui",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "wasm-logger",
- "web-sys",
- "webgl",
- "wee_alloc",
- "yew",
- "yew-router",
-]
 
 [[package]]
 name = "ndk"

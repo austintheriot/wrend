@@ -7,5 +7,5 @@ members = [
     "demos/hello_quad",
     "demos/hello_quad_animated",
     "demos/game_of_life",
-    "demos/multiple_neighborhood_cellular_automata"
+    "demos/larger_than_life"
 ]

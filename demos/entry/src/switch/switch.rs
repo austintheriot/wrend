@@ -3,7 +3,7 @@ use crate::pages::not_found::NotFound;
 use hello_quad::components::app::{App as HelloQuadApp};
 use hello_quad_animated::components::app::{App as HelloQuadAnimatedApp};
 use game_of_life::components::app::{App as GameOfLifeApp};
-use multiple_neighborhood_cellular_automata::components::app::{App as LargerThanLifeApp};
+use larger_than_life::components::app::{App as LargerThanLifeApp};
 use yew::{html, Html};
 use ui::route::Route;
 
