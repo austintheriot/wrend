@@ -1,10 +1,10 @@
 [package]
-name = "webgl"
+name = "wrend"
 version = "0.1.0"
 edition = "2021"
 authors = ["Austin Theriot"]
 license = "MIT OR Apache-2.0"
-description = ""
+description = "Rust wrapper around WebGL for faster & easier abstraction"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

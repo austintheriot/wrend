@@ -2,7 +2,7 @@ use log::info;
 use std::rc::Rc;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
-use webgl::{
+use wrend::{
     constants::quad::QUAD,
     renderer::{
         buffer_link::BufferLink, id::Id, id_name::IdName, program_link::ProgramLink,

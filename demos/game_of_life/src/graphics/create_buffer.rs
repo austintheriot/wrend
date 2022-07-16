@@ -1,5 +1,5 @@
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
-use webgl::{renderer::buffer_create_context::BufferCreateContext, constants::quad::QUAD};
+use wrend::{renderer::buffer_create_context::BufferCreateContext, constants::quad::QUAD};
 
 pub fn create_vertex_buffer<UserCtx>(ctx: BufferCreateContext<UserCtx>) -> WebGlBuffer {
     let gl = ctx.gl();

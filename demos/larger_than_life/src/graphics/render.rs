@@ -5,7 +5,7 @@ use super::{
 use crate::state::render_state::RenderState;
 use std::{cell::RefCell, rc::Rc};
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
-use webgl::renderer::renderer::Renderer;
+use wrend::renderer::renderer::Renderer;
 
 // reusable draw call for both canvas and framebuffer
 fn draw(gl: &WebGl2RenderingContext, canvas: &HtmlCanvasElement) {

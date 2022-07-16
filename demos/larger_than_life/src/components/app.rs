@@ -10,7 +10,7 @@ use crate::{
 use std::rc::Rc;
 use ui::route::Route;
 use web_sys::HtmlCanvasElement;
-use webgl::renderer::{
+use wrend::renderer::{
     animation_callback::AnimationCallback, buffer_link::BufferLink,
     framebuffer_link::FramebufferLink, program_link::ProgramLink, render_callback::RenderCallback,
     renderer::Renderer, texture_link::TextureLink, uniform_link::UniformLink, uniform_callback::UniformCallback,

@@ -1,7 +1,7 @@
 [workspace]
 
 members = [
-    "webgl",
+    "wrend",
     "demos/ui",
     "demos/entry",
     "demos/hello_quad",

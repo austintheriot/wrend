@@ -2,7 +2,7 @@ use std::rc::Rc;
 use ui::route::Route;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
-use webgl::{
+use wrend::{
     constants::quad::QUAD,
     renderer::{
         animation_callback::AnimationCallback, buffer_link::BufferLink, default_id::DefaultId,

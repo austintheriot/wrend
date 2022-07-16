@@ -1,4 +1,4 @@
-use webgl::renderer::id::Id;
+use wrend::renderer::id::Id;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum TextureId {

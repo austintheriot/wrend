@@ -17,7 +17,7 @@ const getStaticFilesOutputDir = (isProduction) => isProduction ? distPath : devP
 // which is probably necessary because the inclusion of a `<base />` tag
 // in the index.html. This allows us not to have to specify the base url for every route
 // in our Yew app
-const REPO_SLUG = '/webgl-rust/';
+const REPO_SLUG = '/wrend/';
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === 'production';

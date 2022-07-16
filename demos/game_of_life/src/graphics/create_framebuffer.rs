@@ -1,7 +1,7 @@
 use super::texture_id::TextureId as AppTextureId;
 use std::rc::Rc;
 use web_sys::{WebGl2RenderingContext, WebGlFramebuffer};
-use webgl::renderer::{
+use wrend::renderer::{
     framebuffer_create_context::FramebufferCreateContext, id::Id, id_name::IdName,
 };
 

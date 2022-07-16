@@ -1,7 +1,7 @@
 use js_sys::Math;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlTexture};
-use webgl::renderer::texture_create_context::TextureCreateContext;
+use wrend::renderer::texture_create_context::TextureCreateContext;
 
 pub fn create_texture<UserCtx>(ctx: TextureCreateContext<UserCtx>) -> WebGlTexture {
     let gl = ctx.gl();

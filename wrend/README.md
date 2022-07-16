@@ -33,8 +33,6 @@ The following use cases should guide the development of this library:
 
 - In the micro apps, use style.scss from /entry
 
-- Rename webgl library to wrend
-
 - Enable other lifetime callbacks for uniforms (create, should update, update)
 
 - Animations:
