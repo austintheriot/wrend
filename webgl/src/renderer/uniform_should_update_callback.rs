@@ -1,10 +1,10 @@
 use super::uniform_context::UniformContext;
-use std::{rc::Rc, ops::Deref};
+use std::{ops::Deref, rc::Rc};
 
-pub struct UniformShouldUpdateCallback<UserCtx>(Rc<dyn Fn(UniformContext<UserCtx>) -> bool>);
+pub struct UniformShouldUpdateCallback<UserCtx>(Rc<dyn Fn(&UniformContext<UserCtx>) -> bool>);
 
-/// By default, all uniforms should be updated, because this checking if it should be updated
-/// is an optional optimization.
+/// By default, all uniforms should be updated, because this checking if it should be
+/// updated is an optional (opt-in) optimization.
 impl<UserCtx> Default for UniformShouldUpdateCallback<UserCtx> {
     fn default() -> Self {
         Self(Rc::new(|_| true))
@@ -12,13 +12,12 @@ impl<UserCtx> Default for UniformShouldUpdateCallback<UserCtx> {
 }
 
 impl<UserCtx> Deref for UniformShouldUpdateCallback<UserCtx> {
-    type Target = (dyn Fn(UniformContext<UserCtx>) -> bool);
+    type Target = (dyn Fn(&UniformContext<UserCtx>) -> bool);
 
     fn deref(&self) -> &Self::Target {
-       &*self.0
+        &*self.0
     }
 }
-
 
 impl<UserCtx> Clone for UniformShouldUpdateCallback<UserCtx> {
     fn clone(&self) -> Self {
@@ -26,10 +25,10 @@ impl<UserCtx> Clone for UniformShouldUpdateCallback<UserCtx> {
     }
 }
 
-impl<UserCtx> From<Rc<dyn Fn(UniformContext<UserCtx>) -> bool>>
+impl<UserCtx> From<Rc<dyn Fn(&UniformContext<UserCtx>) -> bool>>
     for UniformShouldUpdateCallback<UserCtx>
 {
-    fn from(callback: Rc<dyn Fn(UniformContext<UserCtx>) -> bool>) -> Self {
+    fn from(callback: Rc<dyn Fn(&UniformContext<UserCtx>) -> bool>) -> Self {
         UniformShouldUpdateCallback(callback)
     }
 }

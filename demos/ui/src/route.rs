@@ -13,6 +13,6 @@ pub enum Route {
     HelloQuadAnimated,
     #[at("/game-of-life")]
     GameOfLife,
-    #[at("/multiple-neighborhood-cellular-automata")]
-    MultipleNeighborhoodCellularAutomata,
+    #[at("/larger-than-life")]
+    LargerThanLife,
 }

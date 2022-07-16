@@ -1,10 +1,10 @@
 use super::uniform_context::UniformContext;
 use std::{ops::Deref, rc::Rc};
 
-pub struct UniformCallback<UserCtx>(Rc<dyn Fn(UniformContext<UserCtx>)>);
+pub struct UniformCallback<UserCtx>(Rc<dyn Fn(&UniformContext<UserCtx>)>);
 
 impl<UserCtx> UniformCallback<UserCtx> {
-    pub fn new(uniform_callback: Rc<dyn Fn(UniformContext<UserCtx>)>) -> UniformCallback<UserCtx> {
+    pub fn new(uniform_callback: Rc<dyn Fn(&UniformContext<UserCtx>)>) -> UniformCallback<UserCtx> {
         UniformCallback(uniform_callback)
     }
 }
@@ -18,7 +18,7 @@ impl<UserCtx> Default for UniformCallback<UserCtx> {
 }
 
 impl<UserCtx> Deref for UniformCallback<UserCtx> {
-    type Target = dyn Fn(UniformContext<UserCtx>);
+    type Target = dyn Fn(&UniformContext<UserCtx>);
 
     fn deref(&self) -> &Self::Target {
         &*self.0
@@ -31,8 +31,8 @@ impl<UserCtx> Clone for UniformCallback<UserCtx> {
     }
 }
 
-impl<UserCtx> From<Rc<dyn Fn(UniformContext<UserCtx>)>> for UniformCallback<UserCtx> {
-    fn from(callback: Rc<dyn Fn(UniformContext<UserCtx>)>) -> Self {
+impl<UserCtx> From<Rc<dyn Fn(&UniformContext<UserCtx>)>> for UniformCallback<UserCtx> {
+    fn from(callback: Rc<dyn Fn(&UniformContext<UserCtx>)>) -> Self {
         UniformCallback(callback)
     }
 }

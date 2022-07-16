@@ -18,8 +18,15 @@ The following use cases should guide the development of this library:
 -> *** Think through how linking for multiple programs should wokr
     - Allow passing in multiple program ids that should reuse the same uniforms / buffers?
     - Should HashMap's be nested by Program?
+    - Buffer:
+        - Only needs to be created ONCE 
+        - Attribute location must be saved for each ProgramID
+    - Uniform:
+        - Must be initialized once for EACH program
+        - Save UniformLocation for each ProgramId that was passed in
 
-- Rename MNCA to Evans larger than life
+
+- Rename MNCA to larger_than_life
 
 - Enable Vertex Array Object (VAO)
 

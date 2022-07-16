@@ -1,10 +1,11 @@
 use super::id::Id;
+use super::program_id_bridge::ProgramIdBridge;
 use super::uniform_callback::UniformCallback;
 use super::uniform_should_update_callback::UniformShouldUpdateCallback;
 use std::fmt::Debug;
 use std::hash::Hash;
 
-/// This contains an id for a program and and id for a uniform that is associated with it
+/// This contains one or more ids for a program and and id for a uniform that is associated with it
 /// At build time, these get linked together to find the uniform's associated location in the program
 #[derive(Clone)]
 pub struct UniformLink<ProgramId, UniformId, UserCtx>
@@ -12,7 +13,7 @@ where
     ProgramId: Id,
     UniformId: Id,
 {
-    program_id: ProgramId,
+    program_ids: Vec<ProgramId>,
     uniform_id: UniformId,
     initialize_callback: UniformCallback<UserCtx>,
     update_callback: Option<UniformCallback<UserCtx>>,
@@ -25,12 +26,14 @@ where
     UniformId: Id,
 {
     pub fn new(
-        program_id: ProgramId,
+        program_ids: impl Into<ProgramIdBridge<ProgramId>>,
         uniform_id: UniformId,
         initialize_callback: UniformCallback<UserCtx>,
     ) -> Self {
+        let program_id_bridge: ProgramIdBridge<ProgramId> = program_ids.into();
+        let program_ids = program_id_bridge.into();
         Self {
-            program_id,
+            program_ids,
             uniform_id,
             initialize_callback: initialize_callback.into(),
             should_update_callback: None,
@@ -38,8 +41,8 @@ where
         }
     }
 
-    pub fn program_id(&self) -> &ProgramId {
-        &self.program_id
+    pub fn program_ids(&self) -> &Vec<ProgramId> {
+        &self.program_ids
     }
 
     pub fn uniform_id(&self) -> &UniformId {
@@ -81,7 +84,7 @@ where
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("UniformLink")
-            .field("program_id", &self.program_id)
+            .field("program_ids", &self.program_ids)
             .field("uniform_id", &self.uniform_id)
             .field("initialize_callback", &"[not shown]")
             .field("should_update_callback", &"[not shown]")
@@ -96,7 +99,7 @@ where
     UniformId: Id,
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.program_id.hash(state);
+        self.program_ids.hash(state);
         self.uniform_id.hash(state);
     }
 }
@@ -107,7 +110,7 @@ where
     UniformId: Id,
 {
     fn eq(&self, other: &Self) -> bool {
-        self.program_id == other.program_id && self.uniform_id == other.uniform_id
+        self.program_ids == other.program_ids && self.uniform_id == other.uniform_id
     }
 }
 

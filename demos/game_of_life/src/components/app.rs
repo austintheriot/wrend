@@ -52,7 +52,7 @@ pub fn app() -> Html {
                 );
 
                 let u_texture = UniformLink::new(
-                    ProgramId::GameOfLife,
+                    (ProgramId::GameOfLife, ProgramId::PassThrough),
                     UniformId::UTexture,
                     UniformCallback::new(Rc::new(|ctx| {
                         let gl = ctx.gl();

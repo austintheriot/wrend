@@ -167,7 +167,7 @@ pub fn app() -> Html {
                 let mut renderer_builder = Renderer::builder();
 
                 let u_now_link_init_and_update_callback =
-                    Rc::new(|ctx: UniformContext<UseStateHandle<i32>>| {
+                    Rc::new(|ctx: &UniformContext<UseStateHandle<i32>>| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
                         gl.uniform1f(Some(uniform_location), ctx.now() as f32);

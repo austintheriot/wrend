@@ -136,48 +136,27 @@ impl<
     /// Updates a single uniform using the previously given update function. If no function was supplied,
     /// then this is a no-op.
     ///
-    /// This function does NOT check whether a uniform SHOULD be updated or not before calling that uniform's update function.
-    ///
     /// Calls "use_program" on the appropriate program before each uniform's update function (so this is not
     /// necessary to do within the callback itself, unless you need to change programs, for whatever reason).
     pub fn update_uniform(&self, uniform_id: &UniformId) -> &Self {
         let now = Self::now();
         let user_ctx = self.user_ctx();
         let gl = self.gl();
-
+        let programs = self.programs();
         let uniform = self
             .uniforms
             .get(&uniform_id)
             .expect("UniformId should exist in registered uniforms");
+        
 
-        let program_id = uniform.program_id();
-        let program = self.programs().get(program_id);
-        gl.use_program(program);
-
-        uniform.update(gl, now, user_ctx);
-
-        gl.use_program(None);
+        uniform.update(gl, now, user_ctx, programs);
 
         self
     }
 
     /// Iterates through all saved uniforms and updates them using their associated update callbacks.
-    ///
-    /// Checks whether a uniform SHOULD be updated before performing the update.
     pub fn update_uniforms(&self) -> &Self {
-        let now = Self::now();
-        let user_ctx = self.user_ctx();
-        let gl = self.gl();
-
-        for (uniform_id, uniform) in &self.uniforms {
-            let uniform_location = uniform.uniform_location();
-            let uniform_context = UniformContext::new(gl, now, uniform_location, user_ctx);
-            let should_update_callback = uniform.should_update_callback().unwrap_or_default();
-
-            if !should_update_callback(uniform_context) {
-                continue;
-            }
-
+        for (uniform_id, _) in &self.uniforms {
             self.update_uniform(uniform_id);
         }
 
@@ -730,39 +709,41 @@ impl<
         &self,
         uniform_link: &UniformLink<ProgramId, UniformId, UserCtx>,
     ) -> Result<Uniform<ProgramId, UniformId, UserCtx>, RendererBuilderError> {
-        let program_id = uniform_link.program_id().clone();
-        let program = self
-            .programs
-            .get(&program_id)
-            .ok_or(RendererBuilderError::ProgramNotFoundBuildUniformsError)?;
-
+        let uniform_id = uniform_link.uniform_id().clone();
+        let program_ids = uniform_link.program_ids().clone();
         let gl = self
             .gl
             .as_ref()
             .ok_or(RendererBuilderError::NoContextBuildUniformsError)?;
-
-        gl.use_program(Some(program));
-
         let now = Self::now();
         let user_ctx = self.user_ctx.as_ref();
-
-        let uniform_id = uniform_link.uniform_id().clone();
-        let uniform_location = gl
-            .get_uniform_location(program, &uniform_id.name())
-            .ok_or(RendererBuilderError::UniformLocationNotFoundBuildUniformsError)?;
-
         let initialize_callback = uniform_link.initialize_callback();
-        let uniform_context = UniformContext::new(gl, now, &uniform_location, user_ctx);
-
-        (initialize_callback)(uniform_context);
-
         let should_update_callback = uniform_link.should_update_callback();
         let update_callback = uniform_link.update_callback();
+        let mut uniform_locations = HashMap::new();
+
+        for program_id in &program_ids {
+            let program = self
+                .programs
+                .get(&program_id)
+                .ok_or(RendererBuilderError::ProgramNotFoundBuildUniformsError)?;
+
+            gl.use_program(Some(program));
+
+            let uniform_location = gl
+                .get_uniform_location(program, &uniform_id.name())
+                .ok_or(RendererBuilderError::UniformLocationNotFoundBuildUniformsError)?;
+            let uniform_context = UniformContext::new(gl, now, &uniform_location, user_ctx);
+            (initialize_callback)(&uniform_context);
+            uniform_locations.insert(program_id.to_owned(), uniform_location);
+
+            gl.use_program(None);
+        }
 
         let uniform = Uniform::new(
-            program_id,
+            program_ids,
             uniform_id,
-            uniform_location,
+            uniform_locations,
             initialize_callback,
             update_callback,
             should_update_callback,

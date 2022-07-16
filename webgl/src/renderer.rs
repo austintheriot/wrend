@@ -23,4 +23,5 @@ pub mod uniform;
 pub mod uniform_callback;
 pub mod uniform_context;
 pub mod uniform_link;
+pub mod program_id_bridge;
 pub mod uniform_should_update_callback;
