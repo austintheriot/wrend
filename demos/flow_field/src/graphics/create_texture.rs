@@ -1,5 +1,5 @@
 use js_sys::Math;
-use noise::{NoiseFn, Perlin, Seedable};
+use noise::{NoiseFn, Perlin};
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlTexture};
 use wrend::renderer::texture_create_context::TextureCreateContext;
