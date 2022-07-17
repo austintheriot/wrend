@@ -42,12 +42,14 @@ pub fn app() -> Html {
                     ProgramId::GameOfLife,
                     ShaderId::Vertex,
                     ShaderId::GameOfLife,
+                    Default::default(),
                 );
 
                 let pass_through_program_link = ProgramLink::new(
                     ProgramId::PassThrough,
                     ShaderId::Vertex,
                     ShaderId::PassThrough,
+                    Default::default(),
                 );
 
                 let a_position_link = BufferLink::new(

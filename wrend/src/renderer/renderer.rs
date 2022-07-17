@@ -341,7 +341,7 @@ pub enum RendererBuilderError {
     NoContextCreateFramebufferError,
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, Clone)]
 pub struct RendererBuilder<
     VertexShaderId: Id = DefaultId,
     FragmentShaderId: Id = DefaultId,
@@ -358,7 +358,7 @@ pub struct RendererBuilder<
     fragment_shader_sources: HashMap<FragmentShaderId, String>,
     vertex_shaders: HashMap<VertexShaderId, WebGlShader>,
     fragment_shaders: HashMap<FragmentShaderId, WebGlShader>,
-    program_links: HashSet<ProgramLink<ProgramId, VertexShaderId, FragmentShaderId>>,
+    program_links: HashSet<ProgramLink<ProgramId, VertexShaderId, FragmentShaderId, UserCtx>>,
     programs: HashMap<ProgramId, WebGlProgram>,
     uniform_links: HashSet<UniformLink<ProgramId, UniformId, UserCtx>>,
     uniforms: HashMap<UniformId, Uniform<ProgramId, UniformId, UserCtx>>,
@@ -459,7 +459,7 @@ impl<
     /// together by associating the vertex shader id and the fragment shader id with their corresponding compiled shaders.
     pub fn add_program_link(
         &mut self,
-        program_link: impl Into<ProgramLink<ProgramId, VertexShaderId, FragmentShaderId>>,
+        program_link: impl Into<ProgramLink<ProgramId, VertexShaderId, FragmentShaderId, UserCtx>>,
     ) -> &mut Self {
         self.program_links.insert(program_link.into());
 

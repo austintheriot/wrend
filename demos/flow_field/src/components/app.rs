@@ -1,8 +1,8 @@
 use crate::{
     graphics::{
         buffer_id::BufferId, create_buffer::create_vertex_buffer, create_texture::create_texture,
-        program_id::ProgramId, render::render, shader_id::ShaderId, texture_id::TextureId,
-        uniform_id::UniformId,
+        fragment_shader_id::FragmentShaderId, program_id::ProgramId, render::render,
+        texture_id::TextureId, uniform_id::UniformId, vertex_shader_id::VertexShaderId,
     },
     state::render_state::RenderState,
 };
@@ -10,9 +10,9 @@ use std::rc::Rc;
 use ui::route::Route;
 use web_sys::HtmlCanvasElement;
 use wrend::renderer::{
-    animation_callback::AnimationCallback, buffer_link::BufferLink, program_link::ProgramLink,
-    render_callback::RenderCallback, renderer::Renderer, texture_link::TextureLink,
-    uniform_callback::UniformCallback, uniform_link::UniformLink,
+    animation_callback::AnimationCallback, buffer_link::BufferLink,
+    program_link::ProgramLinkBuilder, render_callback::RenderCallback, renderer::Renderer,
+    texture_link::TextureLink, uniform_callback::UniformCallback, uniform_link::UniformLink,
 };
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
 use yew_router::prelude::*;
@@ -36,14 +36,19 @@ pub fn app() -> Html {
                     .cast()
                     .expect("Canvas ref should point to a canvas in the use_effect hook");
 
-                let flow_field_program_link =
-                    ProgramLink::new(ProgramId::FlowField, ShaderId::Vertex, ShaderId::FlowField);
+                let flow_field_program_link = ProgramLinkBuilder::new()
+                    .set_vertex_shader_id(VertexShaderId::Quad)
+                    .set_program_id(ProgramId::FlowField)
+                    .set_fragment_shader_id(FragmentShaderId::FlowField)
+                    .build()
+                    .expect("Should build FlowField ProgramLink successfully");
 
-                let pass_through_program_link = ProgramLink::new(
-                    ProgramId::PassThrough,
-                    ShaderId::Vertex,
-                    ShaderId::PassThrough,
-                );
+                let pass_through_program_link = ProgramLinkBuilder::new()
+                    .set_vertex_shader_id(VertexShaderId::Quad)
+                    .set_program_id(ProgramId::PassThrough)
+                    .set_fragment_shader_id(FragmentShaderId::PassThrough)
+                    .build()
+                    .expect("Should build PassThrough ProgramLink successfully");
 
                 let a_position_link = BufferLink::new(
                     ProgramId::FlowField,
@@ -74,13 +79,13 @@ pub fn app() -> Html {
                     .set_canvas(canvas)
                     .set_user_ctx(render_state)
                     .set_render_callback(render_callback)
-                    .add_vertex_shader_src(ShaderId::Vertex, VERTEX_SHADER.to_string())
+                    .add_vertex_shader_src(VertexShaderId::Quad, VERTEX_SHADER.to_string())
                     .add_fragment_shader_src(
-                        ShaderId::FlowField,
+                        FragmentShaderId::FlowField,
                         FLOW_FIELD_FRAGMENT_SHADER.to_string(),
                     )
                     .add_fragment_shader_src(
-                        ShaderId::PassThrough,
+                        FragmentShaderId::PassThrough,
                         PASS_THROUGH_FRAGMENT_SHADER.to_string(),
                     )
                     .add_program_link(flow_field_program_link)

@@ -69,8 +69,12 @@ pub fn app() -> Html {
                     .cast()
                     .expect("Canvas ref should point to a canvas in the use_effect hook");
 
-                let program_link =
-                    ProgramLink::new(ProgramId, ShaderId::Vertex, ShaderId::Fragment);
+                let program_link = ProgramLink::new(
+                    ProgramId,
+                    ShaderId::Vertex,
+                    ShaderId::Fragment,
+                    Default::default(),
+                );
 
                 let a_position_link = BufferLink::new(
                     ProgramId,

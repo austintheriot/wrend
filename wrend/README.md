@@ -23,6 +23,8 @@ The following use cases should guide the development of this library:
         - Ways to edit:
             - ATTRIBUTES can be adjusted to change how to pull data from buffers (unlikely)
             - New data can be uploaded to BUFFER (possible)
+    ---> Create buffer THEN initialize attributes as separate links / processes
+            
 
 - Enable Vertex Array Object (VAO)
 

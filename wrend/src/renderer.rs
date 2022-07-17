@@ -25,3 +25,5 @@ pub mod uniform_callback;
 pub mod uniform_context;
 pub mod uniform_link;
 pub mod uniform_should_update_callback;
+pub mod program_create_callback;
+pub mod program_create_context;
