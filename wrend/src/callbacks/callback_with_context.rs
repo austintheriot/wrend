@@ -7,14 +7,15 @@ use std::{
 
 use uuid::Uuid;
 
-/// Default return type of the callback type
+/// Type alias for the default return type of the callback type
 pub type CallbackWithContextDefaultReturnType = ();
 
-/// Alias for the inner callback type expected by `CallbackWithContext`
+/// Type alias for the inner callback type expected by `CallbackWithContext`
 pub type CallbackWithContextFnType<Ctx, Returns = CallbackWithContextDefaultReturnType> =
     dyn Fn(&Ctx) -> Returns;
 
-/// Wrapper around a callback to give it a static lifetime and more easily move it around in memory
+/// This is a reusable callback type, useful in contexts where a callback must 
+/// be received from the user which will later be invoked with specific arguments.
 pub struct CallbackWithContext<Ctx, Returns = CallbackWithContextDefaultReturnType> {
     callback: Rc<CallbackWithContextFnType<Ctx, Returns>>,
     uuid: Uuid,
