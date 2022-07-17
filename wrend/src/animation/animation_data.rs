@@ -14,7 +14,7 @@ pub struct AnimationData<
     UserCtx: Clone + 'static = (),
 > {
     id: i32,
-    callback: AnimationCallback<
+    animation_callback: AnimationCallback<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -71,7 +71,7 @@ impl<
     }
 
     pub fn call_animation_callback(&mut self) {
-        self.callback.call(&mut self.renderer);
+        (self.animation_callback)(&mut self.renderer);
     }
 
     pub fn set_is_animating(&mut self, is_animating: bool) -> &mut Self {
@@ -100,7 +100,7 @@ impl<
     }
 
     pub fn new(
-        callback: AnimationCallback<
+        animation_callback: AnimationCallback<
             VertexShaderId,
             FragmentShaderId,
             ProgramId,
@@ -124,7 +124,7 @@ impl<
         >,
     ) -> Self {
         Self {
-            callback,
+            animation_callback,
             renderer,
             id: 0,
             is_animating: false,
