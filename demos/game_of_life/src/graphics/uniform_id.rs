@@ -1,4 +1,4 @@
-use wrend::renderer::{id::Id, id_name::IdName};
+use wrend::{Id, IdName};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum UniformId {

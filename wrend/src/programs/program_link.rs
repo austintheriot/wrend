@@ -1,5 +1,5 @@
-use super::id::Id;
 use super::program_create_callback::ProgramCreateCallback;
+use crate::Id;
 use std::fmt::Debug;
 use std::hash::Hash;
 use thiserror::Error;

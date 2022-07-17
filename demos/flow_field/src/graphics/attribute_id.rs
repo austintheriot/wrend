@@ -1,4 +1,4 @@
-use wrend::renderer::{id_name::IdName, id::Id};
+use wrend::{Id, IdName};
 
 #[derive(Clone, Default, Copy, PartialEq, Eq, Hash, Debug)]
 pub struct AttributeId;

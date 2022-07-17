@@ -1,19 +1,16 @@
-use super::default_id::DefaultId;
-use super::id::Id;
-use super::id_name::IdName;
-use super::renderer::Renderer;
+use crate::{Id, IdDefault, IdName, Renderer};
 use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct AnimationCallback<
-    VertexShaderId: Id = DefaultId,
-    FragmentShaderId: Id = DefaultId,
-    ProgramId: Id = DefaultId,
-    UniformId: Id + IdName = DefaultId,
-    BufferId: Id = DefaultId,
-    AttributeId: Id + IdName = DefaultId,
-    TextureId: Id = DefaultId,
-    FramebufferId: Id = DefaultId,
+    VertexShaderId: Id = IdDefault,
+    FragmentShaderId: Id = IdDefault,
+    ProgramId: Id = IdDefault,
+    UniformId: Id + IdName = IdDefault,
+    BufferId: Id = IdDefault,
+    AttributeId: Id + IdName = IdDefault,
+    TextureId: Id = IdDefault,
+    FramebufferId: Id = IdDefault,
     UserCtx: 'static = (),
 > {
     callback: Rc<

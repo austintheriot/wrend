@@ -1,5 +1,5 @@
-use super::id::Id;
 use super::texture_create_context::TextureCreateContext;
+use crate::Id;
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::rc::Rc;

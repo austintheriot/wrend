@@ -1,4 +1,4 @@
-use super::id::Id;
+use crate::Id;
 use std::fmt::Debug;
 use std::hash::Hash;
 use web_sys::WebGlFramebuffer;

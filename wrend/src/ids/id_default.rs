@@ -1,12 +1,12 @@
 use super::{id::Id, id_name::IdName};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Default)]
-pub struct DefaultId;
+pub struct IdDefault;
 
-impl Id for DefaultId {}
+impl Id for IdDefault {}
 
-impl IdName for DefaultId {
+impl IdName for IdDefault {
     fn name(&self) -> String {
-        String::from("default_id")
+        String::from("id_default")
     }
 }

@@ -1,11 +1,12 @@
 use super::{
-    buffer_id::BufferId, fragment_shader_id::FragmentShaderId, program_id::ProgramId,
-    texture_id::TextureId, uniform_id::UniformId, vertex_shader_id::VertexShaderId, attribute_id::AttributeId,
+    attribute_id::AttributeId, buffer_id::BufferId, fragment_shader_id::FragmentShaderId,
+    program_id::ProgramId, texture_id::TextureId, uniform_id::UniformId,
+    vertex_shader_id::VertexShaderId,
 };
 use crate::state::render_state::RenderState;
 use std::{cell::RefCell, rc::Rc};
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
-use wrend::renderer::{default_id::DefaultId, renderer::Renderer};
+use wrend::{IdDefault, Renderer};
 
 // reusable draw call for both canvas and framebuffer
 fn draw(gl: &WebGl2RenderingContext, canvas: &HtmlCanvasElement) {
@@ -32,7 +33,7 @@ pub fn render(
         BufferId,
         AttributeId,
         TextureId,
-        DefaultId,
+        IdDefault,
         Rc<RefCell<RenderState>>,
     >,
 ) {

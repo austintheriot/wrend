@@ -1,4 +1,4 @@
-use wrend::renderer::id::Id;
+use wrend::Id;
 
 #[derive(Clone, Default, Copy, PartialEq, Eq, Hash, Debug)]
 pub struct VertexShaderId;

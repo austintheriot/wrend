@@ -1,4 +1,4 @@
-use super::uniform_context::UniformContext;
+use crate::UniformContext;
 use std::{ops::Deref, rc::Rc};
 
 pub struct UniformShouldUpdateCallback<UserCtx>(Rc<dyn Fn(&UniformContext<UserCtx>) -> bool>);

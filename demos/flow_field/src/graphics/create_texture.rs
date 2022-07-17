@@ -2,7 +2,7 @@ use js_sys::Math;
 use noise::{NoiseFn, Perlin};
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlTexture};
-use wrend::renderer::texture_create_context::TextureCreateContext;
+use wrend::TextureCreateContext;
 
 pub fn create_texture<UserCtx>(ctx: TextureCreateContext<UserCtx>) -> WebGlTexture {
     let gl = ctx.gl();

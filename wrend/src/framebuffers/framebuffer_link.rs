@@ -1,11 +1,9 @@
-use super::{
-    framebuffer_create_context::FramebufferCreateContext, id::Id, id_name::IdName,
-    renderer::RendererBuilder,
-};
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::rc::Rc;
 use web_sys::{WebGl2RenderingContext, WebGlFramebuffer};
+
+use crate::{FramebufferCreateContext, Id, IdName, RendererBuilder};
 
 pub type CreateFramebufferCallback<
     VertexShaderId,

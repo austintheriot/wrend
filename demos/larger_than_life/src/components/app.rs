@@ -11,18 +11,17 @@ use crate::{
 use std::rc::Rc;
 use ui::route::Route;
 use web_sys::HtmlCanvasElement;
-use wrend::renderer::{
-    animation_callback::AnimationCallback, attribute_link::AttributeLink, buffer_link::BufferLink,
-    framebuffer_link::FramebufferLink, program_link::ProgramLink, render_callback::RenderCallback,
-    renderer::Renderer, texture_link::TextureLink, uniform_callback::UniformCallback,
-    uniform_link::UniformLink,
+use wrend::{
+    AnimationCallback, AttributeLink, BufferLink, FramebufferLink, ProgramLink, RenderCallback,
+    Renderer, TextureLink, UniformCallback, UniformLink,
 };
+
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
 use yew_router::prelude::*;
 
-const VERTEX_SHADER: &'static str = include_str!("../shaders/vertex.glsl");
-const GAME_OF_LIFE_FRAGMENT_SHADER: &'static str = include_str!("../shaders/game_of_life.glsl");
-const PASS_THROUGH_FRAGMENT_SHADER: &'static str = include_str!("../shaders/pass_through.glsl");
+const VERTEX_SHADER: &str = include_str!("../shaders/vertex.glsl");
+const GAME_OF_LIFE_FRAGMENT_SHADER: &str = include_str!("../shaders/game_of_life.glsl");
+const PASS_THROUGH_FRAGMENT_SHADER: &str = include_str!("../shaders/pass_through.glsl");
 
 #[function_component(App)]
 pub fn app() -> Html {
@@ -33,7 +32,7 @@ pub fn app() -> Html {
     use_effect_with_deps(
         {
             let canvas_ref = canvas_ref.clone();
-            let animation_handle = animation_handle.clone();
+            let animation_handle = animation_handle;
             move |_| {
                 let canvas: HtmlCanvasElement = canvas_ref
                     .cast()
@@ -126,7 +125,7 @@ pub fn app() -> Html {
                 // save handle to keep animation going
                 *animation_handle.borrow_mut() = Some(new_animation_handle);
 
-                return || {};
+                || {}
             }
         },
         (),

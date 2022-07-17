@@ -1,4 +1,4 @@
-use wrend::renderer::id::Id;
+use wrend::Id;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum ShaderId {

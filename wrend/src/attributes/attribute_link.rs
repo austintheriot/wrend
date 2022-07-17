@@ -1,8 +1,7 @@
-use super::attribute::{AttributeShouldUpdateCallback, AttributeUpdateCallback};
-use super::attribute_create_context::AttributeCreateContext;
-use super::attribute_location::AttributeLocation;
-use super::id::Id;
-use super::id_name::IdName;
+use crate::{
+    AttributeCreateContext, AttributeLocation, AttributeShouldUpdateCallback,
+    AttributeUpdateCallback, Id, IdName,
+};
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::rc::Rc;

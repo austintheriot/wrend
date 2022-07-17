@@ -1,4 +1,4 @@
-use super::id::Id;
+use crate::Id;
 
 /// Enables accepting either a single ProgramId or many ProgramIds when creating a uniform
 pub enum ProgramIdBridge<ProgramId: Id> {

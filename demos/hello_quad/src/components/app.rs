@@ -2,18 +2,15 @@ use std::rc::Rc;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 use wrend::{
-    constants::quad::QUAD,
-    renderer::{
-        attribute_link::AttributeLink, default_id::DefaultId, id::Id, id_name::IdName,
-        program_link::ProgramLink, render_callback::RenderCallback, renderer::Renderer, buffer_link::BufferLink, buffer_create_context::BufferCreateContext,
-    },
+    AttributeLink, BufferCreateContext, BufferLink, Id, IdDefault, IdName, ProgramLink,
+    RenderCallback, Renderer, QUAD,
 };
 use yew::{
     function_component, html, use_effect_with_deps, use_node_ref, use_state_eq, UseStateHandle,
 };
 
-const VERTEX_SHADER: &'static str = include_str!("../shaders/vertex.glsl");
-const FRAGMENT_SHADER: &'static str = include_str!("../shaders/fragment.glsl");
+const VERTEX_SHADER: &str = include_str!("../shaders/vertex.glsl");
+const FRAGMENT_SHADER: &str = include_str!("../shaders/fragment.glsl");
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Default)]
 pub struct ProgramId;
@@ -110,7 +107,7 @@ pub fn app() -> Html {
                         let gl = ctx.gl();
                         let attribute_location = ctx.attribute_location();
                         let webgl_buffer = ctx.webgl_buffer();
-                        gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&webgl_buffer));
+                        gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(webgl_buffer));
                         gl.vertex_attrib_pointer_with_i32(
                             attribute_location.into(),
                             2,
@@ -129,11 +126,11 @@ pub fn app() -> Html {
                         VertexShaderId,
                         FragmentShaderId,
                         ProgramId,
-                        DefaultId,
+                        IdDefault,
                         BufferId,
                         PositionAttributeId,
-                        DefaultId,
-                        DefaultId,
+                        IdDefault,
+                        IdDefault,
                         UseStateHandle<i32>,
                     >| {
                         let gl = renderer.gl();
@@ -177,7 +174,7 @@ pub fn app() -> Html {
                 renderer.update_uniforms();
                 renderer.render();
 
-                return || {};
+                || {}
             }
         },
         (),

@@ -1,7 +1,7 @@
-use super::id::Id;
-use super::program_id_bridge::ProgramIdBridge;
-use super::uniform_callback::UniformCallback;
-use super::uniform_should_update_callback::UniformShouldUpdateCallback;
+use crate::Id;
+use crate::ProgramIdBridge;
+use crate::UniformCallback;
+use crate::UniformShouldUpdateCallback;
 use std::fmt::Debug;
 use std::hash::Hash;
 
@@ -35,7 +35,7 @@ where
         Self {
             program_ids,
             uniform_id,
-            initialize_callback: initialize_callback.into(),
+            initialize_callback,
             should_update_callback: None,
             update_callback: None,
         }

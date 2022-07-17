@@ -26,7 +26,7 @@ impl<'a, UserCtx> UniformContext<'a, UserCtx> {
     }
 
     pub fn gl(&self) -> &WebGl2RenderingContext {
-        &self.gl
+        self.gl
     }
 
     pub fn now(&self) -> f64 {
@@ -34,7 +34,7 @@ impl<'a, UserCtx> UniformContext<'a, UserCtx> {
     }
 
     pub fn uniform_location(&self) -> &WebGlUniformLocation {
-        &self.uniform_location
+        self.uniform_location
     }
 
     pub fn user_ctx(&self) -> Option<&'a UserCtx> {

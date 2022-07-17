@@ -88,7 +88,7 @@ impl<UserCtx> Clone for ProgramCreateCallback<UserCtx> {
     fn clone(&self) -> Self {
         Self {
             program_create_callback: Rc::clone(&self.program_create_callback),
-            uuid: self.uuid.clone(),
+            uuid: self.uuid,
         }
     }
 }

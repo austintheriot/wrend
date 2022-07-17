@@ -3,13 +3,8 @@ use ui::route::Route;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 use wrend::{
-    constants::quad::QUAD,
-    renderer::{
-        animation_callback::AnimationCallback, attribute_link::AttributeLink,
-        default_id::DefaultId, id::Id, id_name::IdName, program_link::ProgramLink,
-        render_callback::RenderCallback, renderer::Renderer, uniform_callback::UniformCallback,
-        uniform_context::UniformContext, uniform_link::UniformLink, buffer_link::BufferLink, buffer_create_context::BufferCreateContext,
-    },
+    AnimationCallback, AttributeLink, BufferCreateContext, BufferLink, Id, IdDefault, IdName,
+    ProgramLink, RenderCallback, Renderer, UniformCallback, UniformContext, UniformLink, QUAD,
 };
 use yew::{
     function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, use_state_eq,
@@ -17,8 +12,8 @@ use yew::{
 };
 use yew_router::prelude::*;
 
-const VERTEX_SHADER: &'static str = include_str!("../shaders/vertex.glsl");
-const FRAGMENT_SHADER: &'static str = include_str!("../shaders/fragment.glsl");
+const VERTEX_SHADER: &str = include_str!("../shaders/vertex.glsl");
+const FRAGMENT_SHADER: &str = include_str!("../shaders/fragment.glsl");
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Default)]
 pub struct ProgramId;
@@ -88,7 +83,6 @@ impl IdName for PositionAttributeId {
     }
 }
 
-
 #[function_component(App)]
 pub fn app() -> Html {
     let canvas_ref = use_node_ref();
@@ -98,18 +92,18 @@ pub fn app() -> Html {
     use_effect_with_deps(
         {
             let canvas_ref = canvas_ref.clone();
-            let animation_handle = animation_handle.clone();
+            let animation_handle = animation_handle;
             move |_| {
                 let canvas: HtmlCanvasElement = canvas_ref
                     .cast()
                     .expect("Canvas ref should point to a canvas in the use_effect hook");
 
-                    let program_link = ProgramLink::new(
-                        ProgramId,
-                        VertexShaderId,
-                        FragmentShaderId,
-                        Default::default(),
-                    );
+                let program_link = ProgramLink::new(
+                    ProgramId,
+                    VertexShaderId,
+                    FragmentShaderId,
+                    Default::default(),
+                );
 
                 let vertex_buffer_link = BufferLink::new(
                     BufferId::VertexBuffer,
@@ -139,7 +133,7 @@ pub fn app() -> Html {
                         let gl = ctx.gl();
                         let attribute_location = ctx.attribute_location();
                         let webgl_buffer = ctx.webgl_buffer();
-                        gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&webgl_buffer));
+                        gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(webgl_buffer));
                         gl.vertex_attrib_pointer_with_i32(
                             attribute_location.into(),
                             2,
@@ -161,8 +155,8 @@ pub fn app() -> Html {
                         UniformId,
                         BufferId,
                         PositionAttributeId,
-                        DefaultId,
-                        DefaultId,
+                        IdDefault,
+                        IdDefault,
                         UseStateHandle<i32>,
                     >| {
                         let gl = renderer.gl();
@@ -231,7 +225,7 @@ pub fn app() -> Html {
                 // save handle to keep animation going
                 *animation_handle.borrow_mut() = Some(new_animation_handle);
 
-                return || {};
+                || {}
             }
         },
         (),

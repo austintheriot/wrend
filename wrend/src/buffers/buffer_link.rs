@@ -1,4 +1,6 @@
-use super::{buffer_create_context::BufferCreateContext, id::Id};
+use crate::Id;
+
+use super::buffer_create_context::BufferCreateContext;
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::rc::Rc;

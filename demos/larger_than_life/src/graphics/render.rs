@@ -1,11 +1,11 @@
 use super::{
-    buffer_id::BufferId, framebuffer_id::FramebufferId, program_id::ProgramId, shader_id::ShaderId,
-    texture_id::TextureId, uniform_id::UniformId, attribute_id::AttributeId,
+    attribute_id::AttributeId, buffer_id::BufferId, framebuffer_id::FramebufferId,
+    program_id::ProgramId, shader_id::ShaderId, texture_id::TextureId, uniform_id::UniformId,
 };
 use crate::state::render_state::RenderState;
 use std::{cell::RefCell, rc::Rc};
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
-use wrend::renderer::renderer::Renderer;
+use wrend::Renderer;
 
 // reusable draw call for both canvas and framebuffer
 fn draw(gl: &WebGl2RenderingContext, canvas: &HtmlCanvasElement) {

@@ -30,7 +30,7 @@ impl<'a, UserCtx> AttributeContext<'a, UserCtx> {
     }
 
     pub fn gl(&self) -> &WebGl2RenderingContext {
-        &self.gl
+        self.gl
     }
 
     pub fn now(&self) -> f64 {

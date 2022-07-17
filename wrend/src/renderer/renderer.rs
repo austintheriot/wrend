@@ -1,24 +1,3 @@
-use super::animation_callback::AnimationCallback;
-use super::animation_handle::AnimationHandle;
-use super::attribute::Attribute;
-use super::attribute_create_context::AttributeCreateContext;
-use super::attribute_link::AttributeLink;
-use super::attribute_location::AttributeLocation;
-use super::buffer::Buffer;
-use super::buffer_link::BufferLink;
-use super::default_id::DefaultId;
-use super::framebuffer::Framebuffer;
-use super::framebuffer_link::FramebufferLink;
-use super::id::Id;
-use super::id_name::IdName;
-use super::render_callback::RenderCallback;
-use super::texture::Texture;
-use super::texture_link::TextureLink;
-use super::uniform::Uniform;
-use super::uniform_context::UniformContext;
-use super::uniform_link::UniformLink;
-use super::{program_link::ProgramLink, shader_type::ShaderType};
-use std::fmt::Debug;
 use std::{
     collections::{HashMap, HashSet},
     hash::Hash,
@@ -27,16 +6,23 @@ use thiserror::Error;
 use wasm_bindgen::JsCast;
 use web_sys::{window, HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram, WebGlShader};
 
+use crate::{
+    AnimationCallback, AnimationHandle, Attribute, AttributeCreateContext, AttributeLink,
+    AttributeLocation, Buffer, BufferLink, Framebuffer, FramebufferLink, Id, IdDefault, IdName,
+    ProgramLink, RenderCallback, ShaderType, Texture, TextureLink, Uniform, UniformContext,
+    UniformLink,
+};
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Renderer<
-    VertexShaderId: Id = DefaultId,
-    FragmentShaderId: Id = DefaultId,
-    ProgramId: Id = DefaultId,
-    UniformId: Id + IdName = DefaultId,
-    BufferId: Id = DefaultId,
-    AttributeId: Id + IdName = DefaultId,
-    TextureId: Id = DefaultId,
-    FramebufferId: Id = DefaultId,
+    VertexShaderId: Id = IdDefault,
+    FragmentShaderId: Id = IdDefault,
+    ProgramId: Id = IdDefault,
+    UniformId: Id + IdName = IdDefault,
+    BufferId: Id = IdDefault,
+    AttributeId: Id + IdName = IdDefault,
+    TextureId: Id = IdDefault,
+    FramebufferId: Id = IdDefault,
     UserCtx: 'static = (),
 > {
     canvas: HtmlCanvasElement,
@@ -160,7 +146,7 @@ impl<
         let programs = self.programs();
         let uniform = self
             .uniforms
-            .get(&uniform_id)
+            .get(uniform_id)
             .expect("UniformId should exist in registered uniforms");
 
         uniform.update(gl, now, user_ctx, programs);
@@ -362,14 +348,14 @@ pub enum RendererBuilderError {
 
 #[derive(Debug, Clone)]
 pub struct RendererBuilder<
-    VertexShaderId: Id = DefaultId,
-    FragmentShaderId: Id = DefaultId,
-    ProgramId: Id = DefaultId,
-    UniformId: Id + IdName = DefaultId,
-    BufferId: Id = DefaultId,
-    AttributeId: Id + IdName = DefaultId,
-    TextureId: Id = DefaultId,
-    FramebufferId: Id = DefaultId,
+    VertexShaderId: Id = IdDefault,
+    FragmentShaderId: Id = IdDefault,
+    ProgramId: Id = IdDefault,
+    UniformId: Id + IdName = IdDefault,
+    BufferId: Id = IdDefault,
+    AttributeId: Id + IdName = IdDefault,
+    TextureId: Id = IdDefault,
+    FramebufferId: Id = IdDefault,
     UserCtx: 'static = (),
 > {
     canvas: Option<HtmlCanvasElement>,
@@ -673,7 +659,7 @@ impl<
             .canvas
             .as_ref()
             .ok_or(RendererBuilderError::CanvasReturnedNoContext)?;
-        let gl = Self::context_from_canvas(&canvas)?;
+        let gl = Self::context_from_canvas(canvas)?;
         self.gl = Some(gl);
 
         Ok(self)
@@ -700,7 +686,7 @@ impl<
     fn compile_fragment_shaders(&mut self) -> Result<&mut Self, RendererBuilderError> {
         for (id, fragment_shader_src) in self.fragment_shader_sources.iter() {
             let fragment_shader =
-                self.compile_shader(ShaderType::FragmentShader, &fragment_shader_src)?;
+                self.compile_shader(ShaderType::FragmentShader, fragment_shader_src)?;
             self.fragment_shaders.insert((*id).clone(), fragment_shader);
         }
 
@@ -710,8 +696,7 @@ impl<
     /// Takes the list of vertex shader sources and their ids and saves compiled `WebGlShader`s to state
     fn compile_vertex_shaders(&mut self) -> Result<&mut Self, RendererBuilderError> {
         for (id, vertex_shader_src) in self.vertex_shader_sources.iter() {
-            let vertex_shader =
-                self.compile_shader(ShaderType::VertexShader, &vertex_shader_src)?;
+            let vertex_shader = self.compile_shader(ShaderType::VertexShader, vertex_shader_src)?;
             self.vertex_shaders.insert((*id).clone(), vertex_shader);
         }
 
@@ -767,7 +752,7 @@ impl<
         for program_id in &program_ids {
             let program = self
                 .programs
-                .get(&program_id)
+                .get(program_id)
                 .ok_or(RendererBuilderError::ProgramNotFoundBuildUniformsError)?;
 
             gl.use_program(Some(program));
@@ -819,8 +804,8 @@ impl<
             .gl
             .as_ref()
             .ok_or(RendererBuilderError::NoContextCreateAttributeError)?;
-            let now = Self::now();
-            let user_ctx = self.user_ctx.as_ref();
+        let now = Self::now();
+        let user_ctx = self.user_ctx.as_ref();
 
         for attribute_link in &self.attribute_links {
             let program_id = attribute_link.program_id().clone();
@@ -847,7 +832,8 @@ impl<
 
             gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&webgl_buffer));
             gl.enable_vertex_attrib_array(attribute_location.into());
-            let attribute_create_context = AttributeCreateContext::new(gl, now, &webgl_buffer, &attribute_location, user_ctx);
+            let attribute_create_context =
+                AttributeCreateContext::new(gl, now, &webgl_buffer, &attribute_location, user_ctx);
             (attribute_link.create_callback())(attribute_create_context);
             gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, None);
 

@@ -1,7 +1,4 @@
-use super::attribute_context::AttributeContext;
-use super::attribute_location::AttributeLocation;
-use super::id::Id;
-use super::id_name::IdName;
+use crate::{AttributeContext, AttributeLocation, Id, IdName};
 use std::hash::Hash;
 use std::{fmt::Debug, rc::Rc};
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};

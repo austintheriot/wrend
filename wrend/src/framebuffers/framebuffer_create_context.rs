@@ -1,5 +1,6 @@
-use super::{id::Id, id_name::IdName, renderer::RendererBuilder};
 use web_sys::WebGl2RenderingContext;
+
+use crate::{Id, IdName, RendererBuilder};
 
 /// This is the context object that is passed to the create_texture callback function
 #[derive(Debug, Clone)]

@@ -1,1 +1,3 @@
-pub mod quad;
+mod quad;
+
+pub use quad::*;

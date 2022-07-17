@@ -1,7 +1,7 @@
-use super::default_id::DefaultId;
-use super::id::Id;
-use super::id_name::IdName;
 use crate::renderer::renderer::Renderer;
+use crate::Id;
+use crate::IdDefault;
+use crate::IdName;
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::rc::Rc;
@@ -9,14 +9,14 @@ use uuid::Uuid;
 
 #[derive(Clone)]
 pub struct RenderCallback<
-    VertexShaderId: Id = DefaultId,
-    FragmentShaderId: Id = DefaultId,
-    ProgramId: Id = DefaultId,
-    UniformId: Id + IdName = DefaultId,
-    BufferId: Id = DefaultId,
-    AttributeId: Id + IdName = DefaultId,
-    TextureId: Id = DefaultId,
-    FramebufferId: Id = DefaultId,
+    VertexShaderId: Id = IdDefault,
+    FragmentShaderId: Id = IdDefault,
+    ProgramId: Id = IdDefault,
+    UniformId: Id + IdName = IdDefault,
+    BufferId: Id = IdDefault,
+    AttributeId: Id + IdName = IdDefault,
+    TextureId: Id = IdDefault,
+    FramebufferId: Id = IdDefault,
     UserCtx: 'static = (),
 > {
     callback: Rc<

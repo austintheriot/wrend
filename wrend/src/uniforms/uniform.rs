@@ -1,6 +1,7 @@
-use super::uniform_callback::UniformCallback;
-use super::uniform_should_update_callback::UniformShouldUpdateCallback;
-use super::{id::Id, uniform_context::UniformContext};
+use crate::Id;
+use crate::UniformCallback;
+use crate::UniformContext;
+use crate::UniformShouldUpdateCallback;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::hash::Hash;

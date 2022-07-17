@@ -1,8 +1,4 @@
-use super::animation_callback::AnimationCallback;
-use super::animation_data::AnimationData;
-use super::id::Id;
-use super::id_name::IdName;
-use super::renderer::Renderer;
+use crate::{AnimationCallback, AnimationData, Id, IdName, Renderer};
 use std::cell::RefCell;
 use std::rc::Rc;
 use wasm_bindgen::prelude::Closure;
