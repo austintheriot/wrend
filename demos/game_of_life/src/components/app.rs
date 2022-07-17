@@ -1,7 +1,7 @@
 use crate::{
     graphics::{
         attribute_id::AttributeId, buffer_id::BufferId, create_buffer::create_vertex_buffer,
-        create_framebuffer::make_create_frame_buffer,
+        create_framebuffer::create_frame_buffer,
         create_position_attribute::create_position_attribute, create_texture::create_texture,
         fragment_shader_id::FragmentShaderId, framebuffer_id::FramebufferId, program_id::ProgramId,
         render::render, texture_id::TextureId, uniform_id::UniformId,
@@ -13,8 +13,8 @@ use std::rc::Rc;
 use ui::route::Route;
 use web_sys::HtmlCanvasElement;
 use wrend::{
-    AnimationCallback, AttributeLink, BufferLink, FramebufferLink, ProgramLink, RenderCallback,
-    Renderer, TextureLink, UniformCallback, UniformLink,
+    AnimationCallback, AttributeLink, BufferLink, FramebufferCreateCallback, FramebufferLink,
+    ProgramLink, RenderCallback, Renderer, TextureLink, UniformCallback, UniformLink,
 };
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
 use yew_router::prelude::*;
@@ -78,12 +78,17 @@ pub fn app() -> Html {
 
                 let texture_b_link = TextureLink::new(TextureId::B, Rc::new(create_texture));
 
-                let framebuffer_a_link =
-                    FramebufferLink::new(FramebufferId::A, make_create_frame_buffer(TextureId::A));
+                let framebuffer_a_link = FramebufferLink::new(
+                    FramebufferId::A,
+                    FramebufferCreateCallback::new(Rc::new(create_frame_buffer)),
+                    Some(TextureId::A),
+                );
 
-                let framebuffer_b_link =
-                    FramebufferLink::new(FramebufferId::B, make_create_frame_buffer(TextureId::B));
-
+                let framebuffer_b_link = FramebufferLink::new(
+                    FramebufferId::B,
+                    FramebufferCreateCallback::new(Rc::new(create_frame_buffer)),
+                    Some(TextureId::B),
+                );
                 let render_callback = RenderCallback::new(Rc::new(render));
 
                 let mut renderer_builder = Renderer::builder();

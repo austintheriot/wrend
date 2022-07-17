@@ -1,102 +1,27 @@
+use crate::{FramebufferCreateCallback, FramebufferCreateContext, Id, IdDefault};
 use std::fmt::Debug;
 use std::hash::Hash;
-use std::rc::Rc;
-use web_sys::{WebGl2RenderingContext, WebGlFramebuffer};
-
-use crate::{FramebufferCreateContext, Id, IdName, RendererBuilder};
-
-pub type CreateFramebufferCallback<
-    VertexShaderId,
-    FragmentShaderId,
-    ProgramId,
-    UniformId,
-    BufferId,
-    AttributeId,
-    TextureId,
-    FramebufferId,
-    UserCtx,
-> = Rc<
-    dyn Fn(
-        FramebufferCreateContext<
-            VertexShaderId,
-            FragmentShaderId,
-            ProgramId,
-            UniformId,
-            BufferId,
-            AttributeId,
-            TextureId,
-            FramebufferId,
-            UserCtx,
-        >,
-    ) -> WebGlFramebuffer,
->;
+use web_sys::{WebGl2RenderingContext, WebGlFramebuffer, WebGlTexture};
 
 #[derive(Clone)]
-pub struct FramebufferLink<
-    VertexShaderId: Id,
-    FragmentShaderId: Id,
-    ProgramId: Id,
-    UniformId: Id + IdName,
-    BufferId: Id,
-    AttributeId: Id + IdName,
-    TextureId: Id,
-    FramebufferId: Id,
-    UserCtx: Clone + 'static,
-> {
+pub struct FramebufferLink<FramebufferId: Id, UserCtx: Clone + 'static, TextureId: Id = IdDefault> {
     framebuffer_id: FramebufferId,
-    create_framebuffer_callback: CreateFramebufferCallback<
-        VertexShaderId,
-        FragmentShaderId,
-        ProgramId,
-        UniformId,
-        BufferId,
-        AttributeId,
-        TextureId,
-        FramebufferId,
-        UserCtx,
-    >,
+    texture_id: Option<TextureId>,
+    framebuffer_create_callback: FramebufferCreateCallback<UserCtx>,
 }
 
-impl<
-        VertexShaderId: Id,
-        FragmentShaderId: Id,
-        ProgramId: Id,
-        UniformId: Id + IdName,
-        BufferId: Id,
-        AttributeId: Id + IdName,
-        TextureId: Id,
-        FramebufferId: Id,
-        UserCtx: Clone,
-    >
-    FramebufferLink<
-        VertexShaderId,
-        FragmentShaderId,
-        ProgramId,
-        UniformId,
-        BufferId,
-        AttributeId,
-        TextureId,
-        FramebufferId,
-        UserCtx,
-    >
+impl<FramebufferId: Id, UserCtx: Clone, TextureId: Id>
+    FramebufferLink<FramebufferId, UserCtx, TextureId>
 {
     pub fn new(
         framebuffer_id: FramebufferId,
-        create_framebuffer_callback: CreateFramebufferCallback<
-            VertexShaderId,
-            FragmentShaderId,
-            ProgramId,
-            UniformId,
-            BufferId,
-            AttributeId,
-            TextureId,
-            FramebufferId,
-            UserCtx,
-        >,
+        framebuffer_create_callback: impl Into<FramebufferCreateCallback<UserCtx>>,
+        texture_id: Option<TextureId>,
     ) -> Self {
         Self {
             framebuffer_id,
-            create_framebuffer_callback,
+            framebuffer_create_callback: framebuffer_create_callback.into(),
+            texture_id,
         }
     }
 
@@ -104,52 +29,23 @@ impl<
         &self.framebuffer_id
     }
 
+    pub fn texture_id(&self) -> Option<TextureId> {
+        self.texture_id.clone()
+    }
+
     pub fn create_framebuffer(
         &self,
-        gl: &WebGl2RenderingContext,
+        gl: WebGl2RenderingContext,
         now: f64,
-        renderer_builder: &RendererBuilder<
-            VertexShaderId,
-            FragmentShaderId,
-            ProgramId,
-            UniformId,
-            BufferId,
-            AttributeId,
-            TextureId,
-            FramebufferId,
-            UserCtx,
-        >,
-        user_ctx: Option<&UserCtx>,
+        texture: Option<WebGlTexture>,
+        user_ctx: Option<UserCtx>,
     ) -> WebGlFramebuffer {
-        let framebuffer_create_context =
-            FramebufferCreateContext::new(gl, now, renderer_builder, user_ctx);
-        (self.create_framebuffer_callback)(framebuffer_create_context)
+        let framebuffer_create_context = FramebufferCreateContext::new(gl, now, texture, user_ctx);
+        (self.framebuffer_create_callback)(&framebuffer_create_context)
     }
 }
 
-impl<
-        VertexShaderId: Id,
-        FragmentShaderId: Id,
-        ProgramId: Id,
-        UniformId: Id + IdName,
-        BufferId: Id,
-        AttributeId: Id + IdName,
-        TextureId: Id,
-        FramebufferId: Id,
-        UserCtx: Clone,
-    > Debug
-    for FramebufferLink<
-        VertexShaderId,
-        FragmentShaderId,
-        ProgramId,
-        UniformId,
-        BufferId,
-        AttributeId,
-        TextureId,
-        FramebufferId,
-        UserCtx,
-    >
-{
+impl<FramebufferId: Id, UserCtx: Clone, TextureId: Id> Debug for FramebufferLink<FramebufferId, UserCtx, TextureId> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("FramebufferLink")
             .field("framebuffer_id", &self.framebuffer_id)
@@ -157,83 +53,16 @@ impl<
     }
 }
 
-impl<
-        VertexShaderId: Id,
-        FragmentShaderId: Id,
-        ProgramId: Id,
-        UniformId: Id + IdName,
-        BufferId: Id,
-        AttributeId: Id + IdName,
-        TextureId: Id,
-        FramebufferId: Id,
-        UserCtx: Clone,
-    > Hash
-    for FramebufferLink<
-        VertexShaderId,
-        FragmentShaderId,
-        ProgramId,
-        UniformId,
-        BufferId,
-        AttributeId,
-        TextureId,
-        FramebufferId,
-        UserCtx,
-    >
-{
+impl<FramebufferId: Id, UserCtx: Clone, TextureId: Id> Hash for FramebufferLink<FramebufferId, UserCtx, TextureId> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.framebuffer_id.hash(state);
     }
 }
 
-impl<
-        VertexShaderId: Id,
-        FragmentShaderId: Id,
-        ProgramId: Id,
-        UniformId: Id + IdName,
-        BufferId: Id,
-        AttributeId: Id + IdName,
-        TextureId: Id,
-        FramebufferId: Id,
-        UserCtx: Clone,
-    > PartialEq
-    for FramebufferLink<
-        VertexShaderId,
-        FragmentShaderId,
-        ProgramId,
-        UniformId,
-        BufferId,
-        AttributeId,
-        TextureId,
-        FramebufferId,
-        UserCtx,
-    >
-{
+impl<FramebufferId: Id, UserCtx: Clone, TextureId: Id> PartialEq for FramebufferLink<FramebufferId, UserCtx, TextureId> {
     fn eq(&self, other: &Self) -> bool {
         self.framebuffer_id == other.framebuffer_id
     }
 }
 
-impl<
-        VertexShaderId: Id,
-        FragmentShaderId: Id,
-        ProgramId: Id,
-        UniformId: Id + IdName,
-        BufferId: Id,
-        AttributeId: Id + IdName,
-        TextureId: Id,
-        FramebufferId: Id,
-        UserCtx: Clone,
-    > Eq
-    for FramebufferLink<
-        VertexShaderId,
-        FragmentShaderId,
-        ProgramId,
-        UniformId,
-        BufferId,
-        AttributeId,
-        TextureId,
-        FramebufferId,
-        UserCtx,
-    >
-{
-}
+impl<FramebufferId: Id, UserCtx: Clone, TextureId: Id> Eq for FramebufferLink<FramebufferId, UserCtx, TextureId> {}

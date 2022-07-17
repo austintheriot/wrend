@@ -1,112 +1,45 @@
-use web_sys::WebGl2RenderingContext;
-
-use crate::{Id, IdName, RendererBuilder};
+use web_sys::{WebGl2RenderingContext, WebGlTexture};
 
 /// This is the context object that is passed to the create_texture callback function
 #[derive(Debug, Clone)]
-pub struct FramebufferCreateContext<
-    'a,
-    VertexShaderId: Id,
-    FragmentShaderId: Id,
-    ProgramId: Id,
-    UniformId: Id + IdName,
-    BufferId: Id,
-    AttributeId: Id + IdName,
-    TextureId: Id,
-    FramebufferId: Id,
-    UserCtx: Clone + 'static,
-> {
-    gl: &'a WebGl2RenderingContext,
+pub struct FramebufferCreateContext<UserCtx: Clone + 'static> {
+    gl: WebGl2RenderingContext,
     now: f64,
-    renderer_builder: &'a RendererBuilder<
-        VertexShaderId,
-        FragmentShaderId,
-        ProgramId,
-        UniformId,
-        BufferId,
-        AttributeId,
-        TextureId,
-        FramebufferId,
-        UserCtx,
-    >,
-    user_ctx: Option<&'a UserCtx>,
+    /// This is the texture that was specified in the link
+    /// and which will be associated with the Framebuffer
+    webgl_texture: Option<WebGlTexture>,
+    user_ctx: Option<UserCtx>,
 }
 
-impl<
-        'a,
-        VertexShaderId: Id,
-        FragmentShaderId: Id,
-        ProgramId: Id,
-        UniformId: Id + IdName,
-        BufferId: Id,
-        AttributeId: Id + IdName,
-        TextureId: Id,
-        FramebufferId: Id,
-        UserCtx: Clone,
-    >
-    FramebufferCreateContext<
-        'a,
-        VertexShaderId,
-        FragmentShaderId,
-        ProgramId,
-        UniformId,
-        BufferId,
-        AttributeId,
-        TextureId,
-        FramebufferId,
-        UserCtx,
-    >
-{
+impl<UserCtx: Clone> FramebufferCreateContext<UserCtx> {
     /// @todo: make this into a builder pattern
     pub fn new(
-        gl: &'a WebGl2RenderingContext,
+        gl: WebGl2RenderingContext,
         now: f64,
-        renderer_builder: &'a RendererBuilder<
-            VertexShaderId,
-            FragmentShaderId,
-            ProgramId,
-            UniformId,
-            BufferId,
-            AttributeId,
-            TextureId,
-            FramebufferId,
-            UserCtx,
-        >,
-        user_ctx: Option<&'a UserCtx>,
+        texture: Option<WebGlTexture>,
+        user_ctx: Option<UserCtx>,
     ) -> Self {
         Self {
             gl,
             now,
+            webgl_texture: texture,
             user_ctx,
-            renderer_builder,
         }
     }
 
     pub fn gl(&self) -> &WebGl2RenderingContext {
-        self.gl
+        &self.gl
     }
 
     pub fn now(&self) -> f64 {
         self.now
     }
 
-    pub fn user_ctx(&self) -> Option<&'a UserCtx> {
-        self.user_ctx
+    pub fn user_ctx(&self) -> &Option<UserCtx> {
+        &self.user_ctx
     }
 
-    pub fn renderer_builder(
-        &self,
-    ) -> &'a RendererBuilder<
-        VertexShaderId,
-        FragmentShaderId,
-        ProgramId,
-        UniformId,
-        BufferId,
-        AttributeId,
-        TextureId,
-        FramebufferId,
-        UserCtx,
-    > {
-        self.renderer_builder
+    pub fn webgl_texture(&self) -> &Option<WebGlTexture> {
+        &self.webgl_texture
     }
 }
