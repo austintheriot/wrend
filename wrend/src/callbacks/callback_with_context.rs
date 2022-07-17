@@ -1,4 +1,5 @@
 use std::{
+    fmt::Debug,
     hash::{Hash, Hasher},
     ops::Deref,
     rc::Rc,
@@ -11,7 +12,7 @@ pub type CallbackWithContextDefaultReturnType = ();
 
 /// Alias for the inner callback type expected by `CallbackWithContext`
 pub type CallbackWithContextFnType<Ctx, Returns = CallbackWithContextDefaultReturnType> =
-    dyn Fn(Ctx) -> Returns;
+    dyn Fn(&Ctx) -> Returns;
 
 #[derive(Clone)]
 /// Wrapper around a callback to give it a static lifetime and more easily move it around in memory
@@ -73,6 +74,15 @@ impl<Ctx> Ord for CallbackWithContext<Ctx> {
 impl<Ctx> Hash for CallbackWithContext<Ctx> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.uuid.hash(state);
+    }
+}
+
+impl<Ctx> Debug for CallbackWithContext<Ctx> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CallbackWithContext")
+            .field("callback", &"[callback function]")
+            .field("uuid", &self.uuid)
+            .finish()
     }
 }
 

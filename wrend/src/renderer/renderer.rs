@@ -218,7 +218,7 @@ impl<
     }
 
     pub fn render(&self) -> &Self {
-        self.render_callback.call(self);
+        (self.render_callback)(self);
 
         self
     }
