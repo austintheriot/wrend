@@ -14,8 +14,8 @@ use ui::route::Route;
 use web_sys::HtmlCanvasElement;
 use wrend::{
     AnimationCallback, AttributeLink, BufferCreateCallback, BufferLink, FramebufferCreateCallback,
-    FramebufferLink, ProgramLink, RenderCallback, Renderer, TextureLink, UniformCallback,
-    UniformLink,
+    FramebufferLink, ProgramLink, RenderCallback, Renderer, TextureCreateCallback, TextureLink,
+    UniformCallback, UniformLink,
 };
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
 use yew_router::prelude::*;
@@ -77,9 +77,15 @@ pub fn app() -> Html {
                     })),
                 );
 
-                let texture_a_link = TextureLink::new(TextureId::A, Rc::new(create_texture));
+                let texture_a_link = TextureLink::new(
+                    TextureId::A,
+                    TextureCreateCallback::new(Rc::new(create_texture)),
+                );
 
-                let texture_b_link = TextureLink::new(TextureId::B, Rc::new(create_texture));
+                let texture_b_link = TextureLink::new(
+                    TextureId::B,
+                    TextureCreateCallback::new(Rc::new(create_texture)),
+                );
 
                 let framebuffer_a_link = FramebufferLink::new(
                     FramebufferId::A,

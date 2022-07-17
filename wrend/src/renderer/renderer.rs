@@ -840,11 +840,11 @@ impl<
             .as_ref()
             .ok_or(RendererBuilderError::NoContextCreateTextureError)?;
         let now = Self::now();
-        let user_ctx = self.user_ctx.as_ref();
+        let user_ctx = self.user_ctx.clone();
 
         for texture_link in &self.texture_links {
             let texture_id = texture_link.texture_id().clone();
-            let webgl_texture = texture_link.create_texture(gl, now, user_ctx);
+            let webgl_texture = texture_link.create_texture(gl.clone(), now, user_ctx.clone());
             let texture = Texture::new(texture_id.clone(), webgl_texture);
 
             self.textures.insert(texture_id, texture);

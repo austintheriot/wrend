@@ -12,7 +12,7 @@ use ui::route::Route;
 use web_sys::HtmlCanvasElement;
 use wrend::{
     AnimationCallback, AttributeLink, BufferCreateCallback, BufferLink, ProgramLinkBuilder,
-    RenderCallback, Renderer, TextureLink, UniformCallback, UniformLink,
+    RenderCallback, Renderer, TextureCreateCallback, TextureLink, UniformCallback, UniformLink,
 };
 
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
@@ -75,8 +75,10 @@ pub fn app() -> Html {
                     })),
                 );
 
-                let noise_texture_link =
-                    TextureLink::new(TextureId::Noise, Rc::new(create_texture));
+                let noise_texture_link = TextureLink::new(
+                    TextureId::Noise,
+                    TextureCreateCallback::new(Rc::new(create_texture)),
+                );
 
                 let render_callback = RenderCallback::new(Rc::new(render));
 

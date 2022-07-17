@@ -1,11 +1,8 @@
 use super::texture_create_context::TextureCreateContext;
-use crate::Id;
+use crate::{Id, TextureCreateCallback};
 use std::fmt::Debug;
 use std::hash::Hash;
-use std::rc::Rc;
 use web_sys::{WebGl2RenderingContext, WebGlTexture};
-
-pub type TextureCreateCallback<UserCtx> = Rc<dyn Fn(TextureCreateContext<UserCtx>) -> WebGlTexture>;
 
 #[derive(Clone)]
 pub struct TextureLink<TextureId: Id, UserCtx> {
@@ -30,12 +27,12 @@ impl<TextureId: Id, UserCtx> TextureLink<TextureId, UserCtx> {
 
     pub fn create_texture(
         &self,
-        gl: &WebGl2RenderingContext,
+        gl: WebGl2RenderingContext,
         now: f64,
-        user_ctx: Option<&UserCtx>,
+        user_ctx: Option<UserCtx>,
     ) -> WebGlTexture {
         let texture_create_context = TextureCreateContext::new(gl, now, user_ctx);
-        (self.create_texture_callback)(texture_create_context)
+        (self.create_texture_callback)(&texture_create_context)
     }
 }
 
