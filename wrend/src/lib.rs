@@ -9,6 +9,7 @@ mod renderer;
 mod shaders;
 mod textures;
 mod uniforms;
+mod callbacks;
 
 pub use animation::*;
 pub use attributes::*;
@@ -21,3 +22,4 @@ pub use renderer::*;
 pub use shaders::*;
 pub use textures::*;
 pub use uniforms::*;
+pub use callbacks::*;
