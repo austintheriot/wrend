@@ -1,6 +1,7 @@
 mod animation;
 mod attributes;
 mod buffers;
+mod callbacks;
 mod constants;
 mod framebuffers;
 mod ids;
@@ -9,11 +10,11 @@ mod renderer;
 mod shaders;
 mod textures;
 mod uniforms;
-mod callbacks;
 
 pub use animation::*;
 pub use attributes::*;
 pub use buffers::*;
+pub use callbacks::*;
 pub use constants::*;
 pub use framebuffers::*;
 pub use ids::*;
@@ -22,4 +23,3 @@ pub use renderer::*;
 pub use shaders::*;
 pub use textures::*;
 pub use uniforms::*;
-pub use callbacks::*;

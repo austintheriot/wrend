@@ -3,8 +3,9 @@ use ui::route::Route;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 use wrend::{
-    AnimationCallback, AttributeLink, BufferCreateContext, BufferLink, Id, IdDefault, IdName,
-    ProgramLink, RenderCallback, Renderer, UniformCallback, UniformContext, UniformLink, QUAD,
+    AnimationCallback, AttributeLink, BufferCreateCallback, BufferCreateContext, BufferLink, Id,
+    IdDefault, IdName, ProgramLink, RenderCallback, Renderer, UniformCallback, UniformContext,
+    UniformLink, QUAD,
 };
 use yew::{
     function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, use_state_eq,
@@ -107,22 +108,24 @@ pub fn app() -> Html {
 
                 let vertex_buffer_link = BufferLink::new(
                     BufferId::VertexBuffer,
-                    Rc::new(|ctx: &BufferCreateContext<UseStateHandle<i32>>| {
-                        let gl = ctx.gl();
-                        let buffer = gl.create_buffer().unwrap();
-                        gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&buffer));
+                    BufferCreateCallback::new(Rc::new(
+                        |ctx: &BufferCreateContext<UseStateHandle<i32>>| {
+                            let gl = ctx.gl();
+                            let buffer = gl.create_buffer().unwrap();
+                            gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&buffer));
 
-                        // requires `unsafe` since we're creating a raw view into wasm memory,
-                        // but this array is static, so it shouldn't cause any issues
-                        let vertex_array = unsafe { js_sys::Float32Array::view(&QUAD) };
-                        gl.buffer_data_with_array_buffer_view(
-                            WebGl2RenderingContext::ARRAY_BUFFER,
-                            &vertex_array,
-                            WebGl2RenderingContext::STATIC_DRAW,
-                        );
+                            // requires `unsafe` since we're creating a raw view into wasm memory,
+                            // but this array is static, so it shouldn't cause any issues
+                            let vertex_array = unsafe { js_sys::Float32Array::view(&QUAD) };
+                            gl.buffer_data_with_array_buffer_view(
+                                WebGl2RenderingContext::ARRAY_BUFFER,
+                                &vertex_array,
+                                WebGl2RenderingContext::STATIC_DRAW,
+                            );
 
-                        buffer
-                    }),
+                            buffer
+                        },
+                    )),
                 );
 
                 let a_position_link = AttributeLink::new(

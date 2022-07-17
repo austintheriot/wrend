@@ -763,11 +763,11 @@ impl<
             .as_ref()
             .ok_or(RendererBuilderError::NoContextCreateAttributeError)?;
         let now = Self::now();
-        let user_ctx = self.user_ctx.as_ref();
+        let user_ctx = &self.user_ctx;
 
         for buffer_link in &self.buffer_links {
             let buffer_id = buffer_link.buffer_id().clone();
-            let webgl_buffer = buffer_link.create_buffer(gl, now, user_ctx);
+            let webgl_buffer = buffer_link.create_buffer(gl.clone(), now, user_ctx.clone());
             let buffer = Buffer::new(buffer_id.clone(), webgl_buffer);
             self.buffers.insert(buffer_id, buffer);
         }

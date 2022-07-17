@@ -45,7 +45,9 @@ impl<FramebufferId: Id, UserCtx: Clone, TextureId: Id>
     }
 }
 
-impl<FramebufferId: Id, UserCtx: Clone, TextureId: Id> Debug for FramebufferLink<FramebufferId, UserCtx, TextureId> {
+impl<FramebufferId: Id, UserCtx: Clone, TextureId: Id> Debug
+    for FramebufferLink<FramebufferId, UserCtx, TextureId>
+{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("FramebufferLink")
             .field("framebuffer_id", &self.framebuffer_id)
@@ -53,16 +55,23 @@ impl<FramebufferId: Id, UserCtx: Clone, TextureId: Id> Debug for FramebufferLink
     }
 }
 
-impl<FramebufferId: Id, UserCtx: Clone, TextureId: Id> Hash for FramebufferLink<FramebufferId, UserCtx, TextureId> {
+impl<FramebufferId: Id, UserCtx: Clone, TextureId: Id> Hash
+    for FramebufferLink<FramebufferId, UserCtx, TextureId>
+{
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.framebuffer_id.hash(state);
     }
 }
 
-impl<FramebufferId: Id, UserCtx: Clone, TextureId: Id> PartialEq for FramebufferLink<FramebufferId, UserCtx, TextureId> {
+impl<FramebufferId: Id, UserCtx: Clone, TextureId: Id> PartialEq
+    for FramebufferLink<FramebufferId, UserCtx, TextureId>
+{
     fn eq(&self, other: &Self) -> bool {
         self.framebuffer_id == other.framebuffer_id
     }
 }
 
-impl<FramebufferId: Id, UserCtx: Clone, TextureId: Id> Eq for FramebufferLink<FramebufferId, UserCtx, TextureId> {}
+impl<FramebufferId: Id, UserCtx: Clone, TextureId: Id> Eq
+    for FramebufferLink<FramebufferId, UserCtx, TextureId>
+{
+}

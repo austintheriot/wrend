@@ -1,27 +1,24 @@
-use crate::Id;
+use crate::{BufferCreateCallback, Id};
 
 use super::buffer_create_context::BufferCreateContext;
 use std::fmt::Debug;
 use std::hash::Hash;
-use std::rc::Rc;
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
-
-pub type BufferCreateCallback<UserCtx> = Rc<dyn Fn(&BufferCreateContext<UserCtx>) -> WebGlBuffer>;
 
 #[derive(Clone)]
 pub struct BufferLink<BufferId: Id, UserCtx: Clone + 'static> {
     buffer_id: BufferId,
-    create_buffer_callback: BufferCreateCallback<UserCtx>,
+    buffer_create_callback: BufferCreateCallback<UserCtx>,
 }
 
 impl<BufferId: Id, UserCtx: Clone> BufferLink<BufferId, UserCtx> {
     pub fn new(
         buffer_id: impl Into<BufferId>,
-        create_buffer_callback: BufferCreateCallback<UserCtx>,
+        buffer_create_callback: impl Into<BufferCreateCallback<UserCtx>>,
     ) -> Self {
         Self {
             buffer_id: buffer_id.into(),
-            create_buffer_callback,
+            buffer_create_callback: buffer_create_callback.into(),
         }
     }
 
@@ -31,12 +28,12 @@ impl<BufferId: Id, UserCtx: Clone> BufferLink<BufferId, UserCtx> {
 
     pub fn create_buffer(
         &self,
-        gl: &WebGl2RenderingContext,
+        gl: WebGl2RenderingContext,
         now: f64,
-        user_ctx: Option<&UserCtx>,
+        user_ctx: Option<UserCtx>,
     ) -> WebGlBuffer {
         let framebuffer_create_context = BufferCreateContext::new(gl, now, user_ctx);
-        (self.create_buffer_callback)(&framebuffer_create_context)
+        (self.buffer_create_callback)(&framebuffer_create_context)
     }
 }
 

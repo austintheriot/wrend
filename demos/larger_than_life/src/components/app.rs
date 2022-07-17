@@ -12,8 +12,9 @@ use std::rc::Rc;
 use ui::route::Route;
 use web_sys::HtmlCanvasElement;
 use wrend::{
-    AnimationCallback, AttributeLink, BufferLink, FramebufferCreateCallback, FramebufferLink,
-    ProgramLink, RenderCallback, Renderer, TextureLink, UniformCallback, UniformLink,
+    AnimationCallback, AttributeLink, BufferCreateCallback, BufferLink, FramebufferCreateCallback,
+    FramebufferLink, ProgramLink, RenderCallback, Renderer, TextureLink, UniformCallback,
+    UniformLink,
 };
 
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
@@ -52,8 +53,10 @@ pub fn app() -> Html {
                     Default::default(),
                 );
 
-                let vertex_buffer_link =
-                    BufferLink::new(BufferId::VertexBuffer, Rc::new(create_vertex_buffer));
+                let vertex_buffer_link = BufferLink::new(
+                    BufferId::VertexBuffer,
+                    BufferCreateCallback::new(Rc::new(create_vertex_buffer)),
+                );
 
                 let attribute_position_gof_link = AttributeLink::new(
                     ProgramId::GameOfLife,

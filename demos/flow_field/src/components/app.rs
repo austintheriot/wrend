@@ -11,8 +11,8 @@ use std::rc::Rc;
 use ui::route::Route;
 use web_sys::HtmlCanvasElement;
 use wrend::{
-    AnimationCallback, AttributeLink, BufferLink, ProgramLinkBuilder, RenderCallback, Renderer,
-    TextureLink, UniformCallback, UniformLink,
+    AnimationCallback, AttributeLink, BufferCreateCallback, BufferLink, ProgramLinkBuilder,
+    RenderCallback, Renderer, TextureLink, UniformCallback, UniformLink,
 };
 
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
@@ -51,8 +51,10 @@ pub fn app() -> Html {
                     .build()
                     .expect("Should build PassThrough ProgramLink successfully");
 
-                let vertex_buffer_link =
-                    BufferLink::new(BufferId::VertexBuffer, Rc::new(create_vertex_buffer));
+                let vertex_buffer_link = BufferLink::new(
+                    BufferId::VertexBuffer,
+                    BufferCreateCallback::new(Rc::new(create_vertex_buffer)),
+                );
 
                 let a_position_link = AttributeLink::new(
                     ProgramId::FlowField,

@@ -107,9 +107,7 @@ impl<Ctx, Return> From<Rc<CallbackWithContextFnType<Ctx, Return>>>
     }
 }
 
-impl<Ctx: 'static, Return: 'static> From<fn(&Ctx) -> Return>
-    for CallbackWithContext<Ctx, Return>
-{
+impl<Ctx: 'static, Return: 'static> From<fn(&Ctx) -> Return> for CallbackWithContext<Ctx, Return> {
     fn from(callback: fn(&Ctx) -> Return) -> Self {
         CallbackWithContext {
             callback: Rc::new(callback),
