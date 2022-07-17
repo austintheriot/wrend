@@ -20,63 +20,65 @@ pub struct CallbackWithContext<Ctx, Returns = CallbackWithContextDefaultReturnTy
     uuid: Uuid,
 }
 
-impl<Ctx> CallbackWithContext<Ctx> {
-    pub fn new(callback: Rc<CallbackWithContextFnType<Ctx>>) -> CallbackWithContext<Ctx> {
+impl<Ctx, Return> CallbackWithContext<Ctx, Return> {
+    pub fn new(
+        callback: Rc<CallbackWithContextFnType<Ctx, Return>>,
+    ) -> CallbackWithContext<Ctx, Return> {
         CallbackWithContext {
             callback,
             uuid: Uuid::new_v4(),
         }
     }
 
-    pub fn to_owned_callback(&self) -> Rc<CallbackWithContextFnType<Ctx>> {
+    pub fn to_owned_callback(&self) -> Rc<CallbackWithContextFnType<Ctx, Return>> {
         Rc::clone(&self.callback)
     }
 }
 
-impl<Ctx> Default for CallbackWithContext<Ctx> {
+impl<Ctx, Return: Default> Default for CallbackWithContext<Ctx, Return> {
     fn default() -> Self {
         Self {
-            callback: Rc::new(|_| {}),
+            callback: Rc::new(|_| Return::default()),
             uuid: Uuid::new_v4(),
         }
     }
 }
 
-impl<Ctx> Deref for CallbackWithContext<Ctx> {
-    type Target = CallbackWithContextFnType<Ctx>;
+impl<Ctx, Return> Deref for CallbackWithContext<Ctx, Return> {
+    type Target = CallbackWithContextFnType<Ctx, Return>;
 
     fn deref(&self) -> &Self::Target {
         &*self.callback
     }
 }
 
-impl<Ctx> PartialEq for CallbackWithContext<Ctx> {
+impl<Ctx, Return> PartialEq for CallbackWithContext<Ctx, Return> {
     fn eq(&self, other: &Self) -> bool {
         self.uuid == other.uuid
     }
 }
 
-impl<Ctx> Eq for CallbackWithContext<Ctx> {}
+impl<Ctx, Return> Eq for CallbackWithContext<Ctx, Return> {}
 
-impl<Ctx> PartialOrd for CallbackWithContext<Ctx> {
+impl<Ctx, Return> PartialOrd for CallbackWithContext<Ctx, Return> {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         self.uuid.partial_cmp(&other.uuid)
     }
 }
 
-impl<Ctx> Ord for CallbackWithContext<Ctx> {
+impl<Ctx, Return> Ord for CallbackWithContext<Ctx, Return> {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         self.uuid.cmp(&other.uuid)
     }
 }
 
-impl<Ctx> Hash for CallbackWithContext<Ctx> {
+impl<Ctx, Return> Hash for CallbackWithContext<Ctx, Return> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.uuid.hash(state);
     }
 }
 
-impl<Ctx> Clone for CallbackWithContext<Ctx> {
+impl<Ctx, Return> Clone for CallbackWithContext<Ctx, Return> {
     fn clone(&self) -> Self {
         Self {
             callback: self.callback.clone(),
@@ -85,7 +87,7 @@ impl<Ctx> Clone for CallbackWithContext<Ctx> {
     }
 }
 
-impl<Ctx> Debug for CallbackWithContext<Ctx> {
+impl<Ctx, Return> Debug for CallbackWithContext<Ctx, Return> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("CallbackWithContext")
             .field("callback", &"[callback function]")
@@ -94,8 +96,10 @@ impl<Ctx> Debug for CallbackWithContext<Ctx> {
     }
 }
 
-impl<Ctx> From<Rc<CallbackWithContextFnType<Ctx>>> for CallbackWithContext<Ctx> {
-    fn from(callback: Rc<CallbackWithContextFnType<Ctx>>) -> Self {
+impl<Ctx, Return> From<Rc<CallbackWithContextFnType<Ctx, Return>>>
+    for CallbackWithContext<Ctx, Return>
+{
+    fn from(callback: Rc<CallbackWithContextFnType<Ctx, Return>>) -> Self {
         CallbackWithContext {
             callback,
             uuid: Uuid::new_v4(),

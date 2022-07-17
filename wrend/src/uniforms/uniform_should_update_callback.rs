@@ -1,34 +1,22 @@
-use crate::UniformContext;
 use std::{ops::Deref, rc::Rc};
 
-pub struct UniformShouldUpdateCallback<UserCtx>(Rc<dyn Fn(&UniformContext<UserCtx>) -> bool>);
+use crate::{UniformContext, CallbackWithContext};
 
-/// By default, all uniforms should be updated, because this checking if it should be
-/// updated is an optional (opt-in) optimization.
-impl<UserCtx> Default for UniformShouldUpdateCallback<UserCtx> {
-    fn default() -> Self {
-        Self(Rc::new(|_| true))
-    }
-}
+/// Wrapper around CallbackWithContext -- allows for Default implementation to return `true` instead of false,
+/// since, by default, uniforms should be updated if no custom optimization callback is provided.
+#[derive(Clone, Hash, PartialEq, Eq, PartialOrd, Ord, Debug)]
+pub struct UniformShouldUpdateCallback<UserCtx: Clone>(CallbackWithContext<UniformContext<UserCtx>, bool>);
 
-impl<UserCtx> Deref for UniformShouldUpdateCallback<UserCtx> {
-    type Target = (dyn Fn(&UniformContext<UserCtx>) -> bool);
+impl<UserCtx: Clone> Deref for UniformShouldUpdateCallback<UserCtx> {
+    type Target = CallbackWithContext<UniformContext<UserCtx>, bool>;
 
     fn deref(&self) -> &Self::Target {
-        &*self.0
+       &self.0
     }
 }
 
-impl<UserCtx> Clone for UniformShouldUpdateCallback<UserCtx> {
-    fn clone(&self) -> Self {
-        Self(Rc::clone(&self.0))
-    }
-}
-
-impl<UserCtx> From<Rc<dyn Fn(&UniformContext<UserCtx>) -> bool>>
-    for UniformShouldUpdateCallback<UserCtx>
-{
-    fn from(callback: Rc<dyn Fn(&UniformContext<UserCtx>) -> bool>) -> Self {
-        UniformShouldUpdateCallback(callback)
+impl<UserCtx: Clone> Default for UniformShouldUpdateCallback<UserCtx> {
+    fn default() -> Self {
+        Self(CallbackWithContext::new(Rc::new(|_| true)))
     }
 }

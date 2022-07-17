@@ -8,11 +8,7 @@ use std::hash::Hash;
 /// This contains one or more ids for a program and and id for a uniform that is associated with it
 /// At build time, these get linked together to find the uniform's associated location in the program
 #[derive(Clone)]
-pub struct UniformLink<ProgramId, UniformId, UserCtx>
-where
-    ProgramId: Id,
-    UniformId: Id,
-{
+pub struct UniformLink<ProgramId: Id, UniformId: Id, UserCtx: Clone> {
     program_ids: Vec<ProgramId>,
     uniform_id: UniformId,
     initialize_callback: UniformCallback<UserCtx>,
@@ -20,11 +16,7 @@ where
     should_update_callback: Option<UniformShouldUpdateCallback<UserCtx>>,
 }
 
-impl<ProgramId, UniformId, UserCtx> UniformLink<ProgramId, UniformId, UserCtx>
-where
-    ProgramId: Id,
-    UniformId: Id,
-{
+impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> UniformLink<ProgramId, UniformId, UserCtx> {
     pub fn new(
         program_ids: impl Into<ProgramIdBridge<ProgramId>>,
         uniform_id: UniformId,
@@ -80,10 +72,8 @@ where
     }
 }
 
-impl<ProgramId, UniformId, UserCtx> Debug for UniformLink<ProgramId, UniformId, UserCtx>
-where
-    ProgramId: Id,
-    UniformId: Id,
+impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Debug
+    for UniformLink<ProgramId, UniformId, UserCtx>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("UniformLink")
@@ -96,10 +86,8 @@ where
     }
 }
 
-impl<ProgramId, UniformId, UserCtx> Hash for UniformLink<ProgramId, UniformId, UserCtx>
-where
-    ProgramId: Id,
-    UniformId: Id,
+impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Hash
+    for UniformLink<ProgramId, UniformId, UserCtx>
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.program_ids.hash(state);
@@ -107,19 +95,15 @@ where
     }
 }
 
-impl<ProgramId, UniformId, UserCtx> PartialEq for UniformLink<ProgramId, UniformId, UserCtx>
-where
-    ProgramId: Id,
-    UniformId: Id,
+impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> PartialEq
+    for UniformLink<ProgramId, UniformId, UserCtx>
 {
     fn eq(&self, other: &Self) -> bool {
         self.program_ids == other.program_ids && self.uniform_id == other.uniform_id
     }
 }
 
-impl<ProgramId, UniformId, UserCtx> Eq for UniformLink<ProgramId, UniformId, UserCtx>
-where
-    ProgramId: Id,
-    UniformId: Id,
+impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Eq
+    for UniformLink<ProgramId, UniformId, UserCtx>
 {
 }
