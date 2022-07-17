@@ -1,4 +1,5 @@
 use crate::{AnimationCallback, Id, IdDefault, IdName, Renderer};
+use std::ops::Deref;
 
 #[derive(Clone)]
 pub struct AnimationData<
@@ -82,6 +83,22 @@ impl<
         self.is_animating
     }
 
+    pub fn renderer(
+        &self,
+    ) -> &Renderer<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        AttributeId,
+        TextureId,
+        FramebufferId,
+        UserCtx,
+    > {
+        &self.renderer
+    }
+
     pub fn new(
         callback: AnimationCallback<
             VertexShaderId,
@@ -112,5 +129,45 @@ impl<
             id: 0,
             is_animating: false,
         }
+    }
+}
+
+impl<
+        VertexShaderId: Id,
+        FragmentShaderId: Id,
+        ProgramId: Id,
+        UniformId: Id + IdName,
+        BufferId: Id,
+        AttributeId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
+        UserCtx,
+    > Deref
+    for AnimationData<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        AttributeId,
+        TextureId,
+        FramebufferId,
+        UserCtx,
+    >
+{
+    type Target = Renderer<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        AttributeId,
+        TextureId,
+        FramebufferId,
+        UserCtx,
+    >;
+
+    fn deref(&self) -> &Self::Target {
+        &self.renderer
     }
 }
