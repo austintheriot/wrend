@@ -35,7 +35,7 @@ where
         Self {
             program_ids,
             uniform_id,
-            initialize_callback,
+            initialize_callback: initialize_callback.into(),
             should_update_callback: None,
             update_callback: None,
         }

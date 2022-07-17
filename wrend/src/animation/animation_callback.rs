@@ -11,7 +11,7 @@ pub struct AnimationCallback<
     AttributeId: Id + IdName = IdDefault,
     TextureId: Id = IdDefault,
     FramebufferId: Id = IdDefault,
-    UserCtx: 'static = (),
+    UserCtx: Clone + 'static = (),
 > {
     callback: Rc<
         dyn Fn(
@@ -39,7 +39,7 @@ impl<
         AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx: 'static,
+        UserCtx: Clone + 'static,
     >
     AnimationCallback<
         VertexShaderId,

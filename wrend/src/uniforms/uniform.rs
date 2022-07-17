@@ -8,7 +8,7 @@ use std::hash::Hash;
 use web_sys::{WebGl2RenderingContext, WebGlProgram, WebGlUniformLocation};
 
 #[derive(Clone)]
-pub struct Uniform<ProgramId: Id, UniformId: Id, UserCtx> {
+pub struct Uniform<ProgramId: Id, UniformId: Id, UserCtx: Clone> {
     program_ids: Vec<ProgramId>,
     uniform_id: UniformId,
     uniform_locations: HashMap<ProgramId, WebGlUniformLocation>,
@@ -17,7 +17,7 @@ pub struct Uniform<ProgramId: Id, UniformId: Id, UserCtx> {
     should_update_callback: Option<UniformShouldUpdateCallback<UserCtx>>,
 }
 
-impl<ProgramId: Id, UniformId: Id, UserCtx> Uniform<ProgramId, UniformId, UserCtx> {
+impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Uniform<ProgramId, UniformId, UserCtx> {
     // @todo move into builder pattern
     pub fn new(
         program_ids: Vec<ProgramId>,
@@ -68,19 +68,20 @@ impl<ProgramId: Id, UniformId: Id, UserCtx> Uniform<ProgramId, UniformId, UserCt
         &self,
         gl: &WebGl2RenderingContext,
         now: f64,
-        user_ctx: Option<&UserCtx>,
+        user_ctx: Option<UserCtx>,
         programs: &HashMap<ProgramId, WebGlProgram>,
     ) {
         let uniform_locations = self.uniform_locations();
 
         for (program_id, uniform_location) in uniform_locations.iter() {
+            let user_ctx = user_ctx.clone();
             let program = programs
                 .get(program_id)
                 .expect("Program id should correspond to a saved WebGlProgram");
 
             gl.use_program(Some(program));
 
-            let ctx = UniformContext::new(gl, now, uniform_location, user_ctx);
+            let ctx = UniformContext::new(gl.clone(), now, uniform_location.clone(), user_ctx);
             let should_update_callback = self.should_update_callback().unwrap_or_default();
             if let Some(update_callback) = &self.update_callback {
                 if should_update_callback(&ctx) {
@@ -93,7 +94,9 @@ impl<ProgramId: Id, UniformId: Id, UserCtx> Uniform<ProgramId, UniformId, UserCt
     }
 }
 
-impl<ProgramId: Id, UniformId: Id, UserCtx> Debug for Uniform<ProgramId, UniformId, UserCtx> {
+impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Debug
+    for Uniform<ProgramId, UniformId, UserCtx>
+{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Uniform")
             .field("id", &self.uniform_id)
@@ -101,16 +104,18 @@ impl<ProgramId: Id, UniformId: Id, UserCtx> Debug for Uniform<ProgramId, Uniform
             .finish()
     }
 }
-impl<ProgramId: Id, UniformId: Id, UserCtx> Hash for Uniform<ProgramId, UniformId, UserCtx> {
+impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Hash for Uniform<ProgramId, UniformId, UserCtx> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.uniform_id.hash(state);
     }
 }
 
-impl<ProgramId: Id, UniformId: Id, UserCtx> PartialEq for Uniform<ProgramId, UniformId, UserCtx> {
+impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> PartialEq
+    for Uniform<ProgramId, UniformId, UserCtx>
+{
     fn eq(&self, other: &Self) -> bool {
         self.uniform_id == other.uniform_id && self.uniform_locations == other.uniform_locations
     }
 }
 
-impl<ProgramId: Id, UniformId: Id, UserCtx> Eq for Uniform<ProgramId, UniformId, UserCtx> {}
+impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Eq for Uniform<ProgramId, UniformId, UserCtx> {}

@@ -125,7 +125,7 @@ impl<UserCtx> From<Rc<ProgramCreateCallbackType<UserCtx>>> for ProgramCreateCall
     }
 }
 
-impl<UserCtx: 'static>
+impl<UserCtx: Clone + 'static>
     From<fn(&ProgramCreateContext<UserCtx>) -> Result<WebGlProgram, CreateProgramError>>
     for ProgramCreateCallback<UserCtx>
 {

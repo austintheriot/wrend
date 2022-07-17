@@ -41,7 +41,7 @@ pub struct FramebufferLink<
     AttributeId: Id + IdName,
     TextureId: Id,
     FramebufferId: Id,
-    UserCtx: 'static,
+    UserCtx: Clone + 'static,
 > {
     framebuffer_id: FramebufferId,
     create_framebuffer_callback: CreateFramebufferCallback<
@@ -66,7 +66,7 @@ impl<
         AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx,
+        UserCtx: Clone,
     >
     FramebufferLink<
         VertexShaderId,
@@ -136,7 +136,7 @@ impl<
         AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx,
+        UserCtx: Clone,
     > Debug
     for FramebufferLink<
         VertexShaderId,
@@ -166,7 +166,7 @@ impl<
         AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx,
+        UserCtx: Clone,
     > Hash
     for FramebufferLink<
         VertexShaderId,
@@ -194,7 +194,7 @@ impl<
         AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx,
+        UserCtx: Clone,
     > PartialEq
     for FramebufferLink<
         VertexShaderId,
@@ -222,7 +222,7 @@ impl<
         AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx,
+        UserCtx: Clone,
     > Eq
     for FramebufferLink<
         VertexShaderId,

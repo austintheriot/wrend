@@ -23,7 +23,7 @@ pub struct Renderer<
     AttributeId: Id + IdName = IdDefault,
     TextureId: Id = IdDefault,
     FramebufferId: Id = IdDefault,
-    UserCtx: 'static = (),
+    UserCtx: Clone + 'static = (),
 > {
     canvas: HtmlCanvasElement,
     gl: WebGl2RenderingContext,
@@ -59,7 +59,7 @@ impl<
         AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx,
+        UserCtx: Clone,
     >
     Renderer<
         VertexShaderId,
@@ -149,7 +149,7 @@ impl<
             .get(uniform_id)
             .expect("UniformId should exist in registered uniforms");
 
-        uniform.update(gl, now, user_ctx, programs);
+        uniform.update(gl, now, user_ctx.map(Clone::clone), programs);
 
         self
     }
@@ -356,7 +356,7 @@ pub struct RendererBuilder<
     AttributeId: Id + IdName = IdDefault,
     TextureId: Id = IdDefault,
     FramebufferId: Id = IdDefault,
-    UserCtx: 'static = (),
+    UserCtx: Clone + 'static = (),
 > {
     canvas: Option<HtmlCanvasElement>,
     gl: Option<WebGl2RenderingContext>,
@@ -414,7 +414,7 @@ impl<
         AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx: 'static,
+        UserCtx: Clone + 'static,
     >
     RendererBuilder<
         VertexShaderId,
@@ -639,7 +639,7 @@ impl<
         AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx,
+        UserCtx: Clone,
     >
     RendererBuilder<
         VertexShaderId,
@@ -743,7 +743,7 @@ impl<
             .as_ref()
             .ok_or(RendererBuilderError::NoContextBuildUniformsError)?;
         let now = Self::now();
-        let user_ctx = self.user_ctx.as_ref();
+        let user_ctx = self.user_ctx.as_ref().map(Clone::clone);
         let initialize_callback = uniform_link.initialize_callback();
         let should_update_callback = uniform_link.should_update_callback();
         let update_callback = uniform_link.update_callback();
@@ -760,9 +760,10 @@ impl<
             let uniform_location = gl
                 .get_uniform_location(program, &uniform_id.name())
                 .ok_or(RendererBuilderError::UniformLocationNotFoundBuildUniformsError)?;
-            let uniform_context = UniformContext::new(gl, now, &uniform_location, user_ctx);
+            let uniform_context =
+                UniformContext::new(gl.clone(), now, uniform_location.clone(), user_ctx.clone());
             (initialize_callback)(&uniform_context);
-            uniform_locations.insert(program_id.to_owned(), uniform_location);
+            uniform_locations.insert(program_id.to_owned(), uniform_location.clone());
 
             gl.use_program(None);
         }
@@ -990,7 +991,7 @@ impl<
         AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx,
+        UserCtx: Clone,
     > Default
     for RendererBuilder<
         VertexShaderId,

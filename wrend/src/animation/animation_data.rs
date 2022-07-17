@@ -11,7 +11,7 @@ pub struct AnimationData<
     AttributeId: Id + IdName = IdDefault,
     TextureId: Id = IdDefault,
     FramebufferId: Id = IdDefault,
-    UserCtx: 'static = (),
+    UserCtx: Clone + 'static = (),
 > {
     id: i32,
     callback: AnimationCallback<
@@ -48,7 +48,7 @@ impl<
         AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx: 'static,
+        UserCtx: Clone + 'static,
     >
     AnimationData<
         VertexShaderId,
@@ -141,7 +141,7 @@ impl<
         AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx,
+        UserCtx: Clone,
     > Deref
     for AnimationData<
         VertexShaderId,

@@ -14,7 +14,6 @@ pub type CallbackWithContextDefaultReturnType = ();
 pub type CallbackWithContextFnType<Ctx, Returns = CallbackWithContextDefaultReturnType> =
     dyn Fn(&Ctx) -> Returns;
 
-#[derive(Clone)]
 /// Wrapper around a callback to give it a static lifetime and more easily move it around in memory
 pub struct CallbackWithContext<Ctx, Returns = CallbackWithContextDefaultReturnType> {
     callback: Rc<CallbackWithContextFnType<Ctx, Returns>>,
@@ -74,6 +73,15 @@ impl<Ctx> Ord for CallbackWithContext<Ctx> {
 impl<Ctx> Hash for CallbackWithContext<Ctx> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.uuid.hash(state);
+    }
+}
+
+impl<Ctx> Clone for CallbackWithContext<Ctx> {
+    fn clone(&self) -> Self {
+        Self {
+            callback: self.callback.clone(),
+            uuid: self.uuid.clone(),
+        }
     }
 }
 

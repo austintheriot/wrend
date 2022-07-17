@@ -9,12 +9,12 @@ use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 pub type BufferCreateCallback<UserCtx> = Rc<dyn Fn(&BufferCreateContext<UserCtx>) -> WebGlBuffer>;
 
 #[derive(Clone)]
-pub struct BufferLink<BufferId: Id, UserCtx: 'static> {
+pub struct BufferLink<BufferId: Id, UserCtx: Clone + 'static> {
     buffer_id: BufferId,
     create_buffer_callback: BufferCreateCallback<UserCtx>,
 }
 
-impl<BufferId: Id, UserCtx> BufferLink<BufferId, UserCtx> {
+impl<BufferId: Id, UserCtx: Clone> BufferLink<BufferId, UserCtx> {
     pub fn new(
         buffer_id: impl Into<BufferId>,
         create_buffer_callback: BufferCreateCallback<UserCtx>,
@@ -40,7 +40,7 @@ impl<BufferId: Id, UserCtx> BufferLink<BufferId, UserCtx> {
     }
 }
 
-impl<BufferId: Id, UserCtx> Debug for BufferLink<BufferId, UserCtx> {
+impl<BufferId: Id, UserCtx: Clone> Debug for BufferLink<BufferId, UserCtx> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("BufferLink")
             .field("buffer_id", &self.buffer_id)
@@ -48,16 +48,16 @@ impl<BufferId: Id, UserCtx> Debug for BufferLink<BufferId, UserCtx> {
     }
 }
 
-impl<BufferId: Id, UserCtx> Hash for BufferLink<BufferId, UserCtx> {
+impl<BufferId: Id, UserCtx: Clone> Hash for BufferLink<BufferId, UserCtx> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.buffer_id.hash(state);
     }
 }
 
-impl<BufferId: Id, UserCtx> PartialEq for BufferLink<BufferId, UserCtx> {
+impl<BufferId: Id, UserCtx: Clone> PartialEq for BufferLink<BufferId, UserCtx> {
     fn eq(&self, other: &Self) -> bool {
         self.buffer_id == other.buffer_id
     }
 }
 
-impl<BufferId: Id, UserCtx> Eq for BufferLink<BufferId, UserCtx> {}
+impl<BufferId: Id, UserCtx: Clone> Eq for BufferLink<BufferId, UserCtx> {}

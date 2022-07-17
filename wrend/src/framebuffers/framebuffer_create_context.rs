@@ -14,7 +14,7 @@ pub struct FramebufferCreateContext<
     AttributeId: Id + IdName,
     TextureId: Id,
     FramebufferId: Id,
-    UserCtx: 'static,
+    UserCtx: Clone + 'static,
 > {
     gl: &'a WebGl2RenderingContext,
     now: f64,
@@ -42,7 +42,7 @@ impl<
         AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx,
+        UserCtx: Clone,
     >
     FramebufferCreateContext<
         'a,

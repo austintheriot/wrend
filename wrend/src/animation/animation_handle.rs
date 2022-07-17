@@ -15,7 +15,7 @@ pub struct AnimationHandle<
     AttributeId: Id + IdName,
     TextureId: Id,
     FramebufferId: Id,
-    UserCtx: 'static,
+    UserCtx: Clone + 'static,
 > {
     animation_data: Rc<
         RefCell<
@@ -43,7 +43,7 @@ impl<
         AttributeId: 'static + Id + IdName,
         TextureId: 'static + Id,
         FramebufferId: 'static + Id,
-        UserCtx: 'static,
+        UserCtx: Clone + 'static,
     >
     AnimationHandle<
         VertexShaderId,
@@ -140,7 +140,7 @@ impl<
         AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
-        UserCtx,
+        UserCtx: Clone,
     > Drop
     for AnimationHandle<
         VertexShaderId,

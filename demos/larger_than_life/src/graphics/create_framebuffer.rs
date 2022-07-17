@@ -10,7 +10,7 @@ pub fn make_create_frame_buffer<
     UniformId: Id + IdName,
     BufferId: Id,
     FramebufferId: Id,
-    UserCtx: 'static,
+    UserCtx: Clone + 'static,
 >(
     texture_id: AppTextureId,
 ) -> Rc<
