@@ -6,7 +6,7 @@ use wrend::{
     constants::quad::QUAD,
     renderer::{
         attribute_link::AttributeLink, default_id::DefaultId, id::Id, id_name::IdName,
-        program_link::ProgramLink, render_callback::RenderCallback, renderer::Renderer,
+        program_link::ProgramLink, render_callback::RenderCallback, renderer::Renderer, buffer_link::BufferLink, buffer_create_context::BufferCreateContext,
     },
 };
 use yew::{
@@ -42,17 +42,24 @@ impl IdName for BufferId {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
-pub enum ShaderId {
-    Vertex,
-    Fragment,
-}
+#[derive(Clone, Default, Copy, PartialEq, Eq, Hash, Debug)]
+pub struct VertexShaderId;
 
-impl Id for ShaderId {}
+impl Id for VertexShaderId {}
 
-impl Default for ShaderId {
-    fn default() -> Self {
-        Self::Vertex
+#[derive(Clone, Default, Copy, PartialEq, Eq, Hash, Debug)]
+pub struct FragmentShaderId;
+
+impl Id for FragmentShaderId {}
+
+#[derive(Clone, Default, Copy, PartialEq, Eq, Hash, Debug)]
+pub struct PositionAttributeId;
+
+impl Id for PositionAttributeId {}
+
+impl IdName for PositionAttributeId {
+    fn name(&self) -> String {
+        String::from("a_position")
     }
 }
 
@@ -71,18 +78,15 @@ pub fn app() -> Html {
 
                 let program_link = ProgramLink::new(
                     ProgramId,
-                    ShaderId::Vertex,
-                    ShaderId::Fragment,
+                    VertexShaderId,
+                    FragmentShaderId,
                     Default::default(),
                 );
 
-                let a_position_link = AttributeLink::new(
-                    ProgramId,
+                let vertex_buffer_link = BufferLink::new(
                     BufferId::VertexBuffer,
-                    Rc::new(|ctx| {
+                    Rc::new(|ctx: &BufferCreateContext<UseStateHandle<i32>>| {
                         let gl = ctx.gl();
-                        let attribute_location = ctx.attribute_location();
-
                         let buffer = gl.create_buffer().unwrap();
                         gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&buffer));
 
@@ -94,6 +98,20 @@ pub fn app() -> Html {
                             &vertex_array,
                             WebGl2RenderingContext::STATIC_DRAW,
                         );
+
+                        buffer
+                    }),
+                );
+
+                let a_position_link = AttributeLink::new(
+                    ProgramId,
+                    BufferId::VertexBuffer,
+                    PositionAttributeId,
+                    Rc::new(|ctx| {
+                        let gl = ctx.gl();
+                        let attribute_location = ctx.attribute_location();
+                        let webgl_buffer = ctx.webgl_buffer();
+                        gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&webgl_buffer));
                         gl.vertex_attrib_pointer_with_i32(
                             attribute_location.into(),
                             2,
@@ -102,8 +120,6 @@ pub fn app() -> Html {
                             0,
                             0,
                         );
-
-                        buffer
                     }),
                     Rc::new(|_| {}),
                     Rc::new(|_| false),
@@ -111,16 +127,16 @@ pub fn app() -> Html {
 
                 let render_callback = RenderCallback::new(Rc::new(
                     |renderer: &Renderer<
-                        ShaderId,
-                        ShaderId,
+                        VertexShaderId,
+                        FragmentShaderId,
                         ProgramId,
                         DefaultId,
                         BufferId,
+                        PositionAttributeId,
                         DefaultId,
                         DefaultId,
                         UseStateHandle<i32>,
                     >| {
-                        info!("Calling render callback");
                         let gl = renderer.gl();
                         let canvas: HtmlCanvasElement = gl.canvas().unwrap().dyn_into().unwrap();
 
@@ -149,9 +165,10 @@ pub fn app() -> Html {
                     .set_user_ctx(example_state)
                     .set_render_callback(render_callback)
                     .add_program_link(program_link)
-                    .add_vertex_shader_src(ShaderId::Vertex, VERTEX_SHADER.to_string())
-                    .add_fragment_shader_src(ShaderId::Fragment, FRAGMENT_SHADER.to_string())
-                    .add_buffer_link(a_position_link);
+                    .add_vertex_shader_src(VertexShaderId, VERTEX_SHADER.to_string())
+                    .add_fragment_shader_src(FragmentShaderId, FRAGMENT_SHADER.to_string())
+                    .add_buffer_link(vertex_buffer_link)
+                    .add_attribute_link(a_position_link);
 
                 let renderer = renderer_builder
                     .build()

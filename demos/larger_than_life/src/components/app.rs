@@ -1,9 +1,10 @@
 use crate::{
     graphics::{
-        buffer_id::BufferId, create_buffer::create_vertex_buffer,
-        create_framebuffer::make_create_frame_buffer, create_texture::create_texture,
+        attribute_id::AttributeId, buffer_id::BufferId, create_buffer::create_vertex_buffer,
+        create_framebuffer::make_create_frame_buffer,
+        create_position_attribute::create_position_attribute, create_texture::create_texture,
         framebuffer_id::FramebufferId, program_id::ProgramId, render::render, shader_id::ShaderId,
-        texture_id::TextureId, uniform_id::UniformId, attribute_id::AttributeId, create_position_attribute::create_position_attribute,
+        texture_id::TextureId, uniform_id::UniformId,
     },
     state::render_state::RenderState,
 };
@@ -11,15 +12,9 @@ use std::rc::Rc;
 use ui::route::Route;
 use web_sys::HtmlCanvasElement;
 use wrend::renderer::{
-    animation_callback::AnimationCallback,
-    attribute_link::AttributeLink,
-    buffer_link::{BufferCreateCallback, BufferLink},
-    framebuffer_link::FramebufferLink,
-    program_link::ProgramLink,
-    render_callback::RenderCallback,
-    renderer::Renderer,
-    texture_link::TextureLink,
-    uniform_callback::UniformCallback,
+    animation_callback::AnimationCallback, attribute_link::AttributeLink, buffer_link::BufferLink,
+    framebuffer_link::FramebufferLink, program_link::ProgramLink, render_callback::RenderCallback,
+    renderer::Renderer, texture_link::TextureLink, uniform_callback::UniformCallback,
     uniform_link::UniformLink,
 };
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
@@ -58,12 +53,10 @@ pub fn app() -> Html {
                     Default::default(),
                 );
 
-                let vertex_buffer = BufferLink::new(
-                    BufferId::VertexBuffer,
-                    BufferCreateCallback::new(Rc::new(create_vertex_buffer)),
-                );
+                let vertex_buffer =
+                    BufferLink::new(BufferId::VertexBuffer, Rc::new(create_vertex_buffer));
 
-                let a_position_link = AttributeLink::new(
+                let attribute_position_gof_link = AttributeLink::new(
                     ProgramId::GameOfLife,
                     BufferId::VertexBuffer,
                     AttributeId::APosition,
@@ -112,7 +105,7 @@ pub fn app() -> Html {
                     .add_program_link(game_of_life_program_link)
                     .add_program_link(pass_through_program_link)
                     .add_buffer_link(vertex_buffer)
-                    .add_attribute_link(a_position_link)
+                    .add_attribute_link(attribute_position_gof_link)
                     .add_uniform_link(u_texture)
                     .add_texture_link(texture_a_link)
                     .add_texture_link(texture_b_link)

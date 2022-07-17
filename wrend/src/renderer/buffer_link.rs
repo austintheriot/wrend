@@ -4,7 +4,7 @@ use std::hash::Hash;
 use std::rc::Rc;
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
-pub type BufferCreateCallback<UserCtx> = Rc<dyn Fn(BufferCreateContext<UserCtx>) -> WebGlBuffer>;
+pub type BufferCreateCallback<UserCtx> = Rc<dyn Fn(&BufferCreateContext<UserCtx>) -> WebGlBuffer>;
 
 #[derive(Clone)]
 pub struct BufferLink<BufferId: Id, UserCtx: 'static> {
@@ -15,11 +15,11 @@ pub struct BufferLink<BufferId: Id, UserCtx: 'static> {
 impl<BufferId: Id, UserCtx> BufferLink<BufferId, UserCtx> {
     pub fn new(
         buffer_id: impl Into<BufferId>,
-        create_buffer_callback: impl Into<BufferCreateCallback<UserCtx>>,
+        create_buffer_callback: BufferCreateCallback<UserCtx>,
     ) -> Self {
         Self {
             buffer_id: buffer_id.into(),
-            create_buffer_callback: create_buffer_callback.into(),
+            create_buffer_callback,
         }
     }
 
@@ -34,7 +34,7 @@ impl<BufferId: Id, UserCtx> BufferLink<BufferId, UserCtx> {
         user_ctx: Option<&UserCtx>,
     ) -> WebGlBuffer {
         let framebuffer_create_context = BufferCreateContext::new(gl, now, user_ctx);
-        (self.create_buffer_callback)(framebuffer_create_context)
+        (self.create_buffer_callback)(&framebuffer_create_context)
     }
 }
 

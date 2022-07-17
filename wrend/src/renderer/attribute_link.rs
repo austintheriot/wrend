@@ -8,8 +8,7 @@ use std::hash::Hash;
 use std::rc::Rc;
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
-pub type AttributeCreateCallback<UserCtx> =
-    Rc<dyn Fn(AttributeCreateContext<UserCtx>) -> WebGlBuffer>;
+pub type AttributeCreateCallback<UserCtx> = Rc<dyn Fn(AttributeCreateContext<UserCtx>)>;
 
 #[derive(Clone)]
 pub struct AttributeLink<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx> {
@@ -54,14 +53,14 @@ impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx>
         &self.attribute_id
     }
 
-    pub fn create_attribute(
+    pub fn configure_attribute(
         &self,
         gl: &WebGl2RenderingContext,
         now: f64,
         webgl_buffer: &WebGlBuffer,
         attribute_location: &AttributeLocation,
         user_ctx: Option<&UserCtx>,
-    ) -> WebGlBuffer {
+    ) {
         let attribute_create_context =
             AttributeCreateContext::new(gl, now, webgl_buffer, attribute_location, user_ctx);
         (self.attribute_create_callback)(attribute_create_context)

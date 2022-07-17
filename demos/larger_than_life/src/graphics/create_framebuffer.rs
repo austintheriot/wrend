@@ -1,4 +1,4 @@
-use super::texture_id::TextureId as AppTextureId;
+use super::{texture_id::TextureId as AppTextureId, attribute_id::AttributeId};
 use std::rc::Rc;
 use web_sys::{WebGl2RenderingContext, WebGlFramebuffer};
 use wrend::renderer::{
@@ -23,13 +23,14 @@ pub fn make_create_frame_buffer<
             ProgramId,
             UniformId,
             BufferId,
+            AttributeId,
             AppTextureId,
             FramebufferId,
             UserCtx,
         >,
     ) -> WebGlFramebuffer,
 > {
-    let callback = move |ctx: FramebufferCreateContext<_, _, _, _, _, _, _, _>| {
+    let callback = move |ctx: FramebufferCreateContext<_, _, _, _, _, _, _, _, _>| {
         let texture_a = ctx
             .renderer_builder()
             .texture(&texture_id)

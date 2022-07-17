@@ -1,11 +1,5 @@
-use web_sys::{WebGl2RenderingContext, WebGlBuffer};
-use wrend::{
-    constants::quad::QUAD,
-    renderer::{
-        attribute_create_context::AttributeCreateContext,
-        buffer_create_context::AttributeCreateContext,
-    },
-};
+use web_sys::WebGl2RenderingContext;
+use wrend::renderer::attribute_create_context::AttributeCreateContext;
 
 pub fn create_position_attribute<UserCtx>(ctx: AttributeCreateContext<UserCtx>) {
     let gl = ctx.gl();
@@ -21,6 +15,4 @@ pub fn create_position_attribute<UserCtx>(ctx: AttributeCreateContext<UserCtx>) 
         0,
         0,
     );
-
-    buffer
 }

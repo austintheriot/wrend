@@ -1,6 +1,6 @@
 use super::{
     buffer_id::BufferId, framebuffer_id::FramebufferId, program_id::ProgramId, shader_id::ShaderId,
-    texture_id::TextureId, uniform_id::UniformId,
+    texture_id::TextureId, uniform_id::UniformId, attribute_id::AttributeId,
 };
 use crate::state::render_state::RenderState;
 use std::{cell::RefCell, rc::Rc};
@@ -30,6 +30,7 @@ pub fn render(
         ProgramId,
         UniformId,
         BufferId,
+        AttributeId,
         TextureId,
         FramebufferId,
         Rc<RefCell<RenderState>>,
