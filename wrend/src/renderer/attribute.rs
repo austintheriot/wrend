@@ -1,34 +1,34 @@
 use super::attribute_location::AttributeLocation;
-use super::buffer_context::BufferContext;
+use super::attribute_context::AttributeContext;
 use super::id::Id;
 use super::id_name::IdName;
 use std::hash::Hash;
 use std::{fmt::Debug, rc::Rc};
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
-pub type BufferUpdateCallback<UserCtx> = Rc<dyn Fn(&BufferContext<UserCtx>)>;
+pub type AttributeUpdateCallback<UserCtx> = Rc<dyn Fn(&AttributeContext<UserCtx>)>;
 
-pub type BufferShouldUpdateCallback<UserCtx> = Rc<dyn Fn(&BufferContext<UserCtx>) -> bool>;
+pub type AttributeShouldUpdateCallback<UserCtx> = Rc<dyn Fn(&AttributeContext<UserCtx>) -> bool>;
 
 #[derive(Clone)]
-pub struct Buffer<ProgramId: Id, BufferId: Id + IdName, UserCtx> {
+pub struct Attribute<ProgramId: Id, BufferId: Id + IdName, UserCtx> {
     program_id: ProgramId,
     buffer_id: BufferId,
     webgl_buffer: WebGlBuffer,
     attribute_location: AttributeLocation,
-    update_callback: BufferUpdateCallback<UserCtx>,
-    should_update_callback: BufferShouldUpdateCallback<UserCtx>,
+    update_callback: AttributeUpdateCallback<UserCtx>,
+    should_update_callback: AttributeShouldUpdateCallback<UserCtx>,
 }
 
-impl<ProgramId: Id, BufferId: Id + IdName, UserCtx> Buffer<ProgramId, BufferId, UserCtx> {
+impl<ProgramId: Id, BufferId: Id + IdName, UserCtx> Attribute<ProgramId, BufferId, UserCtx> {
     // @todo move into builder pattern
     pub fn new(
         program_id: ProgramId,
         buffer_id: BufferId,
         webgl_buffer: WebGlBuffer,
         attribute_location: AttributeLocation,
-        update_callback: BufferUpdateCallback<UserCtx>,
-        should_update_callback: BufferShouldUpdateCallback<UserCtx>,
+        update_callback: AttributeUpdateCallback<UserCtx>,
+        should_update_callback: AttributeShouldUpdateCallback<UserCtx>,
     ) -> Self {
         Self {
             program_id,
@@ -62,7 +62,7 @@ impl<ProgramId: Id, BufferId: Id + IdName, UserCtx> Buffer<ProgramId, BufferId, 
         now: f64,
         user_ctx: Option<&UserCtx>,
     ) -> bool {
-        let ctx = BufferContext::new(
+        let ctx = AttributeContext::new(
             gl,
             now,
             self.webgl_buffer(),
@@ -73,7 +73,7 @@ impl<ProgramId: Id, BufferId: Id + IdName, UserCtx> Buffer<ProgramId, BufferId, 
     }
 
     pub fn update(&self, gl: &WebGl2RenderingContext, now: f64, user_ctx: Option<&UserCtx>) {
-        let ctx = BufferContext::new(
+        let ctx = AttributeContext::new(
             gl,
             now,
             self.webgl_buffer(),
@@ -84,7 +84,7 @@ impl<ProgramId: Id, BufferId: Id + IdName, UserCtx> Buffer<ProgramId, BufferId, 
     }
 }
 
-impl<ProgramId: Id, BufferId: Id + IdName, UserCtx> Debug for Buffer<ProgramId, BufferId, UserCtx> {
+impl<ProgramId: Id, BufferId: Id + IdName, UserCtx> Debug for Attribute<ProgramId, BufferId, UserCtx> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Buffer")
             .field("program_id", &self.program_id)
@@ -94,14 +94,14 @@ impl<ProgramId: Id, BufferId: Id + IdName, UserCtx> Debug for Buffer<ProgramId, 
             .finish()
     }
 }
-impl<ProgramId: Id, BufferId: Id + IdName, UserCtx> Hash for Buffer<ProgramId, BufferId, UserCtx> {
+impl<ProgramId: Id, BufferId: Id + IdName, UserCtx> Hash for Attribute<ProgramId, BufferId, UserCtx> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.buffer_id.hash(state);
     }
 }
 
 impl<ProgramId: Id, BufferId: Id + IdName, UserCtx> PartialEq
-    for Buffer<ProgramId, BufferId, UserCtx>
+    for Attribute<ProgramId, BufferId, UserCtx>
 {
     fn eq(&self, other: &Self) -> bool {
         self.program_id == other.program_id
@@ -113,4 +113,4 @@ impl<ProgramId: Id, BufferId: Id + IdName, UserCtx> PartialEq
     }
 }
 
-impl<ProgramId: Id, BufferId: Id + IdName, UserCtx> Eq for Buffer<ProgramId, BufferId, UserCtx> {}
+impl<ProgramId: Id, BufferId: Id + IdName, UserCtx> Eq for Attribute<ProgramId, BufferId, UserCtx> {}

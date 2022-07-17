@@ -10,7 +10,7 @@ use std::rc::Rc;
 use ui::route::Route;
 use web_sys::HtmlCanvasElement;
 use wrend::renderer::{
-    animation_callback::AnimationCallback, buffer_link::BufferLink,
+    animation_callback::AnimationCallback, attribute_link::AttributeLink,
     program_link::ProgramLinkBuilder, render_callback::RenderCallback, renderer::Renderer,
     texture_link::TextureLink, uniform_callback::UniformCallback, uniform_link::UniformLink,
 };
@@ -50,7 +50,7 @@ pub fn app() -> Html {
                     .build()
                     .expect("Should build PassThrough ProgramLink successfully");
 
-                let a_position_link = BufferLink::new(
+                let a_position_link = AttributeLink::new(
                     ProgramId::FlowField,
                     BufferId::VertexBuffer,
                     Rc::new(create_vertex_buffer),

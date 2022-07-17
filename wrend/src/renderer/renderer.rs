@@ -1,8 +1,8 @@
 use super::animation_callback::AnimationCallback;
 use super::animation_handle::AnimationHandle;
 use super::attribute_location::AttributeLocation;
-use super::buffer::Buffer;
-use super::buffer_link::BufferLink;
+use super::attribute::Attribute;
+use super::attribute_link::AttributeLink;
 use super::default_id::DefaultId;
 use super::framebuffer::Framebuffer;
 use super::framebuffer_link::FramebufferLink;
@@ -52,7 +52,7 @@ pub struct Renderer<
     >,
     uniforms: HashMap<UniformId, Uniform<ProgramId, UniformId, UserCtx>>,
     user_ctx: Option<UserCtx>,
-    buffers: HashMap<BufferId, Buffer<ProgramId, BufferId, UserCtx>>,
+    buffers: HashMap<BufferId, Attribute<ProgramId, BufferId, UserCtx>>,
     textures: HashMap<TextureId, Texture<TextureId>>,
     framebuffers: HashMap<FramebufferId, Framebuffer<FramebufferId>>,
 }
@@ -116,7 +116,7 @@ impl<
         &self.uniforms
     }
 
-    pub fn buffers(&self) -> &HashMap<BufferId, Buffer<ProgramId, BufferId, UserCtx>> {
+    pub fn buffers(&self) -> &HashMap<BufferId, Attribute<ProgramId, BufferId, UserCtx>> {
         &self.buffers
     }
 
@@ -362,8 +362,8 @@ pub struct RendererBuilder<
     programs: HashMap<ProgramId, WebGlProgram>,
     uniform_links: HashSet<UniformLink<ProgramId, UniformId, UserCtx>>,
     uniforms: HashMap<UniformId, Uniform<ProgramId, UniformId, UserCtx>>,
-    buffer_links: HashSet<BufferLink<ProgramId, BufferId, UserCtx>>,
-    buffers: HashMap<BufferId, Buffer<ProgramId, BufferId, UserCtx>>,
+    buffer_links: HashSet<AttributeLink<ProgramId, BufferId, UserCtx>>,
+    buffers: HashMap<BufferId, Attribute<ProgramId, BufferId, UserCtx>>,
     texture_links: HashSet<TextureLink<TextureId, UserCtx>>,
     textures: HashMap<TextureId, Texture<TextureId>>,
     framebuffer_links: HashSet<
@@ -514,9 +514,9 @@ impl<
     /// Saves a link that will be used to build a buffer/attribute pair at build time.
     pub fn add_buffer_link(
         &mut self,
-        buffer_link: impl Into<BufferLink<ProgramId, BufferId, UserCtx>>,
+        attribute_link: impl Into<AttributeLink<ProgramId, BufferId, UserCtx>>,
     ) -> &mut Self {
-        self.buffer_links.insert(buffer_link.into());
+        self.buffer_links.insert(attribute_link.into());
 
         self
     }
@@ -751,7 +751,7 @@ impl<
         Ok(uniform)
     }
 
-    /// Creates a WebGL buffer for each BufferLink that was supplied using the create_callback.
+    /// Creates a WebGL buffer for each AttributeLink that was supplied using the create_callback.
     fn create_buffers(&mut self) -> Result<&mut Self, RendererBuilderError> {
         let gl = self
             .gl
@@ -760,9 +760,9 @@ impl<
         let now = Self::now();
         let user_ctx = self.user_ctx.as_ref();
 
-        for buffer_link in &self.buffer_links {
-            let program_id = buffer_link.program_id().clone();
-            let buffer_id = buffer_link.buffer_id().clone();
+        for attribute_link in &self.buffer_links {
+            let program_id = attribute_link.program_id().clone();
+            let buffer_id = attribute_link.buffer_id().clone();
 
             let program = self
                 .programs
@@ -776,13 +776,13 @@ impl<
                     attribute_location => attribute_location.into(),
                 };
 
-            let webgl_buffer = buffer_link.create_buffer(gl, now, &attribute_location, user_ctx);
+            let webgl_buffer = attribute_link.create_buffer(gl, now, &attribute_location, user_ctx);
             gl.enable_vertex_attrib_array(attribute_location.into());
 
-            let update_callback = buffer_link.update_callback();
-            let should_update_callback = buffer_link.should_update_callback();
+            let update_callback = attribute_link.update_callback();
+            let should_update_callback = attribute_link.should_update_callback();
 
-            let buffer = Buffer::new(
+            let buffer = Attribute::new(
                 program_id,
                 buffer_id.clone(),
                 webgl_buffer,

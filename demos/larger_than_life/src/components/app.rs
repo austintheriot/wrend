@@ -11,7 +11,7 @@ use std::rc::Rc;
 use ui::route::Route;
 use web_sys::HtmlCanvasElement;
 use wrend::renderer::{
-    animation_callback::AnimationCallback, buffer_link::BufferLink,
+    animation_callback::AnimationCallback, attribute_link::AttributeLink,
     framebuffer_link::FramebufferLink, program_link::ProgramLink, render_callback::RenderCallback,
     renderer::Renderer, texture_link::TextureLink, uniform_callback::UniformCallback,
     uniform_link::UniformLink,
@@ -52,7 +52,7 @@ pub fn app() -> Html {
                     Default::default(),
                 );
 
-                let a_position_link = BufferLink::new(
+                let a_position_link = AttributeLink::new(
                     ProgramId::GameOfLife,
                     BufferId::VertexBuffer,
                     Rc::new(create_vertex_buffer),

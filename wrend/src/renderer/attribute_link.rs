@@ -1,28 +1,28 @@
 use super::attribute_location::AttributeLocation;
-use super::buffer::{BufferShouldUpdateCallback, BufferUpdateCallback};
-use super::buffer_create_context::BufferCreateContext;
+use super::attribute::{AttributeShouldUpdateCallback, AttributeUpdateCallback};
+use super::attribute_create_context::AttributeCreateContext;
 use super::id::Id;
 use std::fmt::Debug;
 use std::hash::Hash;
 use std::rc::Rc;
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
-pub type BufferCreateCallback<UserCtx> = Rc<dyn Fn(BufferCreateContext<UserCtx>) -> WebGlBuffer>;
+pub type AttributeCreateCallback<UserCtx> = Rc<dyn Fn(AttributeCreateContext<UserCtx>) -> WebGlBuffer>;
 
 #[derive(Clone)]
-pub struct BufferLink<ProgramId, BufferId, UserCtx>
+pub struct AttributeLink<ProgramId, BufferId, UserCtx>
 where
     ProgramId: Id,
     BufferId: Id,
 {
     program_id: ProgramId,
     buffer_id: BufferId,
-    create_buffer_callback: BufferCreateCallback<UserCtx>,
-    update_callback: BufferUpdateCallback<UserCtx>,
-    should_update_callback: BufferShouldUpdateCallback<UserCtx>,
+    attribute_create_callback: AttributeCreateCallback<UserCtx>,
+    update_callback: AttributeUpdateCallback<UserCtx>,
+    should_update_callback: AttributeShouldUpdateCallback<UserCtx>,
 }
 
-impl<ProgramId, BufferId, UserCtx> BufferLink<ProgramId, BufferId, UserCtx>
+impl<ProgramId, BufferId, UserCtx> AttributeLink<ProgramId, BufferId, UserCtx>
 where
     ProgramId: Id,
     BufferId: Id,
@@ -30,14 +30,14 @@ where
     pub fn new(
         program_id: ProgramId,
         buffer_id: BufferId,
-        create_buffer_callback: BufferCreateCallback<UserCtx>,
-        update_callback: BufferUpdateCallback<UserCtx>,
-        should_update_callback: BufferShouldUpdateCallback<UserCtx>,
+        attribute_create_callback: AttributeCreateCallback<UserCtx>,
+        update_callback: AttributeUpdateCallback<UserCtx>,
+        should_update_callback: AttributeShouldUpdateCallback<UserCtx>,
     ) -> Self {
         Self {
             program_id,
             buffer_id,
-            create_buffer_callback,
+            attribute_create_callback,
             update_callback,
             should_update_callback,
         }
@@ -58,26 +58,26 @@ where
         attribute_location: &AttributeLocation,
         user_ctx: Option<&UserCtx>,
     ) -> WebGlBuffer {
-        let buffer_create_context = BufferCreateContext::new(gl, now, attribute_location, user_ctx);
-        (self.create_buffer_callback)(buffer_create_context)
+        let attribute_create_context = AttributeCreateContext::new(gl, now, attribute_location, user_ctx);
+        (self.attribute_create_callback)(attribute_create_context)
     }
 
-    pub fn update_callback(&self) -> BufferUpdateCallback<UserCtx> {
+    pub fn update_callback(&self) -> AttributeUpdateCallback<UserCtx> {
         Rc::clone(&self.update_callback)
     }
 
-    pub fn should_update_callback(&self) -> BufferShouldUpdateCallback<UserCtx> {
+    pub fn should_update_callback(&self) -> AttributeShouldUpdateCallback<UserCtx> {
         Rc::clone(&self.should_update_callback)
     }
 }
 
-impl<ProgramId, BufferId, UserCtx> Debug for BufferLink<ProgramId, BufferId, UserCtx>
+impl<ProgramId, BufferId, UserCtx> Debug for AttributeLink<ProgramId, BufferId, UserCtx>
 where
     ProgramId: Id,
     BufferId: Id,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("BufferLink")
+        f.debug_struct("AttributeLink")
             .field("program_id", &self.program_id)
             .field("buffer_id", &self.buffer_id)
             .field("update_callback", &"[not shown]")
@@ -86,7 +86,7 @@ where
     }
 }
 
-impl<ProgramId, BufferId, UserCtx> Hash for BufferLink<ProgramId, BufferId, UserCtx>
+impl<ProgramId, BufferId, UserCtx> Hash for AttributeLink<ProgramId, BufferId, UserCtx>
 where
     ProgramId: Id,
     BufferId: Id,
@@ -97,7 +97,7 @@ where
     }
 }
 
-impl<ProgramId, BufferId, UserCtx> PartialEq for BufferLink<ProgramId, BufferId, UserCtx>
+impl<ProgramId, BufferId, UserCtx> PartialEq for AttributeLink<ProgramId, BufferId, UserCtx>
 where
     ProgramId: Id,
     BufferId: Id,
@@ -110,7 +110,7 @@ where
     }
 }
 
-impl<ProgramId, BufferId, UserCtx> Eq for BufferLink<ProgramId, BufferId, UserCtx>
+impl<ProgramId, BufferId, UserCtx> Eq for AttributeLink<ProgramId, BufferId, UserCtx>
 where
     ProgramId: Id,
     BufferId: Id,

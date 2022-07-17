@@ -3,7 +3,7 @@ use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
 /// This is the context object that is passed to each buffer's update callback
 #[derive(Debug, Clone)]
-pub struct BufferContext<'a, UserCtx> {
+pub struct AttributeContext<'a, UserCtx> {
     gl: &'a WebGl2RenderingContext,
     now: f64,
     buffer: &'a WebGlBuffer,
@@ -11,7 +11,7 @@ pub struct BufferContext<'a, UserCtx> {
     user_ctx: Option<&'a UserCtx>,
 }
 
-impl<'a, UserCtx> BufferContext<'a, UserCtx> {
+impl<'a, UserCtx> AttributeContext<'a, UserCtx> {
     /// @todo: make this into a builder pattern
     pub fn new(
         gl: &'a WebGl2RenderingContext,

@@ -1,7 +1,7 @@
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
-use wrend::{constants::quad::QUAD, renderer::buffer_create_context::BufferCreateContext};
+use wrend::{constants::quad::QUAD, renderer::attribute_create_context::AttributeCreateContext};
 
-pub fn create_vertex_buffer<UserCtx>(ctx: BufferCreateContext<UserCtx>) -> WebGlBuffer {
+pub fn create_vertex_buffer<UserCtx>(ctx: AttributeCreateContext<UserCtx>) -> WebGlBuffer {
     let gl = ctx.gl();
     let attribute_location = ctx.attribute_location();
 
