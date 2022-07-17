@@ -1,6 +1,6 @@
 use super::{
-    buffer_id::BufferId, framebuffer_id::FramebufferId, program_id::ProgramId, shader_id::ShaderId,
-    texture_id::TextureId, uniform_id::UniformId,
+    buffer_id::BufferId, framebuffer_id::FramebufferId, program_id::ProgramId, vertex_shader_id::VertexShaderId,
+    texture_id::TextureId, uniform_id::UniformId, attribute_id::AttributeId, fragment_shader_id::FragmentShaderId,
 };
 use crate::state::render_state::RenderState;
 use std::{cell::RefCell, rc::Rc};
@@ -25,11 +25,12 @@ fn draw(gl: &WebGl2RenderingContext, canvas: &HtmlCanvasElement) {
 
 pub fn render(
     renderer: &Renderer<
-        ShaderId,
-        ShaderId,
+        VertexShaderId,
+        FragmentShaderId,
         ProgramId,
         UniformId,
         BufferId,
+        AttributeId,
         TextureId,
         FramebufferId,
         Rc<RefCell<RenderState>>,

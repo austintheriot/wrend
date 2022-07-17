@@ -1,6 +1,6 @@
 use super::{
     buffer_id::BufferId, fragment_shader_id::FragmentShaderId, program_id::ProgramId,
-    texture_id::TextureId, uniform_id::UniformId, vertex_shader_id::VertexShaderId,
+    texture_id::TextureId, uniform_id::UniformId, vertex_shader_id::VertexShaderId, attribute_id::AttributeId,
 };
 use crate::state::render_state::RenderState;
 use std::{cell::RefCell, rc::Rc};

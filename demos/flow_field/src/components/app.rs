@@ -1,6 +1,7 @@
 use crate::{
     graphics::{
-        buffer_id::BufferId, create_buffer::create_vertex_buffer, create_texture::create_texture,
+        attribute_id::AttributeId, buffer_id::BufferId, create_buffer::create_vertex_buffer,
+        create_position_attribute::create_position_attribute, create_texture::create_texture,
         fragment_shader_id::FragmentShaderId, program_id::ProgramId, render::render,
         texture_id::TextureId, uniform_id::UniformId, vertex_shader_id::VertexShaderId,
     },
@@ -10,7 +11,7 @@ use std::rc::Rc;
 use ui::route::Route;
 use web_sys::HtmlCanvasElement;
 use wrend::renderer::{
-    animation_callback::AnimationCallback, attribute_link::AttributeLink,
+    animation_callback::AnimationCallback, attribute_link::AttributeLink, buffer_link::BufferLink,
     program_link::ProgramLinkBuilder, render_callback::RenderCallback, renderer::Renderer,
     texture_link::TextureLink, uniform_callback::UniformCallback, uniform_link::UniformLink,
 };
@@ -50,10 +51,14 @@ pub fn app() -> Html {
                     .build()
                     .expect("Should build PassThrough ProgramLink successfully");
 
+                let vertex_buffer_link =
+                    BufferLink::new(BufferId::VertexBuffer, Rc::new(create_vertex_buffer));
+
                 let a_position_link = AttributeLink::new(
                     ProgramId::FlowField,
                     BufferId::VertexBuffer,
-                    Rc::new(create_vertex_buffer),
+                    AttributeId,
+                    Rc::new(create_position_attribute),
                     Rc::new(|_| {}),
                     Rc::new(|_| false),
                 );
@@ -90,7 +95,8 @@ pub fn app() -> Html {
                     )
                     .add_program_link(flow_field_program_link)
                     .add_program_link(pass_through_program_link)
-                    .add_buffer_link(a_position_link)
+                    .add_buffer_link(vertex_buffer_link)
+                    .add_attribute_link(a_position_link)
                     .add_uniform_link(u_texture)
                     .add_texture_link(noise_texture_link);
 

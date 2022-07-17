@@ -1,16 +1,15 @@
 use wrend::renderer::id::Id;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
-pub enum ShaderId {
-    Vertex,
+pub enum FragmentShaderId {
     GameOfLife,
     PassThrough,
 }
 
-impl Id for ShaderId {}
+impl Id for FragmentShaderId {}
 
-impl Default for ShaderId {
+impl Default for FragmentShaderId {
     fn default() -> Self {
-        Self::Vertex
+        Self::PassThrough
     }
 }

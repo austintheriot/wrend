@@ -53,7 +53,7 @@ pub fn app() -> Html {
                     Default::default(),
                 );
 
-                let vertex_buffer =
+                let vertex_buffer_link =
                     BufferLink::new(BufferId::VertexBuffer, Rc::new(create_vertex_buffer));
 
                 let attribute_position_gof_link = AttributeLink::new(
@@ -104,7 +104,7 @@ pub fn app() -> Html {
                     )
                     .add_program_link(game_of_life_program_link)
                     .add_program_link(pass_through_program_link)
-                    .add_buffer_link(vertex_buffer)
+                    .add_buffer_link(vertex_buffer_link)
                     .add_attribute_link(attribute_position_gof_link)
                     .add_uniform_link(u_texture)
                     .add_texture_link(texture_a_link)

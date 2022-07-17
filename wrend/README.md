@@ -26,6 +26,7 @@ The following use cases should guide the development of this library:
     ---> Create buffer THEN initialize attributes as separate links / processes
 - Attribute locations are not persisted across programs:
     - Instead, use VAO to save attribute pointer information for each program
+    - Allow one attribute to "bind" to multiple programs like a uniform
     - Enable a `switch_program` utility on the `renderer` that calls: `use_program` and binds the correct VAO
             
 - Move files that are in Renderer into their own appropriate folders

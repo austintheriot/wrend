@@ -26,11 +26,6 @@ pub struct ProgramId;
 impl Id for ProgramId {}
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
-pub enum BufferId {
-    VertexBuffer,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum UniformId {
     UNow,
 }
@@ -49,6 +44,11 @@ impl IdName for UniformId {
             UniformId::UNow => "u_now".to_string(),
         }
     }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
+pub enum BufferId {
+    VertexBuffer,
 }
 
 impl Id for BufferId {}

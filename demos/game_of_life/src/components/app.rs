@@ -2,8 +2,8 @@ use crate::{
     graphics::{
         buffer_id::BufferId, create_buffer::create_vertex_buffer,
         create_framebuffer::make_create_frame_buffer, create_texture::create_texture,
-        framebuffer_id::FramebufferId, program_id::ProgramId, render::render, shader_id::ShaderId,
-        texture_id::TextureId, uniform_id::UniformId,
+        framebuffer_id::FramebufferId, program_id::ProgramId, render::render, vertex_shader_id::VertexShaderId,
+        texture_id::TextureId, uniform_id::UniformId, fragment_shader_id::FragmentShaderId, attribute_id::AttributeId, create_position_attribute::create_position_attribute,
     },
     state::render_state::RenderState,
 };
@@ -14,7 +14,7 @@ use wrend::renderer::{
     animation_callback::AnimationCallback, attribute_link::AttributeLink,
     framebuffer_link::FramebufferLink, program_link::ProgramLink, render_callback::RenderCallback,
     renderer::Renderer, texture_link::TextureLink, uniform_callback::UniformCallback,
-    uniform_link::UniformLink,
+    uniform_link::UniformLink, buffer_link::BufferLink,
 };
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
 use yew_router::prelude::*;
@@ -40,22 +40,26 @@ pub fn app() -> Html {
 
                 let game_of_life_program_link = ProgramLink::new(
                     ProgramId::GameOfLife,
-                    ShaderId::Vertex,
-                    ShaderId::GameOfLife,
+                    VertexShaderId,
+                    FragmentShaderId::GameOfLife,
                     Default::default(),
                 );
 
                 let pass_through_program_link = ProgramLink::new(
                     ProgramId::PassThrough,
-                    ShaderId::Vertex,
-                    ShaderId::PassThrough,
+                    VertexShaderId,
+                    FragmentShaderId::PassThrough,
                     Default::default(),
                 );
 
-                let a_position_link = AttributeLink::new(
+                let vertex_buffer_link =
+                BufferLink::new(BufferId::VertexBuffer, Rc::new(create_vertex_buffer));
+
+                let a_position_gol_life = AttributeLink::new(
                     ProgramId::GameOfLife,
                     BufferId::VertexBuffer,
-                    Rc::new(create_vertex_buffer),
+                    AttributeId,
+                    Rc::new(create_position_attribute),
                     Rc::new(|_| {}),
                     Rc::new(|_| false),
                 );
@@ -88,18 +92,19 @@ pub fn app() -> Html {
                     .set_canvas(canvas)
                     .set_user_ctx(render_state)
                     .set_render_callback(render_callback)
-                    .add_vertex_shader_src(ShaderId::Vertex, VERTEX_SHADER.to_string())
+                    .add_vertex_shader_src(VertexShaderId, VERTEX_SHADER.to_string())
                     .add_fragment_shader_src(
-                        ShaderId::GameOfLife,
+                        FragmentShaderId::GameOfLife,
                         GAME_OF_LIFE_FRAGMENT_SHADER.to_string(),
                     )
                     .add_fragment_shader_src(
-                        ShaderId::PassThrough,
+                        FragmentShaderId::PassThrough,
                         PASS_THROUGH_FRAGMENT_SHADER.to_string(),
                     )
                     .add_program_link(game_of_life_program_link)
                     .add_program_link(pass_through_program_link)
-                    .add_buffer_link(a_position_link)
+                    .add_buffer_link(vertex_buffer_link)
+                    .add_attribute_link(a_position_gol_life)
                     .add_uniform_link(u_texture)
                     .add_texture_link(texture_a_link)
                     .add_texture_link(texture_b_link)
