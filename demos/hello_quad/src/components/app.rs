@@ -157,7 +157,7 @@ pub fn app() -> Html {
                     .build()
                     .expect("Renderer should successfully build");
 
-                renderer.update_buffers();
+                renderer.update_attributes();
                 renderer.update_uniforms();
                 renderer.render();
 

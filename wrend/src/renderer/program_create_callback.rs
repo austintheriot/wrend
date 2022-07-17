@@ -1,10 +1,10 @@
 use super::program_create_context::ProgramCreateContext;
+use std::hash::Hash;
 use std::{any::Any, fmt::Debug, ops::Deref, rc::Rc};
 use thiserror::Error;
 use uuid::Uuid;
 use wasm_bindgen::JsValue;
 use web_sys::{WebGl2RenderingContext, WebGlProgram};
-use std::hash::Hash;
 
 #[derive(Error, Debug)]
 pub enum CreateProgramError {
@@ -125,8 +125,13 @@ impl<UserCtx> From<Rc<ProgramCreateCallbackType<UserCtx>>> for ProgramCreateCall
     }
 }
 
-impl<UserCtx: 'static> From<fn(&ProgramCreateContext<UserCtx>) -> Result<WebGlProgram, CreateProgramError>> for ProgramCreateCallback<UserCtx> {
-    fn from(callback: fn(&ProgramCreateContext<UserCtx>) -> Result<WebGlProgram, CreateProgramError>) -> Self {
+impl<UserCtx: 'static>
+    From<fn(&ProgramCreateContext<UserCtx>) -> Result<WebGlProgram, CreateProgramError>>
+    for ProgramCreateCallback<UserCtx>
+{
+    fn from(
+        callback: fn(&ProgramCreateContext<UserCtx>) -> Result<WebGlProgram, CreateProgramError>,
+    ) -> Self {
         ProgramCreateCallback {
             program_create_callback: Rc::new(callback),
             uuid: Uuid::new_v4(),

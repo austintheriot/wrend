@@ -10,7 +10,7 @@ pub fn make_create_frame_buffer<
     FragmentShaderId: Id,
     ProgramId: Id,
     UniformId: Id + IdName,
-    BufferId: Id + IdName,
+    BufferId: Id,
     FramebufferId: Id,
     UserCtx: 'static,
 >(

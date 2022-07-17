@@ -5,10 +5,10 @@ use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 use wrend::{
     constants::quad::QUAD,
     renderer::{
-        animation_callback::AnimationCallback, attribute_link::AttributeLink, default_id::DefaultId,
-        id::Id, id_name::IdName, program_link::ProgramLink, render_callback::RenderCallback,
-        renderer::Renderer, uniform_callback::UniformCallback, uniform_context::UniformContext,
-        uniform_link::UniformLink,
+        animation_callback::AnimationCallback, attribute_link::AttributeLink,
+        default_id::DefaultId, id::Id, id_name::IdName, program_link::ProgramLink,
+        render_callback::RenderCallback, renderer::Renderer, uniform_callback::UniformCallback,
+        uniform_context::UniformContext, uniform_link::UniformLink,
     },
 };
 use yew::{

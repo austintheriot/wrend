@@ -1,11 +1,12 @@
 use super::attribute_location::AttributeLocation;
-use web_sys::WebGl2RenderingContext;
+use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
 /// This is the context object that is passed to the create_buffer callback function
 #[derive(Debug, Clone)]
 pub struct AttributeCreateContext<'a, UserCtx> {
     gl: &'a WebGl2RenderingContext,
     now: f64,
+    webgl_buffer: &'a WebGlBuffer,
     attribute_location: &'a AttributeLocation,
     user_ctx: Option<&'a UserCtx>,
 }
@@ -15,12 +16,14 @@ impl<'a, UserCtx> AttributeCreateContext<'a, UserCtx> {
     pub fn new(
         gl: &'a WebGl2RenderingContext,
         now: f64,
+        webgl_buffer: &'a WebGlBuffer,
         attribute_location: &'a AttributeLocation,
         user_ctx: Option<&'a UserCtx>,
     ) -> Self {
         Self {
             gl,
             now,
+            webgl_buffer,
             attribute_location,
             user_ctx,
         }
@@ -32,6 +35,10 @@ impl<'a, UserCtx> AttributeCreateContext<'a, UserCtx> {
 
     pub fn now(&self) -> f64 {
         self.now
+    }
+
+    pub fn webgl_buffer(&self) -> &WebGlBuffer {
+        self.webgl_buffer
     }
 
     pub fn attribute_location(&self) -> &AttributeLocation {

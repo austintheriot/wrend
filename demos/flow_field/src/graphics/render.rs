@@ -30,6 +30,7 @@ pub fn render(
         ProgramId,
         UniformId,
         BufferId,
+        AttributeId,
         TextureId,
         DefaultId,
         Rc<RefCell<RenderState>>,

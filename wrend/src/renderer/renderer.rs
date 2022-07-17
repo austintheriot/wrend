@@ -1,8 +1,11 @@
 use super::animation_callback::AnimationCallback;
 use super::animation_handle::AnimationHandle;
-use super::attribute_location::AttributeLocation;
 use super::attribute::Attribute;
+use super::attribute_create_context::AttributeCreateContext;
 use super::attribute_link::AttributeLink;
+use super::attribute_location::AttributeLocation;
+use super::buffer::Buffer;
+use super::buffer_link::BufferLink;
 use super::default_id::DefaultId;
 use super::framebuffer::Framebuffer;
 use super::framebuffer_link::FramebufferLink;
@@ -30,7 +33,8 @@ pub struct Renderer<
     FragmentShaderId: Id = DefaultId,
     ProgramId: Id = DefaultId,
     UniformId: Id + IdName = DefaultId,
-    BufferId: Id + IdName = DefaultId,
+    BufferId: Id = DefaultId,
+    AttributeId: Id + IdName = DefaultId,
     TextureId: Id = DefaultId,
     FramebufferId: Id = DefaultId,
     UserCtx: 'static = (),
@@ -46,13 +50,15 @@ pub struct Renderer<
         ProgramId,
         UniformId,
         BufferId,
+        AttributeId,
         TextureId,
         FramebufferId,
         UserCtx,
     >,
     uniforms: HashMap<UniformId, Uniform<ProgramId, UniformId, UserCtx>>,
     user_ctx: Option<UserCtx>,
-    buffers: HashMap<BufferId, Attribute<ProgramId, BufferId, UserCtx>>,
+    attributes: HashMap<AttributeId, Attribute<ProgramId, BufferId, AttributeId, UserCtx>>,
+    buffers: HashMap<BufferId, Buffer<BufferId>>,
     textures: HashMap<TextureId, Texture<TextureId>>,
     framebuffers: HashMap<FramebufferId, Framebuffer<FramebufferId>>,
 }
@@ -63,7 +69,8 @@ impl<
         FragmentShaderId: Id,
         ProgramId: Id,
         UniformId: Id + IdName,
-        BufferId: Id + IdName,
+        BufferId: Id,
+        AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
         UserCtx,
@@ -74,6 +81,7 @@ impl<
         ProgramId,
         UniformId,
         BufferId,
+        AttributeId,
         TextureId,
         FramebufferId,
         UserCtx,
@@ -85,6 +93,7 @@ impl<
         ProgramId,
         UniformId,
         BufferId,
+        AttributeId,
         TextureId,
         FramebufferId,
         UserCtx,
@@ -116,8 +125,14 @@ impl<
         &self.uniforms
     }
 
-    pub fn buffers(&self) -> &HashMap<BufferId, Attribute<ProgramId, BufferId, UserCtx>> {
+    pub fn buffers(&self) -> &HashMap<BufferId, Buffer<BufferId>> {
         &self.buffers
+    }
+
+    pub fn attributes(
+        &self,
+    ) -> &HashMap<AttributeId, Attribute<ProgramId, BufferId, AttributeId, UserCtx>> {
+        &self.attributes
     }
 
     pub fn textures(&self) -> &HashMap<TextureId, Texture<TextureId>> {
@@ -171,25 +186,25 @@ impl<
     /// whatever reason).
     ///
     /// Binds the correct buffer before the update callback is called, so this may be omitted.
-    pub fn update_buffer(&self, buffer_id: &BufferId) -> &Self {
+    pub fn update_attribute(&self, attribute_id: &AttributeId) -> &Self {
         let now = Self::now();
         let user_ctx = self.user_ctx();
         let gl = self.gl();
 
-        let buffer = self
-            .buffers
-            .get(buffer_id)
-            .expect("BufferId should exist in registered buffers");
+        let attribute = self
+            .attributes
+            .get(attribute_id)
+            .expect("AttributeId should exist in registered attributes");
 
         // bind the corresponding program
-        let program_id = buffer.program_id();
+        let program_id = attribute.program_id();
         let program = self.programs().get(program_id);
         self.gl().use_program(program);
 
         // bind the corresponding buffer
-        let webgl_buffer = buffer.webgl_buffer();
+        let webgl_buffer = attribute.webgl_buffer();
         gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(webgl_buffer));
-        buffer.update(self.gl(), now, user_ctx);
+        attribute.update(self.gl(), now, user_ctx);
         gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, None);
 
         self
@@ -200,17 +215,17 @@ impl<
     /// This function DOES check whether a buffer SHOULD be updated before calling its associated updated callback.
     ///
     /// If no should_update_callback was provided, then it is assumed that the buffer should be updated.
-    pub fn update_buffers(&self) -> &Self {
+    pub fn update_attributes(&self) -> &Self {
         let now = Self::now();
         let user_ctx = self.user_ctx();
         let gl = self.gl();
 
-        for (buffer_id, buffer) in &self.buffers {
-            if !buffer.should_update(gl, now, user_ctx) {
+        for (attribute_id, attribute) in &self.attributes {
+            if !attribute.should_update(gl, now, user_ctx) {
                 continue;
             }
 
-            self.update_buffer(buffer_id);
+            self.update_attribute(attribute_id);
         }
 
         self
@@ -233,6 +248,7 @@ impl<
             ProgramId,
             UniformId,
             BufferId,
+            AttributeId,
             TextureId,
             FramebufferId,
             UserCtx,
@@ -243,6 +259,7 @@ impl<
         ProgramId,
         UniformId,
         BufferId,
+        AttributeId,
         TextureId,
         FramebufferId,
         UserCtx,
@@ -326,13 +343,15 @@ pub enum RendererBuilderError {
 
     // @todo: move this into its own sub-error
     #[error(
-        "Could not create buffer because the attribute's location was not found in the program"
+        "Could not create attribute because the attribute's location was not found in the program"
     )]
-    AttributeLocationNotFoundCreateBufferError,
-    #[error("Could not create buffer because no WebGL2RenderingContext was provided")]
-    NoContextCreateBufferError,
-    #[error("Could not create buffer because buffer link's associated program was not found from the program_id")]
-    ProgramNotFoundCreateBufferError,
+    AttributeLocationNotFoundCreateAttributeError,
+    #[error("Could not create attribute because no WebGL2RenderingContext was provided")]
+    NoContextCreateAttributeError,
+    #[error("Could not create attribute because attribute link's associated program was not found from the program_id")]
+    ProgramNotFoundCreateAttributeError,
+    #[error("Could not create attribute because attribute link's associated buffer was not found from the buffer_id")]
+    BufferNotFoundCreateAttributeError,
 
     #[error("Could not create texture because no WebGL2RenderingContext was provided")]
     NoContextCreateTextureError,
@@ -347,7 +366,8 @@ pub struct RendererBuilder<
     FragmentShaderId: Id = DefaultId,
     ProgramId: Id = DefaultId,
     UniformId: Id + IdName = DefaultId,
-    BufferId: Id + IdName = DefaultId,
+    BufferId: Id = DefaultId,
+    AttributeId: Id + IdName = DefaultId,
     TextureId: Id = DefaultId,
     FramebufferId: Id = DefaultId,
     UserCtx: 'static = (),
@@ -362,8 +382,10 @@ pub struct RendererBuilder<
     programs: HashMap<ProgramId, WebGlProgram>,
     uniform_links: HashSet<UniformLink<ProgramId, UniformId, UserCtx>>,
     uniforms: HashMap<UniformId, Uniform<ProgramId, UniformId, UserCtx>>,
-    buffer_links: HashSet<AttributeLink<ProgramId, BufferId, UserCtx>>,
-    buffers: HashMap<BufferId, Attribute<ProgramId, BufferId, UserCtx>>,
+    buffer_links: HashSet<BufferLink<BufferId, UserCtx>>,
+    buffers: HashMap<BufferId, Buffer<BufferId>>,
+    attribute_links: HashSet<AttributeLink<ProgramId, BufferId, AttributeId, UserCtx>>,
+    attributes: HashMap<AttributeId, Attribute<ProgramId, BufferId, AttributeId, UserCtx>>,
     texture_links: HashSet<TextureLink<TextureId, UserCtx>>,
     textures: HashMap<TextureId, Texture<TextureId>>,
     framebuffer_links: HashSet<
@@ -373,6 +395,7 @@ pub struct RendererBuilder<
             ProgramId,
             UniformId,
             BufferId,
+            AttributeId,
             TextureId,
             FramebufferId,
             UserCtx,
@@ -386,6 +409,7 @@ pub struct RendererBuilder<
             ProgramId,
             UniformId,
             BufferId,
+            AttributeId,
             TextureId,
             FramebufferId,
             UserCtx,
@@ -400,7 +424,8 @@ impl<
         FragmentShaderId: Id,
         ProgramId: Id,
         UniformId: Id + IdName,
-        BufferId: Id + IdName,
+        BufferId: Id,
+        AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
         UserCtx: 'static,
@@ -411,6 +436,7 @@ impl<
         ProgramId,
         UniformId,
         BufferId,
+        AttributeId,
         TextureId,
         FramebufferId,
         UserCtx,
@@ -476,6 +502,7 @@ impl<
                 ProgramId,
                 UniformId,
                 BufferId,
+                AttributeId,
                 TextureId,
                 FramebufferId,
                 UserCtx,
@@ -511,12 +538,22 @@ impl<
         self
     }
 
-    /// Saves a link that will be used to build a buffer/attribute pair at build time.
+    /// Saves a link that will be used to build a WebGL buffer at build time.
     pub fn add_buffer_link(
         &mut self,
-        attribute_link: impl Into<AttributeLink<ProgramId, BufferId, UserCtx>>,
+        buffer_link: impl Into<BufferLink<BufferId, UserCtx>>,
     ) -> &mut Self {
-        self.buffer_links.insert(attribute_link.into());
+        self.buffer_links.insert(buffer_link.into());
+
+        self
+    }
+
+    /// Saves a link that will be used to build a a WebGL attribute at build time.
+    pub fn add_attribute_link(
+        &mut self,
+        attribute_link: impl Into<AttributeLink<ProgramId, BufferId, AttributeId, UserCtx>>,
+    ) -> &mut Self {
+        self.attribute_links.insert(attribute_link.into());
 
         self
     }
@@ -541,6 +578,7 @@ impl<
                 ProgramId,
                 UniformId,
                 BufferId,
+                AttributeId,
                 TextureId,
                 FramebufferId,
                 UserCtx,
@@ -564,6 +602,7 @@ impl<
             ProgramId,
             UniformId,
             BufferId,
+            AttributeId,
             TextureId,
             FramebufferId,
             UserCtx,
@@ -575,8 +614,9 @@ impl<
         self.compile_fragment_shaders()?;
         self.compile_vertex_shaders()?;
         self.link_programs()?;
-        self.build_uniforms()?;
         self.create_buffers()?;
+        self.create_attributes()?;
+        self.build_uniforms()?;
         self.create_textures()?;
         self.create_framebuffers()?;
 
@@ -596,6 +636,7 @@ impl<
             buffers: self.buffers,
             textures: self.textures,
             framebuffers: self.framebuffers,
+            attributes: self.attributes,
         };
 
         Ok(renderer)
@@ -608,7 +649,8 @@ impl<
         FragmentShaderId: Id,
         ProgramId: Id,
         UniformId: Id + IdName,
-        BufferId: Id + IdName,
+        BufferId: Id,
+        AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
         UserCtx,
@@ -619,6 +661,7 @@ impl<
         ProgramId,
         UniformId,
         BufferId,
+        AttributeId,
         TextureId,
         FramebufferId,
         UserCtx,
@@ -751,47 +794,77 @@ impl<
         Ok(uniform)
     }
 
-    /// Creates a WebGL buffer for each AttributeLink that was supplied using the create_callback.
+    /// Creates all WebGL buffers, using the passed in BufferLinks
     fn create_buffers(&mut self) -> Result<&mut Self, RendererBuilderError> {
         let gl = self
             .gl
             .as_ref()
-            .ok_or(RendererBuilderError::NoContextCreateBufferError)?;
+            .ok_or(RendererBuilderError::NoContextCreateAttributeError)?;
         let now = Self::now();
         let user_ctx = self.user_ctx.as_ref();
 
-        for attribute_link in &self.buffer_links {
+        for buffer_link in &self.buffer_links {
+            let buffer_id = buffer_link.buffer_id().clone();
+            let webgl_buffer = buffer_link.create_buffer(gl, now, user_ctx);
+            let buffer = Buffer::new(buffer_id.clone(), webgl_buffer);
+            self.buffers.insert(buffer_id, buffer);
+        }
+
+        Ok(self)
+    }
+
+    /// Creates a WebGL attribute for each AttributeLink that was supplied using the create_callback
+    fn create_attributes(&mut self) -> Result<&mut Self, RendererBuilderError> {
+        let gl = self
+            .gl
+            .as_ref()
+            .ok_or(RendererBuilderError::NoContextCreateAttributeError)?;
+            let now = Self::now();
+            let user_ctx = self.user_ctx.as_ref();
+
+        for attribute_link in &self.attribute_links {
             let program_id = attribute_link.program_id().clone();
             let buffer_id = attribute_link.buffer_id().clone();
+            let attribute_id = attribute_link.attribute_id().clone();
+            let webgl_buffer = self
+                .buffers
+                .get(&buffer_id)
+                .ok_or(RendererBuilderError::BufferNotFoundCreateAttributeError)?
+                .webgl_buffer()
+                .clone();
 
             let program = self
                 .programs
                 .get(&program_id)
-                .ok_or(RendererBuilderError::ProgramNotFoundCreateBufferError)?;
+                .ok_or(RendererBuilderError::ProgramNotFoundCreateAttributeError)?;
 
             // webgl returns `-1` if the attribute location was not found
             let attribute_location: AttributeLocation =
-                match gl.get_attrib_location(program, &buffer_id.name()) {
-                    -1 => Err(RendererBuilderError::AttributeLocationNotFoundCreateBufferError)?,
+                match gl.get_attrib_location(program, &attribute_id.name()) {
+                    -1 => Err(RendererBuilderError::AttributeLocationNotFoundCreateAttributeError)?,
                     attribute_location => attribute_location.into(),
                 };
 
-            let webgl_buffer = attribute_link.create_buffer(gl, now, &attribute_location, user_ctx);
+            gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&webgl_buffer));
             gl.enable_vertex_attrib_array(attribute_location.into());
+            let attribute_create_context = AttributeCreateContext::new(gl, now, &webgl_buffer, &attribute_location, user_ctx);
+            (attribute_link.create_callback())(attribute_create_context);
+            gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, None);
 
             let update_callback = attribute_link.update_callback();
             let should_update_callback = attribute_link.should_update_callback();
 
-            let buffer = Attribute::new(
+            let attribute = Attribute::new(
                 program_id,
                 buffer_id.clone(),
+                attribute_id.clone(),
                 webgl_buffer,
                 attribute_location,
                 update_callback,
                 should_update_callback,
             );
 
-            self.buffers.insert(buffer_id, buffer);
+            self.attributes.insert(attribute_id, attribute);
         }
 
         Ok(self)
@@ -927,7 +1000,8 @@ impl<
         FragmentShaderId: Id,
         ProgramId: Id,
         UniformId: Id + IdName,
-        BufferId: Id + IdName,
+        BufferId: Id,
+        AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
         UserCtx,
@@ -938,6 +1012,7 @@ impl<
         ProgramId,
         UniformId,
         BufferId,
+        AttributeId,
         TextureId,
         FramebufferId,
         UserCtx,
@@ -963,6 +1038,8 @@ impl<
             textures: Default::default(),
             framebuffer_links: Default::default(),
             framebuffers: Default::default(),
+            attribute_links: Default::default(),
+            attributes: Default::default(),
         }
     }
 }

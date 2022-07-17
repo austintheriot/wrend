@@ -1,5 +1,5 @@
-use super::attribute_location::AttributeLocation;
 use super::attribute_context::AttributeContext;
+use super::attribute_location::AttributeLocation;
 use super::id::Id;
 use super::id_name::IdName;
 use std::hash::Hash;
@@ -11,20 +11,24 @@ pub type AttributeUpdateCallback<UserCtx> = Rc<dyn Fn(&AttributeContext<UserCtx>
 pub type AttributeShouldUpdateCallback<UserCtx> = Rc<dyn Fn(&AttributeContext<UserCtx>) -> bool>;
 
 #[derive(Clone)]
-pub struct Attribute<ProgramId: Id, BufferId: Id + IdName, UserCtx> {
+pub struct Attribute<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx> {
     program_id: ProgramId,
     buffer_id: BufferId,
+    attribute_id: AttributeId,
     webgl_buffer: WebGlBuffer,
     attribute_location: AttributeLocation,
     update_callback: AttributeUpdateCallback<UserCtx>,
     should_update_callback: AttributeShouldUpdateCallback<UserCtx>,
 }
 
-impl<ProgramId: Id, BufferId: Id + IdName, UserCtx> Attribute<ProgramId, BufferId, UserCtx> {
+impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx>
+    Attribute<ProgramId, BufferId, AttributeId, UserCtx>
+{
     // @todo move into builder pattern
     pub fn new(
         program_id: ProgramId,
         buffer_id: BufferId,
+        attribute_id: AttributeId,
         webgl_buffer: WebGlBuffer,
         attribute_location: AttributeLocation,
         update_callback: AttributeUpdateCallback<UserCtx>,
@@ -33,6 +37,7 @@ impl<ProgramId: Id, BufferId: Id + IdName, UserCtx> Attribute<ProgramId, BufferI
         Self {
             program_id,
             buffer_id,
+            attribute_id,
             webgl_buffer,
             attribute_location,
             update_callback,
@@ -84,28 +89,36 @@ impl<ProgramId: Id, BufferId: Id + IdName, UserCtx> Attribute<ProgramId, BufferI
     }
 }
 
-impl<ProgramId: Id, BufferId: Id + IdName, UserCtx> Debug for Attribute<ProgramId, BufferId, UserCtx> {
+impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx> Debug
+    for Attribute<ProgramId, BufferId, AttributeId, UserCtx>
+{
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Buffer")
             .field("program_id", &self.program_id)
             .field("buffer_id", &self.buffer_id)
+            .field("attribute_id", &self.attribute_id)
             .field("buffer", &self.webgl_buffer)
             .field("attribute_location", &self.attribute_location)
             .finish()
     }
 }
-impl<ProgramId: Id, BufferId: Id + IdName, UserCtx> Hash for Attribute<ProgramId, BufferId, UserCtx> {
+impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx> Hash
+    for Attribute<ProgramId, BufferId, AttributeId, UserCtx>
+{
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.buffer_id.hash(state);
+        self.program_id.hash(state);
+        self.attribute_id.hash(state);
     }
 }
 
-impl<ProgramId: Id, BufferId: Id + IdName, UserCtx> PartialEq
-    for Attribute<ProgramId, BufferId, UserCtx>
+impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx> PartialEq
+    for Attribute<ProgramId, BufferId, AttributeId, UserCtx>
 {
     fn eq(&self, other: &Self) -> bool {
         self.program_id == other.program_id
             && self.buffer_id == other.buffer_id
+            && self.attribute_id == other.attribute_id
             && self.webgl_buffer == other.webgl_buffer
             && self.attribute_location == other.attribute_location
             && Rc::ptr_eq(&self.update_callback, &other.update_callback)
@@ -113,4 +126,7 @@ impl<ProgramId: Id, BufferId: Id + IdName, UserCtx> PartialEq
     }
 }
 
-impl<ProgramId: Id, BufferId: Id + IdName, UserCtx> Eq for Attribute<ProgramId, BufferId, UserCtx> {}
+impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx> Eq
+    for Attribute<ProgramId, BufferId, AttributeId, UserCtx>
+{
+}

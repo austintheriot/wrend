@@ -2,7 +2,7 @@ use wrend::renderer::id::Id;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum VertexShaderId {
-    Quad
+    Quad,
 }
 
 impl Id for VertexShaderId {}
