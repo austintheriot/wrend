@@ -124,3 +124,12 @@ impl<UserCtx> From<Rc<ProgramCreateCallbackType<UserCtx>>> for ProgramCreateCall
         }
     }
 }
+
+impl<UserCtx: 'static> From<fn(&ProgramCreateContext<UserCtx>) -> Result<WebGlProgram, CreateProgramError>> for ProgramCreateCallback<UserCtx> {
+    fn from(callback: fn(&ProgramCreateContext<UserCtx>) -> Result<WebGlProgram, CreateProgramError>) -> Self {
+        ProgramCreateCallback {
+            program_create_callback: Rc::new(callback),
+            uuid: Uuid::new_v4(),
+        }
+    }
+}
