@@ -248,6 +248,7 @@ dependencies = [
  "larger_than_life",
  "lazy_static",
  "log",
+ "perlin_noise",
  "rand",
  "thiserror",
  "ui",
@@ -882,6 +883,30 @@ name = "percent-encoding"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d4fd5641d01c8f18a23da7b6fe29298ff4b55afcccdf78973b24cf3175fee32e"
+
+[[package]]
+name = "perlin_noise"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "console_error_panic_hook",
+ "cpal",
+ "getrandom",
+ "js-sys",
+ "lazy_static",
+ "log",
+ "rand",
+ "thiserror",
+ "ui",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wee_alloc",
+ "wrend",
+ "yew",
+ "yew-router",
+]
 
 [[package]]
 name = "pkg-config"

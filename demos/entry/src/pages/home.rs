@@ -11,6 +11,7 @@ pub fn home() -> Html {
         <Link<Route> to={Route::HelloQuadAnimated}>{"Hello Quad Animated"}</Link<Route>>
         <Link<Route> to={Route::GameOfLife}>{"Game of Life"}</Link<Route>>
         <Link<Route> to={Route::LargerThanLife}>{"Larger Than Life"}</Link<Route>>
+        <Link<Route> to={Route::PerlinNoise}>{"Perlin Noise"}</Link<Route>>
         <Link<Route> to={Route::FlowField}>{"Flow Field"}</Link<Route>>
      </>
     }

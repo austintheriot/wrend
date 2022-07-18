@@ -17,4 +17,6 @@ pub enum Route {
     LargerThanLife,
     #[at("/flow-field")]
     FlowField,
+    #[at("/perlin-noise")]
+    PerlinNoise,
 }

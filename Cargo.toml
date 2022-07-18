@@ -7,5 +7,6 @@ members = [
     "demos/hello_quad",
     "demos/hello_quad_animated",
     "demos/game_of_life",
-    "demos/larger_than_life"
+    "demos/larger_than_life",
+    "demos/perlin_noise",
 ]
