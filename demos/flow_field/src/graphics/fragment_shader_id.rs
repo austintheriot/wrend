@@ -4,6 +4,7 @@ use wrend::Id;
 pub enum FragmentShaderId {
     FlowField,
     PassThrough,
+    PerlinNoise,
 }
 
 impl Id for FragmentShaderId {}

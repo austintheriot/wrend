@@ -1,12 +1,12 @@
 use super::{
     attribute_id::AttributeId, buffer_id::BufferId, fragment_shader_id::FragmentShaderId,
-    program_id::ProgramId, texture_id::TextureId, transform_feedback_id::TransformFeedbackId,
-    uniform_id::UniformId, vertex_shader_id::VertexShaderId,
+    framebuffer_id::FramebufferId, program_id::ProgramId, texture_id::TextureId,
+    transform_feedback_id::TransformFeedbackId, uniform_id::UniformId,
+    vertex_shader_id::VertexShaderId,
 };
-use crate::state::render_state::RenderState;
-use std::{cell::RefCell, rc::Rc};
+use crate::state::render_state_handle::RenderStateHandle;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
-use wrend::{IdDefault, Renderer};
+use wrend::Renderer;
 
 // reusable draw call for both canvas and framebuffer
 fn draw(gl: &WebGl2RenderingContext, canvas: &HtmlCanvasElement) {
@@ -33,22 +33,31 @@ pub fn render(
         BufferId,
         AttributeId,
         TextureId,
-        IdDefault,
+        FramebufferId,
         TransformFeedbackId,
-        Rc<RefCell<RenderState>>,
+        RenderStateHandle,
     >,
 ) {
     let gl = renderer.gl();
     let canvas = renderer.canvas();
 
+    // render to framebuffer
+    gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, None);
+    renderer.switch_program(&ProgramId::PerlinNoise);
+    let perlin_noise_framebuffer = renderer
+        .framebuffers()
+        .get(&FramebufferId::PerlinNoise)
+        .map(|framebuffer| framebuffer.webgl_framebuffer());
+    gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, perlin_noise_framebuffer);
+    draw(gl, canvas);
+
+    // pull from the framebuffer just drawn to and copy to the canvas
     renderer.switch_program(&ProgramId::PassThrough);
-
-    let noise_texture = renderer
+    let perlin_noise_texture = renderer
         .textures()
-        .get(&TextureId::Noise)
+        .get(&TextureId::PerlinNoise)
         .map(|texture| texture.webgl_texture());
-    gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, noise_texture);
-
+    gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, perlin_noise_texture);
     gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, None);
     draw(gl, canvas);
 }

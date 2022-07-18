@@ -1,19 +1,21 @@
 use crate::{
     graphics::{
         attribute_id::AttributeId, buffer_id::BufferId, create_buffer::create_vertex_buffer,
+        create_framebuffer::create_frame_buffer,
         create_position_attribute::create_position_attribute, create_texture::create_texture,
-        fragment_shader_id::FragmentShaderId, program_id::ProgramId, render::render,
-        texture_id::TextureId, uniform_id::UniformId, vertex_shader_id::VertexShaderId,
+        fragment_shader_id::FragmentShaderId, framebuffer_id::FramebufferId, program_id::ProgramId,
+        render::render, texture_id::TextureId, uniform_id::UniformId,
+        vertex_shader_id::VertexShaderId,
     },
-    state::render_state::RenderState,
+    state::{render_state::RenderState, render_state_handle::RenderStateHandle},
 };
 use std::rc::Rc;
 use ui::route::Route;
 use web_sys::HtmlCanvasElement;
 use wrend::{
     AnimationCallback, AttributeCreateCallback, AttributeLink, BufferCreateCallback, BufferLink,
-    ProgramLinkBuilder, RenderCallback, Renderer, TextureCreateCallback, TextureLink,
-    UniformCallback, UniformLink,
+    FramebufferCreateCallback, FramebufferLink, ProgramLinkBuilder, RenderCallback, Renderer,
+    TextureCreateCallback, TextureLink, UniformCallback, UniformLink,
 };
 
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
@@ -22,6 +24,7 @@ use yew_router::prelude::*;
 const VERTEX_SHADER: &str = include_str!("../shaders/vertex.glsl");
 const FLOW_FIELD_FRAGMENT_SHADER: &str = include_str!("../shaders/flow_field.glsl");
 const PASS_THROUGH_FRAGMENT_SHADER: &str = include_str!("../shaders/pass_through.glsl");
+const PERLIN_NOISE_FRAGMENT_SHADER: &str = include_str!("../shaders/perlin_noise.glsl");
 
 #[function_component(App)]
 pub fn app() -> Html {
@@ -52,21 +55,37 @@ pub fn app() -> Html {
                     .build()
                     .expect("Should build PassThrough ProgramLink successfully");
 
+                let perlin_noise_program_link = ProgramLinkBuilder::new()
+                    .set_vertex_shader_id(VertexShaderId::Quad)
+                    .set_program_id(ProgramId::PerlinNoise)
+                    .set_fragment_shader_id(FragmentShaderId::PerlinNoise)
+                    .build()
+                    .expect("Should build PerlinNoise ProgramLink successfully");
+
                 let vertex_buffer_link = BufferLink::new(
                     BufferId::VertexBuffer,
                     BufferCreateCallback::new(Rc::new(create_vertex_buffer)),
                 );
 
                 let a_position_link = AttributeLink::new(
-                    (ProgramId::FlowField, ProgramId::PassThrough),
+                    (
+                        ProgramId::FlowField,
+                        ProgramId::PassThrough,
+                        ProgramId::PerlinNoise,
+                    ),
                     BufferId::VertexBuffer,
                     AttributeId,
                     AttributeCreateCallback::new(Rc::new(create_position_attribute)),
                 );
 
-                let u_texture = UniformLink::new(
+                let noise_texture_link = TextureLink::new(
+                    TextureId::PerlinNoise,
+                    TextureCreateCallback::new(Rc::new(create_texture)),
+                );
+
+                let u_noise_texture = UniformLink::new(
                     ProgramId::PassThrough,
-                    UniformId::UTexture,
+                    UniformId::UNoiseTexture,
                     UniformCallback::new(Rc::new(|ctx| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
@@ -74,18 +93,21 @@ pub fn app() -> Html {
                     })),
                 );
 
-                let noise_texture_link = TextureLink::new(
-                    TextureId::Noise,
-                    TextureCreateCallback::new(Rc::new(create_texture)),
+                let noise_framebuffer_link = FramebufferLink::new(
+                    FramebufferId::PerlinNoise,
+                    FramebufferCreateCallback::new(Rc::new(create_frame_buffer)),
+                    Some(TextureId::PerlinNoise),
                 );
 
                 let render_callback = RenderCallback::new(Rc::new(render));
+                let render_state_handle: RenderStateHandle = render_state.into();
 
                 let mut renderer_builder = Renderer::builder();
 
+
                 renderer_builder
                     .set_canvas(canvas)
-                    .set_user_ctx(render_state)
+                    .set_user_ctx(render_state_handle)
                     .set_render_callback(render_callback)
                     .add_vertex_shader_src(VertexShaderId::Quad, VERTEX_SHADER.to_string())
                     .add_fragment_shader_src(
@@ -93,15 +115,21 @@ pub fn app() -> Html {
                         FLOW_FIELD_FRAGMENT_SHADER.to_string(),
                     )
                     .add_fragment_shader_src(
+                        FragmentShaderId::PerlinNoise,
+                        PERLIN_NOISE_FRAGMENT_SHADER.to_string(),
+                    )
+                    .add_fragment_shader_src(
                         FragmentShaderId::PassThrough,
                         PASS_THROUGH_FRAGMENT_SHADER.to_string(),
                     )
                     .add_program_link(flow_field_program_link)
                     .add_program_link(pass_through_program_link)
+                    .add_program_link(perlin_noise_program_link)
                     .add_buffer_link(vertex_buffer_link)
                     .add_attribute_link(a_position_link)
-                    .add_uniform_link(u_texture)
-                    .add_texture_link(noise_texture_link);
+                    .add_uniform_link(u_noise_texture)
+                    .add_texture_link(noise_texture_link)
+                    .add_framebuffer_link(noise_framebuffer_link);
 
                 let renderer = renderer_builder
                     .build()

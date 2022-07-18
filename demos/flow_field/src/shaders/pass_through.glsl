@@ -6,10 +6,10 @@ precision highp float;
 in vec2 v_tex_coord;
 
 // our texture
-uniform sampler2D u_texture;
+uniform sampler2D u_noise_texture;
 
 out vec4 out_color;
 
 void main() {
-  out_color = texture(u_texture, v_tex_coord);
+  out_color = texture(u_noise_texture, v_tex_coord);
 }
