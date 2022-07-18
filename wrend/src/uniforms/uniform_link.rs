@@ -79,9 +79,9 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Debug
         f.debug_struct("UniformLink")
             .field("program_ids", &self.program_ids)
             .field("uniform_id", &self.uniform_id)
-            .field("initialize_callback", &"[not shown]")
-            .field("should_update_callback", &"[not shown]")
-            .field("update_callback", &"[not shown]")
+            .field("initialize_callback", &self.initialize_callback)
+            .field("update_callback", &self.update_callback)
+            .field("should_update_callback", &self.should_update_callback)
             .finish()
     }
 }

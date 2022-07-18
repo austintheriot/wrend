@@ -22,7 +22,7 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Uniform<ProgramId, UniformId,
     pub fn new(
         program_ids: Vec<ProgramId>,
         uniform_id: UniformId,
-        // a single conceptual uniform can be shared across multiple programs and updated in tandem
+        // a single "conceptual" uniform can be shared across multiple programs and updated in tandem
         uniform_locations: HashMap<ProgramId, WebGlUniformLocation>,
         initialize_callback: UniformCallback<UserCtx>,
         update_callback: Option<UniformCallback<UserCtx>>,

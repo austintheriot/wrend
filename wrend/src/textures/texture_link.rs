@@ -40,6 +40,7 @@ impl<TextureId: Id, UserCtx> Debug for TextureLink<TextureId, UserCtx> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("TextureLink")
             .field("texture_id", &self.texture_id)
+            .field("create_texture_callback", &self.create_texture_callback)
             .finish()
     }
 }
@@ -47,12 +48,14 @@ impl<TextureId: Id, UserCtx> Debug for TextureLink<TextureId, UserCtx> {
 impl<TextureId: Id, UserCtx> Hash for TextureLink<TextureId, UserCtx> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.texture_id.hash(state);
+        self.create_texture_callback.hash(state);
     }
 }
 
 impl<TextureId: Id, UserCtx> PartialEq for TextureLink<TextureId, UserCtx> {
     fn eq(&self, other: &Self) -> bool {
         self.texture_id == other.texture_id
+            && self.create_texture_callback == other.create_texture_callback
     }
 }
 

@@ -1,5 +1,5 @@
-#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 /// Safe wrapper around WebGL's fragment shader `i32`s
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub enum ShaderType {
     VertexShader,
     FragmentShader,

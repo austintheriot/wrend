@@ -3,6 +3,7 @@ use crate::Id;
 use std::fmt::Debug;
 use std::hash::Hash;
 use thiserror::Error;
+
 /// This contains an id for a pair of shaders: one vertex shader and one fragment
 /// shader. These can be combined to link together a program.
 #[derive(Clone, Debug)]
