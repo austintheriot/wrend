@@ -27,7 +27,7 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> UniformLink<ProgramId, Unifor
         Self {
             program_ids,
             uniform_id,
-            initialize_callback: initialize_callback.into(),
+            initialize_callback,
             should_update_callback: None,
             update_callback: None,
         }

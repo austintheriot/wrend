@@ -82,7 +82,7 @@ impl<Ctx, Return> Clone for CallbackWithContext<Ctx, Return> {
     fn clone(&self) -> Self {
         Self {
             callback: self.callback.clone(),
-            uuid: self.uuid.clone(),
+            uuid: self.uuid,
         }
     }
 }

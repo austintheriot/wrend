@@ -9,6 +9,7 @@ mod programs;
 mod renderer;
 mod shaders;
 mod textures;
+mod transform_feedback;
 mod uniforms;
 
 pub use animation::*;
@@ -22,4 +23,5 @@ pub use programs::*;
 pub use renderer::*;
 pub use shaders::*;
 pub use textures::*;
+pub use transform_feedback::*;
 pub use uniforms::*;

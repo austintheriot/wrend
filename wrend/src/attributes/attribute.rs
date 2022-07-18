@@ -1,4 +1,4 @@
-use crate::{AttributeLocation, Id, IdName, IdBridge};
+use crate::{AttributeLocation, Id, IdBridge, IdName};
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::hash::Hash;

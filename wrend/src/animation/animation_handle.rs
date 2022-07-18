@@ -15,6 +15,7 @@ pub struct AnimationHandle<
     AttributeId: Id + IdName,
     TextureId: Id,
     FramebufferId: Id,
+    TransformFeedbackId: Id,
     UserCtx: Clone + 'static,
 > {
     animation_data: Rc<
@@ -28,6 +29,7 @@ pub struct AnimationHandle<
                 AttributeId,
                 TextureId,
                 FramebufferId,
+                TransformFeedbackId,
                 UserCtx,
             >,
         >,
@@ -43,6 +45,7 @@ impl<
         AttributeId: 'static + Id + IdName,
         TextureId: 'static + Id,
         FramebufferId: 'static + Id,
+        TransformFeedbackId: 'static + Id,
         UserCtx: Clone + 'static,
     >
     AnimationHandle<
@@ -54,6 +57,7 @@ impl<
         AttributeId,
         TextureId,
         FramebufferId,
+        TransformFeedbackId,
         UserCtx,
     >
 {
@@ -67,6 +71,7 @@ impl<
             AttributeId,
             TextureId,
             FramebufferId,
+            TransformFeedbackId,
             UserCtx,
         >,
         renderer: Renderer<
@@ -78,6 +83,7 @@ impl<
             AttributeId,
             TextureId,
             FramebufferId,
+            TransformFeedbackId,
             UserCtx,
         >,
     ) -> Self {
@@ -140,6 +146,7 @@ impl<
         AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
+        TransformFeedbackId: Id,
         UserCtx: Clone,
     > Drop
     for AnimationHandle<
@@ -151,6 +158,7 @@ impl<
         AttributeId,
         TextureId,
         FramebufferId,
+        TransformFeedbackId,
         UserCtx,
     >
 {

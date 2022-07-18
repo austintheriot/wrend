@@ -27,9 +27,7 @@ impl<ProgramId: Id> From<(ProgramId, ProgramId, ProgramId)> for IdBridge<Program
     }
 }
 
-impl<ProgramId: Id> From<(ProgramId, ProgramId, ProgramId, ProgramId)>
-    for IdBridge<ProgramId>
-{
+impl<ProgramId: Id> From<(ProgramId, ProgramId, ProgramId, ProgramId)> for IdBridge<ProgramId> {
     fn from(program_id: (ProgramId, ProgramId, ProgramId, ProgramId)) -> Self {
         IdBridge(vec![program_id.0, program_id.1, program_id.2, program_id.3])
     }

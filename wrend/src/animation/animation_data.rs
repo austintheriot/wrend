@@ -11,6 +11,7 @@ pub struct AnimationData<
     AttributeId: Id + IdName = IdDefault,
     TextureId: Id = IdDefault,
     FramebufferId: Id = IdDefault,
+    TransformFeedbackId: Id = IdDefault,
     UserCtx: Clone + 'static = (),
 > {
     id: i32,
@@ -23,6 +24,7 @@ pub struct AnimationData<
         AttributeId,
         TextureId,
         FramebufferId,
+        TransformFeedbackId,
         UserCtx,
     >,
     renderer: Renderer<
@@ -34,6 +36,7 @@ pub struct AnimationData<
         AttributeId,
         TextureId,
         FramebufferId,
+        TransformFeedbackId,
         UserCtx,
     >,
     is_animating: bool,
@@ -48,6 +51,7 @@ impl<
         AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
+        TransformFeedbackId: Id,
         UserCtx: Clone + 'static,
     >
     AnimationData<
@@ -59,6 +63,7 @@ impl<
         AttributeId,
         TextureId,
         FramebufferId,
+        TransformFeedbackId,
         UserCtx,
     >
 {
@@ -94,6 +99,7 @@ impl<
         AttributeId,
         TextureId,
         FramebufferId,
+        TransformFeedbackId,
         UserCtx,
     > {
         &self.renderer
@@ -109,6 +115,7 @@ impl<
             AttributeId,
             TextureId,
             FramebufferId,
+            TransformFeedbackId,
             UserCtx,
         >,
         renderer: Renderer<
@@ -120,6 +127,7 @@ impl<
             AttributeId,
             TextureId,
             FramebufferId,
+            TransformFeedbackId,
             UserCtx,
         >,
     ) -> Self {
@@ -141,6 +149,7 @@ impl<
         AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
+        TransformFeedbackId: Id,
         UserCtx: Clone,
     > Deref
     for AnimationData<
@@ -152,6 +161,7 @@ impl<
         AttributeId,
         TextureId,
         FramebufferId,
+        TransformFeedbackId,
         UserCtx,
     >
 {
@@ -164,6 +174,7 @@ impl<
         AttributeId,
         TextureId,
         FramebufferId,
+        TransformFeedbackId,
         UserCtx,
     >;
 

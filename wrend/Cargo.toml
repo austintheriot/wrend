@@ -32,5 +32,6 @@ features = [
   'WebGlFramebuffer',
   'WebGlTexture',
   "WebGlVertexArrayObject",
+  "WebGlTransformFeedback",
   'Performance',
 ]

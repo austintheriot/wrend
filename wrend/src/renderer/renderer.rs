@@ -1,3 +1,9 @@
+use crate::{
+    AnimationCallback, AnimationHandle, Attribute, AttributeCreateContext, AttributeLink,
+    AttributeLocation, Buffer, BufferLink, Framebuffer, FramebufferLink, Id, IdDefault, IdName,
+    ProgramLink, RenderCallback, ShaderType, Texture, TextureLink, TransformFeedbackLink, Uniform,
+    UniformContext, UniformLink,
+};
 use std::{
     collections::{HashMap, HashSet},
     hash::Hash,
@@ -6,14 +12,7 @@ use thiserror::Error;
 use wasm_bindgen::JsCast;
 use web_sys::{
     window, HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram, WebGlShader,
-    WebGlVertexArrayObject,
-};
-
-use crate::{
-    AnimationCallback, AnimationHandle, Attribute, AttributeCreateContext, AttributeLink,
-    AttributeLocation, Buffer, BufferLink, Framebuffer, FramebufferLink, Id, IdDefault, IdName,
-    ProgramLink, RenderCallback, ShaderType, Texture, TextureLink, Uniform, UniformContext,
-    UniformLink,
+    WebGlTransformFeedback, WebGlVertexArrayObject,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -26,6 +25,7 @@ pub struct Renderer<
     AttributeId: Id + IdName = IdDefault,
     TextureId: Id = IdDefault,
     FramebufferId: Id = IdDefault,
+    TransformFeedbackId: Id = IdDefault,
     UserCtx: Clone + 'static = (),
 > {
     canvas: HtmlCanvasElement,
@@ -42,6 +42,7 @@ pub struct Renderer<
         AttributeId,
         TextureId,
         FramebufferId,
+        TransformFeedbackId,
         UserCtx,
     >,
     uniforms: HashMap<UniformId, Uniform<ProgramId, UniformId, UserCtx>>,
@@ -51,6 +52,7 @@ pub struct Renderer<
     textures: HashMap<TextureId, Texture<TextureId>>,
     vertex_array_objects: HashMap<ProgramId, WebGlVertexArrayObject>,
     framebuffers: HashMap<FramebufferId, Framebuffer<FramebufferId>>,
+    transform_feedbacks: HashMap<TransformFeedbackId, WebGlTransformFeedback>,
 }
 
 /// Public API
@@ -63,6 +65,7 @@ impl<
         AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
+        TransformFeedbackId: Id,
         UserCtx: Clone,
     >
     Renderer<
@@ -74,6 +77,7 @@ impl<
         AttributeId,
         TextureId,
         FramebufferId,
+        TransformFeedbackId,
         UserCtx,
     >
 {
@@ -86,6 +90,7 @@ impl<
         AttributeId,
         TextureId,
         FramebufferId,
+        TransformFeedbackId,
         UserCtx,
     > {
         RendererBuilder::default()
@@ -129,6 +134,10 @@ impl<
 
     pub fn framebuffers(&self) -> &HashMap<FramebufferId, Framebuffer<FramebufferId>> {
         &self.framebuffers
+    }
+
+    pub fn transform_feedbacks(&self) -> &HashMap<TransformFeedbackId, WebGlTransformFeedback> {
+        &self.transform_feedbacks
     }
 
     // @todo - enable ctx to be returned unconditionally (depending on if it's set or not)
@@ -202,6 +211,7 @@ impl<
             AttributeId,
             TextureId,
             FramebufferId,
+            TransformFeedbackId,
             UserCtx,
         >,
     ) -> AnimationHandle<
@@ -213,6 +223,7 @@ impl<
         AttributeId,
         TextureId,
         FramebufferId,
+        TransformFeedbackId,
         UserCtx,
     > {
         AnimationHandle::new(animation_callback, self)
@@ -310,11 +321,19 @@ pub enum RendererBuilderError {
     #[error("Could not create attribute because attribute link's associated buffer was not found from the buffer_id")]
     BufferNotFoundCreateAttributeError,
 
+    // @todo: move this into its own sub-error
     #[error("Could not create texture because no WebGL2RenderingContext was provided")]
     NoContextCreateTextureError,
 
+    // @todo: move this into its own sub-error
     #[error("Could not create framebuffer because no WebGL2RenderingContext was provided")]
     NoContextCreateFramebufferError,
+
+    // @todo: move this into its own sub-error
+    #[error("Could not build transform feedback because no WebGL2RenderingContext was provided")]
+    NoContextBuildTransformFeedbackError,
+    #[error("Could not build transform feedback because the value returned from create_transform_feedback was None")]
+    TransformFeedbackNotFoundTransformFeedbackError,
 }
 
 #[derive(Debug, Clone)]
@@ -327,6 +346,7 @@ pub struct RendererBuilder<
     AttributeId: Id + IdName = IdDefault,
     TextureId: Id = IdDefault,
     FramebufferId: Id = IdDefault,
+    TransformFeedbackId: Id = IdDefault,
     UserCtx: Clone + 'static = (),
 > {
     canvas: Option<HtmlCanvasElement>,
@@ -357,11 +377,14 @@ pub struct RendererBuilder<
             AttributeId,
             TextureId,
             FramebufferId,
+            TransformFeedbackId,
             UserCtx,
         >,
     >,
     user_ctx: Option<UserCtx>,
     vertex_array_objects: HashMap<ProgramId, WebGlVertexArrayObject>,
+    transform_feedback_links: HashSet<TransformFeedbackLink<TransformFeedbackId>>,
+    transform_feedbacks: HashMap<TransformFeedbackId, WebGlTransformFeedback>,
 }
 
 /// Public API
@@ -374,6 +397,7 @@ impl<
         AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
+        TransformFeedbackId: Id,
         UserCtx: Clone + 'static,
     >
     RendererBuilder<
@@ -385,6 +409,7 @@ impl<
         AttributeId,
         TextureId,
         FramebufferId,
+        TransformFeedbackId,
         UserCtx,
     >
 {
@@ -451,6 +476,7 @@ impl<
                 AttributeId,
                 TextureId,
                 FramebufferId,
+                TransformFeedbackId,
                 UserCtx,
             >,
         >,
@@ -514,12 +540,23 @@ impl<
         self
     }
 
-    /// Saves a link that will be used to build a buffer/attribute pair at build time.
+    /// Saves a link that will be used to build a framebuffer at build time
     pub fn add_framebuffer_link(
         &mut self,
         framebuffer_link: impl Into<FramebufferLink<FramebufferId, UserCtx, TextureId>>,
     ) -> &mut Self {
         self.framebuffer_links.insert(framebuffer_link.into());
+
+        self
+    }
+
+    /// Saves a link that will be used to build a transformFeedback at build time
+    pub fn add_transform_feedback_link(
+        &mut self,
+        transform_feedback_link: impl Into<TransformFeedbackLink<TransformFeedbackId>>,
+    ) -> &mut Self {
+        self.transform_feedback_links
+            .insert(transform_feedback_link.into());
 
         self
     }
@@ -539,6 +576,7 @@ impl<
             AttributeId,
             TextureId,
             FramebufferId,
+            TransformFeedbackId,
             UserCtx,
         >,
         RendererBuilderError,
@@ -553,6 +591,7 @@ impl<
         self.build_uniforms()?;
         self.create_textures()?;
         self.create_framebuffers()?;
+        self.create_transform_feedbacks();
 
         let renderer = Renderer {
             canvas: self
@@ -572,6 +611,7 @@ impl<
             framebuffers: self.framebuffers,
             attributes: self.attributes,
             vertex_array_objects: self.vertex_array_objects,
+            transform_feedbacks: self.transform_feedbacks,
         };
 
         Ok(renderer)
@@ -588,6 +628,7 @@ impl<
         AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
+        TransformFeedbackId: Id,
         UserCtx: Clone,
     >
     RendererBuilder<
@@ -599,6 +640,7 @@ impl<
         AttributeId,
         TextureId,
         FramebufferId,
+        TransformFeedbackId,
         UserCtx,
     >
 {
@@ -647,6 +689,24 @@ impl<
         for (id, vertex_shader_src) in self.vertex_shader_sources.iter() {
             let vertex_shader = self.compile_shader(ShaderType::VertexShader, vertex_shader_src)?;
             self.vertex_shaders.insert((*id).clone(), vertex_shader);
+        }
+
+        Ok(self)
+    }
+
+    fn create_transform_feedbacks(&mut self) -> Result<&mut Self, RendererBuilderError> {
+        let gl = self
+            .gl
+            .as_ref()
+            .ok_or(RendererBuilderError::NoContextBuildTransformFeedbackError)?;
+
+        for transform_feedback_link in self.transform_feedback_links.iter() {
+            let transform_feedback_id = transform_feedback_link.transform_feedback_id().clone();
+            let webgl_transform_feedback = gl
+                .create_transform_feedback()
+                .ok_or(RendererBuilderError::TransformFeedbackNotFoundTransformFeedbackError)?;
+            self.transform_feedbacks
+                .insert(transform_feedback_id, webgl_transform_feedback);
         }
 
         Ok(self)
@@ -773,7 +833,7 @@ impl<
             for program_id in program_ids {
                 let program = self
                     .programs
-                    .get(&program_id)
+                    .get(program_id)
                     .ok_or(RendererBuilderError::ProgramNotFoundCreateAttributeError)?;
                 let vao = self
                     .vertex_array_objects
@@ -788,7 +848,7 @@ impl<
                     attribute_location => attribute_location.into(),
                 };
 
-                attribute_locations.insert(program_id.clone(), attribute_location.clone());
+                attribute_locations.insert(program_id.clone(), attribute_location);
 
                 gl.bind_vertex_array(Some(vao));
                 gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&webgl_buffer));
@@ -972,6 +1032,7 @@ impl<
         AttributeId: Id + IdName,
         TextureId: Id,
         FramebufferId: Id,
+        TransformFeedbackId: Id,
         UserCtx: Clone,
     > Default
     for RendererBuilder<
@@ -983,6 +1044,7 @@ impl<
         AttributeId,
         TextureId,
         FramebufferId,
+        TransformFeedbackId,
         UserCtx,
     >
 {
@@ -1009,6 +1071,8 @@ impl<
             attribute_links: Default::default(),
             attributes: Default::default(),
             vertex_array_objects: Default::default(),
+            transform_feedbacks: Default::default(),
+            transform_feedback_links: Default::default(),
         }
     }
 }

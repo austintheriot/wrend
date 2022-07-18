@@ -1,4 +1,6 @@
-use crate::{AttributeCreateCallback, AttributeCreateContext, AttributeLocation, Id, IdName, IdBridge};
+use crate::{
+    AttributeCreateCallback, AttributeCreateContext, AttributeLocation, Id, IdBridge, IdName,
+};
 use std::fmt::Debug;
 use std::hash::Hash;
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};

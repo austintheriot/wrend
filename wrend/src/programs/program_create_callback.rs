@@ -1,5 +1,5 @@
-use crate::CallbackWithContext;
 use super::program_create_context::ProgramCreateContext;
+use crate::CallbackWithContext;
 use std::hash::Hash;
 use std::{any::Any, fmt::Debug, ops::Deref, rc::Rc};
 use thiserror::Error;
@@ -22,10 +22,15 @@ pub enum CreateProgramError {
 
 /// Wrapper around `CallbackWithContext` to implement a custom Default implementation
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
-pub struct ProgramCreateCallback<UserCtx>(CallbackWithContext<ProgramCreateContext<UserCtx>, Result<WebGlProgram, CreateProgramError>>);
+pub struct ProgramCreateCallback<UserCtx>(
+    CallbackWithContext<ProgramCreateContext<UserCtx>, Result<WebGlProgram, CreateProgramError>>,
+);
 
 impl<UserCtx> Deref for ProgramCreateCallback<UserCtx> {
-    type Target = CallbackWithContext<ProgramCreateContext<UserCtx>, Result<WebGlProgram, CreateProgramError>>;
+    type Target = CallbackWithContext<
+        ProgramCreateContext<UserCtx>,
+        Result<WebGlProgram, CreateProgramError>,
+    >;
 
     fn deref(&self) -> &Self::Target {
         &self.0

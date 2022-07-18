@@ -158,6 +158,7 @@ pub fn app() -> Html {
                         PositionAttributeId,
                         IdDefault,
                         IdDefault,
+                        IdDefault,
                         UseStateHandle<i32>,
                     >| {
                         let gl = renderer.gl();

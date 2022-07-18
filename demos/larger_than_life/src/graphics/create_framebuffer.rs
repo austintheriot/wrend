@@ -21,7 +21,7 @@ pub fn create_frame_buffer<UserCtx: Clone + 'static>(
         WebGl2RenderingContext::FRAMEBUFFER,
         WebGl2RenderingContext::COLOR_ATTACHMENT0,
         WebGl2RenderingContext::TEXTURE_2D,
-        Some(&texture_a),
+        Some(texture_a),
         0,
     );
     framebuffer_object

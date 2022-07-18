@@ -10,6 +10,7 @@ pub type RenderCallback<
     AttributeId,
     TextureId,
     FramebufferId,
+    TransformFeedbackId,
     UserCtx,
 > = CallbackWithContext<
     Renderer<
@@ -21,6 +22,7 @@ pub type RenderCallback<
         AttributeId,
         TextureId,
         FramebufferId,
+        TransformFeedbackId,
         UserCtx,
     >,
 >;
