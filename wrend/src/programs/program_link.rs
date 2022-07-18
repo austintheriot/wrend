@@ -65,7 +65,7 @@ impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id, UserCtx> PartialEq
         self.program_id == other.program_id
             && self.vertex_shader_id == other.vertex_shader_id
             && self.fragment_shader_id == other.fragment_shader_id
-            && self.program_create_callback == other.program_create_callback
+            && *self.program_create_callback == *other.program_create_callback
     }
 }
 
@@ -172,6 +172,6 @@ impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id, UserCtx> PartialEq
         self.program_id == other.program_id
             && self.vertex_shader_id == other.vertex_shader_id
             && self.fragment_shader_id == other.fragment_shader_id
-            && self.program_create_callback == other.program_create_callback
+            && *self.program_create_callback == *other.program_create_callback
     }
 }

@@ -1,21 +1,21 @@
 use web_sys::{WebGl2RenderingContext, WebGlShader};
 
 #[derive(Debug, Clone)]
-pub struct ProgramCreateContext<'a, UserCtx> {
-    gl: &'a WebGl2RenderingContext,
+pub struct ProgramCreateContext<UserCtx> {
+    gl: WebGl2RenderingContext,
     now: f64,
-    user_ctx: Option<&'a UserCtx>,
+    user_ctx: Option<UserCtx>,
     fragment_shader: WebGlShader,
     vertex_shader: WebGlShader,
     transform_feedback_varyings: Vec<String>,
 }
 
-impl<'a, UserCtx> ProgramCreateContext<'a, UserCtx> {
+impl<UserCtx> ProgramCreateContext<UserCtx> {
     /// @todo: make this into a builder pattern
     pub fn new(
-        gl: &'a WebGl2RenderingContext,
+        gl: WebGl2RenderingContext,
         now: f64,
-        user_ctx: Option<&'a UserCtx>,
+        user_ctx: Option<UserCtx>,
         fragment_shader: WebGlShader,
         vertex_shader: WebGlShader,
         transform_feedback_varyings: Vec<String>,
@@ -31,15 +31,15 @@ impl<'a, UserCtx> ProgramCreateContext<'a, UserCtx> {
     }
 
     pub fn gl(&self) -> &WebGl2RenderingContext {
-        self.gl
+        &self.gl
     }
 
     pub fn now(&self) -> f64 {
         self.now
     }
 
-    pub fn user_ctx(&self) -> Option<&'a UserCtx> {
-        self.user_ctx
+    pub fn user_ctx(&self) -> &Option<UserCtx> {
+        &self.user_ctx
     }
 
     pub fn vertex_shader(&self) -> &WebGlShader {
