@@ -41,14 +41,21 @@ pub fn render(
     let gl = renderer.gl();
     let canvas = renderer.canvas();
 
-    // render to framebuffer
-    gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, None);
+    // render perlin noise to framebuffer
+    let white_noise_texture = renderer
+        .textures()
+        .get(&TextureId::WhiteNoise)
+        .map(|texture| texture.webgl_texture());
+    gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, white_noise_texture);
     renderer.switch_program(&ProgramId::PerlinNoise);
     let perlin_noise_framebuffer = renderer
         .framebuffers()
         .get(&FramebufferId::PerlinNoise)
         .map(|framebuffer| framebuffer.webgl_framebuffer());
-    gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, perlin_noise_framebuffer);
+    gl.bind_framebuffer(
+        WebGl2RenderingContext::FRAMEBUFFER,
+        perlin_noise_framebuffer,
+    );
     draw(gl, canvas);
 
     // pull from the framebuffer just drawn to and copy to the canvas

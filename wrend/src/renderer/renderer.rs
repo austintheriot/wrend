@@ -295,9 +295,11 @@ pub enum RendererBuilderError {
     #[error("Could not build uniforms because the associated program_id could no be found")]
     ProgramNotFoundBuildUniformsError,
     #[error(
-        "Could not build uniforms because the uniform's location was not found in the program"
+        "Could not build uniforms because the uniform's location was not found in the program: {uniform_id:?}"
     )]
-    UniformLocationNotFoundBuildUniformsError,
+    UniformLocationNotFoundBuildUniformsError {
+        uniform_id: String,
+    },
 
     // @todo: move this into its own sub-error
     #[error("Could not initialize uniforms because no WebGL2RenderingContext was provided")]
@@ -769,7 +771,9 @@ impl<
 
             let uniform_location = gl
                 .get_uniform_location(program, &uniform_id.name())
-                .ok_or(RendererBuilderError::UniformLocationNotFoundBuildUniformsError)?;
+                .ok_or(RendererBuilderError::UniformLocationNotFoundBuildUniformsError {
+                    uniform_id: uniform_id.name(), 
+                })?;
             let uniform_context =
                 UniformContext::new(gl.clone(), now, uniform_location.clone(), user_ctx.clone());
             (initialize_callback)(&uniform_context);

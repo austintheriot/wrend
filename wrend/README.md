@@ -25,6 +25,8 @@ The following use cases should guide the development of this library:
     using the Attribute's AttributePosition that was saved for that Program/VAO
 - When switching programs, simultaneously switch the VAO so that previous attribute configuration still works
 
+- Make a trait for Texture numbers 
+
 - Question: 
     - Updating how attributes are configured: should be updated for Programs/VAOs simultaneously
     - Updating buffers just means uploading new data, which is a global operation for all consuming Programs/VAOs

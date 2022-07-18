@@ -1,10 +1,17 @@
 use crate::{
     graphics::{
-        attribute_id::AttributeId, buffer_id::BufferId, create_buffer::create_vertex_buffer,
+        attribute_id::AttributeId,
+        buffer_id::BufferId,
+        create_buffer::create_vertex_buffer,
         create_framebuffer::create_frame_buffer,
-        create_position_attribute::create_position_attribute, create_texture::create_texture,
-        fragment_shader_id::FragmentShaderId, framebuffer_id::FramebufferId, program_id::ProgramId,
-        render::render, texture_id::TextureId, uniform_id::UniformId,
+        create_position_attribute::create_position_attribute,
+        create_texture::{create_perlin_noise_texture, create_white_noise_texture},
+        fragment_shader_id::FragmentShaderId,
+        framebuffer_id::FramebufferId,
+        program_id::ProgramId,
+        render::render,
+        texture_id::TextureId,
+        uniform_id::UniformId,
         vertex_shader_id::VertexShaderId,
     },
     state::{render_state::RenderState, render_state_handle::RenderStateHandle},
@@ -15,7 +22,7 @@ use web_sys::HtmlCanvasElement;
 use wrend::{
     AnimationCallback, AttributeCreateCallback, AttributeLink, BufferCreateCallback, BufferLink,
     FramebufferCreateCallback, FramebufferLink, ProgramLinkBuilder, RenderCallback, Renderer,
-    TextureCreateCallback, TextureLink, UniformCallback, UniformLink,
+    TextureCreateCallback, TextureLink, UniformCallback, UniformLink, UniformContext,
 };
 
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
@@ -78,14 +85,14 @@ pub fn app() -> Html {
                     AttributeCreateCallback::new(Rc::new(create_position_attribute)),
                 );
 
-                let noise_texture_link = TextureLink::new(
-                    TextureId::PerlinNoise,
-                    TextureCreateCallback::new(Rc::new(create_texture)),
+                let white_noise_texture_link = TextureLink::new(
+                    TextureId::WhiteNoise,
+                    TextureCreateCallback::new(Rc::new(create_white_noise_texture)),
                 );
 
-                let u_noise_texture = UniformLink::new(
-                    ProgramId::PassThrough,
-                    UniformId::UNoiseTexture,
+                let u_white_noise_texture = UniformLink::new(
+                    ProgramId::PerlinNoise,
+                    UniformId::UWhiteNoiseTexture,
                     UniformCallback::new(Rc::new(|ctx| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
@@ -93,17 +100,46 @@ pub fn app() -> Html {
                     })),
                 );
 
-                let noise_framebuffer_link = FramebufferLink::new(
+                let perlin_noise_texture_link = TextureLink::new(
+                    TextureId::PerlinNoise,
+                    TextureCreateCallback::new(Rc::new(create_perlin_noise_texture)),
+                );
+
+                let u_perlin_noise_texture = UniformLink::new(
+                    ProgramId::PassThrough,
+                    UniformId::UPerlinNoiseTexture,
+                    UniformCallback::new(Rc::new(|ctx| {
+                        let gl = ctx.gl();
+                        let uniform_location = ctx.uniform_location();
+                        gl.uniform1i(Some(uniform_location), 1);
+                    })),
+                );
+
+                let perlin_noise_framebuffer_link = FramebufferLink::new(
                     FramebufferId::PerlinNoise,
                     FramebufferCreateCallback::new(Rc::new(create_frame_buffer)),
                     Some(TextureId::PerlinNoise),
                 );
 
+                let u_now_link_init_and_update_callback =
+                    Rc::new(|ctx: &UniformContext<RenderStateHandle>| {
+                        let gl = ctx.gl();
+                        let uniform_location = ctx.uniform_location();
+                        gl.uniform1f(Some(uniform_location), (ctx.now() / 2000.) as f32);
+                    });
+
+                let mut u_now = UniformLink::new(
+                    ProgramId::PerlinNoise,
+                    UniformId::UNow,
+                    UniformCallback::new(u_now_link_init_and_update_callback.clone()),
+                );
+
+                u_now.set_update_callback(UniformCallback::new(u_now_link_init_and_update_callback.clone()));
+
                 let render_callback = RenderCallback::new(Rc::new(render));
                 let render_state_handle: RenderStateHandle = render_state.into();
 
                 let mut renderer_builder = Renderer::builder();
-
 
                 renderer_builder
                     .set_canvas(canvas)
@@ -127,9 +163,12 @@ pub fn app() -> Html {
                     .add_program_link(perlin_noise_program_link)
                     .add_buffer_link(vertex_buffer_link)
                     .add_attribute_link(a_position_link)
-                    .add_uniform_link(u_noise_texture)
-                    .add_texture_link(noise_texture_link)
-                    .add_framebuffer_link(noise_framebuffer_link);
+                    .add_uniform_link(u_now)
+                    .add_uniform_link(u_perlin_noise_texture)
+                    .add_texture_link(perlin_noise_texture_link)
+                    .add_framebuffer_link(perlin_noise_framebuffer_link)
+                    .add_texture_link(white_noise_texture_link)
+                    .add_uniform_link(u_white_noise_texture);
 
                 let renderer = renderer_builder
                     .build()
@@ -137,6 +176,7 @@ pub fn app() -> Html {
 
                 let new_animation_handle =
                     renderer.into_animation_handle(AnimationCallback::new(Rc::new(|renderer| {
+                        renderer.update_uniforms();
                         renderer.render();
                     })));
 
