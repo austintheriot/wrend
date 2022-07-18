@@ -43,7 +43,7 @@ pub struct Renderer<
     >,
     uniforms: HashMap<UniformId, Uniform<ProgramId, UniformId, UserCtx>>,
     user_ctx: Option<UserCtx>,
-    attributes: HashMap<AttributeId, Attribute<ProgramId, BufferId, AttributeId, UserCtx>>,
+    attributes: HashMap<AttributeId, Attribute<ProgramId, BufferId, AttributeId>>,
     buffers: HashMap<BufferId, Buffer<BufferId>>,
     textures: HashMap<TextureId, Texture<TextureId>>,
     framebuffers: HashMap<FramebufferId, Framebuffer<FramebufferId>>,
@@ -115,9 +115,7 @@ impl<
         &self.buffers
     }
 
-    pub fn attributes(
-        &self,
-    ) -> &HashMap<AttributeId, Attribute<ProgramId, BufferId, AttributeId, UserCtx>> {
+    pub fn attributes(&self) -> &HashMap<AttributeId, Attribute<ProgramId, BufferId, AttributeId>> {
         &self.attributes
     }
 
@@ -158,60 +156,6 @@ impl<
     pub fn update_uniforms(&self) -> &Self {
         for (uniform_id, _) in &self.uniforms {
             self.update_uniform(uniform_id);
-        }
-
-        self
-    }
-
-    /// Updates a single buffer using the passed-in update callback.
-    ///
-    /// This function does NOT check whether the buffer SHOULD be updated before making the update call.
-    ///
-    /// Calls "use_program" on the appropriate program before each uniform's update function
-    /// (so this is not necessary to do within the callback itself, unless you need to change programs, for
-    /// whatever reason).
-    ///
-    /// Binds the correct buffer before the update callback is called, so this may be omitted.
-    pub fn update_attribute(&self, attribute_id: &AttributeId) -> &Self {
-        let now = Self::now();
-        let user_ctx = self.user_ctx().map(Clone::clone);
-        let gl = self.gl();
-
-        let attribute = self
-            .attributes
-            .get(attribute_id)
-            .expect("AttributeId should exist in registered attributes");
-
-        // bind the corresponding program
-        let program_id = attribute.program_id();
-        let program = self.programs().get(program_id);
-        self.gl().use_program(program);
-
-        // bind the corresponding buffer
-        let webgl_buffer = attribute.webgl_buffer();
-        gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(webgl_buffer));
-        attribute.update(self.gl().clone(), now, user_ctx.clone());
-        gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, None);
-
-        self
-    }
-
-    /// Iterates through all saved buffers and updates them using their associated update callbacks.
-    ///
-    /// This function DOES check whether a buffer SHOULD be updated before calling its associated updated callback.
-    ///
-    /// If no should_update_callback was provided, then it is assumed that the buffer should be updated.
-    pub fn update_attributes(&self) -> &Self {
-        let now = Self::now();
-        let user_ctx = self.user_ctx().map(Clone::clone);
-        let gl = self.gl();
-
-        for (attribute_id, attribute) in &self.attributes {
-            if !attribute.should_update(gl.clone(), now, user_ctx.clone()) {
-                continue;
-            }
-
-            self.update_attribute(attribute_id);
         }
 
         self
@@ -371,7 +315,7 @@ pub struct RendererBuilder<
     buffer_links: HashSet<BufferLink<BufferId, UserCtx>>,
     buffers: HashMap<BufferId, Buffer<BufferId>>,
     attribute_links: HashSet<AttributeLink<ProgramId, BufferId, AttributeId, UserCtx>>,
-    attributes: HashMap<AttributeId, Attribute<ProgramId, BufferId, AttributeId, UserCtx>>,
+    attributes: HashMap<AttributeId, Attribute<ProgramId, BufferId, AttributeId>>,
     texture_links: HashSet<TextureLink<TextureId, UserCtx>>,
     textures: HashMap<TextureId, Texture<TextureId>>,
     framebuffer_links: HashSet<FramebufferLink<FramebufferId, UserCtx, TextureId>>,
@@ -819,17 +763,12 @@ impl<
             (attribute_link.create_callback())(&attribute_create_context);
             gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, None);
 
-            let update_callback = attribute_link.update_callback();
-            let should_update_callback = attribute_link.should_update_callback();
-
             let attribute = Attribute::new(
                 program_id,
                 buffer_id.clone(),
                 attribute_id.clone(),
                 webgl_buffer.clone(),
                 attribute_location,
-                update_callback,
-                should_update_callback,
             );
 
             self.attributes.insert(attribute_id, attribute);

@@ -3,9 +3,9 @@ use ui::route::Route;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 use wrend::{
-    AnimationCallback, AttributeLink, BufferCreateCallback, BufferCreateContext, BufferLink, Id,
-    IdDefault, IdName, ProgramLink, RenderCallback, Renderer, UniformCallback, UniformContext,
-    UniformLink, QUAD, AttributeCreateCallback, AttributeUpdateCallback, AttributeShouldUpdateCallback,
+    AnimationCallback, AttributeCreateCallback, AttributeLink, BufferCreateCallback,
+    BufferCreateContext, BufferLink, Id, IdDefault, IdName, ProgramLink, RenderCallback, Renderer,
+    UniformCallback, UniformContext, UniformLink, QUAD,
 };
 use yew::{
     function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, use_state_eq,
@@ -146,8 +146,6 @@ pub fn app() -> Html {
                             0,
                         );
                     })),
-                    AttributeUpdateCallback::new(Rc::new(|_| {})),
-                    AttributeShouldUpdateCallback::new(Rc::new(|_| false)),
                 );
 
                 let render_callback = RenderCallback::new(Rc::new(

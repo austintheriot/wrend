@@ -1,7 +1,4 @@
-use crate::{
-    AttributeCreateCallback, AttributeCreateContext, AttributeLocation,
-    AttributeShouldUpdateCallback, AttributeUpdateCallback, Id, IdName,
-};
+use crate::{AttributeCreateCallback, AttributeCreateContext, AttributeLocation, Id, IdName};
 use std::fmt::Debug;
 use std::hash::Hash;
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
@@ -12,8 +9,6 @@ pub struct AttributeLink<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, 
     buffer_id: BufferId,
     attribute_id: AttributeId,
     attribute_create_callback: AttributeCreateCallback<UserCtx>,
-    update_callback: AttributeUpdateCallback<UserCtx>,
-    should_update_callback: AttributeShouldUpdateCallback<UserCtx>,
 }
 
 impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone>
@@ -24,16 +19,12 @@ impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone>
         buffer_id: BufferId,
         attribute_id: AttributeId,
         attribute_create_callback: impl Into<AttributeCreateCallback<UserCtx>>,
-        update_callback: impl Into<AttributeUpdateCallback<UserCtx>>,
-        should_update_callback: impl Into<AttributeShouldUpdateCallback<UserCtx>>,
     ) -> Self {
         Self {
             program_id,
             buffer_id,
             attribute_id,
             attribute_create_callback: attribute_create_callback.into(),
-            update_callback: update_callback.into(),
-            should_update_callback: should_update_callback.into(),
         }
     }
 
@@ -64,14 +55,6 @@ impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone>
 
     pub fn create_callback(&self) -> AttributeCreateCallback<UserCtx> {
         self.attribute_create_callback.clone()
-    }
-
-    pub fn update_callback(&self) -> AttributeUpdateCallback<UserCtx> {
-        self.update_callback.clone()
-    }
-
-    pub fn should_update_callback(&self) -> AttributeShouldUpdateCallback<UserCtx> {
-        self.should_update_callback.clone()
     }
 }
 

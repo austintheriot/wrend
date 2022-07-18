@@ -12,9 +12,9 @@ use std::rc::Rc;
 use ui::route::Route;
 use web_sys::HtmlCanvasElement;
 use wrend::{
-    AnimationCallback, AttributeLink, BufferCreateCallback, BufferLink, FramebufferCreateCallback,
-    FramebufferLink, ProgramLink, RenderCallback, Renderer, TextureCreateCallback, TextureLink,
-    UniformCallback, UniformLink, AttributeUpdateCallback, AttributeShouldUpdateCallback, AttributeCreateCallback,
+    AnimationCallback, AttributeCreateCallback, AttributeLink, BufferCreateCallback, BufferLink,
+    FramebufferCreateCallback, FramebufferLink, ProgramLink, RenderCallback, Renderer,
+    TextureCreateCallback, TextureLink, UniformCallback, UniformLink,
 };
 
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
@@ -63,8 +63,6 @@ pub fn app() -> Html {
                     BufferId::VertexBuffer,
                     AttributeId::APosition,
                     AttributeCreateCallback::new(Rc::new(create_position_attribute)),
-                    AttributeUpdateCallback::new(Rc::new(|_| {})),
-                    AttributeShouldUpdateCallback::new(Rc::new(|_| false)),
                 );
 
                 let u_texture = UniformLink::new(
