@@ -40,11 +40,7 @@ pub fn render(
     let gl = renderer.gl();
     let canvas = renderer.canvas();
 
-    let program = renderer
-        .programs()
-        .get(&ProgramId::PassThrough)
-        .expect("Should contain pass through program");
-    gl.use_program(Some(program));
+    renderer.switch_program(&ProgramId::PassThrough);
 
     let noise_texture = renderer
         .textures()

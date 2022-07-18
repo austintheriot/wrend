@@ -58,7 +58,7 @@ pub fn app() -> Html {
                 );
 
                 let a_position_link = AttributeLink::new(
-                    ProgramId::FlowField,
+                    (ProgramId::FlowField, ProgramId::PassThrough),
                     BufferId::VertexBuffer,
                     AttributeId,
                     AttributeCreateCallback::new(Rc::new(create_position_attribute)),

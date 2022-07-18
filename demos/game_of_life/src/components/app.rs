@@ -59,7 +59,7 @@ pub fn app() -> Html {
                 );
 
                 let a_position_gol_life = AttributeLink::new(
-                    ProgramId::GameOfLife,
+                    (ProgramId::GameOfLife, ProgramId::PassThrough),
                     BufferId::VertexBuffer,
                     AttributeId,
                     AttributeCreateCallback::new(Rc::new(create_position_attribute)),

@@ -48,7 +48,7 @@ pub fn render(
     let canvas = renderer.canvas();
 
     // use the appropriate program
-    gl.use_program(renderer.programs().get(&ProgramId::GameOfLife));
+    renderer.switch_program(&ProgramId::GameOfLife);
 
     // sample from texture previously rendered to
     // and render to the opposite framebuffer
@@ -72,7 +72,7 @@ pub fn render(
     draw(gl, canvas);
 
     // pull from the framebuffer just drawn to and copy to the canvas
-    gl.use_program(renderer.programs().get(&ProgramId::PassThrough));
+    renderer.switch_program(&ProgramId::PassThrough);
 
     let next_webgl_texture = renderer
         .textures()
