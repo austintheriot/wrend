@@ -15,27 +15,22 @@ The following use cases should guide the development of this library:
 - Ray tracing
 
 ## Todo
--> Multiple ProgramIds per buffer / texture / framebuffer ?
-    - Should HashMap's be nested by Program?
-    - Buffer:
-        - Only needs to be created & initialized ONCE 
-        - Attribute location must be saved for each ProgramID
-        - Ways to edit:
-            - ATTRIBUTES can be adjusted to change how to pull data from buffers (unlikely)
-            - New data can be uploaded to BUFFER (possible)
-    ---> Create buffer THEN initialize attributes as separate links / processes
-- Attribute locations are not persisted across programs:
-    - Instead, use VAO to save attribute pointer information for each program
-    - Allow one attribute to "bind" to multiple programs like a uniform
-    - Enable a `switch_program` utility on the `renderer` that calls: `use_program` and binds the correct VAO
+
+- For every program, create an associated VAO
+- Create all buffers
+- Create all attributes
+- Each attribute specifies which Program/VAO pair it should be linked to
+- Save Attribute's Attribute position for all Programs it is associated with
+- When the attribute is configured, update all VAOs that are linked to the program it corresponds to, 
+    using the Attribute's AttributePosition that was saved for that Program/VAO
+- When switching programs, simultaneously switch the VAO so that previous attribute configuration still works
+
+- Question: 
+    - Updating how attributes are configured: should be updated for Programs/VAOs simultaneously
+    - Updating buffers just means uploading new data, which is a global operation for all consuming Programs/VAOs
+
+- Enable transform feedback
             
-- Move files that are in Renderer into their own appropriate folders
-
-- Enable Vertex Array Object (VAO)
-
-- Clean up buffer callback implementation (based off of uniform implementation)
-    - Use separate callback structs
-
 - Make passing in buffer update / should_update callbacks optional
 
 - Return error when a duplicate item is added to HashMap?
