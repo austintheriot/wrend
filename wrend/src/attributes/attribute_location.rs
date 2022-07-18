@@ -1,3 +1,4 @@
+/// Wrapper around the raw number returned from WebGL to represent an attribute location
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct AttributeLocation(u32);
 

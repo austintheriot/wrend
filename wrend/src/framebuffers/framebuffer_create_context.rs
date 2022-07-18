@@ -1,6 +1,6 @@
 use web_sys::{WebGl2RenderingContext, WebGlTexture};
 
-/// This is the context object that is passed to the create_texture callback function
+/// Context used when creating a Framebuffer object--passed into the callback as the first argument
 #[derive(Debug, Clone)]
 pub struct FramebufferCreateContext<UserCtx: Clone + 'static> {
     gl: WebGl2RenderingContext,

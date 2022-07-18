@@ -1,6 +1,6 @@
 use web_sys::WebGl2RenderingContext;
 
-/// This is the context object that is passed to the create_texture callback function
+/// Context used when creating a buffer--passed as an argument to the callback
 #[derive(Debug, Clone)]
 pub struct BufferCreateContext<UserCtx> {
     gl: WebGl2RenderingContext,

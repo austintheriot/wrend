@@ -1,7 +1,7 @@
 use super::attribute_location::AttributeLocation;
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
-/// This is the context object that is passed to the create_buffer callback function
+/// Context that is used when a new attribute is created
 #[derive(Debug, Clone)]
 pub struct AttributeCreateContext<UserCtx: Clone> {
     gl: WebGl2RenderingContext,
