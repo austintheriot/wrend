@@ -15,7 +15,7 @@ use web_sys::HtmlCanvasElement;
 use wrend::{
     AnimationCallback, AttributeLink, BufferCreateCallback, BufferLink, FramebufferCreateCallback,
     FramebufferLink, ProgramLink, RenderCallback, Renderer, TextureCreateCallback, TextureLink,
-    UniformCallback, UniformLink,
+    UniformCallback, UniformLink, AttributeCreateCallback, AttributeUpdateCallback, AttributeShouldUpdateCallback,
 };
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
 use yew_router::prelude::*;
@@ -62,9 +62,9 @@ pub fn app() -> Html {
                     ProgramId::GameOfLife,
                     BufferId::VertexBuffer,
                     AttributeId,
-                    Rc::new(create_position_attribute),
-                    Rc::new(|_| {}),
-                    Rc::new(|_| false),
+                    AttributeCreateCallback::new(Rc::new(create_position_attribute)),
+                    AttributeUpdateCallback::new(Rc::new(|_| {})),
+                    AttributeShouldUpdateCallback::new(Rc::new(|_| false)),
                 );
 
                 let u_texture = UniformLink::new(

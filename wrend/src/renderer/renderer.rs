@@ -174,7 +174,7 @@ impl<
     /// Binds the correct buffer before the update callback is called, so this may be omitted.
     pub fn update_attribute(&self, attribute_id: &AttributeId) -> &Self {
         let now = Self::now();
-        let user_ctx = self.user_ctx();
+        let user_ctx = self.user_ctx().map(Clone::clone);
         let gl = self.gl();
 
         let attribute = self
@@ -190,7 +190,7 @@ impl<
         // bind the corresponding buffer
         let webgl_buffer = attribute.webgl_buffer();
         gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(webgl_buffer));
-        attribute.update(self.gl(), now, user_ctx);
+        attribute.update(self.gl().clone(), now, user_ctx.clone());
         gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, None);
 
         self
@@ -203,11 +203,11 @@ impl<
     /// If no should_update_callback was provided, then it is assumed that the buffer should be updated.
     pub fn update_attributes(&self) -> &Self {
         let now = Self::now();
-        let user_ctx = self.user_ctx();
+        let user_ctx = self.user_ctx().map(Clone::clone);
         let gl = self.gl();
 
         for (attribute_id, attribute) in &self.attributes {
-            if !attribute.should_update(gl, now, user_ctx) {
+            if !attribute.should_update(gl.clone(), now, user_ctx.clone()) {
                 continue;
             }
 
@@ -782,7 +782,7 @@ impl<
             .as_ref()
             .ok_or(RendererBuilderError::NoContextCreateAttributeError)?;
         let now = Self::now();
-        let user_ctx = self.user_ctx.as_ref();
+        let user_ctx = self.user_ctx.clone();
 
         for attribute_link in &self.attribute_links {
             let program_id = attribute_link.program_id().clone();
@@ -809,9 +809,14 @@ impl<
 
             gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&webgl_buffer));
             gl.enable_vertex_attrib_array(attribute_location.into());
-            let attribute_create_context =
-                AttributeCreateContext::new(gl, now, &webgl_buffer, &attribute_location, user_ctx);
-            (attribute_link.create_callback())(attribute_create_context);
+            let attribute_create_context = AttributeCreateContext::new(
+                gl.clone(),
+                now,
+                webgl_buffer.clone(),
+                attribute_location,
+                user_ctx.clone(),
+            );
+            (attribute_link.create_callback())(&attribute_create_context);
             gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, None);
 
             let update_callback = attribute_link.update_callback();
@@ -821,7 +826,7 @@ impl<
                 program_id,
                 buffer_id.clone(),
                 attribute_id.clone(),
-                webgl_buffer,
+                webgl_buffer.clone(),
                 attribute_location,
                 update_callback,
                 should_update_callback,

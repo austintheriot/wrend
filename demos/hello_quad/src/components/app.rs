@@ -2,8 +2,9 @@ use std::rc::Rc;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 use wrend::{
-    AttributeLink, BufferCreateCallback, BufferCreateContext, BufferLink, Id, IdDefault, IdName,
-    ProgramLink, RenderCallback, Renderer, QUAD,
+    AttributeCreateCallback, AttributeLink, AttributeShouldUpdateCallback, AttributeUpdateCallback,
+    BufferCreateCallback, BufferCreateContext, BufferLink, Id, IdDefault, IdName, ProgramLink,
+    RenderCallback, Renderer, QUAD,
 };
 use yew::{
     function_component, html, use_effect_with_deps, use_node_ref, use_state_eq, UseStateHandle,
@@ -105,7 +106,7 @@ pub fn app() -> Html {
                     ProgramId,
                     BufferId::VertexBuffer,
                     PositionAttributeId,
-                    Rc::new(|ctx| {
+                    AttributeCreateCallback::new(Rc::new(|ctx| {
                         let gl = ctx.gl();
                         let attribute_location = ctx.attribute_location();
                         let webgl_buffer = ctx.webgl_buffer();
@@ -118,9 +119,9 @@ pub fn app() -> Html {
                             0,
                             0,
                         );
-                    }),
-                    Rc::new(|_| {}),
-                    Rc::new(|_| false),
+                    })),
+                    AttributeUpdateCallback::new(Rc::new(|_| {})),
+                    AttributeShouldUpdateCallback::new(Rc::new(|_| false)),
                 );
 
                 let render_callback = RenderCallback::new(Rc::new(

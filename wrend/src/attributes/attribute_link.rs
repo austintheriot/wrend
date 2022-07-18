@@ -1,16 +1,13 @@
 use crate::{
-    AttributeCreateContext, AttributeLocation, AttributeShouldUpdateCallback,
-    AttributeUpdateCallback, Id, IdName,
+    AttributeCreateCallback, AttributeCreateContext, AttributeLocation,
+    AttributeShouldUpdateCallback, AttributeUpdateCallback, Id, IdName,
 };
 use std::fmt::Debug;
 use std::hash::Hash;
-use std::rc::Rc;
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
-pub type AttributeCreateCallback<UserCtx> = Rc<dyn Fn(AttributeCreateContext<UserCtx>)>;
-
 #[derive(Clone)]
-pub struct AttributeLink<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx> {
+pub struct AttributeLink<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> {
     program_id: ProgramId,
     buffer_id: BufferId,
     attribute_id: AttributeId,
@@ -19,24 +16,24 @@ pub struct AttributeLink<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, 
     should_update_callback: AttributeShouldUpdateCallback<UserCtx>,
 }
 
-impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx>
+impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone>
     AttributeLink<ProgramId, BufferId, AttributeId, UserCtx>
 {
     pub fn new(
         program_id: ProgramId,
         buffer_id: BufferId,
         attribute_id: AttributeId,
-        attribute_create_callback: AttributeCreateCallback<UserCtx>,
-        update_callback: AttributeUpdateCallback<UserCtx>,
-        should_update_callback: AttributeShouldUpdateCallback<UserCtx>,
+        attribute_create_callback: impl Into<AttributeCreateCallback<UserCtx>>,
+        update_callback: impl Into<AttributeUpdateCallback<UserCtx>>,
+        should_update_callback: impl Into<AttributeShouldUpdateCallback<UserCtx>>,
     ) -> Self {
         Self {
             program_id,
             buffer_id,
             attribute_id,
-            attribute_create_callback,
-            update_callback,
-            should_update_callback,
+            attribute_create_callback: attribute_create_callback.into(),
+            update_callback: update_callback.into(),
+            should_update_callback: should_update_callback.into(),
         }
     }
 
@@ -54,31 +51,31 @@ impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx>
 
     pub fn configure_attribute(
         &self,
-        gl: &WebGl2RenderingContext,
+        gl: WebGl2RenderingContext,
         now: f64,
-        webgl_buffer: &WebGlBuffer,
-        attribute_location: &AttributeLocation,
-        user_ctx: Option<&UserCtx>,
+        webgl_buffer: WebGlBuffer,
+        attribute_location: AttributeLocation,
+        user_ctx: Option<UserCtx>,
     ) {
         let attribute_create_context =
             AttributeCreateContext::new(gl, now, webgl_buffer, attribute_location, user_ctx);
-        (self.attribute_create_callback)(attribute_create_context)
+        (self.attribute_create_callback)(&attribute_create_context)
     }
 
     pub fn create_callback(&self) -> AttributeCreateCallback<UserCtx> {
-        Rc::clone(&self.attribute_create_callback)
+        self.attribute_create_callback.clone()
     }
 
     pub fn update_callback(&self) -> AttributeUpdateCallback<UserCtx> {
-        Rc::clone(&self.update_callback)
+        self.update_callback.clone()
     }
 
     pub fn should_update_callback(&self) -> AttributeShouldUpdateCallback<UserCtx> {
-        Rc::clone(&self.should_update_callback)
+        self.should_update_callback.clone()
     }
 }
 
-impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx> Debug
+impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> Debug
     for AttributeLink<ProgramId, BufferId, AttributeId, UserCtx>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -92,7 +89,7 @@ impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx> Debug
     }
 }
 
-impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx> Hash
+impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> Hash
     for AttributeLink<ProgramId, BufferId, AttributeId, UserCtx>
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
@@ -102,7 +99,7 @@ impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx> Hash
     }
 }
 
-impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx> PartialEq
+impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> PartialEq
     for AttributeLink<ProgramId, BufferId, AttributeId, UserCtx>
 {
     fn eq(&self, other: &Self) -> bool {
@@ -113,7 +110,7 @@ impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx> PartialEq
     }
 }
 
-impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx> Eq
+impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> Eq
     for AttributeLink<ProgramId, BufferId, AttributeId, UserCtx>
 {
 }

@@ -3,22 +3,22 @@ use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
 /// This is the context object that is passed to each buffer's update callback
 #[derive(Debug, Clone)]
-pub struct AttributeContext<'a, UserCtx> {
-    gl: &'a WebGl2RenderingContext,
+pub struct AttributeContext<UserCtx: Clone> {
+    gl: WebGl2RenderingContext,
     now: f64,
-    buffer: &'a WebGlBuffer,
+    buffer: WebGlBuffer,
     attribute_location: AttributeLocation,
-    user_ctx: Option<&'a UserCtx>,
+    user_ctx: Option<UserCtx>,
 }
 
-impl<'a, UserCtx> AttributeContext<'a, UserCtx> {
+impl<UserCtx: Clone> AttributeContext<UserCtx> {
     /// @todo: make this into a builder pattern
     pub fn new(
-        gl: &'a WebGl2RenderingContext,
+        gl: WebGl2RenderingContext,
         now: f64,
-        buffer: &'a WebGlBuffer,
+        buffer: WebGlBuffer,
         attribute_location: AttributeLocation,
-        user_ctx: Option<&'a UserCtx>,
+        user_ctx: Option<UserCtx>,
     ) -> Self {
         Self {
             gl,
@@ -30,7 +30,7 @@ impl<'a, UserCtx> AttributeContext<'a, UserCtx> {
     }
 
     pub fn gl(&self) -> &WebGl2RenderingContext {
-        self.gl
+        &self.gl
     }
 
     pub fn now(&self) -> f64 {
@@ -38,14 +38,14 @@ impl<'a, UserCtx> AttributeContext<'a, UserCtx> {
     }
 
     pub fn buffer(&self) -> &WebGlBuffer {
-        self.buffer
+        &self.buffer
     }
 
     pub fn attribute_location(&self) -> &AttributeLocation {
         &self.attribute_location
     }
 
-    pub fn user_ctx(&self) -> Option<&'a UserCtx> {
-        self.user_ctx
+    pub fn user_ctx(&self) -> Option<UserCtx> {
+        self.user_ctx.clone()
     }
 }

@@ -3,22 +3,22 @@ use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
 /// This is the context object that is passed to the create_buffer callback function
 #[derive(Debug, Clone)]
-pub struct AttributeCreateContext<'a, UserCtx> {
-    gl: &'a WebGl2RenderingContext,
+pub struct AttributeCreateContext<UserCtx: Clone> {
+    gl: WebGl2RenderingContext,
     now: f64,
-    webgl_buffer: &'a WebGlBuffer,
-    attribute_location: &'a AttributeLocation,
-    user_ctx: Option<&'a UserCtx>,
+    webgl_buffer: WebGlBuffer,
+    attribute_location: AttributeLocation,
+    user_ctx: Option<UserCtx>,
 }
 
-impl<'a, UserCtx> AttributeCreateContext<'a, UserCtx> {
+impl<UserCtx: Clone> AttributeCreateContext<UserCtx> {
     /// @todo: make this into a builder pattern
     pub fn new(
-        gl: &'a WebGl2RenderingContext,
+        gl: WebGl2RenderingContext,
         now: f64,
-        webgl_buffer: &'a WebGlBuffer,
-        attribute_location: &'a AttributeLocation,
-        user_ctx: Option<&'a UserCtx>,
+        webgl_buffer: WebGlBuffer,
+        attribute_location: AttributeLocation,
+        user_ctx: Option<UserCtx>,
     ) -> Self {
         Self {
             gl,
@@ -30,7 +30,7 @@ impl<'a, UserCtx> AttributeCreateContext<'a, UserCtx> {
     }
 
     pub fn gl(&self) -> &WebGl2RenderingContext {
-        self.gl
+        &self.gl
     }
 
     pub fn now(&self) -> f64 {
@@ -38,14 +38,14 @@ impl<'a, UserCtx> AttributeCreateContext<'a, UserCtx> {
     }
 
     pub fn webgl_buffer(&self) -> &WebGlBuffer {
-        self.webgl_buffer
+        &self.webgl_buffer
     }
 
     pub fn attribute_location(&self) -> &AttributeLocation {
-        self.attribute_location
+        &self.attribute_location
     }
 
-    pub fn user_ctx(&self) -> Option<&'a UserCtx> {
-        self.user_ctx
+    pub fn user_ctx(&self) -> Option<UserCtx> {
+        self.user_ctx.clone()
     }
 }

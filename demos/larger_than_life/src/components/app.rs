@@ -14,7 +14,7 @@ use web_sys::HtmlCanvasElement;
 use wrend::{
     AnimationCallback, AttributeLink, BufferCreateCallback, BufferLink, FramebufferCreateCallback,
     FramebufferLink, ProgramLink, RenderCallback, Renderer, TextureCreateCallback, TextureLink,
-    UniformCallback, UniformLink,
+    UniformCallback, UniformLink, AttributeUpdateCallback, AttributeShouldUpdateCallback, AttributeCreateCallback,
 };
 
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
@@ -58,13 +58,13 @@ pub fn app() -> Html {
                     BufferCreateCallback::new(Rc::new(create_vertex_buffer)),
                 );
 
-                let attribute_position_gof_link = AttributeLink::new(
+                let attribute_position_gol_link = AttributeLink::new(
                     ProgramId::GameOfLife,
                     BufferId::VertexBuffer,
                     AttributeId::APosition,
-                    Rc::new(create_position_attribute),
-                    Rc::new(|_| {}),
-                    Rc::new(|_| false),
+                    AttributeCreateCallback::new(Rc::new(create_position_attribute)),
+                    AttributeUpdateCallback::new(Rc::new(|_| {})),
+                    AttributeShouldUpdateCallback::new(Rc::new(|_| false)),
                 );
 
                 let u_texture = UniformLink::new(
@@ -119,7 +119,7 @@ pub fn app() -> Html {
                     .add_program_link(game_of_life_program_link)
                     .add_program_link(pass_through_program_link)
                     .add_buffer_link(vertex_buffer_link)
-                    .add_attribute_link(attribute_position_gof_link)
+                    .add_attribute_link(attribute_position_gol_link)
                     .add_uniform_link(u_texture)
                     .add_texture_link(texture_a_link)
                     .add_texture_link(texture_b_link)

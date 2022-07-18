@@ -1,14 +1,13 @@
-use crate::{AttributeContext, AttributeLocation, Id, IdName};
+use crate::{
+    AttributeContext, AttributeLocation, AttributeShouldUpdateCallback, AttributeUpdateCallback,
+    Id, IdName,
+};
+use std::fmt::Debug;
 use std::hash::Hash;
-use std::{fmt::Debug, rc::Rc};
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
-pub type AttributeUpdateCallback<UserCtx> = Rc<dyn Fn(&AttributeContext<UserCtx>)>;
-
-pub type AttributeShouldUpdateCallback<UserCtx> = Rc<dyn Fn(&AttributeContext<UserCtx>) -> bool>;
-
 #[derive(Clone)]
-pub struct Attribute<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx> {
+pub struct Attribute<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> {
     program_id: ProgramId,
     buffer_id: BufferId,
     attribute_id: AttributeId,
@@ -18,7 +17,7 @@ pub struct Attribute<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, User
     should_update_callback: AttributeShouldUpdateCallback<UserCtx>,
 }
 
-impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx>
+impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone>
     Attribute<ProgramId, BufferId, AttributeId, UserCtx>
 {
     // @todo move into builder pattern
@@ -60,25 +59,25 @@ impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx>
 
     pub fn should_update(
         &self,
-        gl: &WebGl2RenderingContext,
+        gl: WebGl2RenderingContext,
         now: f64,
-        user_ctx: Option<&UserCtx>,
+        user_ctx: Option<UserCtx>,
     ) -> bool {
         let ctx = AttributeContext::new(
             gl,
             now,
-            self.webgl_buffer(),
+            self.webgl_buffer().clone(),
             *self.attribute_location(),
             user_ctx,
         );
         (self.should_update_callback)(&ctx)
     }
 
-    pub fn update(&self, gl: &WebGl2RenderingContext, now: f64, user_ctx: Option<&UserCtx>) {
+    pub fn update(&self, gl: WebGl2RenderingContext, now: f64, user_ctx: Option<UserCtx>) {
         let ctx = AttributeContext::new(
             gl,
             now,
-            self.webgl_buffer(),
+            self.webgl_buffer().clone(),
             *self.attribute_location(),
             user_ctx,
         );
@@ -86,7 +85,7 @@ impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx>
     }
 }
 
-impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx> Debug
+impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> Debug
     for Attribute<ProgramId, BufferId, AttributeId, UserCtx>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -99,7 +98,7 @@ impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx> Debug
             .finish()
     }
 }
-impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx> Hash
+impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> Hash
     for Attribute<ProgramId, BufferId, AttributeId, UserCtx>
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
@@ -109,7 +108,7 @@ impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx> Hash
     }
 }
 
-impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx> PartialEq
+impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> PartialEq
     for Attribute<ProgramId, BufferId, AttributeId, UserCtx>
 {
     fn eq(&self, other: &Self) -> bool {
@@ -118,12 +117,12 @@ impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx> PartialEq
             && self.attribute_id == other.attribute_id
             && self.webgl_buffer == other.webgl_buffer
             && self.attribute_location == other.attribute_location
-            && Rc::ptr_eq(&self.update_callback, &other.update_callback)
-            && Rc::ptr_eq(&self.should_update_callback, &other.should_update_callback)
+            && self.update_callback == other.update_callback
+            && self.should_update_callback == other.should_update_callback
     }
 }
 
-impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx> Eq
+impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> Eq
     for Attribute<ProgramId, BufferId, AttributeId, UserCtx>
 {
 }
