@@ -143,7 +143,7 @@ pub fn app() -> Html {
                 );
 
                 let u_perlin_noise_texture = UniformLink::new(
-                    (ProgramId::PassThrough, ProgramId::UpdateParticles, ProgramId::DrawParticles),
+                    (ProgramId::PassThrough, ProgramId::UpdateParticles),
                     UniformId::UPerlinNoiseTexture,
                     UniformCallback::new(Rc::new(|ctx| {
                         let gl = ctx.gl();
