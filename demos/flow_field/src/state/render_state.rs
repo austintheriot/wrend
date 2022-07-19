@@ -13,7 +13,7 @@ pub struct RenderState {
 impl Default for RenderState {
     fn default() -> Self {
         Self {
-            num_particles: 1000,
+            num_particles: 100_000,
             count: 0,
         }
     }

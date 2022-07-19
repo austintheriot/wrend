@@ -143,7 +143,7 @@ pub fn app() -> Html {
                 );
 
                 let u_perlin_noise_texture = UniformLink::new(
-                    ProgramId::PassThrough,
+                    (ProgramId::PassThrough, ProgramId::UpdateParticles, ProgramId::DrawParticles),
                     UniformId::UPerlinNoiseTexture,
                     UniformCallback::new(Rc::new(|ctx| {
                         let gl = ctx.gl();
@@ -165,13 +165,15 @@ pub fn app() -> Html {
                         gl.uniform1f(Some(uniform_location), (ctx.now() / 2000.) as f32);
                     });
 
-                let /* mut */ u_now = UniformLink::new(
+                let mut u_now = UniformLink::new(
                     ProgramId::PerlinNoise,
                     UniformId::UNow,
                     UniformCallback::new(u_now_link_init_and_update_callback.clone()),
                 );
 
-                // u_now.set_update_callback(UniformCallback::new(u_now_link_init_and_update_callback.clone()));
+                u_now.set_update_callback(UniformCallback::new(
+                    u_now_link_init_and_update_callback.clone(),
+                ));
 
                 let transform_feedback_link =
                     TransformFeedbackLink::new(TransformFeedbackId::Particle);

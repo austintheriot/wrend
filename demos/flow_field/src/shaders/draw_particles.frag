@@ -2,8 +2,13 @@
 
 precision highp float;
 
+uniform sampler2D u_perlin_noise_texture;
+
+in vec3 v_particle_position;
+
 out vec4 o_color;
  
 void main() {
-  o_color = vec4(1., 0.75, 0.5, 0.35);
+  vec2 uv = v_particle_position.xy * 0.5 + 0.5;
+  o_color = texture(u_perlin_noise_texture, uv);
 }
