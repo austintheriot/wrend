@@ -1,8 +1,8 @@
 use crate::{
     AnimationCallback, AnimationHandle, Attribute, AttributeCreateContext, AttributeLink,
-    AttributeLocation, Buffer, BufferLink, Framebuffer, FramebufferLink, Id, IdDefault, IdName,
-    ProgramLink, RenderCallback, ShaderType, Texture, TextureLink, TransformFeedbackLink, Uniform,
-    UniformContext, UniformLink,
+    AttributeLocation, Buffer, BufferLink, CreateProgramError, Framebuffer, FramebufferLink, Id,
+    IdDefault, IdName, ProgramCreateContext, ProgramLink, RenderCallback, ShaderType, Texture,
+    TextureLink, TransformFeedbackLink, Uniform, UniformContext, UniformLink,
 };
 use std::{
     collections::{HashMap, HashSet},
@@ -278,16 +278,18 @@ pub enum RendererBuilderError {
     VertexShaderNotFoundLinkProgramError,
     #[error("Could not link program because no fragment shader was found associated with the id provided")]
     FragmentShaderNotFoundLinkProgramError,
+    #[error(
+        "Could not link program because ProgramLink could not be found for ProgramId provided"
+    )]
+    NoProgramLinkLinkProgramError,
     #[error("Could not link program because value returned by `gl.link_program` was `None`")]
     NoProgramLinkProgramError,
     #[error(
         "Could not link program because value returned by `gl.create_vertex_array` was `None`"
     )]
     NoVaoLinkProgramError,
-    #[error("Could not link program. Reason: {0}")]
-    KnownErrorLinkProgramError(String),
-    #[error("Could not link program. An unknown error occurred.")]
-    UnknownErrorLinkProgramError,
+    #[error("Could not link program because an error occurred: {0}")]
+    CreateProgramLinkProgramError(#[from] CreateProgramError),
 
     // @todo: move this into its own sub-error
     #[error("Could not build uniforms because no WebGL2RenderingContext was provided")]
@@ -297,9 +299,7 @@ pub enum RendererBuilderError {
     #[error(
         "Could not build uniforms because the uniform's location was not found in the program: {uniform_id:?}"
     )]
-    UniformLocationNotFoundBuildUniformsError {
-        uniform_id: String,
-    },
+    UniformLocationNotFoundBuildUniformsError { uniform_id: String },
 
     // @todo: move this into its own sub-error
     #[error("Could not initialize uniforms because no WebGL2RenderingContext was provided")]
@@ -460,7 +460,8 @@ impl<
         &mut self,
         program_link: impl Into<ProgramLink<ProgramId, VertexShaderId, FragmentShaderId, UserCtx>>,
     ) -> &mut Self {
-        self.program_links.insert(program_link.into());
+        let program_link = program_link.into();
+        self.program_links.insert(program_link);
 
         self
     }
@@ -593,7 +594,7 @@ impl<
         self.build_uniforms()?;
         self.create_textures()?;
         self.create_framebuffers()?;
-        self.create_transform_feedbacks();
+        self.create_transform_feedbacks()?;
 
         let renderer = Renderer {
             canvas: self
@@ -720,24 +721,10 @@ impl<
     /// If a ProgramLink does not correspond to an actual shader, returns an Error.
     fn link_programs(&mut self) -> Result<&mut Self, RendererBuilderError> {
         for program_link in self.program_links.iter() {
-            let vertex_shader_id = program_link.vertex_shader_id();
-            let vertex_shader = self
-                .vertex_shaders
-                .get(vertex_shader_id)
-                .ok_or(RendererBuilderError::VertexShaderNotFoundLinkProgramError)?;
-
-            let fragment_shader_id = program_link.fragment_shader_id();
-            let fragment_shader = self
-                .fragment_shaders
-                .get(fragment_shader_id)
-                .ok_or(RendererBuilderError::FragmentShaderNotFoundLinkProgramError)?;
-
-            let (program, vao) = self.link_program(vertex_shader, fragment_shader)?;
-
-            let program_id = program_link.program_id().clone();
-
+            let (program, vao) = self.link_program(program_link)?;
+            let program_id = program_link.program_id();
             self.programs.insert(program_id.clone(), program);
-            self.vertex_array_objects.insert(program_id, vao);
+            self.vertex_array_objects.insert(program_id.to_owned(), vao);
         }
 
         Ok(self)
@@ -769,11 +756,11 @@ impl<
 
             gl.use_program(Some(program));
 
-            let uniform_location = gl
-                .get_uniform_location(program, &uniform_id.name())
-                .ok_or(RendererBuilderError::UniformLocationNotFoundBuildUniformsError {
-                    uniform_id: uniform_id.name(), 
-                })?;
+            let uniform_location = gl.get_uniform_location(program, &uniform_id.name()).ok_or(
+                RendererBuilderError::UniformLocationNotFoundBuildUniformsError {
+                    uniform_id: uniform_id.name(),
+                },
+            )?;
             let uniform_context =
                 UniformContext::new(gl.clone(), now, uniform_location.clone(), user_ctx.clone());
             (initialize_callback)(&uniform_context);
@@ -950,39 +937,47 @@ impl<
 
     fn link_program(
         &self,
-        vertex_shader: &WebGlShader,
-        fragment_shader: &WebGlShader,
+        program_link: &ProgramLink<ProgramId, VertexShaderId, FragmentShaderId, UserCtx>,
     ) -> Result<(WebGlProgram, WebGlVertexArrayObject), RendererBuilderError> {
         let gl = self
             .gl
             .as_ref()
             .ok_or(RendererBuilderError::NoContextLinkProgramError)?;
+        let now = Self::now();
+        let user_ctx = self.user_ctx.clone();
 
-        let program = gl
-            .create_program()
-            .ok_or(RendererBuilderError::NoProgramLinkProgramError)?;
+        let vertex_shader_id = program_link.vertex_shader_id();
+        let vertex_shader = self
+            .vertex_shaders
+            .get(vertex_shader_id)
+            .ok_or(RendererBuilderError::VertexShaderNotFoundLinkProgramError)?;
+
+        let fragment_shader_id = program_link.fragment_shader_id();
+        let fragment_shader = self
+            .fragment_shaders
+            .get(fragment_shader_id)
+            .ok_or(RendererBuilderError::FragmentShaderNotFoundLinkProgramError)?;
+
+        // @todo - make this not have to clone the slice
+        let transform_feedback_varyings = program_link.transform_feedback_varyings().to_vec();
+        let program_create_context = ProgramCreateContext::new(
+            gl.clone(),
+            now,
+            user_ctx,
+            fragment_shader.to_owned(),
+            vertex_shader.to_owned(),
+            transform_feedback_varyings,
+        );
+
+        let program = (program_link.program_create_callback())(&program_create_context)
+            .map_err(|err| RendererBuilderError::CreateProgramLinkProgramError(err))?;
 
         // each program gets an associated Vertex Array Object
         let vao = gl
             .create_vertex_array()
             .ok_or(RendererBuilderError::NoVaoLinkProgramError)?;
 
-        gl.attach_shader(&program, vertex_shader);
-        gl.attach_shader(&program, fragment_shader);
-        gl.link_program(&program);
-
-        if gl
-            .get_program_parameter(&program, WebGl2RenderingContext::LINK_STATUS)
-            .as_bool()
-            .unwrap_or(false)
-        {
-            Ok((program, vao))
-        } else {
-            Err(match gl.get_program_info_log(&program) {
-                Some(known_error) => RendererBuilderError::KnownErrorLinkProgramError(known_error),
-                None => RendererBuilderError::UnknownErrorLinkProgramError,
-            })
-        }
+        Ok((program, vao))
     }
 
     /// Gets current DOMHighResTimeStamp from performance.now()

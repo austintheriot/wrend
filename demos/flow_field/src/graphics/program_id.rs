@@ -3,8 +3,9 @@ use wrend::Id;
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum ProgramId {
     PerlinNoise,
-    FlowField,
     PassThrough,
+    UpdateParticles,
+    DrawParticles,
 }
 
 impl Id for ProgramId {}

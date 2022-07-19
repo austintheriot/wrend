@@ -2,7 +2,9 @@ use crate::state::render_state_handle::RenderStateHandle;
 use web_sys::{WebGl2RenderingContext, WebGlFramebuffer};
 use wrend::FramebufferCreateContext;
 
-pub fn create_frame_buffer(ctx: &FramebufferCreateContext<RenderStateHandle>) -> WebGlFramebuffer {
+pub fn create_perlin_noise_framebuffer(
+    ctx: &FramebufferCreateContext<RenderStateHandle>,
+) -> WebGlFramebuffer {
     let texture_a = ctx
         .webgl_texture()
         .as_ref()
@@ -23,5 +25,7 @@ pub fn create_frame_buffer(ctx: &FramebufferCreateContext<RenderStateHandle>) ->
         Some(texture_a),
         0,
     );
+    gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, None);
+
     framebuffer_object
 }

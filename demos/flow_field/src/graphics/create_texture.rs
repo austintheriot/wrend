@@ -49,6 +49,8 @@ pub fn create_white_noise_texture<UserCtx>(ctx: &TextureCreateContext<UserCtx>) 
     )
     .unwrap();
 
+    gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, None);
+
     webgl_texture
 }
 
@@ -98,6 +100,8 @@ pub fn create_perlin_noise_texture<UserCtx>(ctx: &TextureCreateContext<UserCtx>)
         None,
     )
     .unwrap();
+
+    gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, None);
 
     webgl_texture
 }

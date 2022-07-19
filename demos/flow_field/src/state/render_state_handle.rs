@@ -15,3 +15,9 @@ impl From<RenderState> for RenderStateHandle {
         RenderStateHandle(Rc::new(RefCell::new(render_state)))
     }
 }
+
+impl RenderStateHandle {
+    pub fn get(&self) -> Rc<RefCell<RenderState>> {
+        Rc::clone(&self.0)
+    }
+} 

@@ -2,9 +2,10 @@ use wrend::Id;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum FragmentShaderId {
-    FlowField,
     PassThrough,
     PerlinNoise,
+    UpdateParticles,
+    DrawParticles,
 }
 
 impl Id for FragmentShaderId {}

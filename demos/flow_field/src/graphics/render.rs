@@ -14,7 +14,7 @@ fn draw(gl: &WebGl2RenderingContext, canvas: &HtmlCanvasElement) {
     gl.viewport(0, 0, canvas.width() as i32, canvas.height() as i32);
 
     // clear canvas
-    gl.clear_color(0.0, 0.0, 0.0, 0.0);
+    gl.clear_color(0.0, 0.0, 1.0, 0.1);
     gl.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT);
 
     // draw
@@ -40,31 +40,107 @@ pub fn render(
 ) {
     let gl = renderer.gl();
     let canvas = renderer.canvas();
+    let user_ctx = renderer
+        .user_ctx()
+        .expect("RenderState should exist during render callback")
+        .get();
 
-    // render perlin noise to framebuffer
+    let num_particles = user_ctx.borrow().num_particles();
+
+    // RENDER NEW PERLIN NOISE TO FRAMEBUFFER --------------------------------------------------------
+    let quad_vertex_buffer = renderer
+        .buffers()
+        .get(&BufferId::QuadVertexBuffer)
+        .expect("QuadVertexBuffer should exist in renderer")
+        .webgl_buffer();
+    gl.bind_buffer(
+        WebGl2RenderingContext::ARRAY_BUFFER,
+        Some(quad_vertex_buffer),
+    );
     let white_noise_texture = renderer
         .textures()
         .get(&TextureId::WhiteNoise)
-        .map(|texture| texture.webgl_texture());
-    gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, white_noise_texture);
+        .expect("WhiteNoiseTexture should exist in renderer")
+        .webgl_texture();
+    gl.bind_texture(
+        WebGl2RenderingContext::TEXTURE_2D,
+        Some(white_noise_texture),
+    );
     renderer.switch_program(&ProgramId::PerlinNoise);
     let perlin_noise_framebuffer = renderer
         .framebuffers()
         .get(&FramebufferId::PerlinNoise)
-        .map(|framebuffer| framebuffer.webgl_framebuffer());
+        .expect("PerlinNoise Framebuffer should exist in renderer")
+        .webgl_framebuffer();
     gl.bind_framebuffer(
         WebGl2RenderingContext::FRAMEBUFFER,
-        perlin_noise_framebuffer,
+        Some(perlin_noise_framebuffer),
     );
     draw(gl, canvas);
-
-    // pull from the framebuffer just drawn to and copy to the canvas
-    renderer.switch_program(&ProgramId::PassThrough);
-    let perlin_noise_texture = renderer
-        .textures()
-        .get(&TextureId::PerlinNoise)
-        .map(|texture| texture.webgl_texture());
-    gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, perlin_noise_texture);
+    gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, None);
     gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, None);
-    draw(gl, canvas);
+    gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, None);
+    
+    // UPDATE PARTICLE POSITIONS --------------------------------------------------------
+    renderer.switch_program(&ProgramId::UpdateParticles);
+    let read_write_buffer = user_ctx.borrow_mut().next_read_write_buffers();
+    let read_buffer_id = read_write_buffer.read_buffer();
+    let read_buffer = renderer
+        .buffers()
+        .get(&read_buffer_id)
+        .expect("Read buffer should exist in renderer");
+    let webgl_read_buffer = read_buffer.webgl_buffer();
+    gl.bind_buffer(
+        WebGl2RenderingContext::ARRAY_BUFFER,
+        Some(webgl_read_buffer),
+    );
+
+    let transform_feedback = renderer
+        .transform_feedbacks()
+        .get(&TransformFeedbackId::Particle)
+        .expect("Transform feedback should exist in the renderer");
+    gl.bind_transform_feedback(
+        WebGl2RenderingContext::TRANSFORM_FEEDBACK,
+        Some(transform_feedback),
+    );
+
+    let write_buffer_id = read_write_buffer.write_buffer();
+    let write_buffer = renderer
+        .buffers()
+        .get(&write_buffer_id)
+        .expect("Write buffer should exist in renderer");
+    let webgl_write_buffer = write_buffer.webgl_buffer();
+    gl.bind_buffer_base(
+        WebGl2RenderingContext::TRANSFORM_FEEDBACK_BUFFER,
+        0,
+        Some(webgl_write_buffer),
+    );
+
+    gl.enable(WebGl2RenderingContext::RASTERIZER_DISCARD);
+    gl.begin_transform_feedback(WebGl2RenderingContext::POINTS);
+    gl.draw_arrays(WebGl2RenderingContext::POINTS, 0, num_particles as i32);
+    gl.disable(WebGl2RenderingContext::RASTERIZER_DISCARD);
+    gl.end_transform_feedback();
+    gl.bind_buffer_base(WebGl2RenderingContext::TRANSFORM_FEEDBACK_BUFFER, 0, None);
+    gl.bind_transform_feedback(WebGl2RenderingContext::TRANSFORM_FEEDBACK, None);
+
+    // DRAW PARTICLES TO CANVAS --------------------------------------------------------
+    renderer.switch_program(&ProgramId::DrawParticles);
+    gl.viewport(0, 0, canvas.width() as i32, canvas.height() as i32);
+    gl.clear_color(0.0, 1.0, 0.0, 0.1);
+    gl.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT);
+
+    gl.disable(WebGl2RenderingContext::DEPTH_TEST);
+    gl.disable(WebGl2RenderingContext::CULL_FACE);
+    gl.blend_func(
+        WebGl2RenderingContext::SRC_ALPHA,
+        WebGl2RenderingContext::ONE,
+    );
+    gl.enable(WebGl2RenderingContext::BLEND);
+    gl.bind_buffer(
+        WebGl2RenderingContext::ARRAY_BUFFER,
+        Some(webgl_write_buffer),
+    );
+
+    gl.draw_arrays(WebGl2RenderingContext::POINTS, 0, num_particles as i32);
 }

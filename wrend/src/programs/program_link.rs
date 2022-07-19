@@ -12,6 +12,7 @@ pub struct ProgramLink<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id, 
     vertex_shader_id: VertexShaderId,
     fragment_shader_id: FragmentShaderId,
     program_create_callback: ProgramCreateCallback<UserCtx>,
+    transform_feedback_varyings: Vec<String>
 }
 
 impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id, UserCtx>
@@ -28,6 +29,7 @@ impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id, UserCtx>
             vertex_shader_id,
             fragment_shader_id,
             program_create_callback,
+            transform_feedback_varyings: Default::default(),
         }
     }
 
@@ -41,6 +43,14 @@ impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id, UserCtx>
 
     pub fn fragment_shader_id(&self) -> &FragmentShaderId {
         &self.fragment_shader_id
+    }
+
+    pub fn transform_feedback_varyings(&self) -> &[String] {
+        &self.transform_feedback_varyings
+    }
+
+    pub fn program_create_callback(&self) ->  ProgramCreateCallback<UserCtx> {
+        self.program_create_callback.clone()
     }
 
     pub fn builder() -> ProgramLinkBuilder<ProgramId, VertexShaderId, FragmentShaderId, UserCtx> {
@@ -91,6 +101,7 @@ pub struct ProgramLinkBuilder<ProgramId: Id, VertexShaderId: Id, FragmentShaderI
     vertex_shader_id: Option<VertexShaderId>,
     fragment_shader_id: Option<FragmentShaderId>,
     program_create_callback: ProgramCreateCallback<UserCtx>,
+    transform_feedback_varyings: Vec<String>,
 }
 
 impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id, UserCtx>
@@ -112,6 +123,11 @@ impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id, UserCtx>
 
     pub fn set_fragment_shader_id(mut self, fragment_shader_id: FragmentShaderId) -> Self {
         self.fragment_shader_id = Some(fragment_shader_id);
+        self
+    }
+
+    pub fn set_transform_feedback_varyings(mut self, transform_feedback_varyings: impl Into<Vec<String>>) -> Self {
+        self.transform_feedback_varyings = transform_feedback_varyings.into();
         self
     }
 
@@ -138,6 +154,7 @@ impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id, UserCtx>
                 .fragment_shader_id
                 .ok_or(ProgramLinkBuildError::NoFragmentShaderId)?,
             program_create_callback: self.program_create_callback,
+            transform_feedback_varyings: self.transform_feedback_varyings,
         })
     }
 }
@@ -151,6 +168,7 @@ impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id, UserCtx> Default
             vertex_shader_id: Default::default(),
             fragment_shader_id: Default::default(),
             program_create_callback: Default::default(),
+            transform_feedback_varyings: Default::default(),
         }
     }
 }

@@ -1,12 +1,12 @@
 use super::program_create_context::ProgramCreateContext;
 use crate::CallbackWithContext;
 use std::hash::Hash;
-use std::{any::Any, fmt::Debug, ops::Deref, rc::Rc};
+use std::{fmt::Debug, ops::Deref, rc::Rc};
 use thiserror::Error;
 use wasm_bindgen::JsValue;
 use web_sys::{WebGl2RenderingContext, WebGlProgram};
 
-#[derive(Error, Debug)]
+#[derive(Error, Hash, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum CreateProgramError {
     #[error("Could not create program because value returned by `gl.link_program` was `None`")]
     NoProgramLinkProgramError,
@@ -16,15 +16,19 @@ pub enum CreateProgramError {
     CouldNotConvertVaryingsToArray,
     #[error("Could not create program because an unknown error occurred")]
     UnknownErrorLinkProgramError,
-    #[error("Could not create program: {0:?}")]
-    Other(Box<dyn Any>),
 }
 
 /// Wrapper around `CallbackWithContext` to implement a custom Default implementation
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
 pub struct ProgramCreateCallback<UserCtx>(
     CallbackWithContext<ProgramCreateContext<UserCtx>, Result<WebGlProgram, CreateProgramError>>,
 );
+
+impl<UserCtx> Clone for ProgramCreateCallback<UserCtx> {
+    fn clone(&self) -> Self {
+        Self(self.0.clone())
+    }
+}
 
 impl<UserCtx> Deref for ProgramCreateCallback<UserCtx> {
     type Target = CallbackWithContext<

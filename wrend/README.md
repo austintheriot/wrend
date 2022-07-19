@@ -31,6 +31,14 @@ The following use cases should guide the development of this library:
     - Updating how attributes are configured: should be updated for Programs/VAOs simultaneously
     - Updating buffers just means uploading new data, which is a global operation for all consuming Programs/VAOs
 
+- Cleanup:
+    - Consume links when they are used during build time - would require less cloning in general
+    - Enable borrowing in context structs - would also require less cloning to occur
+
+- Road map:
+    - Add Vec / Matrix utilities
+    - Enable compiling new programs at run time
+
 - Enable transform feedback
             
 - Make passing in buffer update / should_update callbacks optional
