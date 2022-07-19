@@ -1,6 +1,5 @@
 use crate::state::render_state_handle::RenderStateHandle;
 use js_sys::Math;
-use log::info;
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 use wrend::{BufferCreateContext, QUAD};
 
@@ -40,7 +39,6 @@ pub fn create_particle_buffer_a(ctx: &BufferCreateContext<RenderStateHandle>) ->
         .into_iter()
         .map(|_| (Math::random() * 2.0 - 1.0) as f32)
         .collect();
-    info!("{:?}", &initial_particle_positions[0..20]);
     let initial_particle_positions =
         unsafe { js_sys::Float32Array::view(&initial_particle_positions) };
     gl.buffer_data_with_array_buffer_view(

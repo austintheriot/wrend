@@ -14,7 +14,7 @@ fn draw(gl: &WebGl2RenderingContext, canvas: &HtmlCanvasElement) {
     gl.viewport(0, 0, canvas.width() as i32, canvas.height() as i32);
 
     // clear canvas
-    gl.clear_color(0.0, 0.0, 1.0, 0.1);
+    gl.clear_color(0.0, 0.0, 0.0, 1.0);
     gl.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT);
 
     // draw
@@ -82,7 +82,11 @@ pub fn render(
     gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, None);
     
     // UPDATE PARTICLE POSITIONS --------------------------------------------------------
-    renderer.switch_program(&ProgramId::UpdateParticles);
+
+    // ***NOTE***: can't use VAO here (i.e. renderer.switch_program()), since a buffer can't simultaneously
+    // be bound to a VAO and also a transform feedback at the same time 
+    let program = renderer.programs().get(&ProgramId::UpdateParticles).unwrap();
+    gl.use_program(Some(program));
     let read_write_buffer = user_ctx.borrow_mut().next_read_write_buffers();
     let read_buffer_id = read_write_buffer.read_buffer();
     let read_buffer = renderer
@@ -93,6 +97,14 @@ pub fn render(
     gl.bind_buffer(
         WebGl2RenderingContext::ARRAY_BUFFER,
         Some(webgl_read_buffer),
+    );
+    gl.vertex_attrib_pointer_with_i32(
+        0,
+        3,
+        WebGl2RenderingContext::FLOAT,
+        false,
+        0,
+        0,
     );
 
     let transform_feedback = renderer
@@ -125,9 +137,10 @@ pub fn render(
     gl.bind_transform_feedback(WebGl2RenderingContext::TRANSFORM_FEEDBACK, None);
 
     // DRAW PARTICLES TO CANVAS --------------------------------------------------------
-    renderer.switch_program(&ProgramId::DrawParticles);
+    let program = renderer.programs().get(&ProgramId::DrawParticles).unwrap();
+    gl.use_program(Some(program));
     gl.viewport(0, 0, canvas.width() as i32, canvas.height() as i32);
-    gl.clear_color(0.0, 1.0, 0.0, 0.1);
+    gl.clear_color(0.0, 0.0, 0.0, 1.0);
     gl.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT);
 
     gl.disable(WebGl2RenderingContext::DEPTH_TEST);
@@ -140,6 +153,14 @@ pub fn render(
     gl.bind_buffer(
         WebGl2RenderingContext::ARRAY_BUFFER,
         Some(webgl_write_buffer),
+    );
+    gl.vertex_attrib_pointer_with_i32(
+        0,
+        3,
+        WebGl2RenderingContext::FLOAT,
+        false,
+        0,
+        0,
     );
 
     gl.draw_arrays(WebGl2RenderingContext::POINTS, 0, num_particles as i32);

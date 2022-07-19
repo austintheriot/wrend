@@ -2,7 +2,9 @@ use crate::{
     graphics::{
         attribute_id::AttributeId,
         buffer_id::BufferId,
-        create_buffer::{create_particle_buffer_a, create_particle_buffer_b, create_quad_vertex_buffer},
+        create_buffer::{
+            create_particle_buffer_a, create_particle_buffer_b, create_quad_vertex_buffer,
+        },
         create_framebuffer::create_perlin_noise_framebuffer,
         create_position_attribute::{
             create_particle_position_attribute, create_quad_vertex_attribute,
