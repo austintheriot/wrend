@@ -17,5 +17,5 @@ void main() {
   vec2 movement = vec2(cos(perlin_value * TWO_PI), sin(perlin_value * TWO_PI));
   vec2 movement_slowed = movement * MOVEMENT_DAMPENING;
   vec3 new_location = vec3(a_particle_position.xy + movement_slowed, 0.0);
-  o_position = new_location;
+  o_position = mod((new_location + 1.0), vec3(2.0)) - 1.0;
 }
