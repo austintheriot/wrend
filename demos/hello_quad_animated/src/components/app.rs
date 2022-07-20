@@ -165,7 +165,7 @@ pub fn app() -> Html {
                         let canvas: HtmlCanvasElement = gl.canvas().unwrap().dyn_into().unwrap();
 
                         // use the appropriate program
-                        renderer.switch_program(&ProgramId);
+                        renderer.use_program_with_vao(&ProgramId);
 
                         // sync canvas dimensions with viewport
                         gl.viewport(0, 0, canvas.width() as i32, canvas.height() as i32);

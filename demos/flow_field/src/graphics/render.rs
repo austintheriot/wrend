@@ -89,7 +89,7 @@ pub fn render(
         .expect("Transform feedback should exist in the renderer");
 
     // RENDER NEW PERLIN NOISE TO FRAMEBUFFER --------------------------------------------------------
-    renderer.switch_program(&ProgramId::PerlinNoise);
+    renderer.use_program_with_vao(&ProgramId::PerlinNoise);
     gl.active_texture(WebGl2RenderingContext::TEXTURE0);
     gl.bind_texture(
         WebGl2RenderingContext::TEXTURE_2D,
@@ -102,20 +102,11 @@ pub fn render(
     draw_quad(gl, canvas);
     gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, None);
 
-    // DEBUGGING PERLIN_NOISE --------------------------------------------------------
-    //  pull from the framebuffer just drawn to and copy to the canvas
-     renderer.switch_program(&ProgramId::PassThrough);
-    gl.active_texture(WebGl2RenderingContext::TEXTURE1);
-    gl.bind_texture(
-        WebGl2RenderingContext::TEXTURE_2D,
-        Some(perlin_noise_texture),
-    );
-     gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, None);
-     draw_quad(gl, canvas);
-
-    // // UPDATE PARTICLE POSITIONS --------------------------------------------------------
-    // // ***NOTE***: can't use VAO here (i.e. renderer.switch_program()), since a buffer can't simultaneously
-    // // be bound to a VAO and also a transform feedback at the same time
+    // UPDATE PARTICLE POSITIONS --------------------------------------------------------
+    // ***NOTE***: can't use VAO here (i.e. renderer.use_program_with_vao(&ProgramId::UpdateParticles)), 
+    // since a buffer can't simultaneously be bound to a VAO AND also a transform feedback at the same time
+    // @todo: a bug makes the draw call work only work if the following function call is made (I have no idea why)
+    renderer.use_program_with_vao(&ProgramId::PassThrough);
     let program = renderer
         .programs()
         .get(&ProgramId::UpdateParticles)
@@ -149,9 +140,8 @@ pub fn render(
     gl.bind_buffer_base(WebGl2RenderingContext::TRANSFORM_FEEDBACK_BUFFER, 0, None);
     gl.bind_transform_feedback(WebGl2RenderingContext::TRANSFORM_FEEDBACK, None);
 
-    // // DRAW PARTICLES TO CANVAS --------------------------------------------------------
-    let program = renderer.programs().get(&ProgramId::DrawParticles).unwrap();
-    gl.use_program(Some(program));
+    // DRAW PARTICLES TO CANVAS --------------------------------------------------------
+    renderer.use_program_with_vao(&ProgramId::DrawParticles);
     gl.viewport(0, 0, canvas.width() as i32, canvas.height() as i32);
     gl.clear_color(0.0, 0.0, 0.0, 1.0);
     gl.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT);

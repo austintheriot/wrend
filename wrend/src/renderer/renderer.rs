@@ -146,7 +146,7 @@ impl<
     }
 
     /// Switches to using new program and its associated VAO
-    pub fn switch_program(&self, program_id: &ProgramId) -> &Self {
+    pub fn use_program_with_vao(&self, program_id: &ProgramId) -> &Self {
         let program = self
             .programs
             .get(program_id)

@@ -47,7 +47,7 @@ pub fn render(
         .get(&TextureId::WhiteNoise)
         .map(|texture| texture.webgl_texture());
     gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, white_noise_texture);
-    renderer.switch_program(&ProgramId::PerlinNoise);
+    renderer.use_program_with_vao(&ProgramId::PerlinNoise);
     let perlin_noise_framebuffer = renderer
         .framebuffers()
         .get(&FramebufferId::PerlinNoise)
@@ -61,7 +61,7 @@ pub fn render(
     // copy perlin noise from framebuffer to canvas 
     // (this step could be replaced with a true render call,
     // where the perlin noise is used as a texture in the render)
-    renderer.switch_program(&ProgramId::PassThrough);
+    renderer.use_program_with_vao(&ProgramId::PassThrough);
     let perlin_noise_texture = renderer
         .textures()
         .get(&TextureId::PerlinNoise)
