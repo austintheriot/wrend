@@ -4,6 +4,8 @@ use wrend::{Id, IdName};
 pub enum UniformId {
     UWhiteNoiseTexture,
     UPerlinNoiseTexture,
+    UPrevFrameTextureA,
+    UPrevFrameTextureB,
     UNow,
 }
 
@@ -21,6 +23,8 @@ impl IdName for UniformId {
             UniformId::UWhiteNoiseTexture => "u_white_noise_texture".to_string(),
             UniformId::UPerlinNoiseTexture => "u_perlin_noise_texture".to_string(),
             UniformId::UNow => "u_now".to_string(),
+            UniformId::UPrevFrameTextureA => "u_prev_frame_texture_a".to_string(),
+            UniformId::UPrevFrameTextureB => "u_prev_frame_texture_b".to_string(),
         }
     }
 }

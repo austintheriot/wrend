@@ -5,16 +5,20 @@ use crate::{
         create_buffer::{
             create_particle_buffer_a, create_particle_buffer_b, create_quad_vertex_buffer,
         },
-        create_framebuffer::create_perlin_noise_framebuffer,
+        create_framebuffer::{create_perlin_noise_framebuffer, create_prev_frame_framebuffer},
         create_position_attribute::{
             create_particle_position_attribute, create_quad_vertex_attribute,
         },
-        create_texture::{create_perlin_noise_texture, create_white_noise_texture},
+        create_texture::{
+            crate_prev_frame_a_texture, crate_prev_frame_b_texture, create_perlin_noise_texture,
+            create_white_noise_texture,
+        },
         fragment_shader_id::FragmentShaderId,
         framebuffer_id::FramebufferId,
         program_id::ProgramId,
         render::render,
         texture_id::TextureId,
+        texture_id_number::TextureIdNumber,
         transform_feedback_id::TransformFeedbackId,
         uniform_id::UniformId,
         vertex_shader_id::VertexShaderId,
@@ -41,6 +45,7 @@ const UPDATE_PARTICLES_FRAGMENT_SHADER: &str = include_str!("../shaders/update_p
 const UPDATE_PARTICLES_VERTEX_SHADER: &str = include_str!("../shaders/update_particles.vert");
 const DRAW_PARTICLES_FRAGMENT_SHADER: &str = include_str!("../shaders/draw_particles.frag");
 const DRAW_PARTICLES_VERTEX_SHADER: &str = include_str!("../shaders/draw_particles.vert");
+const DEBUG_PERLIN_NOISE_FRAGMENT_SHADER: &str = include_str!("../shaders/debug_perlin_noise.frag");
 
 #[function_component(App)]
 pub fn app() -> Html {
@@ -85,6 +90,13 @@ pub fn app() -> Html {
                     .set_fragment_shader_id(FragmentShaderId::DrawParticles)
                     .build()
                     .expect("Should build DrawParticles ProgramLink successfully");
+
+                let debug_perlin_noise_program_link = ProgramLinkBuilder::new()
+                    .set_program_id(ProgramId::DebugPerlinNoise)
+                    .set_vertex_shader_id(VertexShaderId::Quad)
+                    .set_fragment_shader_id(FragmentShaderId::DebugPerlinNoise)
+                    .build()
+                    .expect("Should build DebugPerlinNoise ProgramLink successfully");
 
                 let vertex_buffer_link = BufferLink::new(
                     BufferId::QuadVertexBuffer,
@@ -133,7 +145,7 @@ pub fn app() -> Html {
                     UniformCallback::new(Rc::new(|ctx| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
-                        gl.uniform1i(Some(uniform_location), 0);
+                        gl.uniform1i(Some(uniform_location), TextureId::WhiteNoise.num() as i32);
                     })),
                 );
 
@@ -143,12 +155,42 @@ pub fn app() -> Html {
                 );
 
                 let u_perlin_noise_texture = UniformLink::new(
-                    (ProgramId::PassThrough, ProgramId::UpdateParticles),
+                    (ProgramId::UpdateParticles, ProgramId::DebugPerlinNoise),
                     UniformId::UPerlinNoiseTexture,
                     UniformCallback::new(Rc::new(|ctx| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
-                        gl.uniform1i(Some(uniform_location), 1);
+                        gl.uniform1i(Some(uniform_location), TextureId::PerlinNoise.num() as i32);
+                    })),
+                );
+
+                let prev_frame_a_texture_link = TextureLink::new(
+                    TextureId::PrevFrameA,
+                    TextureCreateCallback::new(Rc::new(crate_prev_frame_a_texture)),
+                );
+
+                let prev_frame_b_texture_link = TextureLink::new(
+                    TextureId::PrevFrameB,
+                    TextureCreateCallback::new(Rc::new(crate_prev_frame_b_texture)),
+                );
+
+                let u_prev_frame_a_texture = UniformLink::new(
+                    ProgramId::PassThrough,
+                    UniformId::UPrevFrameTextureA,
+                    UniformCallback::new(Rc::new(|ctx| {
+                        let gl = ctx.gl();
+                        let uniform_location = ctx.uniform_location();
+                        gl.uniform1i(Some(uniform_location), TextureId::PrevFrameA.num() as i32);
+                    })),
+                );
+
+                let u_prev_frame_b_texture = UniformLink::new(
+                    ProgramId::PassThrough,
+                    UniformId::UPrevFrameTextureB,
+                    UniformCallback::new(Rc::new(|ctx| {
+                        let gl = ctx.gl();
+                        let uniform_location = ctx.uniform_location();
+                        gl.uniform1i(Some(uniform_location), TextureId::PrevFrameB.num() as i32);
                     })),
                 );
 
@@ -156,6 +198,18 @@ pub fn app() -> Html {
                     FramebufferId::PerlinNoise,
                     FramebufferCreateCallback::new(Rc::new(create_perlin_noise_framebuffer)),
                     Some(TextureId::PerlinNoise),
+                );
+
+                let prev_frame_a_framebuffer_link = FramebufferLink::new(
+                    FramebufferId::PrevFrameA,
+                    FramebufferCreateCallback::new(Rc::new(create_prev_frame_framebuffer)),
+                    Some(TextureId::PrevFrameA),
+                );
+
+                let prev_frame_b_framebuffer_link = FramebufferLink::new(
+                    FramebufferId::PrevFrameB,
+                    FramebufferCreateCallback::new(Rc::new(create_prev_frame_framebuffer)),
+                    Some(TextureId::PrevFrameB),
                 );
 
                 let u_now_link_init_and_update_callback =
@@ -207,6 +261,10 @@ pub fn app() -> Html {
                         FragmentShaderId::DrawParticles,
                         DRAW_PARTICLES_FRAGMENT_SHADER.to_string(),
                     )
+                    .add_fragment_shader_src(
+                        FragmentShaderId::DebugPerlinNoise,
+                        DEBUG_PERLIN_NOISE_FRAGMENT_SHADER.to_string(),
+                    )
                     .add_vertex_shader_src(
                         VertexShaderId::DrawParticles,
                         DRAW_PARTICLES_VERTEX_SHADER.to_string(),
@@ -215,6 +273,7 @@ pub fn app() -> Html {
                     .add_program_link(pass_through_program_link)
                     .add_program_link(update_particles_program_link)
                     .add_program_link(draw_particles_program_link)
+                    .add_program_link(debug_perlin_noise_program_link)
                     .add_buffer_link(vertex_buffer_link)
                     .add_buffer_link(particle_buffer_a_link)
                     .add_buffer_link(particle_buffer_b_link)
@@ -223,9 +282,15 @@ pub fn app() -> Html {
                     .add_attribute_link(a_particle_position_b_link)
                     .add_texture_link(perlin_noise_texture_link)
                     .add_texture_link(white_noise_texture_link)
+                    .add_texture_link(prev_frame_a_texture_link)
+                    .add_texture_link(prev_frame_b_texture_link)
                     .add_framebuffer_link(perlin_noise_framebuffer_link)
+                    .add_framebuffer_link(prev_frame_a_framebuffer_link)
+                    .add_framebuffer_link(prev_frame_b_framebuffer_link)
                     .add_uniform_link(u_perlin_noise_texture)
                     .add_uniform_link(u_white_noise_texture)
+                    .add_uniform_link(u_prev_frame_a_texture)
+                    .add_uniform_link(u_prev_frame_b_texture)
                     .add_uniform_link(u_now)
                     .add_transform_feedback_link(transform_feedback_link);
 

@@ -6,6 +6,7 @@ pub enum ProgramId {
     PassThrough,
     UpdateParticles,
     DrawParticles,
+    DebugPerlinNoise,
 }
 
 impl Id for ProgramId {}

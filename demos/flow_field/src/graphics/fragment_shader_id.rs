@@ -6,6 +6,7 @@ pub enum FragmentShaderId {
     PerlinNoise,
     UpdateParticles,
     DrawParticles,
+    DebugPerlinNoise,
 }
 
 impl Id for FragmentShaderId {}

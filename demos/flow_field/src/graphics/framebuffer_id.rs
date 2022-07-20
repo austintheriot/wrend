@@ -2,7 +2,9 @@ use wrend::Id;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum FramebufferId {
-    PerlinNoise
+    PerlinNoise,
+    PrevFrameA,
+    PrevFrameB,
 }
 
 impl Default for FramebufferId {

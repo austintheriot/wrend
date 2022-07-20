@@ -9,6 +9,7 @@ pub mod framebuffer_id;
 pub mod program_id;
 pub mod render;
 pub mod texture_id;
+pub mod texture_id_number;
 pub mod transform_feedback_id;
 pub mod uniform_id;
 pub mod vertex_shader_id;
