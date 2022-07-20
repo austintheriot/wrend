@@ -140,6 +140,10 @@ impl<
         &self.transform_feedbacks
     }
 
+    pub fn vertex_array_objects(&self) -> &HashMap<ProgramId, WebGlVertexArrayObject> {
+        &self.vertex_array_objects
+    }
+
     // @todo - enable ctx to be returned unconditionally (depending on if it's set or not)
     pub fn user_ctx(&self) -> Option<&UserCtx> {
         self.user_ctx.as_ref()

@@ -1,5 +1,6 @@
 use super::{
-    attribute_id::AttributeId, buffer_id::BufferId, fragment_shader_id::FragmentShaderId,
+    attribute_id::AttributeId, buffer_id::BufferId,
+    create_position_attribute::PARTICLE_POSITION_ATTRIBUTE, fragment_shader_id::FragmentShaderId,
     framebuffer_id::FramebufferId, program_id::ProgramId, texture_id::TextureId,
     transform_feedback_id::TransformFeedbackId, uniform_id::UniformId,
     vertex_shader_id::VertexShaderId,
@@ -103,25 +104,37 @@ pub fn render(
     gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, None);
 
     // UPDATE PARTICLE POSITIONS --------------------------------------------------------
-    // ***NOTE***: can't use VAO here (i.e. renderer.use_program_with_vao(&ProgramId::UpdateParticles)), 
-    // since a buffer can't simultaneously be bound to a VAO AND also a transform feedback at the same time
-    // @todo: a bug makes the draw call work only work if the following function call is made (I have no idea why)
-    renderer.use_program_with_vao(&ProgramId::PassThrough);
+    // NOTE: Can't use default VAO provided by Wrend here (e.g. renderer.use_program_with_vao(&ProgramId::UpdateParticles))
+    //
+    // Since the default behavior of Wrend is to bind VAOs with a corresponding program, the read & write buffer here that contain the particle
+    // positions are by default both bound to the same VAO. If the UpdateParticles program were to be enabled with its corresponding VAO here that
+    // would make the buffer that is being written to be bound to both a VAO __AND__ also a transform feedback at the same time, which would be an error.
+    //
+    // Instead, the attribute must be manually specified (T⌓T)
     let program = renderer
         .programs()
         .get(&ProgramId::UpdateParticles)
         .unwrap();
     gl.use_program(Some(program));
+    gl.bind_vertex_array(None);
+    gl.bind_buffer(
+        WebGl2RenderingContext::ARRAY_BUFFER,
+        Some(webgl_particle_read_buffer),
+    );
+    gl.enable_vertex_attrib_array(PARTICLE_POSITION_ATTRIBUTE);
+    gl.vertex_attrib_pointer_with_i32(
+        PARTICLE_POSITION_ATTRIBUTE,
+        3,
+        WebGl2RenderingContext::FLOAT,
+        false,
+        0,
+        0,
+    );
     gl.active_texture(WebGl2RenderingContext::TEXTURE1);
     gl.bind_texture(
         WebGl2RenderingContext::TEXTURE_2D,
         Some(perlin_noise_texture),
     );
-    gl.bind_buffer(
-        WebGl2RenderingContext::ARRAY_BUFFER,
-        Some(webgl_particle_read_buffer),
-    );
-    gl.vertex_attrib_pointer_with_i32(0, 3, WebGl2RenderingContext::FLOAT, false, 0, 0);
 
     gl.bind_transform_feedback(
         WebGl2RenderingContext::TRANSFORM_FEEDBACK,
@@ -153,11 +166,5 @@ pub fn render(
         WebGl2RenderingContext::ONE,
     );
     gl.enable(WebGl2RenderingContext::BLEND);
-    gl.bind_buffer(
-        WebGl2RenderingContext::ARRAY_BUFFER,
-        Some(webgl_particle_write_buffer),
-    );
-    gl.vertex_attrib_pointer_with_i32(0, 3, WebGl2RenderingContext::FLOAT, false, 0, 0);
-
     gl.draw_arrays(WebGl2RenderingContext::POINTS, 0, num_particles as i32);
 }

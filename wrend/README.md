@@ -16,20 +16,10 @@ The following use cases should guide the development of this library:
 
 ## Todo
 
-- For every program, create an associated VAO
-- Create all buffers
-- Create all attributes
-- Each attribute specifies which Program/VAO pair it should be linked to
-- Save Attribute's Attribute position for all Programs it is associated with
-- When the attribute is configured, update all VAOs that are linked to the program it corresponds to, 
-    using the Attribute's AttributePosition that was saved for that Program/VAO
-- When switching programs, simultaneously switch the VAO so that previous attribute configuration still works
+- Rethink Wrend's default behavior around VAOs:
+    - Make them end-user configurable--to prevent the issue with transform feedback, where the default behavior just does not work
 
-- Make a trait for Texture numbers 
-
-- Question: 
-    - Updating how attributes are configured: should be updated for Programs/VAOs simultaneously
-    - Updating buffers just means uploading new data, which is a global operation for all consuming Programs/VAOs
+- Make a trait for Texture numbers that is available from the Renderer?
 
 - Cleanup:
     - Consume links when they are used during build time - would require less cloning in general
@@ -37,7 +27,8 @@ The following use cases should guide the development of this library:
 
 - Road map:
     - Add Vec / Matrix utilities
-    - Enable compiling new programs at run time
+    - Build out a more structured Scene Graphs, etc. ?
+    - Enable compiling new shaders / programs at run time ?
 
 - Enable transform feedback
             
