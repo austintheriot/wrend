@@ -162,7 +162,7 @@ pub fn app() -> Html {
                     Rc::new(|ctx: &UniformContext<RenderStateHandle>| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
-                        gl.uniform1f(Some(uniform_location), (ctx.now() / 2000.) as f32);
+                        gl.uniform1f(Some(uniform_location), (ctx.now() / 50_000.) as f32);
                     });
 
                 let mut u_now = UniformLink::new(
