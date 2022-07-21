@@ -166,15 +166,11 @@ pub fn app() -> Html {
                         gl.uniform1f(Some(uniform_location), (ctx.now() / 50_000.) as f32);
                     });
 
-                let mut u_now = UniformLink::new(
+                let u_now = UniformLink::new(
                     ProgramId::PerlinNoise,
                     UniformId::UNow,
                     UniformCallback::new(u_now_link_init_and_update_callback.clone()),
                 );
-
-                u_now.set_update_callback(UniformCallback::new(
-                    u_now_link_init_and_update_callback.clone(),
-                ));
 
                 let transform_feedback_link =
                     TransformFeedbackLink::new(TransformFeedbackId::Particle);
