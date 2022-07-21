@@ -161,11 +161,17 @@ pub fn render(
 
     gl.disable(WebGl2RenderingContext::DEPTH_TEST);
     gl.disable(WebGl2RenderingContext::CULL_FACE);
+    gl.enable(WebGl2RenderingContext::BLEND);
+    // good for adding light particle values together:
     gl.blend_func(
         WebGl2RenderingContext::SRC_ALPHA,
         WebGl2RenderingContext::ONE,
     );
-    gl.enable(WebGl2RenderingContext::BLEND);
+    // good for adding dark particle values together:
+    // gl.blend_func(
+    //     WebGl2RenderingContext::ONE,
+    //     WebGl2RenderingContext::ONE_MINUS_SRC_ALPHA,
+    // );
     gl.draw_arrays(WebGl2RenderingContext::POINTS, 0, num_particles as i32);
 
     if user_ctx.borrow().should_save_image() {

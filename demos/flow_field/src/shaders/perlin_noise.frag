@@ -41,6 +41,6 @@ float pseudo_3d_noise(vec3 pos) {
 }
 
 void main() {
-    float noiseVal = 0.5 + 0.5 * pseudo_3d_noise(vec3(v_tex_coord * 100.0, u_now));
+    float noiseVal = 0.5 + 0.5 * pseudo_3d_noise(vec3(v_tex_coord * 10.0, u_now));
     out_color = vec4(noiseVal, noiseVal, noiseVal, 1);
 }

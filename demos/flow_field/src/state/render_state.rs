@@ -14,7 +14,7 @@ pub struct RenderState {
 impl Default for RenderState {
     fn default() -> Self {
         Self {
-            num_particles: 250_000,
+            num_particles: 100_000,
             count: 0,
             should_save_image: false,
         }
