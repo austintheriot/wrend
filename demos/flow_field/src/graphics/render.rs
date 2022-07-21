@@ -156,8 +156,12 @@ pub fn render(
     // DRAW PARTICLES TO CANVAS --------------------------------------------------------
     renderer.use_program_with_vao(&ProgramId::DrawParticles);
     gl.viewport(0, 0, canvas.width() as i32, canvas.height() as i32);
-    gl.clear_color(0.0, 0.0, 0.0, 1.0);
-    gl.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT);
+    
+    if user_ctx.borrow().is_first_render() {
+        user_ctx.borrow_mut().set_is_first_render(false);
+        gl.clear_color(0.0, 0.0, 0.0, 1.0);
+        gl.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT);
+    }
 
     gl.disable(WebGl2RenderingContext::DEPTH_TEST);
     gl.disable(WebGl2RenderingContext::CULL_FACE);

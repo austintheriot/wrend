@@ -228,7 +228,8 @@ pub fn app() -> Html {
                     .add_uniform_link(u_perlin_noise_texture)
                     .add_uniform_link(u_white_noise_texture)
                     .add_uniform_link(u_now)
-                    .add_transform_feedback_link(transform_feedback_link);
+                    .add_transform_feedback_link(transform_feedback_link)
+                    .preserve_drawing_buffer(true);
 
                 let renderer = renderer_builder
                     .build()

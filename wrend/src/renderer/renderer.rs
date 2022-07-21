@@ -7,12 +7,13 @@ use crate::{
 use std::{
     collections::{HashMap, HashSet},
     hash::Hash,
+    ops::{Deref, DerefMut},
 };
 use thiserror::Error;
 use wasm_bindgen::JsCast;
 use web_sys::{
-    window, HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram, WebGlShader,
-    WebGlTransformFeedback, WebGlVertexArrayObject,
+    window, HtmlCanvasElement, WebGl2RenderingContext, WebGlContextAttributes, WebGlProgram,
+    WebGlShader, WebGlTransformFeedback, WebGlVertexArrayObject,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -53,6 +54,7 @@ pub struct Renderer<
     vertex_array_objects: HashMap<ProgramId, WebGlVertexArrayObject>,
     framebuffers: HashMap<FramebufferId, Framebuffer<FramebufferId>>,
     transform_feedbacks: HashMap<TransformFeedbackId, WebGlTransformFeedback>,
+    webgl_context_attributes: WebGlContextAttributes,
 }
 
 /// Public API
@@ -391,6 +393,7 @@ pub struct RendererBuilder<
     vertex_array_objects: HashMap<ProgramId, WebGlVertexArrayObject>,
     transform_feedback_links: HashSet<TransformFeedbackLink<TransformFeedbackId>>,
     transform_feedbacks: HashMap<TransformFeedbackId, WebGlTransformFeedback>,
+    webgl_context_attributes: WebGlContextAttributes,
 }
 
 /// Public API
@@ -619,6 +622,7 @@ impl<
             attributes: self.attributes,
             vertex_array_objects: self.vertex_array_objects,
             transform_feedbacks: self.transform_feedbacks,
+            webgl_context_attributes: self.webgl_context_attributes,
         };
 
         Ok(renderer)
@@ -657,7 +661,7 @@ impl<
             .canvas
             .as_ref()
             .ok_or(RendererBuilderError::CanvasReturnedNoContext)?;
-        let gl = Self::context_from_canvas(canvas)?;
+        let gl = self.context_from_canvas(canvas)?;
         self.gl = Some(gl);
 
         Ok(self)
@@ -665,10 +669,11 @@ impl<
 
     /// Get the WebGL2 rendering context from a canvas
     fn context_from_canvas(
+        &self,
         canvas: &HtmlCanvasElement,
     ) -> Result<WebGl2RenderingContext, RendererBuilderError> {
         let gl = canvas
-            .get_context("webgl2")
+            .get_context_with_context_options("webgl2", self.webgl_context_attributes.as_ref())
             .map_err(|_| RendererBuilderError::WebGL2ContextRetrievalError)?;
 
         let gl = gl.ok_or(RendererBuilderError::WebGL2ContextNotFoundError)?;
@@ -1076,6 +1081,69 @@ impl<
             vertex_array_objects: Default::default(),
             transform_feedbacks: Default::default(),
             transform_feedback_links: Default::default(),
+            webgl_context_attributes: WebGlContextAttributes::new(),
         }
+    }
+}
+
+impl<
+        VertexShaderId: Id,
+        FragmentShaderId: Id,
+        ProgramId: Id,
+        UniformId: Id + IdName,
+        BufferId: Id,
+        AttributeId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
+        TransformFeedbackId: Id,
+        UserCtx: Clone,
+    > Deref
+    for RendererBuilder<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        AttributeId,
+        TextureId,
+        FramebufferId,
+        TransformFeedbackId,
+        UserCtx,
+    >
+{
+    type Target = WebGlContextAttributes;
+
+    fn deref(&self) -> &Self::Target {
+        &self.webgl_context_attributes
+    }
+}
+
+impl<
+        VertexShaderId: Id,
+        FragmentShaderId: Id,
+        ProgramId: Id,
+        UniformId: Id + IdName,
+        BufferId: Id,
+        AttributeId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
+        TransformFeedbackId: Id,
+        UserCtx: Clone,
+    > DerefMut
+    for RendererBuilder<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        AttributeId,
+        TextureId,
+        FramebufferId,
+        TransformFeedbackId,
+        UserCtx,
+    >
+{
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.webgl_context_attributes
     }
 }

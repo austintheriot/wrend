@@ -9,6 +9,7 @@ pub struct RenderState {
     num_particles: u32,
     count: u32,
     should_save_image: bool,
+    is_first_render: bool,
 }
 
 impl Default for RenderState {
@@ -17,6 +18,7 @@ impl Default for RenderState {
             num_particles: 100_000,
             count: 0,
             should_save_image: false,
+            is_first_render: true,
         }
     }
 }
@@ -54,6 +56,15 @@ impl RenderState {
 
     pub fn set_should_save_image(&mut self, should_save_image: bool) -> &mut Self {
         self.should_save_image = should_save_image;
+        self
+    }
+
+    pub fn is_first_render(&self) -> bool {
+        self.is_first_render
+    }
+
+    pub fn set_is_first_render(&mut self, is_first_render: bool) -> &mut Self {
+        self.is_first_render = is_first_render;
         self
     }
 }
