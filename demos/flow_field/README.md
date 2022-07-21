@@ -18,3 +18,7 @@
 ### 3D
 - Add camera / ability to move around
 - Make particles volumetric and/or bigger/smaller depending on closeness
+
+## Improvements
+
+- The Perlin noise texture could be simplified by using a single-value LUMINANCE texture rather than 4 values (since only 1 actually necessary to encode it's value)
