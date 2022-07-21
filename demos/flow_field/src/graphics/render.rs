@@ -5,7 +5,7 @@ use super::{
     transform_feedback_id::TransformFeedbackId, uniform_id::UniformId,
     vertex_shader_id::VertexShaderId,
 };
-use crate::state::render_state_handle::RenderStateHandle;
+use crate::{state::render_state_handle::RenderStateHandle, utils};
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 use wrend::Renderer;
 
@@ -167,4 +167,9 @@ pub fn render(
     );
     gl.enable(WebGl2RenderingContext::BLEND);
     gl.draw_arrays(WebGl2RenderingContext::POINTS, 0, num_particles as i32);
+
+    if user_ctx.borrow().should_save_image() {
+        user_ctx.borrow_mut().set_should_save_image(false);
+        utils::save_image(canvas);
+    }
 }

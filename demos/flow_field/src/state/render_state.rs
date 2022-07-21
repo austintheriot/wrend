@@ -8,6 +8,7 @@ pub type RenderStateCount = u32;
 pub struct RenderState {
     num_particles: u32,
     count: u32,
+    should_save_image: bool,
 }
 
 impl Default for RenderState {
@@ -15,6 +16,7 @@ impl Default for RenderState {
         Self {
             num_particles: 250_000,
             count: 0,
+            should_save_image: false,
         }
     }
 }
@@ -44,5 +46,14 @@ impl RenderState {
         self.count = self.count.wrapping_add(1);
 
         read_write_buffers
+    }
+
+    pub fn should_save_image(&self) -> bool {
+        self.should_save_image
+    }
+
+    pub fn set_should_save_image(&mut self, should_save_image: bool) -> &mut Self {
+        self.should_save_image = should_save_image;
+        self
     }
 }

@@ -23,7 +23,7 @@ use crate::{
 };
 use std::rc::Rc;
 use ui::route::Route;
-use web_sys::HtmlCanvasElement;
+use web_sys::{HtmlCanvasElement, MouseEvent};
 use wrend::{
     AnimationCallback, AttributeCreateCallback, AttributeLink, BufferCreateCallback, BufferLink,
     FramebufferCreateCallback, FramebufferLink, ProgramLinkBuilder, RenderCallback, Renderer,
@@ -31,7 +31,7 @@ use wrend::{
     UniformLink,
 };
 
-use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
+use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, Callback};
 use yew_router::prelude::*;
 
 const QUAD_VERTEX_SHADER: &str = include_str!("../shaders/quad.vert");
@@ -52,6 +52,7 @@ pub fn app() -> Html {
         {
             let canvas_ref = canvas_ref.clone();
             let animation_handle = animation_handle;
+            let render_state = Rc::clone(&render_state);
             move |_| {
                 let canvas: HtmlCanvasElement = canvas_ref
                     .cast()
@@ -250,9 +251,18 @@ pub fn app() -> Html {
         (),
     );
 
+    let handle_click = {
+        let render_state = Rc::clone(&render_state);
+        Callback::from(move |e: MouseEvent| {
+            e.prevent_default();
+            render_state.borrow_mut().set_should_save_image(true);
+        })
+    };
+
     html! {
         <div class="flow-field">
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
+            <button onclick={handle_click}>{"Save Image"}</button>
             <canvas ref={canvas_ref} height={1000} width={1000} />
         </div>
     }
