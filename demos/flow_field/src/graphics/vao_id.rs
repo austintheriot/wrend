@@ -4,8 +4,8 @@ use wrend::Id;
 pub enum VAOId {
     PerlinNoise,
     PassThrough,
-    UpdateParticlesRead,
-    UpdateParticlesWrite,
+    UpdateParticlesA,
+    UpdateParticlesB,
     DrawParticles,
 }
 

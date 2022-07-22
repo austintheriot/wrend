@@ -1,6 +1,6 @@
-use crate::graphics::buffer_id::BufferId;
+use crate::graphics::{buffer_id::BufferId, vao_id::VAOId};
 
-use super::read_write_buffers::ReadWriteBuffers;
+use super::read_write_buffers::ReadWriteIds;
 
 pub type RenderStateCount = u32;
 
@@ -32,16 +32,16 @@ impl RenderState {
         self.num_particles * 3
     }
 
-    pub fn next_read_write_buffers(&mut self) -> ReadWriteBuffers {
+    pub fn next_read_write_buffers(&mut self) -> ReadWriteIds {
         let read_write_buffers = if self.count % 2 == 0 {
-            ReadWriteBuffers::new(
-                BufferId::ParticleBufferA,
-                BufferId::ParticleBufferB,
+            ReadWriteIds::new(
+                (BufferId::ParticleBufferA, VAOId::UpdateParticlesA),
+                (BufferId::ParticleBufferB, VAOId::UpdateParticlesB),
             )
         } else {
-            ReadWriteBuffers::new(
-                BufferId::ParticleBufferB,
-                BufferId::ParticleBufferA,
+            ReadWriteIds::new(
+                (BufferId::ParticleBufferB, VAOId::UpdateParticlesB),
+                (BufferId::ParticleBufferA, VAOId::UpdateParticlesA),
             )
         };
 

@@ -70,14 +70,15 @@ pub fn render(
     // note: this mutates global state (so that on the next render, the buffers are swapped)
     let particle_read_write_buffer = user_ctx.borrow_mut().next_read_write_buffers();
 
-    let particle_read_buffer_id = particle_read_write_buffer.read_buffer();
+    let (particle_read_buffer_id, update_particle_vao_read_id) =
+        particle_read_write_buffer.read_ids();
     let particle_read_buffer = renderer
         .buffers()
         .get(&particle_read_buffer_id)
         .expect("Particle read buffer should exist in renderer");
     let webgl_particle_read_buffer = particle_read_buffer.webgl_buffer();
 
-    let particle_write_buffer_id = particle_read_write_buffer.write_buffer();
+    let (particle_write_buffer_id, _) = particle_read_write_buffer.write_ids();
     let particle_write_buffer = renderer
         .buffers()
         .get(&particle_write_buffer_id)
@@ -88,13 +89,6 @@ pub fn render(
         .transform_feedbacks()
         .get(&TransformFeedbackId::Particle)
         .expect("Transform feedback should exist in the renderer");
-
-    let particle_position_attribute_location: u32 = renderer
-        .attributes()
-        .get(&AttributeId::AParticlePosition)
-        .unwrap()
-        .attribute_location()
-        .into();
 
     // RENDER NEW PERLIN NOISE TO FRAMEBUFFER --------------------------------------------------------
     renderer.use_program(&ProgramId::PerlinNoise);
@@ -113,19 +107,12 @@ pub fn render(
 
     // UPDATE PARTICLE POSITIONS --------------------------------------------------------
     renderer.use_program(&ProgramId::UpdateParticles);
-    gl.bind_vertex_array(None);
+    // must bind the VAO that corresponds to the read buffer (and not the write buffer)
+    // because it is a WebGL error to bind to a buffer via a VAO and Transform Feedback at the same time
+    renderer.use_vao(&update_particle_vao_read_id);
     gl.bind_buffer(
         WebGl2RenderingContext::ARRAY_BUFFER,
         Some(webgl_particle_read_buffer),
-    );
-    gl.enable_vertex_attrib_array(particle_position_attribute_location);
-    gl.vertex_attrib_pointer_with_i32(
-        particle_position_attribute_location,
-        3,
-        WebGl2RenderingContext::FLOAT,
-        false,
-        0,
-        0,
     );
     gl.active_texture(WebGl2RenderingContext::TEXTURE1);
     gl.bind_texture(

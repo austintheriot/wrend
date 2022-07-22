@@ -102,9 +102,16 @@ pub fn app() -> Html {
                     BufferCreateCallback::new(Rc::new(create_particle_buffer_b)),
                 );
 
-                let a_particle_position_link = AttributeLink::new(
-                    VAOId::DrawParticles,
+                let a_particle_position_link_a = AttributeLink::new(
+                    (VAOId::DrawParticles, VAOId::UpdateParticlesA),
                     BufferId::ParticleBufferA,
+                    AttributeId::AParticlePosition,
+                    AttributeCreateCallback::new(Rc::new(create_particle_position_attribute)),
+                );
+
+                let a_particle_position_link_b = AttributeLink::new(
+                    (VAOId::DrawParticles, VAOId::UpdateParticlesB),
+                    BufferId::ParticleBufferB,
                     AttributeId::AParticlePosition,
                     AttributeCreateCallback::new(Rc::new(create_particle_position_attribute)),
                 );
@@ -209,7 +216,8 @@ pub fn app() -> Html {
                     .add_buffer_link(particle_buffer_a_link)
                     .add_buffer_link(particle_buffer_b_link)
                     .add_attribute_link(a_quad_vertex_link)
-                    .add_attribute_link(a_particle_position_link)
+                    .add_attribute_link(a_particle_position_link_a)
+                    .add_attribute_link(a_particle_position_link_b)
                     .add_texture_link(perlin_noise_texture_link)
                     .add_texture_link(white_noise_texture_link)
                     .add_framebuffer_link(perlin_noise_framebuffer_link)
@@ -219,8 +227,8 @@ pub fn app() -> Html {
                     .add_transform_feedback_link(transform_feedback_link)
                     .add_vao_link(VAOId::PerlinNoise)
                     .add_vao_link(VAOId::PassThrough)
-                    .add_vao_link(VAOId::UpdateParticlesRead)
-                    .add_vao_link(VAOId::UpdateParticlesWrite)
+                    .add_vao_link(VAOId::UpdateParticlesA)
+                    .add_vao_link(VAOId::UpdateParticlesB)
                     .add_vao_link(VAOId::DrawParticles)
                     .preserve_drawing_buffer(true);
 
