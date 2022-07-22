@@ -6,33 +6,33 @@ use std::hash::Hash;
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
 #[derive(Clone)]
-pub struct AttributeLink<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> {
-    program_ids: Vec<ProgramId>,
+pub struct AttributeLink<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> {
+    vao_ids: Vec<VertexArrayObjectId>,
     buffer_id: BufferId,
     attribute_id: AttributeId,
     attribute_create_callback: AttributeCreateCallback<UserCtx>,
 }
 
-impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone>
-    AttributeLink<ProgramId, BufferId, AttributeId, UserCtx>
+impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone>
+    AttributeLink<VertexArrayObjectId, BufferId, AttributeId, UserCtx>
 {
     pub fn new(
-        program_ids: impl Into<IdBridge<ProgramId>>,
+        vao_ids: impl Into<IdBridge<VertexArrayObjectId>>,
         buffer_id: BufferId,
         attribute_id: AttributeId,
         attribute_create_callback: impl Into<AttributeCreateCallback<UserCtx>>,
     ) -> Self {
-        let program_ids_bridge = program_ids.into();
+        let vao_ids_bridge = vao_ids.into();
         Self {
-            program_ids: program_ids_bridge.into(),
+            vao_ids: vao_ids_bridge.into(),
             buffer_id,
             attribute_id,
             attribute_create_callback: attribute_create_callback.into(),
         }
     }
 
-    pub fn program_ids(&self) -> &[ProgramId] {
-        &self.program_ids
+    pub fn vao_ids(&self) -> &[VertexArrayObjectId] {
+        &self.vao_ids
     }
 
     pub fn buffer_id(&self) -> &BufferId {
@@ -61,12 +61,12 @@ impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone>
     }
 }
 
-impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> Debug
-    for AttributeLink<ProgramId, BufferId, AttributeId, UserCtx>
+impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> Debug
+    for AttributeLink<VertexArrayObjectId, BufferId, AttributeId, UserCtx>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("AttributeLink")
-            .field("program_id", &self.program_ids)
+            .field("vao_ids", &self.vao_ids)
             .field("buffer_id", &self.buffer_id)
             .field("attribute_id", &self.attribute_id)
             .field("update_callback", &"[not shown]")
@@ -75,28 +75,28 @@ impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> Debu
     }
 }
 
-impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> Hash
-    for AttributeLink<ProgramId, BufferId, AttributeId, UserCtx>
+impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> Hash
+    for AttributeLink<VertexArrayObjectId, BufferId, AttributeId, UserCtx>
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.program_ids.hash(state);
+        self.vao_ids.hash(state);
         self.buffer_id.hash(state);
         self.attribute_id.hash(state);
     }
 }
 
-impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> PartialEq
-    for AttributeLink<ProgramId, BufferId, AttributeId, UserCtx>
+impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> PartialEq
+    for AttributeLink<VertexArrayObjectId, BufferId, AttributeId, UserCtx>
 {
     fn eq(&self, other: &Self) -> bool {
-        self.program_ids == other.program_ids
+        self.vao_ids == other.vao_ids
             && self.buffer_id == other.buffer_id
-            && self.program_ids == other.program_ids
+            && self.vao_ids == other.vao_ids
             && self.attribute_id == other.attribute_id
     }
 }
 
-impl<ProgramId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> Eq
-    for AttributeLink<ProgramId, BufferId, AttributeId, UserCtx>
+impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> Eq
+    for AttributeLink<VertexArrayObjectId, BufferId, AttributeId, UserCtx>
 {
 }

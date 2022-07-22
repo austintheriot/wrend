@@ -2,7 +2,7 @@
 
 precision highp float;
 
-layout (location = 0) in vec3 a_particle_position;
+in vec3 a_particle_position;
 
 out vec3 v_particle_position;
 

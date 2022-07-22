@@ -103,7 +103,6 @@ pub fn app() -> Html {
                     ProgramId,
                     VertexShaderId,
                     FragmentShaderId,
-                    Default::default(),
                 );
 
                 let vertex_buffer_link = BufferLink::new(
@@ -159,13 +158,15 @@ pub fn app() -> Html {
                         IdDefault,
                         IdDefault,
                         IdDefault,
+                        ProgramId,
                         UseStateHandle<i32>,
                     >| {
                         let gl = renderer.gl();
                         let canvas: HtmlCanvasElement = gl.canvas().unwrap().dyn_into().unwrap();
 
                         // use the appropriate program
-                        renderer.use_program_with_vao(&ProgramId);
+                        renderer.use_program(&ProgramId);
+                        renderer.use_vao(&ProgramId);
 
                         // sync canvas dimensions with viewport
                         gl.viewport(0, 0, canvas.width() as i32, canvas.height() as i32);
@@ -210,7 +211,8 @@ pub fn app() -> Html {
                     .add_fragment_shader_src(FragmentShaderId, FRAGMENT_SHADER.to_string())
                     .add_buffer_link(vertex_buffer_link)
                     .add_attribute_link(a_position_link)
-                    .add_uniform_link(u_now_link);
+                    .add_uniform_link(u_now_link)
+                    .add_vao_link(ProgramId);
 
                 let renderer = renderer_builder
                     .build()

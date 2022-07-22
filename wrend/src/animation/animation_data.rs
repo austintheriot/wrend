@@ -12,6 +12,7 @@ pub struct AnimationData<
     TextureId: Id = IdDefault,
     FramebufferId: Id = IdDefault,
     TransformFeedbackId: Id = IdDefault,
+    VertexArrayObjectId: Id = IdDefault,
     UserCtx: Clone + 'static = (),
 > {
     id: i32,
@@ -25,6 +26,7 @@ pub struct AnimationData<
         TextureId,
         FramebufferId,
         TransformFeedbackId,
+        VertexArrayObjectId,
         UserCtx,
     >,
     renderer: Renderer<
@@ -37,6 +39,7 @@ pub struct AnimationData<
         TextureId,
         FramebufferId,
         TransformFeedbackId,
+        VertexArrayObjectId,
         UserCtx,
     >,
     is_animating: bool,
@@ -52,6 +55,7 @@ impl<
         TextureId: Id,
         FramebufferId: Id,
         TransformFeedbackId: Id,
+        VertexArrayObjectId: Id,
         UserCtx: Clone + 'static,
     >
     AnimationData<
@@ -64,6 +68,7 @@ impl<
         TextureId,
         FramebufferId,
         TransformFeedbackId,
+        VertexArrayObjectId,
         UserCtx,
     >
 {
@@ -100,6 +105,7 @@ impl<
         TextureId,
         FramebufferId,
         TransformFeedbackId,
+        VertexArrayObjectId,
         UserCtx,
     > {
         &self.renderer
@@ -116,6 +122,7 @@ impl<
             TextureId,
             FramebufferId,
             TransformFeedbackId,
+            VertexArrayObjectId,
             UserCtx,
         >,
         renderer: Renderer<
@@ -128,6 +135,7 @@ impl<
             TextureId,
             FramebufferId,
             TransformFeedbackId,
+            VertexArrayObjectId,
             UserCtx,
         >,
     ) -> Self {
@@ -150,6 +158,7 @@ impl<
         TextureId: Id,
         FramebufferId: Id,
         TransformFeedbackId: Id,
+        VertexArrayObjectId: Id,
         UserCtx: Clone,
     > Deref
     for AnimationData<
@@ -162,6 +171,7 @@ impl<
         TextureId,
         FramebufferId,
         TransformFeedbackId,
+        VertexArrayObjectId,
         UserCtx,
     >
 {
@@ -175,6 +185,7 @@ impl<
         TextureId,
         FramebufferId,
         TransformFeedbackId,
+        VertexArrayObjectId,
         UserCtx,
     >;
 

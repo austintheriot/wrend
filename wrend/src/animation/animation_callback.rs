@@ -10,6 +10,7 @@ pub type AnimationCallback<
     TextureId,
     FramebufferId,
     TransformFeedbackId,
+    VertexArrayObjectId,
     UserCtx,
 > = CallbackWithContext<
     Renderer<
@@ -22,6 +23,7 @@ pub type AnimationCallback<
         TextureId,
         FramebufferId,
         TransformFeedbackId,
+        VertexArrayObjectId,
         UserCtx,
     >,
 >;

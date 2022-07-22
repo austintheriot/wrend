@@ -1,4 +1,3 @@
-use super::program_create_callback::ProgramCreateCallback;
 use crate::Id;
 use std::fmt::Debug;
 use std::hash::Hash;
@@ -7,28 +6,25 @@ use thiserror::Error;
 /// This contains an id for a pair of shaders: one vertex shader and one fragment
 /// shader. These can be combined to link together a program.
 #[derive(Clone, Debug)]
-pub struct ProgramLink<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id, UserCtx> {
+pub struct ProgramLink<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id> {
     program_id: ProgramId,
     vertex_shader_id: VertexShaderId,
     fragment_shader_id: FragmentShaderId,
-    program_create_callback: ProgramCreateCallback<UserCtx>,
     transform_feedback_varyings: Vec<String>
 }
 
-impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id, UserCtx>
-    ProgramLink<ProgramId, VertexShaderId, FragmentShaderId, UserCtx>
+impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id>
+    ProgramLink<ProgramId, VertexShaderId, FragmentShaderId>
 {
     pub fn new(
         program_id: ProgramId,
         vertex_shader_id: VertexShaderId,
         fragment_shader_id: FragmentShaderId,
-        program_create_callback: ProgramCreateCallback<UserCtx>,
     ) -> Self {
         Self {
             program_id,
             vertex_shader_id,
             fragment_shader_id,
-            program_create_callback,
             transform_feedback_varyings: Default::default(),
         }
     }
@@ -49,39 +45,33 @@ impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id, UserCtx>
         &self.transform_feedback_varyings
     }
 
-    pub fn program_create_callback(&self) ->  ProgramCreateCallback<UserCtx> {
-        self.program_create_callback.clone()
-    }
-
-    pub fn builder() -> ProgramLinkBuilder<ProgramId, VertexShaderId, FragmentShaderId, UserCtx> {
+    pub fn builder() -> ProgramLinkBuilder<ProgramId, VertexShaderId, FragmentShaderId> {
         ProgramLinkBuilder::default()
     }
 }
 
-impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id, UserCtx> Hash
-    for ProgramLink<ProgramId, VertexShaderId, FragmentShaderId, UserCtx>
+impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id> Hash
+    for ProgramLink<ProgramId, VertexShaderId, FragmentShaderId>
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.program_id.hash(state);
         self.vertex_shader_id.hash(state);
         self.fragment_shader_id.hash(state);
-        self.program_create_callback.hash(state);
     }
 }
 
-impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id, UserCtx> PartialEq
-    for ProgramLink<ProgramId, VertexShaderId, FragmentShaderId, UserCtx>
+impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id> PartialEq
+    for ProgramLink<ProgramId, VertexShaderId, FragmentShaderId>
 {
     fn eq(&self, other: &Self) -> bool {
         self.program_id == other.program_id
             && self.vertex_shader_id == other.vertex_shader_id
             && self.fragment_shader_id == other.fragment_shader_id
-            && *self.program_create_callback == *other.program_create_callback
     }
 }
 
-impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id, UserCtx> Eq
-    for ProgramLink<ProgramId, VertexShaderId, FragmentShaderId, UserCtx>
+impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id> Eq
+    for ProgramLink<ProgramId, VertexShaderId, FragmentShaderId>
 {
 }
 
@@ -96,16 +86,15 @@ pub enum ProgramLinkBuildError {
 }
 
 #[derive(Clone)]
-pub struct ProgramLinkBuilder<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id, UserCtx> {
+pub struct ProgramLinkBuilder<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id> {
     program_id: Option<ProgramId>,
     vertex_shader_id: Option<VertexShaderId>,
     fragment_shader_id: Option<FragmentShaderId>,
-    program_create_callback: ProgramCreateCallback<UserCtx>,
     transform_feedback_varyings: Vec<String>,
 }
 
-impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id, UserCtx>
-    ProgramLinkBuilder<ProgramId, VertexShaderId, FragmentShaderId, UserCtx>
+impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id>
+    ProgramLinkBuilder<ProgramId, VertexShaderId, FragmentShaderId>
 {
     pub fn new() -> Self {
         Self::default()
@@ -131,18 +120,11 @@ impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id, UserCtx>
         self
     }
 
-    pub fn set_program_create_callback(
-        mut self,
-        program_create_callback: ProgramCreateCallback<UserCtx>,
-    ) -> Self {
-        self.program_create_callback = program_create_callback;
-        self
-    }
 
     pub fn build(
         self,
     ) -> Result<
-        ProgramLink<ProgramId, VertexShaderId, FragmentShaderId, UserCtx>,
+        ProgramLink<ProgramId, VertexShaderId, FragmentShaderId>,
         ProgramLinkBuildError,
     > {
         Ok(ProgramLink {
@@ -153,44 +135,40 @@ impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id, UserCtx>
             fragment_shader_id: self
                 .fragment_shader_id
                 .ok_or(ProgramLinkBuildError::NoFragmentShaderId)?,
-            program_create_callback: self.program_create_callback,
             transform_feedback_varyings: self.transform_feedback_varyings,
         })
     }
 }
 
-impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id, UserCtx> Default
-    for ProgramLinkBuilder<ProgramId, VertexShaderId, FragmentShaderId, UserCtx>
+impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id> Default
+    for ProgramLinkBuilder<ProgramId, VertexShaderId, FragmentShaderId>
 {
     fn default() -> Self {
         Self {
             program_id: Default::default(),
             vertex_shader_id: Default::default(),
             fragment_shader_id: Default::default(),
-            program_create_callback: Default::default(),
             transform_feedback_varyings: Default::default(),
         }
     }
 }
 
-impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id, UserCtx> Hash
-    for ProgramLinkBuilder<ProgramId, VertexShaderId, FragmentShaderId, UserCtx>
+impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id> Hash
+    for ProgramLinkBuilder<ProgramId, VertexShaderId, FragmentShaderId>
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.program_id.hash(state);
         self.vertex_shader_id.hash(state);
         self.fragment_shader_id.hash(state);
-        self.program_create_callback.hash(state);
     }
 }
 
-impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id, UserCtx> PartialEq
-    for ProgramLinkBuilder<ProgramId, VertexShaderId, FragmentShaderId, UserCtx>
+impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id> PartialEq
+    for ProgramLinkBuilder<ProgramId, VertexShaderId, FragmentShaderId>
 {
     fn eq(&self, other: &Self) -> bool {
         self.program_id == other.program_id
             && self.vertex_shader_id == other.vertex_shader_id
             && self.fragment_shader_id == other.fragment_shader_id
-            && *self.program_create_callback == *other.program_create_callback
     }
 }

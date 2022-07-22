@@ -17,7 +17,7 @@ use crate::{
         texture_id::TextureId,
         transform_feedback_id::TransformFeedbackId,
         uniform_id::UniformId,
-        vertex_shader_id::VertexShaderId,
+        vertex_shader_id::VertexShaderId, vao_id::VAOId,
     },
     state::{render_state::RenderState, render_state_handle::RenderStateHandle},
 };
@@ -102,22 +102,15 @@ pub fn app() -> Html {
                     BufferCreateCallback::new(Rc::new(create_particle_buffer_b)),
                 );
 
-                let a_particle_position_a_link = AttributeLink::new(
-                    (ProgramId::UpdateParticles, ProgramId::DrawParticles),
+                let a_particle_position_link = AttributeLink::new(
+                    VAOId::DrawParticles,
                     BufferId::ParticleBufferA,
-                    AttributeId::AParticlePositionA,
-                    AttributeCreateCallback::new(Rc::new(create_particle_position_attribute)),
-                );
-
-                let a_particle_position_b_link = AttributeLink::new(
-                    (ProgramId::UpdateParticles, ProgramId::DrawParticles),
-                    BufferId::ParticleBufferB,
-                    AttributeId::AParticlePositionB,
+                    AttributeId::AParticlePosition,
                     AttributeCreateCallback::new(Rc::new(create_particle_position_attribute)),
                 );
 
                 let a_quad_vertex_link = AttributeLink::new(
-                    (ProgramId::PassThrough, ProgramId::PerlinNoise),
+                    (VAOId::PassThrough, VAOId::PerlinNoise),
                     BufferId::QuadVertexBuffer,
                     AttributeId::AQuadVertex,
                     AttributeCreateCallback::new(Rc::new(create_quad_vertex_attribute)),
@@ -216,8 +209,7 @@ pub fn app() -> Html {
                     .add_buffer_link(particle_buffer_a_link)
                     .add_buffer_link(particle_buffer_b_link)
                     .add_attribute_link(a_quad_vertex_link)
-                    .add_attribute_link(a_particle_position_a_link)
-                    .add_attribute_link(a_particle_position_b_link)
+                    .add_attribute_link(a_particle_position_link)
                     .add_texture_link(perlin_noise_texture_link)
                     .add_texture_link(white_noise_texture_link)
                     .add_framebuffer_link(perlin_noise_framebuffer_link)
@@ -225,6 +217,11 @@ pub fn app() -> Html {
                     .add_uniform_link(u_white_noise_texture)
                     .add_uniform_link(u_now)
                     .add_transform_feedback_link(transform_feedback_link)
+                    .add_vao_link(VAOId::PerlinNoise)
+                    .add_vao_link(VAOId::PassThrough)
+                    .add_vao_link(VAOId::UpdateParticlesRead)
+                    .add_vao_link(VAOId::UpdateParticlesWrite)
+                    .add_vao_link(VAOId::DrawParticles)
                     .preserve_drawing_buffer(true);
 
                 let renderer = renderer_builder

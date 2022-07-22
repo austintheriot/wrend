@@ -43,14 +43,12 @@ pub fn app() -> Html {
                     ProgramId::GameOfLife,
                     ShaderId::Vertex,
                     ShaderId::GameOfLife,
-                    Default::default(),
                 );
 
                 let pass_through_program_link = ProgramLink::new(
                     ProgramId::PassThrough,
                     ShaderId::Vertex,
                     ShaderId::PassThrough,
-                    Default::default(),
                 );
 
                 let vertex_buffer_link = BufferLink::new(
@@ -122,7 +120,9 @@ pub fn app() -> Html {
                     .add_texture_link(texture_a_link)
                     .add_texture_link(texture_b_link)
                     .add_framebuffer_link(framebuffer_a_link)
-                    .add_framebuffer_link(framebuffer_b_link);
+                    .add_framebuffer_link(framebuffer_b_link)
+                    .add_vao_link(ProgramId::PassThrough)
+                    .add_vao_link(ProgramId::GameOfLife);
 
                 let renderer = renderer_builder
                     .build()

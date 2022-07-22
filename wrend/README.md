@@ -22,6 +22,10 @@ The following use cases should guide the development of this library:
         - This would decouple the Program and/or the buffers from what the user wants to specify in the VAOs 
         - In the majority of cases, the same ProgramId would suffice, but in the case of transform feedback, for example, 
         it would greatly simplify things to be able to specify custom VAO bindings to attributes
+    - Add a new build step:
+        - AFTER programs are created
+        - but BEFORE prgrams are linked: 
+        assigned unique locations in all programs for each AttributeId
 
 - Make a trait for Texture numbers that is available from the Renderer?
 

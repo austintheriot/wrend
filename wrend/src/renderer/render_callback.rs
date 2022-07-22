@@ -11,6 +11,7 @@ pub type RenderCallback<
     TextureId,
     FramebufferId,
     TransformFeedbackId,
+    VertexArrayObjectId,
     UserCtx,
 > = CallbackWithContext<
     Renderer<
@@ -23,6 +24,7 @@ pub type RenderCallback<
         TextureId,
         FramebufferId,
         TransformFeedbackId,
+        VertexArrayObjectId,
         UserCtx,
     >,
 >;

@@ -1,8 +1,7 @@
 use crate::{
-    AnimationCallback, AnimationHandle, Attribute, AttributeCreateContext, AttributeLink,
-    AttributeLocation, Buffer, BufferLink, CreateProgramError, Framebuffer, FramebufferLink, Id,
-    IdDefault, IdName, ProgramCreateContext, ProgramLink, RenderCallback, ShaderType, Texture,
-    TextureLink, TransformFeedbackLink, Uniform, UniformContext, UniformLink,
+    AnimationCallback, AnimationHandle, Attribute, AttributeCreateContext, AttributeLink, Buffer,
+    BufferLink, Framebuffer, FramebufferLink, Id, IdDefault, IdName, ProgramLink, RenderCallback,
+    ShaderType, Texture, TextureLink, TransformFeedbackLink, Uniform, UniformContext, UniformLink,
 };
 use std::{
     collections::{HashMap, HashSet},
@@ -10,7 +9,7 @@ use std::{
     ops::{Deref, DerefMut},
 };
 use thiserror::Error;
-use wasm_bindgen::JsCast;
+use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{
     window, HtmlCanvasElement, WebGl2RenderingContext, WebGlContextAttributes, WebGlProgram,
     WebGlShader, WebGlTransformFeedback, WebGlVertexArrayObject,
@@ -27,6 +26,7 @@ pub struct Renderer<
     TextureId: Id = IdDefault,
     FramebufferId: Id = IdDefault,
     TransformFeedbackId: Id = IdDefault,
+    VertexArrayObjectId: Id = IdDefault,
     UserCtx: Clone + 'static = (),
 > {
     canvas: HtmlCanvasElement,
@@ -44,14 +44,15 @@ pub struct Renderer<
         TextureId,
         FramebufferId,
         TransformFeedbackId,
+        VertexArrayObjectId,
         UserCtx,
     >,
     uniforms: HashMap<UniformId, Uniform<ProgramId, UniformId, UserCtx>>,
     user_ctx: Option<UserCtx>,
-    attributes: HashMap<AttributeId, Attribute<ProgramId, BufferId, AttributeId>>,
+    attributes: HashMap<AttributeId, Attribute<VertexArrayObjectId, BufferId, AttributeId>>,
     buffers: HashMap<BufferId, Buffer<BufferId>>,
     textures: HashMap<TextureId, Texture<TextureId>>,
-    vertex_array_objects: HashMap<ProgramId, WebGlVertexArrayObject>,
+    vertex_array_objects: HashMap<VertexArrayObjectId, WebGlVertexArrayObject>,
     framebuffers: HashMap<FramebufferId, Framebuffer<FramebufferId>>,
     transform_feedbacks: HashMap<TransformFeedbackId, WebGlTransformFeedback>,
     webgl_context_attributes: WebGlContextAttributes,
@@ -68,6 +69,7 @@ impl<
         TextureId: Id,
         FramebufferId: Id,
         TransformFeedbackId: Id,
+        VertexArrayObjectId: Id,
         UserCtx: Clone,
     >
     Renderer<
@@ -80,6 +82,7 @@ impl<
         TextureId,
         FramebufferId,
         TransformFeedbackId,
+        VertexArrayObjectId,
         UserCtx,
     >
 {
@@ -93,6 +96,7 @@ impl<
         TextureId,
         FramebufferId,
         TransformFeedbackId,
+        VertexArrayObjectId,
         UserCtx,
     > {
         RendererBuilder::default()
@@ -126,7 +130,9 @@ impl<
         &self.buffers
     }
 
-    pub fn attributes(&self) -> &HashMap<AttributeId, Attribute<ProgramId, BufferId, AttributeId>> {
+    pub fn attributes(
+        &self,
+    ) -> &HashMap<AttributeId, Attribute<VertexArrayObjectId, BufferId, AttributeId>> {
         &self.attributes
     }
 
@@ -142,7 +148,7 @@ impl<
         &self.transform_feedbacks
     }
 
-    pub fn vertex_array_objects(&self) -> &HashMap<ProgramId, WebGlVertexArrayObject> {
+    pub fn vertex_array_objects(&self) -> &HashMap<VertexArrayObjectId, WebGlVertexArrayObject> {
         &self.vertex_array_objects
     }
 
@@ -152,17 +158,23 @@ impl<
     }
 
     /// Switches to using new program and its associated VAO
-    pub fn use_program_with_vao(&self, program_id: &ProgramId) -> &Self {
+    pub fn use_program(&self, program_id: &ProgramId) -> &Self {
         let program = self
             .programs
             .get(program_id)
             .expect("Program should exist for ProgramId");
-        let vao = self
-            .vertex_array_objects
-            .get(program_id)
-            .expect("VAO should exist for ProgramId");
 
         self.gl().use_program(Some(program));
+
+        self
+    }
+
+    pub fn use_vao(&self, vao_id: &VertexArrayObjectId) -> &Self {
+        let vao = self
+            .vertex_array_objects
+            .get(vao_id)
+            .expect("VAO should exist for ProgramId");
+
         self.gl().bind_vertex_array(Some(vao));
 
         self
@@ -218,6 +230,7 @@ impl<
             TextureId,
             FramebufferId,
             TransformFeedbackId,
+            VertexArrayObjectId,
             UserCtx,
         >,
     ) -> AnimationHandle<
@@ -230,6 +243,7 @@ impl<
         TextureId,
         FramebufferId,
         TransformFeedbackId,
+        VertexArrayObjectId,
         UserCtx,
     > {
         AnimationHandle::new(animation_callback, self)
@@ -290,12 +304,12 @@ pub enum RendererBuilderError {
     NoProgramLinkLinkProgramError,
     #[error("Could not link program because value returned by `gl.link_program` was `None`")]
     NoProgramLinkProgramError,
-    #[error(
-        "Could not link program because value returned by `gl.create_vertex_array` was `None`"
-    )]
-    NoVaoLinkProgramError,
-    #[error("Could not link program because an error occurred: {0}")]
-    CreateProgramLinkProgramError(#[from] CreateProgramError),
+    #[error("Could not create program. Reason: {0}")]
+    KnownErrorLinkProgramError(String),
+    #[error("Could not create program because varyings should not be converted to an array")]
+    CouldNotConvertVaryingsToArray,
+    #[error("Could not create program because an unknown error occurred")]
+    UnknownErrorLinkProgramError,
 
     // @todo: move this into its own sub-error
     #[error("Could not build uniforms because no WebGL2RenderingContext was provided")]
@@ -316,10 +330,12 @@ pub enum RendererBuilderError {
     CanvasReturnedNoContext,
 
     // @todo: move this into its own sub-error
-    #[error(
-        "Could not create attribute because the attribute's location was not found in the program"
-    )]
-    AttributeLocationNotFoundCreateAttributeError,
+    #[error("Could not create VAO because no WebGL2RenderingContext was provided")]
+    NoContextCreateVAOError,
+    #[error("Could not create VAO because no the VAO returned from the WebGL2 context was None")]
+    NoVAOCreateVAOError,
+
+    // @todo: move this into its own sub-error
     #[error("Could not create attribute because no WebGL2RenderingContext was provided")]
     NoContextCreateAttributeError,
     #[error("Could not create attribute because attribute link's associated program was not found from the program_id")]
@@ -328,6 +344,10 @@ pub enum RendererBuilderError {
     VAONotFoundCreateAttributeError,
     #[error("Could not create attribute because attribute link's associated buffer was not found from the buffer_id")]
     BufferNotFoundCreateAttributeError,
+    #[error(
+        "Could not create attribute because attribute link's associated location was not found"
+    )]
+    AttributeLocationNotFoundCreateAttributeError,
 
     // @todo: move this into its own sub-error
     #[error("Could not create texture because no WebGL2RenderingContext was provided")]
@@ -355,6 +375,7 @@ pub struct RendererBuilder<
     TextureId: Id = IdDefault,
     FramebufferId: Id = IdDefault,
     TransformFeedbackId: Id = IdDefault,
+    VertexArrayObjectId: Id = IdDefault,
     UserCtx: Clone + 'static = (),
 > {
     canvas: Option<HtmlCanvasElement>,
@@ -363,14 +384,15 @@ pub struct RendererBuilder<
     fragment_shader_sources: HashMap<FragmentShaderId, String>,
     vertex_shaders: HashMap<VertexShaderId, WebGlShader>,
     fragment_shaders: HashMap<FragmentShaderId, WebGlShader>,
-    program_links: HashSet<ProgramLink<ProgramId, VertexShaderId, FragmentShaderId, UserCtx>>,
+    program_links: HashSet<ProgramLink<ProgramId, VertexShaderId, FragmentShaderId>>,
     programs: HashMap<ProgramId, WebGlProgram>,
     uniform_links: HashSet<UniformLink<ProgramId, UniformId, UserCtx>>,
     uniforms: HashMap<UniformId, Uniform<ProgramId, UniformId, UserCtx>>,
     buffer_links: HashSet<BufferLink<BufferId, UserCtx>>,
     buffers: HashMap<BufferId, Buffer<BufferId>>,
-    attribute_links: HashSet<AttributeLink<ProgramId, BufferId, AttributeId, UserCtx>>,
-    attributes: HashMap<AttributeId, Attribute<ProgramId, BufferId, AttributeId>>,
+    attribute_links: HashSet<AttributeLink<VertexArrayObjectId, BufferId, AttributeId, UserCtx>>,
+    attribute_locations: HashMap<AttributeId, u32>,
+    attributes: HashMap<AttributeId, Attribute<VertexArrayObjectId, BufferId, AttributeId>>,
     texture_links: HashSet<TextureLink<TextureId, UserCtx>>,
     textures: HashMap<TextureId, Texture<TextureId>>,
     framebuffer_links: HashSet<FramebufferLink<FramebufferId, UserCtx, TextureId>>,
@@ -386,11 +408,13 @@ pub struct RendererBuilder<
             TextureId,
             FramebufferId,
             TransformFeedbackId,
+            VertexArrayObjectId,
             UserCtx,
         >,
     >,
     user_ctx: Option<UserCtx>,
-    vertex_array_objects: HashMap<ProgramId, WebGlVertexArrayObject>,
+    vertex_array_object_links: HashSet<VertexArrayObjectId>,
+    vertex_array_objects: HashMap<VertexArrayObjectId, WebGlVertexArrayObject>,
     transform_feedback_links: HashSet<TransformFeedbackLink<TransformFeedbackId>>,
     transform_feedbacks: HashMap<TransformFeedbackId, WebGlTransformFeedback>,
     webgl_context_attributes: WebGlContextAttributes,
@@ -407,6 +431,7 @@ impl<
         TextureId: Id,
         FramebufferId: Id,
         TransformFeedbackId: Id,
+        VertexArrayObjectId: Id,
         UserCtx: Clone + 'static,
     >
     RendererBuilder<
@@ -419,6 +444,7 @@ impl<
         TextureId,
         FramebufferId,
         TransformFeedbackId,
+        VertexArrayObjectId,
         UserCtx,
     >
 {
@@ -465,7 +491,7 @@ impl<
     /// together by associating the vertex shader id and the fragment shader id with their corresponding compiled shaders.
     pub fn add_program_link(
         &mut self,
-        program_link: impl Into<ProgramLink<ProgramId, VertexShaderId, FragmentShaderId, UserCtx>>,
+        program_link: impl Into<ProgramLink<ProgramId, VertexShaderId, FragmentShaderId>>,
     ) -> &mut Self {
         let program_link = program_link.into();
         self.program_links.insert(program_link);
@@ -487,6 +513,7 @@ impl<
                 TextureId,
                 FramebufferId,
                 TransformFeedbackId,
+                VertexArrayObjectId,
                 UserCtx,
             >,
         >,
@@ -533,9 +560,15 @@ impl<
     /// Saves a link that will be used to build a a WebGL attribute at build time.
     pub fn add_attribute_link(
         &mut self,
-        attribute_link: impl Into<AttributeLink<ProgramId, BufferId, AttributeId, UserCtx>>,
+        attribute_link: impl Into<AttributeLink<VertexArrayObjectId, BufferId, AttributeId, UserCtx>>,
     ) -> &mut Self {
-        self.attribute_links.insert(attribute_link.into());
+        let attribute_link = attribute_link.into();
+        let attribute_id = attribute_link.attribute_id().to_owned();
+        let new_attribute_location = self.attribute_links.len() as u32;
+        self.attribute_links.insert(attribute_link);
+        self.attribute_locations
+            .insert(attribute_id, new_attribute_location);
+
 
         self
     }
@@ -571,6 +604,17 @@ impl<
         self
     }
 
+    /// Saves a link that will be used to build a VAO at build time
+    pub fn add_vao_link(
+        &mut self,
+        vertex_array_object_id: impl Into<VertexArrayObjectId>,
+    ) -> &mut Self {
+        self.vertex_array_object_links
+            .insert(vertex_array_object_id.into());
+
+        self
+    }
+
     /// Compiles all vertex shaders and fragment shaders.
     /// Links together any programs that have been specified.
     /// Outputs the final Renderer.
@@ -587,6 +631,7 @@ impl<
             TextureId,
             FramebufferId,
             TransformFeedbackId,
+            VertexArrayObjectId,
             UserCtx,
         >,
         RendererBuilderError,
@@ -595,6 +640,7 @@ impl<
         self.save_webgl_context_from_canvas()?;
         self.compile_fragment_shaders()?;
         self.compile_vertex_shaders()?;
+        self.create_vaos()?;
         self.link_programs()?;
         self.create_buffers()?;
         self.create_attributes()?;
@@ -640,6 +686,7 @@ impl<
         TextureId: Id,
         FramebufferId: Id,
         TransformFeedbackId: Id,
+        VertexArrayObjectId: Id,
         UserCtx: Clone,
     >
     RendererBuilder<
@@ -652,6 +699,7 @@ impl<
         TextureId,
         FramebufferId,
         TransformFeedbackId,
+        VertexArrayObjectId,
         UserCtx,
     >
 {
@@ -730,10 +778,9 @@ impl<
     /// If a ProgramLink does not correspond to an actual shader, returns an Error.
     fn link_programs(&mut self) -> Result<&mut Self, RendererBuilderError> {
         for program_link in self.program_links.iter() {
-            let (program, vao) = self.link_program(program_link)?;
+            let program = self.link_program(program_link)?;
             let program_id = program_link.program_id();
             self.programs.insert(program_id.clone(), program);
-            self.vertex_array_objects.insert(program_id.to_owned(), vao);
         }
 
         Ok(self)
@@ -809,6 +856,22 @@ impl<
         Ok(self)
     }
 
+    fn create_vaos(&mut self) -> Result<&mut Self, RendererBuilderError> {
+        let gl = self
+            .gl
+            .as_ref()
+            .ok_or(RendererBuilderError::NoContextCreateVAOError)?;
+
+        for vao_id in self.vertex_array_object_links.iter() {
+            let vao = gl
+                .create_vertex_array()
+                .ok_or(RendererBuilderError::NoVAOCreateVAOError)?;
+            self.vertex_array_objects.insert(vao_id.to_owned(), vao);
+        }
+
+        Ok(self)
+    }
+
     /// Creates a WebGL attribute for each AttributeLink that was supplied using the create_callback
     fn create_attributes(&mut self) -> Result<&mut Self, RendererBuilderError> {
         let gl = self
@@ -819,7 +882,7 @@ impl<
         let user_ctx = self.user_ctx.clone();
 
         for attribute_link in &self.attribute_links {
-            let program_ids = attribute_link.program_ids().clone();
+            let vao_ids = attribute_link.vao_ids().clone();
             let buffer_id = attribute_link.buffer_id().clone();
             let attribute_id = attribute_link.attribute_id().clone();
             let webgl_buffer = self
@@ -828,52 +891,63 @@ impl<
                 .ok_or(RendererBuilderError::BufferNotFoundCreateAttributeError)?
                 .webgl_buffer()
                 .clone();
-            let mut attribute_locations = HashMap::new();
+            let attribute_location = self
+                .attribute_locations
+                .get(&attribute_id)
+                .ok_or(RendererBuilderError::AttributeLocationNotFoundCreateAttributeError)?;
 
-            for program_id in program_ids {
-                let program = self
-                    .programs
-                    .get(program_id)
-                    .ok_or(RendererBuilderError::ProgramNotFoundCreateAttributeError)?;
-                let vao = self
-                    .vertex_array_objects
-                    .get(program_id)
-                    .ok_or(RendererBuilderError::VAONotFoundCreateAttributeError)?;
-
-                // webgl returns `-1` if the attribute location was not found
-                let attribute_location: AttributeLocation = match gl
-                    .get_attrib_location(program, &attribute_id.name())
-                {
-                    -1 => Err(RendererBuilderError::AttributeLocationNotFoundCreateAttributeError)?,
-                    attribute_location => attribute_location.into(),
-                };
-
-                attribute_locations.insert(program_id.clone(), attribute_location);
-
-                gl.bind_vertex_array(Some(vao));
+            if vao_ids.is_empty() {
+                // initialize attribute on the default VAO context
+                gl.bind_vertex_array(None);
                 gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&webgl_buffer));
-                gl.enable_vertex_attrib_array(attribute_location.into());
+                gl.enable_vertex_attrib_array(*attribute_location);
                 let attribute_create_context = AttributeCreateContext::new(
                     gl.clone(),
                     now,
                     webgl_buffer.clone(),
-                    attribute_location,
+                    attribute_location.into(),
                     user_ctx.clone(),
                 );
                 // create callback is expected to initialize its associated attribute
                 // with a call to vertexAttribPointer,
                 // which is saved in the associated VAO
                 (attribute_link.create_callback())(&attribute_create_context);
-                gl.bind_vertex_array(None);
                 gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, None);
+            } else {
+                // initialize attribute for each VAO that it is linked to
+                for vao_id in vao_ids {
+                    let vao = self
+                        .vertex_array_objects
+                        .get(vao_id)
+                        .ok_or(RendererBuilderError::VAONotFoundCreateAttributeError)?;
+    
+                    gl.bind_vertex_array(Some(vao));
+                    gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&webgl_buffer));
+                    gl.enable_vertex_attrib_array(*attribute_location);
+                    let attribute_create_context = AttributeCreateContext::new(
+                        gl.clone(),
+                        now,
+                        webgl_buffer.clone(),
+                        attribute_location.into(),
+                        user_ctx.clone(),
+                    );
+                    // create callback is expected to initialize its associated attribute
+                    // with a call to vertexAttribPointer,
+                    // which is saved in the associated VAO
+                    (attribute_link.create_callback())(&attribute_create_context);
+                    gl.bind_vertex_array(None);
+                    gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, None);
+                }
             }
 
+            
+
             let attribute = Attribute::new(
-                program_ids.to_vec(),
+                vao_ids.to_vec(),
                 buffer_id.clone(),
                 attribute_id.clone(),
                 webgl_buffer.clone(),
-                attribute_locations,
+                attribute_location.into(),
             );
 
             self.attributes.insert(attribute_id, attribute);
@@ -946,14 +1020,12 @@ impl<
 
     fn link_program(
         &self,
-        program_link: &ProgramLink<ProgramId, VertexShaderId, FragmentShaderId, UserCtx>,
-    ) -> Result<(WebGlProgram, WebGlVertexArrayObject), RendererBuilderError> {
+        program_link: &ProgramLink<ProgramId, VertexShaderId, FragmentShaderId>,
+    ) -> Result<WebGlProgram, RendererBuilderError> {
         let gl = self
             .gl
             .as_ref()
             .ok_or(RendererBuilderError::NoContextLinkProgramError)?;
-        let now = Self::now();
-        let user_ctx = self.user_ctx.clone();
 
         let vertex_shader_id = program_link.vertex_shader_id();
         let vertex_shader = self
@@ -969,24 +1041,43 @@ impl<
 
         // @todo - make this not have to clone the slice
         let transform_feedback_varyings = program_link.transform_feedback_varyings().to_vec();
-        let program_create_context = ProgramCreateContext::new(
-            gl.clone(),
-            now,
-            user_ctx,
-            fragment_shader.to_owned(),
-            vertex_shader.to_owned(),
-            transform_feedback_varyings,
-        );
 
-        let program = (program_link.program_create_callback())(&program_create_context)
-            .map_err(|err| RendererBuilderError::CreateProgramLinkProgramError(err))?;
+        let webgl_program = gl
+            .create_program()
+            .ok_or(RendererBuilderError::NoProgramLinkProgramError)?;
 
-        // each program gets an associated Vertex Array Object
-        let vao = gl
-            .create_vertex_array()
-            .ok_or(RendererBuilderError::NoVaoLinkProgramError)?;
+        // assign attribute locations
+        for (attribute_id, attribute_location) in self.attribute_locations.iter() {
+            gl.bind_attrib_location(&webgl_program, *attribute_location, &attribute_id.name());
+        }
 
-        Ok((program, vao))
+        gl.attach_shader(&webgl_program, vertex_shader);
+        gl.attach_shader(&webgl_program, fragment_shader);
+
+        if !transform_feedback_varyings.is_empty() {
+            let varyings_js_value = JsValue::from_serde(&transform_feedback_varyings)
+                .map_err(|_| RendererBuilderError::CouldNotConvertVaryingsToArray)?;
+            gl.transform_feedback_varyings(
+                &webgl_program,
+                &varyings_js_value,
+                WebGl2RenderingContext::INTERLEAVED_ATTRIBS,
+            )
+        }
+
+        gl.link_program(&webgl_program);
+
+        if gl
+            .get_program_parameter(&webgl_program, WebGl2RenderingContext::LINK_STATUS)
+            .as_bool()
+            .unwrap_or(false)
+        {
+            Ok(webgl_program)
+        } else {
+            Err(match gl.get_program_info_log(&webgl_program) {
+                Some(known_error) => RendererBuilderError::KnownErrorLinkProgramError(known_error),
+                None => RendererBuilderError::UnknownErrorLinkProgramError,
+            })
+        }
     }
 
     /// Gets current DOMHighResTimeStamp from performance.now()
@@ -1041,6 +1132,7 @@ impl<
         TextureId: Id,
         FramebufferId: Id,
         TransformFeedbackId: Id,
+        VertexArrayObjectId: Id,
         UserCtx: Clone,
     > Default
     for RendererBuilder<
@@ -1053,6 +1145,7 @@ impl<
         TextureId,
         FramebufferId,
         TransformFeedbackId,
+        VertexArrayObjectId,
         UserCtx,
     >
 {
@@ -1078,10 +1171,12 @@ impl<
             framebuffers: Default::default(),
             attribute_links: Default::default(),
             attributes: Default::default(),
+            vertex_array_object_links: Default::default(),
             vertex_array_objects: Default::default(),
             transform_feedbacks: Default::default(),
             transform_feedback_links: Default::default(),
             webgl_context_attributes: WebGlContextAttributes::new(),
+            attribute_locations: Default::default(),
         }
     }
 }
@@ -1096,6 +1191,7 @@ impl<
         TextureId: Id,
         FramebufferId: Id,
         TransformFeedbackId: Id,
+        VertexArrayObjectId: Id,
         UserCtx: Clone,
     > Deref
     for RendererBuilder<
@@ -1108,6 +1204,7 @@ impl<
         TextureId,
         FramebufferId,
         TransformFeedbackId,
+        VertexArrayObjectId,
         UserCtx,
     >
 {
@@ -1128,6 +1225,7 @@ impl<
         TextureId: Id,
         FramebufferId: Id,
         TransformFeedbackId: Id,
+        VertexArrayObjectId: Id,
         UserCtx: Clone,
     > DerefMut
     for RendererBuilder<
@@ -1140,6 +1238,7 @@ impl<
         TextureId,
         FramebufferId,
         TransformFeedbackId,
+        VertexArrayObjectId,
         UserCtx,
     >
 {

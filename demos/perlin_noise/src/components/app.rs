@@ -154,7 +154,9 @@ pub fn app() -> Html {
                     .add_texture_link(perlin_noise_texture_link)
                     .add_framebuffer_link(perlin_noise_framebuffer_link)
                     .add_texture_link(white_noise_texture_link)
-                    .add_uniform_link(u_white_noise_texture);
+                    .add_uniform_link(u_white_noise_texture)
+                    .add_vao_link(ProgramId::PassThrough)
+                    .add_vao_link(ProgramId::PerlinNoise);
 
                 let renderer = renderer_builder
                     .build()

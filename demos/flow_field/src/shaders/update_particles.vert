@@ -4,7 +4,7 @@ const float TWO_PI = 6.283185307179586;
 
 const float MOVEMENT_DAMPENING = 0.001;
 
-layout (location = 0) in vec3 a_particle_position;
+in vec3 a_particle_position;
 
 uniform sampler2D u_perlin_noise_texture;
 

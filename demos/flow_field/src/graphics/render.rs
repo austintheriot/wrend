@@ -1,8 +1,7 @@
 use super::{
-    attribute_id::AttributeId, buffer_id::BufferId,
-    create_position_attribute::PARTICLE_POSITION_ATTRIBUTE, fragment_shader_id::FragmentShaderId,
+    attribute_id::AttributeId, buffer_id::BufferId, fragment_shader_id::FragmentShaderId,
     framebuffer_id::FramebufferId, program_id::ProgramId, texture_id::TextureId,
-    transform_feedback_id::TransformFeedbackId, uniform_id::UniformId,
+    transform_feedback_id::TransformFeedbackId, uniform_id::UniformId, vao_id::VAOId,
     vertex_shader_id::VertexShaderId,
 };
 use crate::{state::render_state_handle::RenderStateHandle, utils};
@@ -36,6 +35,7 @@ pub fn render(
         TextureId,
         FramebufferId,
         TransformFeedbackId,
+        VAOId,
         RenderStateHandle,
     >,
 ) {
@@ -89,8 +89,16 @@ pub fn render(
         .get(&TransformFeedbackId::Particle)
         .expect("Transform feedback should exist in the renderer");
 
+    let particle_position_attribute_location: u32 = renderer
+        .attributes()
+        .get(&AttributeId::AParticlePosition)
+        .unwrap()
+        .attribute_location()
+        .into();
+
     // RENDER NEW PERLIN NOISE TO FRAMEBUFFER --------------------------------------------------------
-    renderer.use_program_with_vao(&ProgramId::PerlinNoise);
+    renderer.use_program(&ProgramId::PerlinNoise);
+    renderer.use_vao(&VAOId::PerlinNoise);
     gl.active_texture(WebGl2RenderingContext::TEXTURE0);
     gl.bind_texture(
         WebGl2RenderingContext::TEXTURE_2D,
@@ -104,26 +112,15 @@ pub fn render(
     gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, None);
 
     // UPDATE PARTICLE POSITIONS --------------------------------------------------------
-    // NOTE: Can't use default VAO provided by Wrend here (e.g. renderer.use_program_with_vao(&ProgramId::UpdateParticles))
-    //
-    // Since the default behavior of Wrend is to bind VAOs with a corresponding program, the read & write buffer here that contain the particle
-    // positions are by default both bound to the same VAO. If the UpdateParticles program were to be enabled with its corresponding VAO here that
-    // would make the buffer that is being written to be bound to both a VAO __AND__ also a transform feedback at the same time, which would be an error.
-    //
-    // Instead, the attribute must be manually specified (T⌓T)
-    let program = renderer
-        .programs()
-        .get(&ProgramId::UpdateParticles)
-        .unwrap();
-    gl.use_program(Some(program));
+    renderer.use_program(&ProgramId::UpdateParticles);
     gl.bind_vertex_array(None);
     gl.bind_buffer(
         WebGl2RenderingContext::ARRAY_BUFFER,
         Some(webgl_particle_read_buffer),
     );
-    gl.enable_vertex_attrib_array(PARTICLE_POSITION_ATTRIBUTE);
+    gl.enable_vertex_attrib_array(particle_position_attribute_location);
     gl.vertex_attrib_pointer_with_i32(
-        PARTICLE_POSITION_ATTRIBUTE,
+        particle_position_attribute_location,
         3,
         WebGl2RenderingContext::FLOAT,
         false,
@@ -154,9 +151,10 @@ pub fn render(
     gl.bind_transform_feedback(WebGl2RenderingContext::TRANSFORM_FEEDBACK, None);
 
     // DRAW PARTICLES TO CANVAS --------------------------------------------------------
-    renderer.use_program_with_vao(&ProgramId::DrawParticles);
+    renderer.use_program(&ProgramId::DrawParticles);
+    renderer.use_vao(&VAOId::DrawParticles);
     gl.viewport(0, 0, canvas.width() as i32, canvas.height() as i32);
-    
+
     if user_ctx.borrow().is_first_render() {
         user_ctx.borrow_mut().set_is_first_render(false);
         gl.clear_color(0.0, 0.0, 0.0, 1.0);
