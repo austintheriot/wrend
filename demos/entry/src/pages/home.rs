@@ -13,6 +13,7 @@ pub fn home() -> Html {
         <Link<Route> to={Route::LargerThanLife}>{"Larger Than Life"}</Link<Route>>
         <Link<Route> to={Route::PerlinNoise}>{"Perlin Noise"}</Link<Route>>
         <Link<Route> to={Route::FlowField}>{"Flow Field"}</Link<Route>>
+        <Link<Route> to={Route::FlowFieldColorful}>{"Flow Field Colorful"}</Link<Route>>
      </>
     }
 }

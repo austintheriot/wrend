@@ -4,6 +4,7 @@
 @use '../larger_than_life/style.scss' as larger-than-life;
 @use '../perlin_noise/style.scss' as perlin-noise;
 @use '../flow_field/style.scss' as flow-field;
+@use '../flow_field_colorful/style.scss' as flow-field-colorful;
 
 * {
   font-family: 'Roboto', sans-serif;
