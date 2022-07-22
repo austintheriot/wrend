@@ -3,11 +3,11 @@ use crate::{
         attribute_id::AttributeId,
         buffer_id::BufferId,
         create_buffer::{
-            create_particle_buffer_a, create_particle_buffer_b, create_quad_vertex_buffer,
+            create_particle_buffer_a, create_particle_buffer_b, create_quad_vertex_buffer, create_particle_color_buffer,
         },
         create_framebuffer::create_perlin_noise_framebuffer,
-        create_position_attribute::{
-            create_particle_position_attribute, create_quad_vertex_attribute,
+        create_attribute::{
+            create_particle_position_attribute, create_quad_vertex_attribute, create_particle_color_attribute,
         },
         create_texture::{create_perlin_noise_texture, create_white_noise_texture},
         fragment_shader_id::FragmentShaderId,
@@ -22,6 +22,7 @@ use crate::{
     state::{render_state::RenderState, render_state_handle::RenderStateHandle},
 };
 use std::rc::Rc;
+use js_sys::Math;
 use ui::route::Route;
 use web_sys::{HtmlCanvasElement, MouseEvent};
 use wrend::{
@@ -102,6 +103,18 @@ pub fn app() -> Html {
                     BufferCreateCallback::new(Rc::new(create_particle_buffer_b)),
                 );
 
+                let particle_color_buffer_link = BufferLink::new(
+                    BufferId::ParticleColorBuffer,
+                    BufferCreateCallback::new(Rc::new(create_particle_color_buffer)),
+                );
+
+                let a_particle_color_link = AttributeLink::new(
+                    VAOId::DrawParticles,
+                    BufferId::ParticleColorBuffer,
+                    AttributeId::AParticleColor,
+                    AttributeCreateCallback::new(Rc::new(create_particle_color_attribute)),
+                );
+
                 let a_particle_position_link_a = AttributeLink::new(
                     (VAOId::DrawParticles, VAOId::UpdateParticlesA),
                     BufferId::ParticleBufferA,
@@ -163,7 +176,11 @@ pub fn app() -> Html {
                     Rc::new(|ctx: &UniformContext<RenderStateHandle>| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
-                        gl.uniform1f(Some(uniform_location), (ctx.now() / 50_000.) as f32);
+                        const TIME_CONSTANT: f64 = 50_000.0;
+                        const MAX_OFFSET: f32 = f32::MAX / 10.0;
+                        let time_offset = Math::random() as f32 * MAX_OFFSET;
+                        let final_time = (ctx.now() / TIME_CONSTANT) as f32 + time_offset;
+                        gl.uniform1f(Some(uniform_location), final_time);
                     });
 
                 let u_now = UniformLink::new(
@@ -215,9 +232,11 @@ pub fn app() -> Html {
                     .add_buffer_link(vertex_buffer_link)
                     .add_buffer_link(particle_buffer_a_link)
                     .add_buffer_link(particle_buffer_b_link)
+                    .add_buffer_link(particle_color_buffer_link)
                     .add_attribute_link(a_quad_vertex_link)
                     .add_attribute_link(a_particle_position_link_a)
                     .add_attribute_link(a_particle_position_link_b)
+                    .add_attribute_link(a_particle_color_link)
                     .add_texture_link(perlin_noise_texture_link)
                     .add_texture_link(white_noise_texture_link)
                     .add_framebuffer_link(perlin_noise_framebuffer_link)

@@ -77,3 +77,32 @@ pub fn create_particle_buffer_b(ctx: &BufferCreateContext<RenderStateHandle>) ->
 
     buffer
 }
+
+pub fn create_particle_color_buffer(ctx: &BufferCreateContext<RenderStateHandle>) -> WebGlBuffer {
+    let gl = ctx.gl();
+    let buffer = gl.create_buffer().unwrap();
+    let num_particle_vertices = ctx
+        .user_ctx()
+        .as_ref()
+        .expect("Should have render_state in buffer_create_context")
+        .get()
+        .borrow()
+        .num_particle_vertices();
+
+    gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&buffer));
+
+    let particle_colors: Vec<f32> = vec![0.0; num_particle_vertices as usize]
+        .into_iter()
+        .map(|_| (Math::random() * 2.0 - 1.0) as f32)
+        .collect();
+    let particle_colors = unsafe { js_sys::Float32Array::view(&particle_colors) };
+    gl.buffer_data_with_array_buffer_view(
+        WebGl2RenderingContext::ARRAY_BUFFER,
+        &particle_colors,
+        WebGl2RenderingContext::DYNAMIC_COPY,
+    );
+
+    gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, None);
+
+    buffer
+}

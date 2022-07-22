@@ -5,6 +5,7 @@ pub enum BufferId {
     QuadVertexBuffer,
     ParticleBufferA,
     ParticleBufferB,
+    ParticleColorBuffer,
 }
 
 impl Id for BufferId {}
