@@ -1,14 +1,15 @@
 use crate::{
     AnimationCallback, AnimationHandle, Attribute, AttributeCreateContext, AttributeLink, Buffer,
-    BufferLink, Framebuffer, FramebufferLink, Id, IdDefault, IdName, ProgramLink, RenderCallback,
-    ShaderType, Texture, TextureLink, TransformFeedbackLink, Uniform, UniformContext, UniformLink,
+    BufferLink, CompileShaderError, CreateBufferError, CreateTextureError,
+    CreateTransformFeedbackError, CreateVAOError, Framebuffer, FramebufferLink, Id, IdDefault,
+    IdName, InitializeAttributeError, LinkProgramError, ProgramLink, RenderCallback,
+    BuildRendererError, RendererBuilderError, SaveContextError, ShaderType, Texture, TextureLink,
+    TransformFeedbackLink, Uniform, UniformContext, CreateUniformError, UniformLink, WebGlContextError,
 };
 use std::{
     collections::{HashMap, HashSet},
-    hash::Hash,
     ops::{Deref, DerefMut},
 };
-use thiserror::Error;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{
     window, HtmlCanvasElement, WebGl2RenderingContext, WebGlContextAttributes, WebGlProgram,
@@ -257,113 +258,6 @@ impl<
     }
 }
 
-#[derive(Error, Debug, PartialEq, Eq, Clone, Hash)]
-pub enum RendererBuilderError {
-    // @todo: move this into its own sub-error
-    #[error(
-        "Error occurred while trying to get a WebGL2 rendering context from the supplied canvas"
-    )]
-    WebGL2ContextRetrievalError,
-    #[error("WebGL2 rendering context could not be acquired from the canvas. The returned value was `None`")]
-    WebGL2ContextNotFoundError,
-    #[error("The JavaScript Object returned from get_context could not be converted into a `WebGl2RenderingContext`")]
-    WebGL2TypeConversionError,
-
-    // @todo: move this into its own sub-error
-    #[error("Renderer could not be built with canvas, because no canvas was supplied")]
-    NoCanvasBuildError,
-    #[error(
-        "Renderer could not be built with WebGL2RenderingContext, because no canvas was supplied"
-    )]
-    NoContextBuildError,
-    #[error("Renderer could not be built, because no `RenderCallback` was supplied")]
-    NoRenderCallbackBuildError,
-
-    // @todo: move this into its own sub-error
-    #[error("Could not compile shader, because no canvas or its associated context were supplied")]
-    NoContextCompileShaderError,
-    #[error("Could not compile shader, because call to WebGL2RenderingContext returned None")]
-    NoShaderReturnedCompilerShaderError,
-    #[error("Could not compile shader. Reason: {0}")]
-    KnownErrorCompileShaderError(String),
-    #[error("Could not compile shader. An unknown error occurred.")]
-    UnknownErrorCompilerShaderError,
-
-    // @todo: move this into its own sub-error
-    #[error("Could not link program because no WebGL2RenderingContext was provided")]
-    NoContextLinkProgramError,
-    #[error(
-        "Could not link program because no vertex shader was found associated with the id provided"
-    )]
-    VertexShaderNotFoundLinkProgramError,
-    #[error("Could not link program because no fragment shader was found associated with the id provided")]
-    FragmentShaderNotFoundLinkProgramError,
-    #[error(
-        "Could not link program because ProgramLink could not be found for ProgramId provided"
-    )]
-    NoProgramLinkLinkProgramError,
-    #[error("Could not link program because value returned by `gl.link_program` was `None`")]
-    NoProgramLinkProgramError,
-    #[error("Could not create program. Reason: {0}")]
-    KnownErrorLinkProgramError(String),
-    #[error("Could not create program because varyings should not be converted to an array")]
-    CouldNotConvertVaryingsToArray,
-    #[error("Could not create program because an unknown error occurred")]
-    UnknownErrorLinkProgramError,
-
-    // @todo: move this into its own sub-error
-    #[error("Could not build uniforms because no WebGL2RenderingContext was provided")]
-    NoContextBuildUniformsError,
-    #[error("Could not build uniforms because the associated program_id could no be found")]
-    ProgramNotFoundBuildUniformsError,
-    #[error(
-        "Could not build uniforms because the uniform's location was not found in the program: {uniform_id:?}"
-    )]
-    UniformLocationNotFoundBuildUniformsError { uniform_id: String },
-
-    // @todo: move this into its own sub-error
-    #[error("Could not initialize uniforms because no WebGL2RenderingContext was provided")]
-    NoContextInitializeUniformsError,
-
-    // @todo: move this into its own sub-error
-    #[error("Could not get WebGl2RenderingContext from canvas, because None was returned")]
-    CanvasReturnedNoContext,
-
-    // @todo: move this into its own sub-error
-    #[error("Could not create VAO because no WebGL2RenderingContext was provided")]
-    NoContextCreateVAOError,
-    #[error("Could not create VAO because no the VAO returned from the WebGL2 context was None")]
-    NoVAOCreateVAOError,
-
-    // @todo: move this into its own sub-error
-    #[error("Could not create attribute because no WebGL2RenderingContext was provided")]
-    NoContextCreateAttributeError,
-    #[error("Could not create attribute because attribute link's associated program was not found from the program_id")]
-    ProgramNotFoundCreateAttributeError,
-    #[error("Could not create attribute because attribute link's associated Vertex Array Object was not found from the program_id")]
-    VAONotFoundCreateAttributeError,
-    #[error("Could not create attribute because attribute link's associated buffer was not found from the buffer_id")]
-    BufferNotFoundCreateAttributeError,
-    #[error(
-        "Could not create attribute because attribute link's associated location was not found"
-    )]
-    AttributeLocationNotFoundCreateAttributeError,
-
-    // @todo: move this into its own sub-error
-    #[error("Could not create texture because no WebGL2RenderingContext was provided")]
-    NoContextCreateTextureError,
-
-    // @todo: move this into its own sub-error
-    #[error("Could not create framebuffer because no WebGL2RenderingContext was provided")]
-    NoContextCreateFramebufferError,
-
-    // @todo: move this into its own sub-error
-    #[error("Could not build transform feedback because no WebGL2RenderingContext was provided")]
-    NoContextBuildTransformFeedbackError,
-    #[error("Could not build transform feedback because the value returned from create_transform_feedback was None")]
-    TransformFeedbackNotFoundTransformFeedbackError,
-}
-
 #[derive(Debug, Clone)]
 pub struct RendererBuilder<
     VertexShaderId: Id = IdDefault,
@@ -569,7 +463,6 @@ impl<
         self.attribute_locations
             .insert(attribute_id, new_attribute_location);
 
-
         self
     }
 
@@ -644,22 +537,20 @@ impl<
         self.link_programs()?;
         self.create_buffers()?;
         self.create_attributes()?;
-        self.build_uniforms()?;
+        self.create_uniforms()?;
         self.create_textures()?;
         self.create_framebuffers()?;
         self.create_transform_feedbacks()?;
 
         let renderer = Renderer {
-            canvas: self
-                .canvas
-                .ok_or(RendererBuilderError::NoCanvasBuildError)?,
-            gl: self.gl.ok_or(RendererBuilderError::NoContextBuildError)?,
+            canvas: self.canvas.ok_or(BuildRendererError::NoCanvas)?,
+            gl: self.gl.ok_or(BuildRendererError::NoContext)?,
             fragment_shaders: self.fragment_shaders,
             vertex_shaders: self.vertex_shaders,
             programs: self.programs,
             render_callback: self
                 .render_callback
-                .ok_or(RendererBuilderError::NoRenderCallbackBuildError)?,
+                .ok_or(BuildRendererError::NoRenderCallback)?,
             user_ctx: self.user_ctx,
             uniforms: self.uniforms,
             buffers: self.buffers,
@@ -708,7 +599,7 @@ impl<
         let canvas = self
             .canvas
             .as_ref()
-            .ok_or(RendererBuilderError::CanvasReturnedNoContext)?;
+            .ok_or(SaveContextError::CanvasReturnedNoContext)?;
         let gl = self.context_from_canvas(canvas)?;
         self.gl = Some(gl);
 
@@ -719,22 +610,22 @@ impl<
     fn context_from_canvas(
         &self,
         canvas: &HtmlCanvasElement,
-    ) -> Result<WebGl2RenderingContext, RendererBuilderError> {
+    ) -> Result<WebGl2RenderingContext, WebGlContextError> {
         let gl = canvas
             .get_context_with_context_options("webgl2", self.webgl_context_attributes.as_ref())
-            .map_err(|_| RendererBuilderError::WebGL2ContextRetrievalError)?;
+            .map_err(|_| WebGlContextError::RetrievalError)?;
 
-        let gl = gl.ok_or(RendererBuilderError::WebGL2ContextNotFoundError)?;
+        let gl = gl.ok_or(WebGlContextError::NotFoundError)?;
 
         let gl: WebGl2RenderingContext = gl
             .dyn_into()
-            .map_err(|_| RendererBuilderError::WebGL2TypeConversionError)?;
+            .map_err(|_| WebGlContextError::TypeConversionError)?;
 
         Ok(gl)
     }
 
     /// Takes the list of fragment shader sources and their ids and saves compiled `WebGlShader`s to state
-    fn compile_fragment_shaders(&mut self) -> Result<&mut Self, RendererBuilderError> {
+    fn compile_fragment_shaders(&mut self) -> Result<&mut Self, CompileShaderError> {
         for (id, fragment_shader_src) in self.fragment_shader_sources.iter() {
             let fragment_shader =
                 self.compile_shader(ShaderType::FragmentShader, fragment_shader_src)?;
@@ -745,7 +636,7 @@ impl<
     }
 
     /// Takes the list of vertex shader sources and their ids and saves compiled `WebGlShader`s to state
-    fn compile_vertex_shaders(&mut self) -> Result<&mut Self, RendererBuilderError> {
+    fn compile_vertex_shaders(&mut self) -> Result<&mut Self, CompileShaderError> {
         for (id, vertex_shader_src) in self.vertex_shader_sources.iter() {
             let vertex_shader = self.compile_shader(ShaderType::VertexShader, vertex_shader_src)?;
             self.vertex_shaders.insert((*id).clone(), vertex_shader);
@@ -754,17 +645,17 @@ impl<
         Ok(self)
     }
 
-    fn create_transform_feedbacks(&mut self) -> Result<&mut Self, RendererBuilderError> {
+    fn create_transform_feedbacks(&mut self) -> Result<&mut Self, CreateTransformFeedbackError> {
         let gl = self
             .gl
             .as_ref()
-            .ok_or(RendererBuilderError::NoContextBuildTransformFeedbackError)?;
+            .ok_or(CreateTransformFeedbackError::NoContext)?;
 
         for transform_feedback_link in self.transform_feedback_links.iter() {
             let transform_feedback_id = transform_feedback_link.transform_feedback_id().clone();
             let webgl_transform_feedback = gl
                 .create_transform_feedback()
-                .ok_or(RendererBuilderError::TransformFeedbackNotFoundTransformFeedbackError)?;
+                .ok_or(CreateTransformFeedbackError::NoneWasReturned)?;
             self.transform_feedbacks
                 .insert(transform_feedback_id, webgl_transform_feedback);
         }
@@ -776,7 +667,7 @@ impl<
     /// according to any ProgramLinks that were provided.
     ///
     /// If a ProgramLink does not correspond to an actual shader, returns an Error.
-    fn link_programs(&mut self) -> Result<&mut Self, RendererBuilderError> {
+    fn link_programs(&mut self) -> Result<&mut Self, LinkProgramError> {
         for program_link in self.program_links.iter() {
             let program = self.link_program(program_link)?;
             let program_id = program_link.program_id();
@@ -787,16 +678,13 @@ impl<
     }
 
     /// Find the uniform's position in a shader and constructs necessary data for each uniform.
-    fn build_uniform(
+    fn create_uniform(
         &self,
         uniform_link: &UniformLink<ProgramId, UniformId, UserCtx>,
-    ) -> Result<Uniform<ProgramId, UniformId, UserCtx>, RendererBuilderError> {
+    ) -> Result<Uniform<ProgramId, UniformId, UserCtx>, CreateUniformError> {
         let uniform_id = uniform_link.uniform_id().clone();
         let program_ids = uniform_link.program_ids().clone();
-        let gl = self
-            .gl
-            .as_ref()
-            .ok_or(RendererBuilderError::NoContextBuildUniformsError)?;
+        let gl = self.gl.as_ref().ok_or(CreateUniformError::NoContext)?;
         let now = Self::now();
         let user_ctx = self.user_ctx.as_ref().map(Clone::clone);
         let initialize_callback = uniform_link.initialize_callback();
@@ -808,12 +696,12 @@ impl<
             let program = self
                 .programs
                 .get(program_id)
-                .ok_or(RendererBuilderError::ProgramNotFoundBuildUniformsError)?;
+                .ok_or(CreateUniformError::ProgramNotFound)?;
 
             gl.use_program(Some(program));
 
             let uniform_location = gl.get_uniform_location(program, &uniform_id.name()).ok_or(
-                RendererBuilderError::UniformLocationNotFoundBuildUniformsError {
+                CreateUniformError::UniformLocationNotFound {
                     uniform_id: uniform_id.name(),
                 },
             )?;
@@ -838,11 +726,8 @@ impl<
     }
 
     /// Creates all WebGL buffers, using the passed in BufferLinks
-    fn create_buffers(&mut self) -> Result<&mut Self, RendererBuilderError> {
-        let gl = self
-            .gl
-            .as_ref()
-            .ok_or(RendererBuilderError::NoContextCreateAttributeError)?;
+    fn create_buffers(&mut self) -> Result<&mut Self, CreateBufferError> {
+        let gl = self.gl.as_ref().ok_or(CreateBufferError::NoContext)?;
         let now = Self::now();
         let user_ctx = &self.user_ctx;
 
@@ -856,16 +741,13 @@ impl<
         Ok(self)
     }
 
-    fn create_vaos(&mut self) -> Result<&mut Self, RendererBuilderError> {
-        let gl = self
-            .gl
-            .as_ref()
-            .ok_or(RendererBuilderError::NoContextCreateVAOError)?;
+    fn create_vaos(&mut self) -> Result<&mut Self, CreateVAOError> {
+        let gl = self.gl.as_ref().ok_or(CreateVAOError::NoContext)?;
 
         for vao_id in self.vertex_array_object_links.iter() {
             let vao = gl
                 .create_vertex_array()
-                .ok_or(RendererBuilderError::NoVAOCreateVAOError)?;
+                .ok_or(CreateVAOError::NoneWasReturned)?;
             self.vertex_array_objects.insert(vao_id.to_owned(), vao);
         }
 
@@ -873,11 +755,11 @@ impl<
     }
 
     /// Creates a WebGL attribute for each AttributeLink that was supplied using the create_callback
-    fn create_attributes(&mut self) -> Result<&mut Self, RendererBuilderError> {
+    fn create_attributes(&mut self) -> Result<&mut Self, InitializeAttributeError> {
         let gl = self
             .gl
             .as_ref()
-            .ok_or(RendererBuilderError::NoContextCreateAttributeError)?;
+            .ok_or(InitializeAttributeError::NoContext)?;
         let now = Self::now();
         let user_ctx = self.user_ctx.clone();
 
@@ -888,13 +770,13 @@ impl<
             let webgl_buffer = self
                 .buffers
                 .get(&buffer_id)
-                .ok_or(RendererBuilderError::BufferNotFoundCreateAttributeError)?
+                .ok_or(InitializeAttributeError::BufferNotFound)?
                 .webgl_buffer()
                 .clone();
             let attribute_location = self
                 .attribute_locations
                 .get(&attribute_id)
-                .ok_or(RendererBuilderError::AttributeLocationNotFoundCreateAttributeError)?;
+                .ok_or(InitializeAttributeError::AttributeLocationNotFound)?;
 
             if vao_ids.is_empty() {
                 // initialize attribute on the default VAO context
@@ -919,8 +801,8 @@ impl<
                     let vao = self
                         .vertex_array_objects
                         .get(vao_id)
-                        .ok_or(RendererBuilderError::VAONotFoundCreateAttributeError)?;
-    
+                        .ok_or(InitializeAttributeError::VAONotFound)?;
+
                     gl.bind_vertex_array(Some(vao));
                     gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&webgl_buffer));
                     gl.enable_vertex_attrib_array(*attribute_location);
@@ -940,8 +822,6 @@ impl<
                 }
             }
 
-            
-
             let attribute = Attribute::new(
                 vao_ids.to_vec(),
                 buffer_id.clone(),
@@ -957,11 +837,8 @@ impl<
     }
 
     /// Creates a WebGL texture for each Texture that was supplied using the create_texture callback
-    fn create_textures(&mut self) -> Result<&mut Self, RendererBuilderError> {
-        let gl = self
-            .gl
-            .as_ref()
-            .ok_or(RendererBuilderError::NoContextCreateTextureError)?;
+    fn create_textures(&mut self) -> Result<&mut Self, CreateTextureError> {
+        let gl = self.gl.as_ref().ok_or(CreateTextureError::NoContext)?;
         let now = Self::now();
         let user_ctx = self.user_ctx.clone();
 
@@ -977,11 +854,8 @@ impl<
     }
 
     /// Creates a WebGL Framebuffer for each FramebufferLink that was supplied using the callback
-    fn create_framebuffers(&mut self) -> Result<&mut Self, RendererBuilderError> {
-        let gl = self
-            .gl
-            .as_ref()
-            .ok_or(RendererBuilderError::NoContextCreateFramebufferError)?;
+    fn create_framebuffers(&mut self) -> Result<&mut Self, CreateBufferError> {
+        let gl = self.gl.as_ref().ok_or(CreateBufferError::NoContext)?;
         let now = Self::now();
         let user_ctx = self.user_ctx.clone();
 
@@ -1008,10 +882,10 @@ impl<
     }
 
     /// Finds all uniform's position in its corresponding program and builds a wrapper for it
-    fn build_uniforms(&mut self) -> Result<&mut Self, RendererBuilderError> {
+    fn create_uniforms(&mut self) -> Result<&mut Self, CreateUniformError> {
         for uniform_link in self.uniform_links.iter() {
             let uniform_id = uniform_link.uniform_id().clone();
-            let uniform = self.build_uniform(uniform_link)?;
+            let uniform = self.create_uniform(uniform_link)?;
             self.uniforms.insert(uniform_id, uniform);
         }
 
@@ -1021,30 +895,25 @@ impl<
     fn link_program(
         &self,
         program_link: &ProgramLink<ProgramId, VertexShaderId, FragmentShaderId>,
-    ) -> Result<WebGlProgram, RendererBuilderError> {
-        let gl = self
-            .gl
-            .as_ref()
-            .ok_or(RendererBuilderError::NoContextLinkProgramError)?;
+    ) -> Result<WebGlProgram, LinkProgramError> {
+        let gl = self.gl.as_ref().ok_or(LinkProgramError::NoContext)?;
 
         let vertex_shader_id = program_link.vertex_shader_id();
         let vertex_shader = self
             .vertex_shaders
             .get(vertex_shader_id)
-            .ok_or(RendererBuilderError::VertexShaderNotFoundLinkProgramError)?;
+            .ok_or(LinkProgramError::VertexShaderNotFound)?;
 
         let fragment_shader_id = program_link.fragment_shader_id();
         let fragment_shader = self
             .fragment_shaders
             .get(fragment_shader_id)
-            .ok_or(RendererBuilderError::FragmentShaderNotFoundLinkProgramError)?;
+            .ok_or(LinkProgramError::FragmentShaderNotFound)?;
 
         // @todo - make this not have to clone the slice
         let transform_feedback_varyings = program_link.transform_feedback_varyings().to_vec();
 
-        let webgl_program = gl
-            .create_program()
-            .ok_or(RendererBuilderError::NoProgramLinkProgramError)?;
+        let webgl_program = gl.create_program().ok_or(LinkProgramError::NoProgram)?;
 
         // assign attribute locations
         for (attribute_id, attribute_location) in self.attribute_locations.iter() {
@@ -1056,7 +925,7 @@ impl<
 
         if !transform_feedback_varyings.is_empty() {
             let varyings_js_value = JsValue::from_serde(&transform_feedback_varyings)
-                .map_err(|_| RendererBuilderError::CouldNotConvertVaryingsToArray)?;
+                .map_err(|_| LinkProgramError::CouldNotConvertVaryingsToArray)?;
             gl.transform_feedback_varyings(
                 &webgl_program,
                 &varyings_js_value,
@@ -1073,10 +942,11 @@ impl<
         {
             Ok(webgl_program)
         } else {
-            Err(match gl.get_program_info_log(&webgl_program) {
-                Some(known_error) => RendererBuilderError::KnownErrorLinkProgramError(known_error),
-                None => RendererBuilderError::UnknownErrorLinkProgramError,
-            })
+            let inner_error = match gl.get_program_info_log(&webgl_program) {
+                Some(known_error) => LinkProgramError::KnownError(known_error),
+                None => LinkProgramError::UnknownError,
+            };
+            Err(inner_error)?
         }
     }
 
@@ -1092,15 +962,12 @@ impl<
         &self,
         shader_type: ShaderType,
         source: &str,
-    ) -> Result<WebGlShader, RendererBuilderError> {
-        let gl = self
-            .gl
-            .as_ref()
-            .ok_or(RendererBuilderError::NoContextCompileShaderError)?;
+    ) -> Result<WebGlShader, CompileShaderError> {
+        let gl = self.gl.as_ref().ok_or(CompileShaderError::NoContext)?;
 
         let shader = gl
             .create_shader(shader_type.into())
-            .ok_or(RendererBuilderError::NoShaderReturnedCompilerShaderError)?;
+            .ok_or(CompileShaderError::NoShaderReturned)?;
 
         gl.shader_source(&shader, source);
         gl.compile_shader(&shader);
@@ -1112,12 +979,11 @@ impl<
         {
             Ok(shader)
         } else {
-            Err(match gl.get_shader_info_log(&shader) {
-                Some(known_error) => {
-                    RendererBuilderError::KnownErrorCompileShaderError(known_error)
-                }
-                None => RendererBuilderError::UnknownErrorCompilerShaderError,
-            })
+            let inner_error = match gl.get_shader_info_log(&shader) {
+                Some(known_error) => CompileShaderError::KnownError(known_error),
+                None => CompileShaderError::UnknownError,
+            };
+            Err(inner_error)?
         }
     }
 }
