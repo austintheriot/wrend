@@ -22,7 +22,7 @@ use web_sys::HtmlCanvasElement;
 use wrend::{
     AnimationCallback, AttributeCreateCallback, AttributeLink, BufferCreateCallback, BufferLink,
     FramebufferCreateCallback, FramebufferLink, ProgramLinkBuilder, RenderCallback, Renderer,
-    TextureCreateCallback, TextureLink, UniformCallback, UniformLink, UniformContext,
+    TextureCreateCallback, TextureLink, UniformCallback, UniformContext, UniformLink,
 };
 
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
@@ -67,10 +67,7 @@ pub fn app() -> Html {
                 );
 
                 let a_position_link = AttributeLink::new(
-                    (
-                        ProgramId::PassThrough,
-                        ProgramId::PerlinNoise,
-                    ),
+                    (ProgramId::PassThrough, ProgramId::PerlinNoise),
                     BufferId::VertexBuffer,
                     AttributeId,
                     AttributeCreateCallback::new(Rc::new(create_position_attribute)),
@@ -125,7 +122,9 @@ pub fn app() -> Html {
                     UniformCallback::new(u_now_link_init_and_update_callback.clone()),
                 );
 
-                u_now.set_update_callback(UniformCallback::new(u_now_link_init_and_update_callback.clone()));
+                u_now.set_update_callback(UniformCallback::new(
+                    u_now_link_init_and_update_callback.clone(),
+                ));
 
                 let render_callback = RenderCallback::new(Rc::new(render));
                 let render_state_handle: RenderStateHandle = render_state.into();

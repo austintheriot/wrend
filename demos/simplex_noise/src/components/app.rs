@@ -1,18 +1,11 @@
 use crate::{
     graphics::{
-        attribute_id::AttributeId,
-        buffer_id::BufferId,
-        create_buffer::create_vertex_buffer,
+        attribute_id::AttributeId, buffer_id::BufferId, create_buffer::create_vertex_buffer,
         create_framebuffer::create_frame_buffer,
         create_position_attribute::create_position_attribute,
-        create_texture::{create_simplex_noise_texture},
-        fragment_shader_id::FragmentShaderId,
-        framebuffer_id::FramebufferId,
-        program_id::ProgramId,
-        render::render,
-        texture_id::TextureId,
-        uniform_id::UniformId,
-        vertex_shader_id::VertexShaderId,
+        create_texture::create_simplex_noise_texture, fragment_shader_id::FragmentShaderId,
+        framebuffer_id::FramebufferId, program_id::ProgramId, render::render,
+        texture_id::TextureId, uniform_id::UniformId, vertex_shader_id::VertexShaderId,
     },
     state::{render_state::RenderState, render_state_handle::RenderStateHandle},
 };
@@ -22,7 +15,7 @@ use web_sys::HtmlCanvasElement;
 use wrend::{
     AnimationCallback, AttributeCreateCallback, AttributeLink, BufferCreateCallback, BufferLink,
     FramebufferCreateCallback, FramebufferLink, ProgramLinkBuilder, RenderCallback, Renderer,
-    TextureCreateCallback, TextureLink, UniformCallback, UniformLink, UniformContext,
+    TextureCreateCallback, TextureLink, UniformCallback, UniformContext, UniformLink,
 };
 
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
@@ -67,10 +60,7 @@ pub fn app() -> Html {
                 );
 
                 let a_position_link = AttributeLink::new(
-                    (
-                        ProgramId::PassThrough,
-                        ProgramId::SimplexNoise,
-                    ),
+                    (ProgramId::PassThrough, ProgramId::SimplexNoise),
                     BufferId::VertexBuffer,
                     AttributeId,
                     AttributeCreateCallback::new(Rc::new(create_position_attribute)),
@@ -110,7 +100,9 @@ pub fn app() -> Html {
                     UniformCallback::new(u_now_link_init_and_update_callback.clone()),
                 );
 
-                u_now.set_update_callback(UniformCallback::new(u_now_link_init_and_update_callback.clone()));
+                u_now.set_update_callback(UniformCallback::new(
+                    u_now_link_init_and_update_callback.clone(),
+                ));
 
                 let render_callback = RenderCallback::new(Rc::new(render));
                 let render_state_handle: RenderStateHandle = render_state.into();

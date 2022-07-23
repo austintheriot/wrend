@@ -61,7 +61,7 @@ impl<
         TextureId,
         FramebufferId,
         TransformFeedbackId,
-VertexArrayObjectId,
+        VertexArrayObjectId,
         UserCtx,
     >
 {
@@ -76,7 +76,7 @@ VertexArrayObjectId,
             TextureId,
             FramebufferId,
             TransformFeedbackId,
-VertexArrayObjectId,
+            VertexArrayObjectId,
             UserCtx,
         >,
         renderer: Renderer<
@@ -89,7 +89,7 @@ VertexArrayObjectId,
             TextureId,
             FramebufferId,
             TransformFeedbackId,
-VertexArrayObjectId,
+            VertexArrayObjectId,
             UserCtx,
         >,
     ) -> Self {
@@ -166,7 +166,7 @@ impl<
         TextureId,
         FramebufferId,
         TransformFeedbackId,
-VertexArrayObjectId,
+        VertexArrayObjectId,
         UserCtx,
     >
 {

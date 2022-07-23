@@ -42,10 +42,7 @@ pub fn create_texture<UserCtx>(ctx: &TextureCreateContext<UserCtx>) -> WebGlText
     // generate a texture of noise
     let bytes_per_pixel = 4;
     let length_of_noise_array = (canvas_width * canvas_height * bytes_per_pixel) as usize;
-    let mut noise_image = Vec::with_capacity(length_of_noise_array);
-    for _ in 0..length_of_noise_array {
-        noise_image.push(0u8);
-    }
+    let mut noise_image = vec![0u8; length_of_noise_array];
     for rgba in noise_image.chunks_mut(bytes_per_pixel as usize) {
         let random_float = Math::random();
         let black_or_white = if random_float < 0.5 { u8::MIN } else { u8::MAX };

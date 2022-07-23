@@ -13,8 +13,6 @@ use web_sys::{
     WebGlTransformFeedback, WebGlVertexArrayObject,
 };
 
-use super::get_context_callback;
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Renderer<
     VertexShaderId: Id = IdDefault,
@@ -201,7 +199,7 @@ impl<
 
     /// Iterates through all saved uniforms and updates them using their associated update callbacks.
     pub fn update_uniforms(&self) -> &Self {
-        for (uniform_id, _) in &self.uniforms {
+        for uniform_id in self.uniforms.keys() {
             self.update_uniform(uniform_id);
         }
 
@@ -757,7 +755,7 @@ impl<
         let user_ctx = self.user_ctx.clone();
 
         for attribute_link in &self.attribute_links {
-            let vao_ids = attribute_link.vao_ids().clone();
+            let vao_ids = attribute_link.vao_ids();
             let buffer_id = attribute_link.buffer_id().clone();
             let attribute_id = attribute_link.attribute_id().clone();
             let webgl_buffer = self

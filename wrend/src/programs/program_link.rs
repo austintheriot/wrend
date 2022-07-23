@@ -10,7 +10,7 @@ pub struct ProgramLink<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id> 
     program_id: ProgramId,
     vertex_shader_id: VertexShaderId,
     fragment_shader_id: FragmentShaderId,
-    transform_feedback_varyings: Vec<String>
+    transform_feedback_varyings: Vec<String>,
 }
 
 impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id>
@@ -115,18 +115,18 @@ impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id>
         self
     }
 
-    pub fn set_transform_feedback_varyings(mut self, transform_feedback_varyings: impl Into<Vec<String>>) -> Self {
+    pub fn set_transform_feedback_varyings(
+        mut self,
+        transform_feedback_varyings: impl Into<Vec<String>>,
+    ) -> Self {
         self.transform_feedback_varyings = transform_feedback_varyings.into();
         self
     }
 
-
     pub fn build(
         self,
-    ) -> Result<
-        ProgramLink<ProgramId, VertexShaderId, FragmentShaderId>,
-        ProgramLinkBuildError,
-    > {
+    ) -> Result<ProgramLink<ProgramId, VertexShaderId, FragmentShaderId>, ProgramLinkBuildError>
+    {
         Ok(ProgramLink {
             program_id: self.program_id.ok_or(ProgramLinkBuildError::NoProgramId)?,
             vertex_shader_id: self

@@ -6,7 +6,12 @@ use std::hash::Hash;
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
 #[derive(Clone)]
-pub struct AttributeLink<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> {
+pub struct AttributeLink<
+    VertexArrayObjectId: Id,
+    BufferId: Id,
+    AttributeId: Id + IdName,
+    UserCtx: Clone,
+> {
     vao_ids: Vec<VertexArrayObjectId>,
     buffer_id: BufferId,
     attribute_id: AttributeId,
@@ -91,8 +96,8 @@ impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: C
     fn eq(&self, other: &Self) -> bool {
         self.vao_ids == other.vao_ids
             && self.buffer_id == other.buffer_id
-            && self.vao_ids == other.vao_ids
             && self.attribute_id == other.attribute_id
+            && self.attribute_create_callback == other.attribute_create_callback
     }
 }
 

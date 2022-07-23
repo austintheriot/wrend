@@ -1,5 +1,5 @@
 use wasm_bindgen::JsCast;
-use web_sys::{window, HtmlCanvasElement, HtmlAnchorElement};
+use web_sys::{window, HtmlAnchorElement, HtmlCanvasElement};
 
 pub fn save_image(canvas: &HtmlCanvasElement) {
     let data_url = canvas

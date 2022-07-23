@@ -7,7 +7,9 @@ pub struct TransformFeedbackLink<TransformFeedbackId: Id> {
 
 impl<TransformFeedbackId: Id> TransformFeedbackLink<TransformFeedbackId> {
     pub fn new(transform_feedback_id: TransformFeedbackId) -> Self {
-        Self { transform_feedback_id }
+        Self {
+            transform_feedback_id,
+        }
     }
     pub fn transform_feedback_id(&self) -> &TransformFeedbackId {
         &self.transform_feedback_id

@@ -1,7 +1,7 @@
+use crate::assets::noise_texture::NOISE_64X64;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlTexture};
 use wrend::TextureCreateContext;
-use crate::assets::noise_texture::NOISE_64X64;
 
 pub fn create_white_noise_texture<UserCtx>(ctx: &TextureCreateContext<UserCtx>) -> WebGlTexture {
     let gl = ctx.gl();
@@ -51,7 +51,6 @@ pub fn create_white_noise_texture<UserCtx>(ctx: &TextureCreateContext<UserCtx>) 
 
     webgl_texture
 }
-
 
 pub fn create_perlin_noise_texture<UserCtx>(ctx: &TextureCreateContext<UserCtx>) -> WebGlTexture {
     let gl = ctx.gl();

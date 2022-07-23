@@ -20,7 +20,6 @@ impl From<u32> for AttributeLocation {
     }
 }
 
-
 impl From<&u32> for AttributeLocation {
     fn from(attribute_location: &u32) -> Self {
         AttributeLocation(*attribute_location)

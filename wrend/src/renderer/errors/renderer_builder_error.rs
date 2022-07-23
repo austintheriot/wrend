@@ -1,7 +1,7 @@
 use crate::{
-    BuildRendererError, CompileShaderError, CreateBufferError, CreateFramebufferError,
-    CreateTextureError, CreateTransformFeedbackError, CreateUniformError, CreateVAOError,
-    CreateAttributeError, LinkProgramError, SaveContextError, WebGlContextError,
+    BuildRendererError, CompileShaderError, CreateAttributeError, CreateBufferError,
+    CreateFramebufferError, CreateTextureError, CreateTransformFeedbackError, CreateUniformError,
+    CreateVAOError, LinkProgramError, SaveContextError, WebGlContextError,
 };
 use thiserror::Error;
 

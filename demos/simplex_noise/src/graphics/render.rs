@@ -60,7 +60,7 @@ pub fn render(
     );
     draw(gl, canvas);
 
-    // copy perlin noise from framebuffer to canvas 
+    // copy perlin noise from framebuffer to canvas
     // (this step could be replaced with a true render call,
     // where the perlin noise is used as a texture in the render)
     renderer.use_program(&ProgramId::PassThrough);
