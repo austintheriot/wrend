@@ -2,7 +2,7 @@ use crate::{
     AnimationCallback, AnimationHandle, Attribute, AttributeCreateContext, AttributeLink, Buffer,
     BufferLink, CompileShaderError, CreateBufferError, CreateTextureError,
     CreateTransformFeedbackError, CreateVAOError, Framebuffer, FramebufferLink, Id, IdDefault,
-    IdName, InitializeAttributeError, LinkProgramError, ProgramLink, RenderCallback,
+    IdName, CreateAttributeError, LinkProgramError, ProgramLink, RenderCallback,
     BuildRendererError, RendererBuilderError, SaveContextError, ShaderType, Texture, TextureLink,
     TransformFeedbackLink, Uniform, UniformContext, CreateUniformError, UniformLink, WebGlContextError,
 };
@@ -755,11 +755,11 @@ impl<
     }
 
     /// Creates a WebGL attribute for each AttributeLink that was supplied using the create_callback
-    fn create_attributes(&mut self) -> Result<&mut Self, InitializeAttributeError> {
+    fn create_attributes(&mut self) -> Result<&mut Self, CreateAttributeError> {
         let gl = self
             .gl
             .as_ref()
-            .ok_or(InitializeAttributeError::NoContext)?;
+            .ok_or(CreateAttributeError::NoContext)?;
         let now = Self::now();
         let user_ctx = self.user_ctx.clone();
 
@@ -770,13 +770,13 @@ impl<
             let webgl_buffer = self
                 .buffers
                 .get(&buffer_id)
-                .ok_or(InitializeAttributeError::BufferNotFound)?
+                .ok_or(CreateAttributeError::BufferNotFound)?
                 .webgl_buffer()
                 .clone();
             let attribute_location = self
                 .attribute_locations
                 .get(&attribute_id)
-                .ok_or(InitializeAttributeError::AttributeLocationNotFound)?;
+                .ok_or(CreateAttributeError::AttributeLocationNotFound)?;
 
             if vao_ids.is_empty() {
                 // initialize attribute on the default VAO context
@@ -801,7 +801,7 @@ impl<
                     let vao = self
                         .vertex_array_objects
                         .get(vao_id)
-                        .ok_or(InitializeAttributeError::VAONotFound)?;
+                        .ok_or(CreateAttributeError::VAONotFound)?;
 
                     gl.bind_vertex_array(Some(vao));
                     gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&webgl_buffer));
@@ -881,7 +881,7 @@ impl<
         Ok(self)
     }
 
-    /// Finds all uniform's position in its corresponding program and builds a wrapper for it
+    /// Finds every uniform's position in its corresponding program and builds a wrapper for it
     fn create_uniforms(&mut self) -> Result<&mut Self, CreateUniformError> {
         for uniform_link in self.uniform_links.iter() {
             let uniform_id = uniform_link.uniform_id().clone();
