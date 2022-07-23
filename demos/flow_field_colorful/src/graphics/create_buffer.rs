@@ -91,10 +91,22 @@ pub fn create_particle_color_buffer(ctx: &BufferCreateContext<RenderStateHandle>
 
     gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&buffer));
 
-    let particle_colors: Vec<f32> = vec![0.0; num_particle_vertices as usize]
-        .into_iter()
-        .map(|_| (Math::random() * 2.0 - 1.0) as f32)
-        .collect();
+    const PARTICLE_COLORS: [[f32; 3]; 2] = [[1.0, 0.0, 0.0], [1.0, 1.0, 0.0]];
+    let mut particle_colors = vec![0.0; num_particle_vertices as usize];
+    let chunks = particle_colors.chunks_mut(4);
+    let chunks_len = chunks.len();
+    for (i, rgba) in chunks.enumerate() {
+        // evenly distribute list of colors through the particles
+        let percentage = i as f32 / (chunks_len as f32);
+        let index_through_colors = percentage * (PARTICLE_COLORS.len() - 1) as f32;
+        let index_through_colors = index_through_colors as usize;
+        let particle_color = PARTICLE_COLORS[index_through_colors];
+
+        rgba[0] = particle_color[0];
+        rgba[1] = particle_color[1];
+        rgba[2] = particle_color[2];
+        rgba[3] = 1.0;
+    }
     let particle_colors = unsafe { js_sys::Float32Array::view(&particle_colors) };
     gl.buffer_data_with_array_buffer_view(
         WebGl2RenderingContext::ARRAY_BUFFER,
