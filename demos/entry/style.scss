@@ -5,6 +5,7 @@
 @use '../perlin_noise/style.scss' as perlin-noise;
 @use '../flow_field/style.scss' as flow-field;
 @use '../flow_field_colorful/style.scss' as flow-field-colorful;
+@use '../simplex_noise/style.scss' as simplex-noise;
 
 * {
   font-family: 'Roboto', sans-serif;
@@ -13,6 +14,11 @@
   padding: 0;
 }
 
-a { 
-  display: block;
+.home {
+  padding: 1rem;
+  
+  a {
+    display: block;
+    margin: 1rem 0;
+  }
 }

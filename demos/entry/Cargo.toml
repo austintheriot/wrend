@@ -51,6 +51,7 @@ wrend = { path = '../../wrend' }
 ui = { path = '../ui' }
 larger_than_life = { path = '../larger_than_life' }
 perlin_noise = { path = '../perlin_noise' }
+simplex_noise = { path = '../simplex_noise' }
 flow_field = { path = '../flow_field' }
 flow_field_colorful = { path = '../flow_field_colorful' }
 

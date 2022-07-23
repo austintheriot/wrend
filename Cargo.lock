@@ -251,6 +251,7 @@ dependencies = [
  "log",
  "perlin_noise",
  "rand",
+ "simplex_noise",
  "thiserror",
  "ui",
  "wasm-bindgen",
