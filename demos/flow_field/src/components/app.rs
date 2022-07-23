@@ -17,18 +17,20 @@ use crate::{
         texture_id::TextureId,
         transform_feedback_id::TransformFeedbackId,
         uniform_id::UniformId,
-        vertex_shader_id::VertexShaderId, vao_id::VAOId,
+        vao_id::VAOId,
+        vertex_shader_id::VertexShaderId,
     },
     state::{render_state::RenderState, render_state_handle::RenderStateHandle},
 };
 use std::rc::Rc;
 use ui::route::Route;
-use web_sys::{HtmlCanvasElement, MouseEvent};
+use wasm_bindgen::JsCast;
+use web_sys::{HtmlCanvasElement, MouseEvent, WebGl2RenderingContext, WebGlContextAttributes};
 use wrend::{
     AnimationCallback, AttributeCreateCallback, AttributeLink, BufferCreateCallback, BufferLink,
-    FramebufferCreateCallback, FramebufferLink, ProgramLinkBuilder, RenderCallback, Renderer,
-    TextureCreateCallback, TextureLink, TransformFeedbackLink, UniformCallback, UniformContext,
-    UniformLink,
+    CallbackWithContext, FramebufferCreateCallback, FramebufferLink, GetContextCallback,
+    ProgramLinkBuilder, RenderCallback, Renderer, TextureCreateCallback, TextureLink,
+    TransformFeedbackLink, UniformCallback, UniformContext, UniformLink, WebGlContextError,
 };
 
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, Callback};
@@ -175,6 +177,26 @@ pub fn app() -> Html {
                 let transform_feedback_link =
                     TransformFeedbackLink::new(TransformFeedbackId::Particle);
 
+                // provide custom attributes when getting WebGL context
+                let get_context_callback = GetContextCallback::new(CallbackWithContext::new(
+                    Rc::new(|canvas: &HtmlCanvasElement| {
+                        let mut webgl_context_attributes = WebGlContextAttributes::new();
+                        webgl_context_attributes.preserve_drawing_buffer(true);
+
+                        let gl = canvas
+                            .get_context_with_context_options("webgl2", &webgl_context_attributes)
+                            .map_err(|_| WebGlContextError::RetrievalError)?;
+
+                        let gl = gl.ok_or(WebGlContextError::NotFoundError)?;
+
+                        let gl: WebGl2RenderingContext = gl
+                            .dyn_into()
+                            .map_err(|_| WebGlContextError::TypeConversionError)?;
+
+                        Ok(gl)
+                    }),
+                ));
+
                 let render_callback = RenderCallback::new(Rc::new(render));
                 let render_state_handle: RenderStateHandle = render_state.into();
 
@@ -230,7 +252,7 @@ pub fn app() -> Html {
                     .add_vao_link(VAOId::UpdateParticlesA)
                     .add_vao_link(VAOId::UpdateParticlesB)
                     .add_vao_link(VAOId::DrawParticles)
-                    .preserve_drawing_buffer(true);
+                    .set_get_context_callback(get_context_callback);
 
                 let renderer = renderer_builder
                     .build()

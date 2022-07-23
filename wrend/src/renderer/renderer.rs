@@ -1,20 +1,19 @@
 use crate::{
     AnimationCallback, AnimationHandle, Attribute, AttributeCreateContext, AttributeLink, Buffer,
-    BufferLink, CompileShaderError, CreateBufferError, CreateTextureError,
-    CreateTransformFeedbackError, CreateVAOError, Framebuffer, FramebufferLink, Id, IdDefault,
-    IdName, CreateAttributeError, LinkProgramError, ProgramLink, RenderCallback,
-    BuildRendererError, RendererBuilderError, SaveContextError, ShaderType, Texture, TextureLink,
-    TransformFeedbackLink, Uniform, UniformContext, CreateUniformError, UniformLink, WebGlContextError,
+    BufferLink, BuildRendererError, CompileShaderError, CreateAttributeError, CreateBufferError,
+    CreateTextureError, CreateTransformFeedbackError, CreateUniformError, CreateVAOError,
+    Framebuffer, FramebufferLink, GetContextCallback, Id, IdDefault, IdName, LinkProgramError,
+    ProgramLink, RenderCallback, RendererBuilderError, SaveContextError, ShaderType, Texture,
+    TextureLink, TransformFeedbackLink, Uniform, UniformContext, UniformLink, WebGlContextError,
 };
-use std::{
-    collections::{HashMap, HashSet},
-    ops::{Deref, DerefMut},
-};
-use wasm_bindgen::{JsCast, JsValue};
+use std::collections::{HashMap, HashSet};
+use wasm_bindgen::JsValue;
 use web_sys::{
-    window, HtmlCanvasElement, WebGl2RenderingContext, WebGlContextAttributes, WebGlProgram,
-    WebGlShader, WebGlTransformFeedback, WebGlVertexArrayObject,
+    window, HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram, WebGlShader,
+    WebGlTransformFeedback, WebGlVertexArrayObject,
 };
+
+use super::get_context_callback;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Renderer<
@@ -56,7 +55,6 @@ pub struct Renderer<
     vertex_array_objects: HashMap<VertexArrayObjectId, WebGlVertexArrayObject>,
     framebuffers: HashMap<FramebufferId, Framebuffer<FramebufferId>>,
     transform_feedbacks: HashMap<TransformFeedbackId, WebGlTransformFeedback>,
-    webgl_context_attributes: WebGlContextAttributes,
 }
 
 /// Public API
@@ -311,7 +309,7 @@ pub struct RendererBuilder<
     vertex_array_objects: HashMap<VertexArrayObjectId, WebGlVertexArrayObject>,
     transform_feedback_links: HashSet<TransformFeedbackLink<TransformFeedbackId>>,
     transform_feedbacks: HashMap<TransformFeedbackId, WebGlTransformFeedback>,
-    webgl_context_attributes: WebGlContextAttributes,
+    get_context_callback: GetContextCallback,
 }
 
 /// Public API
@@ -508,6 +506,14 @@ impl<
         self
     }
 
+    pub fn set_get_context_callback(
+        &mut self,
+        get_context_callback: impl Into<GetContextCallback>,
+    ) -> &mut Self {
+        self.get_context_callback = get_context_callback.into();
+        self
+    }
+
     /// Compiles all vertex shaders and fragment shaders.
     /// Links together any programs that have been specified.
     /// Outputs the final Renderer.
@@ -559,7 +565,6 @@ impl<
             attributes: self.attributes,
             vertex_array_objects: self.vertex_array_objects,
             transform_feedbacks: self.transform_feedbacks,
-            webgl_context_attributes: self.webgl_context_attributes,
         };
 
         Ok(renderer)
@@ -611,16 +616,7 @@ impl<
         &self,
         canvas: &HtmlCanvasElement,
     ) -> Result<WebGl2RenderingContext, WebGlContextError> {
-        let gl = canvas
-            .get_context_with_context_options("webgl2", self.webgl_context_attributes.as_ref())
-            .map_err(|_| WebGlContextError::RetrievalError)?;
-
-        let gl = gl.ok_or(WebGlContextError::NotFoundError)?;
-
-        let gl: WebGl2RenderingContext = gl
-            .dyn_into()
-            .map_err(|_| WebGlContextError::TypeConversionError)?;
-
+        let gl = (self.get_context_callback)(canvas)?;
         Ok(gl)
     }
 
@@ -756,10 +752,7 @@ impl<
 
     /// Creates a WebGL attribute for each AttributeLink that was supplied using the create_callback
     fn create_attributes(&mut self) -> Result<&mut Self, CreateAttributeError> {
-        let gl = self
-            .gl
-            .as_ref()
-            .ok_or(CreateAttributeError::NoContext)?;
+        let gl = self.gl.as_ref().ok_or(CreateAttributeError::NoContext)?;
         let now = Self::now();
         let user_ctx = self.user_ctx.clone();
 
@@ -1041,74 +1034,8 @@ impl<
             vertex_array_objects: Default::default(),
             transform_feedbacks: Default::default(),
             transform_feedback_links: Default::default(),
-            webgl_context_attributes: WebGlContextAttributes::new(),
+            get_context_callback: Default::default(),
             attribute_locations: Default::default(),
         }
-    }
-}
-
-impl<
-        VertexShaderId: Id,
-        FragmentShaderId: Id,
-        ProgramId: Id,
-        UniformId: Id + IdName,
-        BufferId: Id,
-        AttributeId: Id + IdName,
-        TextureId: Id,
-        FramebufferId: Id,
-        TransformFeedbackId: Id,
-        VertexArrayObjectId: Id,
-        UserCtx: Clone,
-    > Deref
-    for RendererBuilder<
-        VertexShaderId,
-        FragmentShaderId,
-        ProgramId,
-        UniformId,
-        BufferId,
-        AttributeId,
-        TextureId,
-        FramebufferId,
-        TransformFeedbackId,
-        VertexArrayObjectId,
-        UserCtx,
-    >
-{
-    type Target = WebGlContextAttributes;
-
-    fn deref(&self) -> &Self::Target {
-        &self.webgl_context_attributes
-    }
-}
-
-impl<
-        VertexShaderId: Id,
-        FragmentShaderId: Id,
-        ProgramId: Id,
-        UniformId: Id + IdName,
-        BufferId: Id,
-        AttributeId: Id + IdName,
-        TextureId: Id,
-        FramebufferId: Id,
-        TransformFeedbackId: Id,
-        VertexArrayObjectId: Id,
-        UserCtx: Clone,
-    > DerefMut
-    for RendererBuilder<
-        VertexShaderId,
-        FragmentShaderId,
-        ProgramId,
-        UniformId,
-        BufferId,
-        AttributeId,
-        TextureId,
-        FramebufferId,
-        TransformFeedbackId,
-        VertexArrayObjectId,
-        UserCtx,
-    >
-{
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.webgl_context_attributes
     }
 }
