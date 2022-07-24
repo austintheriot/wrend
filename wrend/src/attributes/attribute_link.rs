@@ -1,5 +1,5 @@
 use crate::{
-    AttributeCreateCallback, AttributeCreateContext, AttributeLocation, Id, IdBridge, IdName,
+    AttributeCreateCallback, AttributeCreateContext, AttributeLocation, Id, Bridge, IdName,
 };
 use std::fmt::Debug;
 use std::hash::Hash;
@@ -22,7 +22,7 @@ impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: C
     AttributeLink<VertexArrayObjectId, BufferId, AttributeId, UserCtx>
 {
     pub fn new(
-        vao_ids: impl Into<IdBridge<VertexArrayObjectId>>,
+        vao_ids: impl Into<Bridge<VertexArrayObjectId>>,
         buffer_id: BufferId,
         attribute_id: AttributeId,
         attribute_create_callback: impl Into<AttributeCreateCallback<UserCtx>>,

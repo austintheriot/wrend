@@ -7,7 +7,6 @@ mod material_type;
 mod ray;
 mod sphere;
 
-
 pub use hit::*;
 pub use hit_result::*;
 pub use hit_result_data::*;

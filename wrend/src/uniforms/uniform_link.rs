@@ -1,5 +1,5 @@
 use crate::Id;
-use crate::IdBridge;
+use crate::Bridge;
 use crate::UniformCallback;
 use crate::UniformShouldUpdateCallback;
 use std::fmt::Debug;
@@ -18,11 +18,11 @@ pub struct UniformLink<ProgramId: Id, UniformId: Id, UserCtx: Clone> {
 
 impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> UniformLink<ProgramId, UniformId, UserCtx> {
     pub fn new(
-        program_ids: impl Into<IdBridge<ProgramId>>,
+        program_ids: impl Into<Bridge<ProgramId>>,
         uniform_id: UniformId,
         initialize_callback: UniformCallback<UserCtx>,
     ) -> Self {
-        let program_id_bridge: IdBridge<ProgramId> = program_ids.into();
+        let program_id_bridge: Bridge<ProgramId> = program_ids.into();
         let program_ids = program_id_bridge.into();
         Self {
             program_ids,

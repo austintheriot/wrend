@@ -1,4 +1,4 @@
-use crate::{AttributeLocation, Id, IdBridge, IdName};
+use crate::{AttributeLocation, Id, Bridge, IdName};
 use std::fmt::Debug;
 use std::hash::Hash;
 use web_sys::WebGlBuffer;
@@ -17,7 +17,7 @@ impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName>
 {
     // @todo move into builder pattern
     pub fn new(
-        vao_ids: impl Into<IdBridge<VertexArrayObjectId>>,
+        vao_ids: impl Into<Bridge<VertexArrayObjectId>>,
         buffer_id: BufferId,
         attribute_id: AttributeId,
         webgl_buffer: WebGlBuffer,

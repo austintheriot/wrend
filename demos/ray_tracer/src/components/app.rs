@@ -188,21 +188,29 @@ pub fn app() -> Html {
                         FragmentShaderId::AverageRenders,
                         AVERAGE_RENDERS_FRAGMENT_SHADERS.to_string(),
                     )
-                    .add_program_link(ray_tracer_program_link)
-                    .add_program_link(average_renders_program_link)
-                    .add_program_link(pass_through_program_link)
+                    .add_program_links([
+                        ray_tracer_program_link,
+                        average_renders_program_link,
+                        pass_through_program_link
+                    ])
                     .add_buffer_link(vertex_buffer_link)
                     .add_attribute_link(a_quad_vertex_link)
-                    .add_texture_link(prev_render_texture_link)
-                    .add_texture_link(averaged_render_a_texture_link)
-                    .add_texture_link(averaged_render_b_texture_link)
-                    .add_framebuffer_link(prev_render_framebuffer_link)
-                    .add_framebuffer_link(averaged_render_a_framebuffer_link)
-                    .add_framebuffer_link(averaged_render_b_framebuffer_link)
-                    .add_uniform_link(u_now)
-                    .add_uniform_link(u_prev_render_texture)
-                    .add_uniform_link(u_averaged_render_texture_a)
-                    .add_uniform_link(u_averaged_render_texture_b)
+                    .add_texture_links([
+                        prev_render_texture_link,
+                        averaged_render_a_texture_link,
+                        averaged_render_b_texture_link,
+                    ])
+                    .add_framebuffer_links([
+                        prev_render_framebuffer_link,
+                        averaged_render_a_framebuffer_link,
+                        averaged_render_b_framebuffer_link,
+                    ])
+                    .add_uniform_links([
+                        u_now,
+                        u_prev_render_texture,
+                        u_averaged_render_texture_a,
+                        u_averaged_render_texture_b,
+                    ])
                     .add_vao_link(VAOId::Quad);
 
                 let renderer = renderer_builder

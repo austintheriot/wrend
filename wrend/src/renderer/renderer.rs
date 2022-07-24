@@ -1,10 +1,11 @@
 use crate::{
-    AnimationCallback, AnimationHandle, Attribute, AttributeCreateContext, AttributeLink, Buffer,
-    BufferLink, BuildRendererError, CompileShaderError, CreateAttributeError, CreateBufferError,
-    CreateTextureError, CreateTransformFeedbackError, CreateUniformError, CreateVAOError,
-    Framebuffer, FramebufferLink, GetContextCallback, Id, IdDefault, IdName, LinkProgramError,
-    ProgramLink, RenderCallback, RendererBuilderError, SaveContextError, ShaderType, Texture,
-    TextureLink, TransformFeedbackLink, Uniform, UniformContext, UniformLink, WebGlContextError,
+    AnimationCallback, AnimationHandle, Attribute, AttributeCreateContext, AttributeLink, Bridge,
+    Buffer, BufferLink, BuildRendererError, CompileShaderError, CreateAttributeError,
+    CreateBufferError, CreateTextureError, CreateTransformFeedbackError, CreateUniformError,
+    CreateVAOError, Framebuffer, FramebufferLink, GetContextCallback, Id, IdDefault, IdName,
+    LinkProgramError, ProgramLink, RenderCallback, RendererBuilderError, SaveContextError,
+    ShaderType, Texture, TextureLink, TransformFeedbackLink, Uniform, UniformContext, UniformLink,
+    WebGlContextError,
 };
 use std::collections::{HashMap, HashSet};
 use wasm_bindgen::JsValue;
@@ -141,7 +142,10 @@ impl<
         self.textures.get(texture_id)
     }
 
-    pub fn framebuffer(&self, framebuffer_id: &FramebufferId) -> Option<&Framebuffer<FramebufferId>> {
+    pub fn framebuffer(
+        &self,
+        framebuffer_id: &FramebufferId,
+    ) -> Option<&Framebuffer<FramebufferId>> {
         self.framebuffers.get(framebuffer_id)
     }
 
@@ -396,6 +400,21 @@ impl<
         self
     }
 
+    pub fn add_program_links(
+        &mut self,
+        program_links: impl Into<Bridge<ProgramLink<ProgramId, VertexShaderId, FragmentShaderId>>>,
+    ) -> &mut Self {
+        let program_link_bridge: Bridge<ProgramLink<ProgramId, VertexShaderId, FragmentShaderId>> =
+            program_links.into();
+        let program_links: Vec<_> = program_link_bridge.into();
+
+        for program_link in program_links {
+            self.add_program_link(program_link);
+        }
+
+        self
+    }
+
     /// Save a callback that will be called each time it is time to render a new frame
     pub fn set_render_callback(
         &mut self,
@@ -444,12 +463,40 @@ impl<
         self
     }
 
+    pub fn add_uniform_links(
+        &mut self,
+        uniform_links: impl Into<Bridge<UniformLink<ProgramId, UniformId, UserCtx>>>,
+    ) -> &mut Self {
+        let uniform_link_bridge: Bridge<_> = uniform_links.into();
+        let uniform_links: Vec<_> = uniform_link_bridge.into();
+
+        for uniform_link in uniform_links {
+            self.add_uniform_link(uniform_link);
+        }
+
+        self
+    }
+
     /// Saves a link that will be used to build a WebGL buffer at build time.
     pub fn add_buffer_link(
         &mut self,
         buffer_link: impl Into<BufferLink<BufferId, UserCtx>>,
     ) -> &mut Self {
         self.buffer_links.insert(buffer_link.into());
+
+        self
+    }
+
+    pub fn add_buffer_links(
+        &mut self,
+        buffer_links: impl Into<Bridge<BufferLink<BufferId, UserCtx>>>,
+    ) -> &mut Self {
+        let buffer_link_bridge: Bridge<_> = buffer_links.into();
+        let buffer_links: Vec<_> = buffer_link_bridge.into();
+
+        for buffer_link in buffer_links {
+            self.add_buffer_link(buffer_link);
+        }
 
         self
     }
@@ -469,6 +516,22 @@ impl<
         self
     }
 
+    pub fn add_attribute_links(
+        &mut self,
+        attribute_links: impl Into<
+            Bridge<AttributeLink<VertexArrayObjectId, BufferId, AttributeId, UserCtx>>,
+        >,
+    ) -> &mut Self {
+        let attribute_link_bridge: Bridge<_> = attribute_links.into();
+        let attribute_links: Vec<_> = attribute_link_bridge.into();
+
+        for attribute_link in attribute_links {
+            self.add_attribute_link(attribute_link);
+        }
+
+        self
+    }
+
     /// Saves a link that will be used to build a buffer/attribute pair at build time.
     pub fn add_texture_link(
         &mut self,
@@ -479,12 +542,40 @@ impl<
         self
     }
 
+    pub fn add_texture_links(
+        &mut self,
+        texture_links: impl Into<Bridge<TextureLink<TextureId, UserCtx>>>,
+    ) -> &mut Self {
+        let texture_link_bridge: Bridge<_> = texture_links.into();
+        let texture_links: Vec<_> = texture_link_bridge.into();
+
+        for texture_link in texture_links {
+            self.add_texture_link(texture_link);
+        }
+
+        self
+    }
+
     /// Saves a link that will be used to build a framebuffer at build time
     pub fn add_framebuffer_link(
         &mut self,
         framebuffer_link: impl Into<FramebufferLink<FramebufferId, UserCtx, TextureId>>,
     ) -> &mut Self {
         self.framebuffer_links.insert(framebuffer_link.into());
+
+        self
+    }
+
+    pub fn add_framebuffer_links(
+        &mut self,
+        framebuffer_links: impl Into<Bridge<FramebufferLink<FramebufferId, UserCtx, TextureId>>>,
+    ) -> &mut Self {
+        let framebuffer_link_bridge: Bridge<_> = framebuffer_links.into();
+        let framebuffer_links: Vec<_> = framebuffer_link_bridge.into();
+
+        for framebuffer_link in framebuffer_links {
+            self.add_framebuffer_link(framebuffer_link);
+        }
 
         self
     }
@@ -500,6 +591,20 @@ impl<
         self
     }
 
+    pub fn add_transform_feedback_links(
+        &mut self,
+        transform_feedback_links: impl Into<Bridge<TransformFeedbackLink<TransformFeedbackId>>>,
+    ) -> &mut Self {
+        let transform_feedback_link_bridge: Bridge<_> = transform_feedback_links.into();
+        let transform_feedback_links: Vec<_> = transform_feedback_link_bridge.into();
+
+        for transform_feedback_link in transform_feedback_links {
+            self.add_transform_feedback_link(transform_feedback_link);
+        }
+
+        self
+    }
+
     /// Saves a link that will be used to build a VAO at build time
     pub fn add_vao_link(
         &mut self,
@@ -507,6 +612,22 @@ impl<
     ) -> &mut Self {
         self.vertex_array_object_links
             .insert(vertex_array_object_id.into());
+
+        self
+    }
+
+    pub fn add_vao_links(
+        &mut self,
+        vao_links: impl Into<Bridge<VertexArrayObjectId>>,
+    ) -> &mut Self {
+        let vao_link_bridge: Bridge<_> = vao_links.into();
+        let vao_links: Vec<_> = vao_link_bridge.into();
+        let vao_links: Vec<VertexArrayObjectId> =
+            vao_links.into_iter().map(|link| link.into()).collect();
+
+        for vao_link in vao_links {
+            self.add_vao_link(vao_link);
+        }
 
         self
     }
