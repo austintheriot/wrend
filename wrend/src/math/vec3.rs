@@ -1,4 +1,5 @@
 use crate::math;
+use crate::Matrix4x4;
 use std::f64::consts::PI;
 use std::ops::Add;
 use std::ops::AddAssign;
@@ -115,13 +116,27 @@ impl Vec3 {
         Vec3::normalize(Vec3::random_point_in_unit_sphere())
     }
 
-    pub fn to_array(&self) -> [f32; 3] {
-        [self.x() as f32, self.y() as f32, self.z() as f32]
-    }
-
-    pub fn near_zero(&self) -> bool {
+    pub fn is_near_zero(&self) -> bool {
         let threshold = 1e-10;
         self.x() < threshold && self.y() < threshold && self.z() < threshold
+    }
+}
+
+impl From<Vec3> for [f64; 3] {
+    fn from(vec3: Vec3) -> Self {
+        [vec3.0, vec3.1, vec3.2]
+    }
+}
+
+impl From<&Vec3> for [f64; 3] {
+    fn from(vec3: &Vec3) -> Self {
+        [vec3.0, vec3.1, vec3.2]
+    }
+}
+
+impl From<Vec3> for (f64, f64, f64) {
+    fn from(vec3: Vec3) -> Self {
+        (vec3.0, vec3.1, vec3.2)
     }
 }
 
@@ -197,10 +212,11 @@ impl DivAssign<Vec3> for Vec3 {
     }
 }
 
-impl Add<Vec3> for Vec3 {
+impl<V: Into<Vec3>> Add<V> for Vec3 {
     type Output = Vec3;
 
-    fn add(self, rhs: Vec3) -> Self::Output {
+    fn add(self, rhs: V) -> Self::Output {
+        let rhs = rhs.into();
         Vec3(self.0 + rhs.0, self.1 + rhs.1, self.2 + rhs.2)
     }
 }
@@ -578,6 +594,18 @@ impl Div<&Vec3> for &f64 {
 
     fn div(self, rhs: &Vec3) -> Self::Output {
         *rhs / *self
+    }
+}
+
+impl From<Matrix4x4> for Vec3 {
+    fn from(m4: Matrix4x4) -> Self {
+        Vec3(m4.0[3], m4.0[7], m4.0[11])
+    }
+}
+
+impl From<&Matrix4x4> for Vec3 {
+    fn from(m4: &Matrix4x4) -> Self {
+        (*m4).into()
     }
 }
 
