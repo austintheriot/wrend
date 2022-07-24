@@ -2,7 +2,7 @@ use wrend::Id;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum ProgramId {
-    SimplexNoise,
+    RayTracer,
     PassThrough,
 }
 

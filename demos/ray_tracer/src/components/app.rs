@@ -1,13 +1,14 @@
 use crate::{
     graphics::{
         attribute_id::AttributeId, buffer_id::BufferId, create_buffer::create_quad_vertex_buffer,
-        create_framebuffer::create_frame_buffer,
+        create_framebuffer::create_render_framebuffer,
         create_position_attribute::create_position_attribute,
         create_texture::create_ray_tracer_texture, fragment_shader_id::FragmentShaderId,
         framebuffer_id::FramebufferId, program_id::ProgramId, render::render,
-        texture_id::TextureId, uniform_id::UniformId, vertex_shader_id::VertexShaderId,
+        texture_id::TextureId, uniform_id::UniformId, vao_id::VAOId,
+        vertex_shader_id::VertexShaderId,
     },
-    state::{render_state::RenderState, render_state_handle::RenderStateHandle},
+    state::{app_state::AppState, state_handle::StateHandle},
 };
 use std::rc::Rc;
 use ui::route::Route;
@@ -28,7 +29,7 @@ const PERLIN_NOISE_FRAGMENT_SHADER: &str = include_str!("../shaders/ray_tracer.g
 #[function_component(App)]
 pub fn app() -> Html {
     let canvas_ref = use_node_ref();
-    let render_state = use_mut_ref(RenderState::default);
+    let app_state = use_mut_ref(AppState::default);
     let animation_handle = use_mut_ref(|| None);
 
     use_effect_with_deps(
@@ -49,53 +50,74 @@ pub fn app() -> Html {
 
                 let ray_tracer_program_link = ProgramLinkBuilder::new()
                     .set_vertex_shader_id(VertexShaderId::Quad)
-                    .set_program_id(ProgramId::SimplexNoise)
-                    .set_fragment_shader_id(FragmentShaderId::SimplexNoise)
+                    .set_program_id(ProgramId::RayTracer)
+                    .set_fragment_shader_id(FragmentShaderId::RayTracer)
                     .build()
-                    .expect("Should build SimplexNoise ProgramLink successfully");
+                    .expect("Should build RayTracer ProgramLink successfully");
 
                 let vertex_buffer_link = BufferLink::new(
-                    BufferId::VertexBuffer,
+                    BufferId::QuadVertexBuffer,
                     BufferCreateCallback::new(Rc::new(create_quad_vertex_buffer)),
                 );
 
-                let a_position_link = AttributeLink::new(
-                    (ProgramId::PassThrough, ProgramId::SimplexNoise),
-                    BufferId::VertexBuffer,
+                let a_quad_vertex_link = AttributeLink::new(
+                    VAOId::Quad,
+                    BufferId::QuadVertexBuffer,
                     AttributeId,
                     AttributeCreateCallback::new(Rc::new(create_position_attribute)),
                 );
 
-                let ray_tracer_texture_link = TextureLink::new(
-                    TextureId::SimplexNoise,
+                let render_a_texture_link = TextureLink::new(
+                    TextureId::RenderA,
                     TextureCreateCallback::new(Rc::new(create_ray_tracer_texture)),
                 );
 
-                let u_ray_tracer_texture = UniformLink::new(
+                let render_b_texture_link = TextureLink::new(
+                    TextureId::RenderB,
+                    TextureCreateCallback::new(Rc::new(create_ray_tracer_texture)),
+                );
+
+                let u_render_a_texture = UniformLink::new(
                     ProgramId::PassThrough,
-                    UniformId::USimplexNoiseTexture,
+                    UniformId::URenderATexture,
                     UniformCallback::new(Rc::new(|ctx| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
-                        gl.uniform1i(Some(uniform_location), 1);
+                        gl.uniform1ui(Some(uniform_location), TextureId::RenderA.location());
                     })),
                 );
 
-                let ray_tracer_framebuffer_link = FramebufferLink::new(
-                    FramebufferId::SimplexNoise,
-                    FramebufferCreateCallback::new(Rc::new(create_frame_buffer)),
-                    Some(TextureId::SimplexNoise),
+                let u_render_b_texture = UniformLink::new(
+                    ProgramId::PassThrough,
+                    UniformId::URenderBTexture,
+                    UniformCallback::new(Rc::new(|ctx| {
+                        let gl = ctx.gl();
+                        let uniform_location = ctx.uniform_location();
+                        gl.uniform1ui(Some(uniform_location), TextureId::RenderB.location());
+                    })),
+                );
+
+                let render_a_framebuffer_link = FramebufferLink::new(
+                    FramebufferId::RenderA,
+                    FramebufferCreateCallback::new(Rc::new(create_render_framebuffer)),
+                    Some(TextureId::RenderA),
+                );
+
+                let render_b_framebuffer_link = FramebufferLink::new(
+                    FramebufferId::RenderB,
+                    FramebufferCreateCallback::new(Rc::new(create_render_framebuffer)),
+                    Some(TextureId::RenderB),
                 );
 
                 let u_now_link_init_and_update_callback =
-                    Rc::new(|ctx: &UniformContext<RenderStateHandle>| {
+                    Rc::new(|ctx: &UniformContext<StateHandle>| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
                         gl.uniform1f(Some(uniform_location), (ctx.now() / 2000.) as f32);
                     });
 
                 let mut u_now = UniformLink::new(
-                    ProgramId::SimplexNoise,
+                    ProgramId::RayTracer,
                     UniformId::UNow,
                     UniformCallback::new(u_now_link_init_and_update_callback.clone()),
                 );
@@ -105,17 +127,18 @@ pub fn app() -> Html {
                 ));
 
                 let render_callback = RenderCallback::new(Rc::new(render));
-                let render_state_handle: RenderStateHandle = render_state.into();
+
+                let app_state_handle = StateHandle::new(app_state);
 
                 let mut renderer_builder = Renderer::builder();
 
                 renderer_builder
                     .set_canvas(canvas)
-                    .set_user_ctx(render_state_handle)
+                    .set_user_ctx(app_state_handle)
                     .set_render_callback(render_callback)
                     .add_vertex_shader_src(VertexShaderId::Quad, VERTEX_SHADER.to_string())
                     .add_fragment_shader_src(
-                        FragmentShaderId::SimplexNoise,
+                        FragmentShaderId::RayTracer,
                         PERLIN_NOISE_FRAGMENT_SHADER.to_string(),
                     )
                     .add_fragment_shader_src(
@@ -125,13 +148,15 @@ pub fn app() -> Html {
                     .add_program_link(pass_through_program_link)
                     .add_program_link(ray_tracer_program_link)
                     .add_buffer_link(vertex_buffer_link)
-                    .add_attribute_link(a_position_link)
+                    .add_attribute_link(a_quad_vertex_link)
+                    .add_texture_link(render_a_texture_link)
+                    .add_texture_link(render_b_texture_link)
+                    .add_framebuffer_link(render_a_framebuffer_link)
+                    .add_framebuffer_link(render_b_framebuffer_link)
                     .add_uniform_link(u_now)
-                    .add_uniform_link(u_ray_tracer_texture)
-                    .add_texture_link(ray_tracer_texture_link)
-                    .add_framebuffer_link(ray_tracer_framebuffer_link)
-                    .add_vao_link(ProgramId::PassThrough)
-                    .add_vao_link(ProgramId::SimplexNoise);
+                    .add_uniform_link(u_render_a_texture)
+                    .add_uniform_link(u_render_b_texture)
+                    .add_vao_link(VAOId::Quad);
 
                 let renderer = renderer_builder
                     .build()

@@ -3,7 +3,7 @@ use wrend::Id;
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum FragmentShaderId {
     PassThrough,
-    SimplexNoise,
+    RayTracer,
 }
 
 impl Id for FragmentShaderId {}

@@ -2,9 +2,9 @@ use super::{
     attribute_id::AttributeId, buffer_id::BufferId, fragment_shader_id::FragmentShaderId,
     framebuffer_id::FramebufferId, program_id::ProgramId, texture_id::TextureId,
     transform_feedback_id::TransformFeedbackId, uniform_id::UniformId,
-    vertex_shader_id::VertexShaderId,
+    vertex_shader_id::VertexShaderId, vao_id::VAOId,
 };
-use crate::state::render_state_handle::RenderStateHandle;
+use crate::state::state_handle::StateHandle;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 use wrend::Renderer;
 
@@ -35,8 +35,8 @@ pub fn render(
         TextureId,
         FramebufferId,
         TransformFeedbackId,
-        ProgramId,
-        RenderStateHandle,
+        VAOId,
+        StateHandle,
     >,
 ) {
     let gl = renderer.gl();
@@ -44,13 +44,13 @@ pub fn render(
 
     // render perlin noise to framebuffer
     let white_noise_texture = renderer
-        .texture(&TextureId::WhiteNoise)
+        .texture(&TextureId::RenderA)
         .map(|texture| texture.webgl_texture());
     gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, white_noise_texture);
-    renderer.use_program(&ProgramId::SimplexNoise);
-    renderer.use_vao(&ProgramId::SimplexNoise);
+    renderer.use_program(&ProgramId::RayTracer);
+    renderer.use_vao(&VAOId::Quad);
     let ray_tracer_framebuffer = renderer
-        .framebuffer(&FramebufferId::SimplexNoise)
+        .framebuffer(&FramebufferId::RenderA)
         .map(|framebuffer| framebuffer.webgl_framebuffer());
     gl.bind_framebuffer(
         WebGl2RenderingContext::FRAMEBUFFER,
@@ -62,9 +62,9 @@ pub fn render(
     // (this step could be replaced with a true render call,
     // where the perlin noise is used as a texture in the render)
     renderer.use_program(&ProgramId::PassThrough);
-    renderer.use_vao(&ProgramId::PassThrough);
+    renderer.use_vao(&VAOId::Quad);
     let ray_tracer_texture = renderer
-        .texture(&TextureId::SimplexNoise)
+        .texture(&TextureId::RenderB)
         .map(|texture| texture.webgl_texture());
     gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, ray_tracer_texture);
     gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, None);

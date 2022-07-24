@@ -7,6 +7,6 @@ impl Id for AttributeId {}
 
 impl IdName for AttributeId {
     fn name(&self) -> String {
-        String::from("a_position")
+        String::from("a_quad_vertex")
     }
 }
