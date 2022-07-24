@@ -1,5 +1,6 @@
 use super::app_state::AppState;
 use std::{cell::RefCell, rc::Rc};
+use std::ops::Deref;
 
 #[derive(Clone, Debug)]
 pub struct StateHandle(Rc<RefCell<AppState>>);
@@ -19,5 +20,13 @@ impl From<Rc<RefCell<AppState>>> for StateHandle {
 impl From<AppState> for StateHandle {
     fn from(app_state: AppState) -> Self {
         StateHandle(Rc::new(RefCell::new(app_state)))
+    }
+}
+
+impl Deref for StateHandle {
+    type Target = Rc<RefCell<AppState>>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }

@@ -2,8 +2,9 @@ use wrend::Id;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum FragmentShaderId {
-    PassThrough,
     RayTracer,
+    AverageRenders,
+    PassThrough,
 }
 
 impl Id for FragmentShaderId {}

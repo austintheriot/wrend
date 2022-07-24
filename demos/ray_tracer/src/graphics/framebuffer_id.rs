@@ -2,13 +2,14 @@ use wrend::Id;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum FramebufferId {
-    RenderA,
-    RenderB,
+    PrevRender,
+    AveragedRenderA,
+    AveragedRenderB,
 }
 
 impl Default for FramebufferId {
     fn default() -> Self {
-        Self::RenderA
+        Self::PrevRender
     }
 }
 

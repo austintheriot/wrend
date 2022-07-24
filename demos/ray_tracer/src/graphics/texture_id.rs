@@ -2,23 +2,25 @@ use wrend::Id;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum TextureId {
-    RenderA,
-    RenderB,
+    PrevRender,
+    AveragedRenderA,
+    AveragedRenderB,
 }
 
 impl Id for TextureId {}
 
 impl Default for TextureId {
     fn default() -> Self {
-        Self::RenderA
+        Self::PrevRender
     }
 }
 
 impl TextureId {
     pub fn location(&self) -> u32 {
         match self {
-            TextureId::RenderA => 0,
-            TextureId::RenderB => 1,
+            TextureId::PrevRender => 0,
+            TextureId::AveragedRenderA => 1,
+            TextureId::AveragedRenderB => 1,
         }
     }
 }
