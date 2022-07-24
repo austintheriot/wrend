@@ -12,7 +12,7 @@ description = "Rust wrapper around WebGL2 in the browser for faster, easier deve
 # NOTE: These two crates enable the info!() logging macro, etc.
 log = "0.4"
 wasm-logger = "0.2.0"
-wasm-bindgen = "0.2.78"
+wasm-bindgen = { version = "0.2.78", features = ["serde-serialize"] }
 js-sys = "0.3.55"
 thiserror = "1.0.31"
 uuid = { version = "1.1.2", features = ["v4"] }

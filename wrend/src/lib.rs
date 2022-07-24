@@ -11,6 +11,7 @@ mod shaders;
 mod textures;
 mod transform_feedback;
 mod uniforms;
+mod math;
 
 pub use animation::*;
 pub use attributes::*;
@@ -25,3 +26,4 @@ pub use shaders::*;
 pub use textures::*;
 pub use transform_feedback::*;
 pub use uniforms::*;
+pub use math::*;
