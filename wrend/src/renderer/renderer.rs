@@ -107,46 +107,53 @@ impl<
         &self.gl
     }
 
-    pub fn fragment_shaders(&self) -> &HashMap<FragmentShaderId, WebGlShader> {
-        &self.fragment_shaders
+    pub fn fragment_shader(&self, fragment_shader_id: &FragmentShaderId) -> Option<&WebGlShader> {
+        self.fragment_shaders.get(fragment_shader_id)
     }
 
-    pub fn vertex_shaders(&self) -> &HashMap<VertexShaderId, WebGlShader> {
-        &self.vertex_shaders
+    pub fn vertex_shader(&self, vertex_shader_id: &VertexShaderId) -> Option<&WebGlShader> {
+        self.vertex_shaders.get(vertex_shader_id)
     }
 
-    pub fn programs(&self) -> &HashMap<ProgramId, WebGlProgram> {
-        &self.programs
+    pub fn program(&self, program_id: &ProgramId) -> Option<&WebGlProgram> {
+        self.programs.get(program_id)
     }
 
-    pub fn uniforms(&self) -> &HashMap<UniformId, Uniform<ProgramId, UniformId, UserCtx>> {
-        &self.uniforms
-    }
-
-    pub fn buffers(&self) -> &HashMap<BufferId, Buffer<BufferId>> {
-        &self.buffers
-    }
-
-    pub fn attributes(
+    pub fn uniform(
         &self,
-    ) -> &HashMap<AttributeId, Attribute<VertexArrayObjectId, BufferId, AttributeId>> {
-        &self.attributes
+        uniform_id: &UniformId,
+    ) -> Option<&Uniform<ProgramId, UniformId, UserCtx>> {
+        self.uniforms.get(uniform_id)
     }
 
-    pub fn textures(&self) -> &HashMap<TextureId, Texture<TextureId>> {
-        &self.textures
+    pub fn buffer(&self, buffer_id: &BufferId) -> Option<&Buffer<BufferId>> {
+        self.buffers.get(buffer_id)
     }
 
-    pub fn framebuffers(&self) -> &HashMap<FramebufferId, Framebuffer<FramebufferId>> {
-        &self.framebuffers
+    pub fn attribute(
+        &self,
+        attribute_id: &AttributeId,
+    ) -> Option<&Attribute<VertexArrayObjectId, BufferId, AttributeId>> {
+        self.attributes.get(attribute_id)
     }
 
-    pub fn transform_feedbacks(&self) -> &HashMap<TransformFeedbackId, WebGlTransformFeedback> {
-        &self.transform_feedbacks
+    pub fn texture(&self, texture_id: &TextureId) -> Option<&Texture<TextureId>> {
+        self.textures.get(texture_id)
     }
 
-    pub fn vertex_array_objects(&self) -> &HashMap<VertexArrayObjectId, WebGlVertexArrayObject> {
-        &self.vertex_array_objects
+    pub fn framebuffer(&self, framebuffer_id: &FramebufferId) -> Option<&Framebuffer<FramebufferId>> {
+        self.framebuffers.get(framebuffer_id)
+    }
+
+    pub fn transform_feedback(
+        &self,
+        transform_feedback_id: &TransformFeedbackId,
+    ) -> Option<&WebGlTransformFeedback> {
+        self.transform_feedbacks.get(transform_feedback_id)
+    }
+
+    pub fn vao(&self, vao_id: &VertexArrayObjectId) -> Option<&WebGlVertexArrayObject> {
+        self.vertex_array_objects.get(vao_id)
     }
 
     // @todo - enable ctx to be returned unconditionally (depending on if it's set or not)
@@ -186,7 +193,7 @@ impl<
         let now = Self::now();
         let user_ctx = self.user_ctx();
         let gl = self.gl();
-        let programs = self.programs();
+        let programs = &self.programs;
         let uniform = self
             .uniforms
             .get(uniform_id)

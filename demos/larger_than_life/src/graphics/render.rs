@@ -60,15 +60,13 @@ pub fn render(
         (TextureId::B, FramebufferId::A, TextureId::A)
     };
     let previous_webgl_texture = renderer
-        .textures()
-        .get(&previous_texture_id)
+        .texture(&previous_texture_id)
         .map(|texture| texture.webgl_texture());
     gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, previous_webgl_texture);
 
     // render to framebuffer
     let next_frame_buffer = renderer
-        .framebuffers()
-        .get(&next_frame_buffer_id)
+        .framebuffer(&next_frame_buffer_id)
         .map(|framebuffer| framebuffer.webgl_framebuffer());
     gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, next_frame_buffer);
     draw(gl, canvas);
@@ -78,8 +76,7 @@ pub fn render(
     renderer.use_vao(&ProgramId::PassThrough);
 
     let next_webgl_texture = renderer
-        .textures()
-        .get(&next_texture_id)
+        .texture(&next_texture_id)
         .map(|texture| texture.webgl_texture());
     gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, next_webgl_texture);
 

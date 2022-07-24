@@ -50,20 +50,17 @@ pub fn render(
 
     // RETRIEVING ALL WEBGL OBJECTS --------------------------------------------------------
     let white_noise_texture = renderer
-        .textures()
-        .get(&TextureId::WhiteNoise)
+        .texture(&TextureId::WhiteNoise)
         .expect("WhiteNoiseTexture should exist in renderer")
         .webgl_texture();
 
     let perlin_noise_texture = renderer
-        .textures()
-        .get(&TextureId::PerlinNoise)
+        .texture(&TextureId::PerlinNoise)
         .expect("PerlinNoiseTexture should exist in renderer")
         .webgl_texture();
 
     let perlin_noise_framebuffer = renderer
-        .framebuffers()
-        .get(&FramebufferId::PerlinNoise)
+        .framebuffer(&FramebufferId::PerlinNoise)
         .expect("PerlinNoise Framebuffer should exist in renderer")
         .webgl_framebuffer();
 
@@ -73,21 +70,18 @@ pub fn render(
     let (particle_read_buffer_id, update_particle_vao_read_id) =
         particle_read_write_buffer.read_ids();
     let particle_read_buffer = renderer
-        .buffers()
-        .get(&particle_read_buffer_id)
+        .buffer(&particle_read_buffer_id)
         .expect("Particle read buffer should exist in renderer");
     let webgl_particle_read_buffer = particle_read_buffer.webgl_buffer();
 
     let (particle_write_buffer_id, _) = particle_read_write_buffer.write_ids();
     let particle_write_buffer = renderer
-        .buffers()
-        .get(&particle_write_buffer_id)
+        .buffer(&particle_write_buffer_id)
         .expect("Particle write buffer should exist in renderer");
     let webgl_particle_write_buffer = particle_write_buffer.webgl_buffer();
 
     let transform_feedback = renderer
-        .transform_feedbacks()
-        .get(&TransformFeedbackId::Particle)
+        .transform_feedback(&TransformFeedbackId::Particle)
         .expect("Transform feedback should exist in the renderer");
 
     // RENDER NEW PERLIN NOISE TO FRAMEBUFFER --------------------------------------------------------

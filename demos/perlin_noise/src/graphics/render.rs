@@ -44,15 +44,13 @@ pub fn render(
 
     // render perlin noise to framebuffer
     let white_noise_texture = renderer
-        .textures()
-        .get(&TextureId::WhiteNoise)
+        .texture(&TextureId::WhiteNoise)
         .map(|texture| texture.webgl_texture());
     gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, white_noise_texture);
     renderer.use_program(&ProgramId::PerlinNoise);
     renderer.use_vao(&ProgramId::PerlinNoise);
     let perlin_noise_framebuffer = renderer
-        .framebuffers()
-        .get(&FramebufferId::PerlinNoise)
+        .framebuffer(&FramebufferId::PerlinNoise)
         .map(|framebuffer| framebuffer.webgl_framebuffer());
     gl.bind_framebuffer(
         WebGl2RenderingContext::FRAMEBUFFER,
@@ -66,8 +64,7 @@ pub fn render(
     renderer.use_program(&ProgramId::PassThrough);
     renderer.use_vao(&ProgramId::PassThrough);
     let perlin_noise_texture = renderer
-        .textures()
-        .get(&TextureId::PerlinNoise)
+        .texture(&TextureId::PerlinNoise)
         .map(|texture| texture.webgl_texture());
     gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, perlin_noise_texture);
     gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, None);
