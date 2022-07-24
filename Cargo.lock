@@ -251,6 +251,7 @@ dependencies = [
  "log",
  "perlin_noise",
  "rand",
+ "ray_tracer",
  "simplex_noise",
  "thiserror",
  "ui",
@@ -1026,6 +1027,30 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d34f1408f55294453790c48b2f1ebbb1c5b4b7563eb1f418bcfcfdbb06ebb4e7"
 dependencies = [
  "getrandom",
+]
+
+[[package]]
+name = "ray_tracer"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "console_error_panic_hook",
+ "cpal",
+ "getrandom",
+ "js-sys",
+ "lazy_static",
+ "log",
+ "rand",
+ "thiserror",
+ "ui",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wee_alloc",
+ "wrend",
+ "yew",
+ "yew-router",
 ]
 
 [[package]]

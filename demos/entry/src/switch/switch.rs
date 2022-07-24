@@ -8,6 +8,7 @@ use hello_quad_animated::components::app::App as HelloQuadAnimatedApp;
 use larger_than_life::components::app::App as LargerThanLifeApp;
 use perlin_noise::components::app::App as PerlinNoiseApp;
 use simplex_noise::components::app::App as SimplexNoiseApp;
+use ray_tracer::components::app::App as RayTracerApp;
 use ui::route::Route;
 use yew::{html, Html};
 
@@ -23,5 +24,6 @@ pub fn switch(routes: &Route) -> Html {
         Route::FlowField => html! { <FlowFieldApp /> },
         Route::FlowFieldColorful => html! { <FlowFieldColorfulApp /> },
         Route::SimplexNoise => html! { <SimplexNoiseApp /> },
+        Route::RayTracer => html!{ <RayTracerApp /> },
     }
 }

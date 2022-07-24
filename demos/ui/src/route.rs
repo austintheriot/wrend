@@ -23,4 +23,6 @@ pub enum Route {
     FlowField,
     #[at("/flow-field-colorful")]
     FlowFieldColorful,
+    #[at("/ray-tracer")]
+    RayTracer,
 }
