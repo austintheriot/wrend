@@ -3,14 +3,12 @@ use crate::state::{render_state::MAX_NUM_SPHERES, state_handle::StateHandle};
 use std::{rc::Rc, vec};
 use wrend::{UniformCallback, UniformContext, UniformLink};
 
-const RAY_TRACER_PROGRAM_ID: ProgramId = ProgramId::RayTracer;
-
 /// Programmatically create uniforms for every possible WebGL sphere
 pub fn create_sphere_uniform_links() -> Vec<UniformLink<ProgramId, String, StateHandle>> {
-    let mut sphere_uniforms = Vec::new();
+    let mut sphere_uniforms = Vec::with_capacity(MAX_NUM_SPHERES as usize);
     for i in 0..(MAX_NUM_SPHERES as usize) {
         let u_sphere_center_link = UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
+            ProgramId::RayTracer,
             format!("u_sphere_list[{}].center", i),
             UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
                 let gl = ctx.gl();
@@ -31,7 +29,7 @@ pub fn create_sphere_uniform_links() -> Vec<UniformLink<ProgramId, String, State
         sphere_uniforms.push(u_sphere_center_link);
 
         let u_sphere_radius_link = UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
+            ProgramId::RayTracer,
             format!("u_sphere_list[{}].radius", i),
             UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
                 let gl = ctx.gl();
@@ -48,7 +46,7 @@ pub fn create_sphere_uniform_links() -> Vec<UniformLink<ProgramId, String, State
         sphere_uniforms.push(u_sphere_radius_link);
 
         let u_sphere_material_type_link = UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
+            ProgramId::RayTracer,
             format!("u_sphere_list[{}].material.type", i),
             UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
                 let gl = ctx.gl();
@@ -68,7 +66,7 @@ pub fn create_sphere_uniform_links() -> Vec<UniformLink<ProgramId, String, State
         sphere_uniforms.push(u_sphere_material_type_link);
 
         let u_sphere_material_albedo = UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
+            ProgramId::RayTracer,
             format!("u_sphere_list[{}].material.albedo", i),
             UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
                 let gl = ctx.gl();
@@ -88,7 +86,7 @@ pub fn create_sphere_uniform_links() -> Vec<UniformLink<ProgramId, String, State
         sphere_uniforms.push(u_sphere_material_albedo);
 
         let u_sphere_material_fuzz_link = UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
+            ProgramId::RayTracer,
             format!("u_sphere_list[{}].material.fuzz", i),
             UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
                 let gl = ctx.gl();
@@ -104,7 +102,7 @@ pub fn create_sphere_uniform_links() -> Vec<UniformLink<ProgramId, String, State
         sphere_uniforms.push(u_sphere_material_fuzz_link);
 
         let u_sphere_material_refraction_index_link = UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
+            ProgramId::RayTracer,
             format!("u_sphere_list[{}].material.refraction_index", i),
             UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
                 let gl = ctx.gl();
@@ -120,7 +118,7 @@ pub fn create_sphere_uniform_links() -> Vec<UniformLink<ProgramId, String, State
         sphere_uniforms.push(u_sphere_material_refraction_index_link);
 
         let u_sphere_is_active_link = UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
+            ProgramId::RayTracer,
             format!("u_sphere_list[{}].is_active", i),
             UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
                 let gl = ctx.gl();
@@ -135,7 +133,7 @@ pub fn create_sphere_uniform_links() -> Vec<UniformLink<ProgramId, String, State
         sphere_uniforms.push(u_sphere_is_active_link);
 
         let u_sphere_uuid_link = UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
+            ProgramId::RayTracer,
             format!("u_sphere_list[{}].uuid", i),
             UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
                 let gl = ctx.gl();
@@ -155,6 +153,44 @@ pub fn create_sphere_uniform_links() -> Vec<UniformLink<ProgramId, String, State
 }
 
 pub fn create_general_uniform_links() -> Vec<UniformLink<ProgramId, String, StateHandle>>  {
+    vec![
+        UniformLink::new(
+            ProgramId::AverageRenders,
+            String::from("u_averaged_render_texture_a"),
+            UniformCallback::new(Rc::new(|ctx| {
+                let gl = ctx.gl();
+                let uniform_location = ctx.uniform_location();
+                gl.uniform1i(
+                    Some(uniform_location),
+                    TextureId::AveragedRenderA.location() as i32,
+                );
+            })),
+        ),
+        UniformLink::new(
+            ProgramId::AverageRenders,
+            String::from("u_averaged_render_texture_b"),
+            UniformCallback::new(Rc::new(|ctx| {
+                let gl = ctx.gl();
+                let uniform_location = ctx.uniform_location();
+                gl.uniform1i(
+                    Some(uniform_location),
+                    TextureId::AveragedRenderB.location() as i32,
+                );
+            })),
+        ),
+        UniformLink::new(
+            ProgramId::AverageRenders,
+            String::from("u_prev_render_texture"),
+            UniformCallback::new(Rc::new(|ctx| {
+                let gl = ctx.gl();
+                let uniform_location = ctx.uniform_location();
+                gl.uniform1i(Some(uniform_location), TextureId::PrevRender.location() as i32);
+            })),
+        ),
+    ]
+}
+
+pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, String, StateHandle>> {
     let u_now_link_init_and_update_callback = Rc::new(|ctx: &UniformContext<StateHandle>| {
         let gl = ctx.gl();
         let uniform_location = ctx.uniform_location();
@@ -171,46 +207,11 @@ pub fn create_general_uniform_links() -> Vec<UniformLink<ProgramId, String, Stat
         u_now_link_init_and_update_callback.clone(),
     ));
 
-    vec![u_now_link]
-}
 
-pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, String, StateHandle>> {
     vec![
+        u_now_link,
         UniformLink::new(
-            ProgramId::PassThrough,
-            String::from("u_averaged_render_texture_a"),
-            UniformCallback::new(Rc::new(|ctx| {
-                let gl = ctx.gl();
-                let uniform_location = ctx.uniform_location();
-                gl.uniform1ui(
-                    Some(uniform_location),
-                    TextureId::AveragedRenderA.location(),
-                );
-            })),
-        ),
-        UniformLink::new(
-            ProgramId::PassThrough,
-            String::from("u_averaged_render_texture_b"),
-            UniformCallback::new(Rc::new(|ctx| {
-                let gl = ctx.gl();
-                let uniform_location = ctx.uniform_location();
-                gl.uniform1ui(
-                    Some(uniform_location),
-                    TextureId::AveragedRenderB.location(),
-                );
-            })),
-        ),
-        UniformLink::new(
-            ProgramId::PassThrough,
-            String::from("u_prev_render_texture"),
-            UniformCallback::new(Rc::new(|ctx| {
-                let gl = ctx.gl();
-                let uniform_location = ctx.uniform_location();
-                gl.uniform1ui(Some(uniform_location), TextureId::PrevRender.location());
-            })),
-        ),
-        UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
+            ProgramId::RayTracer,
             String::from("u_width"),
             UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
                 let gl = ctx.gl();
@@ -222,7 +223,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             })),
         ),
         UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
+            ProgramId::RayTracer,
             String::from("u_height"),
             UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
                 let gl = ctx.gl();
@@ -234,7 +235,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             })),
         ),
         UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
+            ProgramId::RayTracer,
             String::from("u_samples_per_pixel"),
             UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
                 let gl = ctx.gl();
@@ -253,56 +254,56 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
                 gl.uniform1i(Some(&uniform_location), samples_per_pixel as i32);
             })),
         ),
+        // UniformLink::new(
+        //     ProgramId::RayTracer,
+        //     String::from("u_aspect_ratio"),
+        //     UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
+        //         let gl = ctx.gl();
+        //         let uniform_location = ctx.uniform_location();
+        //         let user_ctx = ctx.user_ctx().unwrap();
+        //         let app_state_ref = user_ctx.borrow();
+        //         let render_state = &app_state_ref.render_state();
+        //         gl.uniform1f(Some(&uniform_location), render_state.aspect_ratio as f32);
+        //     })),
+        // ),
+        // UniformLink::new(
+        //     ProgramId::RayTracer,
+        //     String::from("u_viewport_height"),
+        //     UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
+        //         let gl = ctx.gl();
+        //         let uniform_location = ctx.uniform_location();
+        //         let user_ctx = ctx.user_ctx().unwrap();
+        //         let app_state_ref = user_ctx.borrow();
+        //         let render_state = &app_state_ref.render_state();
+        //         gl.uniform1f(Some(&uniform_location), render_state.viewport_height as f32);
+        //     })),
+        // ),
+        // UniformLink::new(
+        //     ProgramId::RayTracer,
+        //     String::from("u_viewport_width"),
+        //     UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
+        //         let gl = ctx.gl();
+        //         let uniform_location = ctx.uniform_location();
+        //         let user_ctx = ctx.user_ctx().unwrap();
+        //         let app_state_ref = user_ctx.borrow();
+        //         let render_state = &app_state_ref.render_state();
+        //         gl.uniform1f(Some(&uniform_location), render_state.viewport_width as f32);
+        //     })),
+        // ),
+        // UniformLink::new(
+        //     ProgramId::RayTracer,
+        //     String::from("u_focal_length"),
+        //     UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
+        //         let gl = ctx.gl();
+        //         let uniform_location = ctx.uniform_location();
+        //         let user_ctx = ctx.user_ctx().unwrap();
+        //         let app_state_ref = user_ctx.borrow();
+        //         let render_state = &app_state_ref.render_state();
+        //         gl.uniform1f(Some(&uniform_location), render_state.focal_length as f32);
+        //     })),
+        // ),
         UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
-            String::from("u_aspect_ratio"),
-            UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
-                let gl = ctx.gl();
-                let uniform_location = ctx.uniform_location();
-                let user_ctx = ctx.user_ctx().unwrap();
-                let app_state_ref = user_ctx.borrow();
-                let render_state = &app_state_ref.render_state();
-                gl.uniform1f(Some(&uniform_location), render_state.aspect_ratio as f32);
-            })),
-        ),
-        UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
-            String::from("u_viewport_height"),
-            UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
-                let gl = ctx.gl();
-                let uniform_location = ctx.uniform_location();
-                let user_ctx = ctx.user_ctx().unwrap();
-                let app_state_ref = user_ctx.borrow();
-                let render_state = &app_state_ref.render_state();
-                gl.uniform1f(Some(&uniform_location), render_state.viewport_height as f32);
-            })),
-        ),
-        UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
-            String::from("u_viewport_width"),
-            UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
-                let gl = ctx.gl();
-                let uniform_location = ctx.uniform_location();
-                let user_ctx = ctx.user_ctx().unwrap();
-                let app_state_ref = user_ctx.borrow();
-                let render_state = &app_state_ref.render_state();
-                gl.uniform1f(Some(&uniform_location), render_state.viewport_width as f32);
-            })),
-        ),
-        UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
-            String::from("u_focal_length"),
-            UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
-                let gl = ctx.gl();
-                let uniform_location = ctx.uniform_location();
-                let user_ctx = ctx.user_ctx().unwrap();
-                let app_state_ref = user_ctx.borrow();
-                let render_state = &app_state_ref.render_state();
-                gl.uniform1f(Some(&uniform_location), render_state.focal_length as f32);
-            })),
-        ),
-        UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
+            ProgramId::RayTracer,
             String::from("u_camera_origin"),
             UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
                 let gl = ctx.gl();
@@ -317,7 +318,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             })),
         ),
         UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
+            ProgramId::RayTracer,
             String::from("u_horizontal"),
             UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
                 let gl = ctx.gl();
@@ -332,7 +333,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             })),
         ),
         UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
+            ProgramId::RayTracer,
             String::from("u_vertical"),
             UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
                 let gl = ctx.gl();
@@ -347,7 +348,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             })),
         ),
         UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
+            ProgramId::RayTracer,
             String::from("u_lower_left_corner"),
             UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
                 let gl = ctx.gl();
@@ -362,7 +363,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             })),
         ),
         UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
+            ProgramId::RayTracer,
             String::from("u_max_depth"),
             UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
                 let gl = ctx.gl();
@@ -373,47 +374,47 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
                 gl.uniform1i(Some(&uniform_location), render_state.max_depth as i32);
             })),
         ),
+        // UniformLink::new(
+        //     ProgramId::RayTracer,
+        //     String::from("u_render_count"),
+        //     UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
+        //         let gl = ctx.gl();
+        //         let uniform_location = ctx.uniform_location();
+        //         let user_ctx = ctx.user_ctx().unwrap();
+        //         let app_state_ref = user_ctx.borrow();
+        //         let render_state = &app_state_ref.render_state();
+        //         gl.uniform1i(Some(&uniform_location), render_state.render_count as i32);
+        //     })),
+        // ),
+        // UniformLink::new(
+        //     ProgramId::RayTracer,
+        //     String::from("u_should_average"),
+        //     UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
+        //         let gl = ctx.gl();
+        //         let uniform_location = ctx.uniform_location();
+        //         let user_ctx = ctx.user_ctx().unwrap();
+        //         let app_state_ref = user_ctx.borrow();
+        //         let render_state = &app_state_ref.render_state();
+        //         gl.uniform1i(Some(&uniform_location), render_state.should_average as i32);
+        //     })),
+        // ),
+        // UniformLink::new(
+        //     ProgramId::RayTracer,
+        //     String::from("u_last_frame_weight"),
+        //     UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
+        //         let gl = ctx.gl();
+        //         let uniform_location = ctx.uniform_location();
+        //         let user_ctx = ctx.user_ctx().unwrap();
+        //         let app_state_ref = user_ctx.borrow();
+        //         let render_state = &app_state_ref.render_state();
+        //         gl.uniform1f(
+        //             Some(&uniform_location),
+        //             render_state.last_frame_weight as f32,
+        //         );
+        //     })),
+        // ),
         UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
-            String::from("u_render_count"),
-            UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
-                let gl = ctx.gl();
-                let uniform_location = ctx.uniform_location();
-                let user_ctx = ctx.user_ctx().unwrap();
-                let app_state_ref = user_ctx.borrow();
-                let render_state = &app_state_ref.render_state();
-                gl.uniform1i(Some(&uniform_location), render_state.render_count as i32);
-            })),
-        ),
-        UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
-            String::from("u_should_average"),
-            UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
-                let gl = ctx.gl();
-                let uniform_location = ctx.uniform_location();
-                let user_ctx = ctx.user_ctx().unwrap();
-                let app_state_ref = user_ctx.borrow();
-                let render_state = &app_state_ref.render_state();
-                gl.uniform1i(Some(&uniform_location), render_state.should_average as i32);
-            })),
-        ),
-        UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
-            String::from("u_last_frame_weight"),
-            UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
-                let gl = ctx.gl();
-                let uniform_location = ctx.uniform_location();
-                let user_ctx = ctx.user_ctx().unwrap();
-                let app_state_ref = user_ctx.borrow();
-                let render_state = &app_state_ref.render_state();
-                gl.uniform1f(
-                    Some(&uniform_location),
-                    render_state.last_frame_weight as f32,
-                );
-            })),
-        ),
-        UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
+            ProgramId::RayTracer,
             String::from("u_lens_radius"),
             UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
                 let gl = ctx.gl();
@@ -425,7 +426,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             })),
         ),
         UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
+            ProgramId::RayTracer,
             String::from("u_u"),
             UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
                 let gl = ctx.gl();
@@ -440,7 +441,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             })),
         ),
         UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
+            ProgramId::RayTracer,
             String::from("u_v"),
             UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
                 let gl = ctx.gl();
@@ -454,23 +455,23 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
                 );
             })),
         ),
+        // UniformLink::new(
+        //     ProgramId::RayTracer,
+        //     String::from("u_w"),
+        //     UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
+        //         let gl = ctx.gl();
+        //         let uniform_location = ctx.uniform_location();
+        //         let user_ctx = ctx.user_ctx().unwrap();
+        //         let app_state_ref = user_ctx.borrow();
+        //         let render_state = &app_state_ref.render_state();
+        //         gl.uniform3fv_with_f32_array(
+        //             Some(&uniform_location),
+        //             &render_state.w.to_f32_array(),
+        //         );
+        //     })),
+        // ),
         UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
-            String::from("u_w"),
-            UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
-                let gl = ctx.gl();
-                let uniform_location = ctx.uniform_location();
-                let user_ctx = ctx.user_ctx().unwrap();
-                let app_state_ref = user_ctx.borrow();
-                let render_state = &app_state_ref.render_state();
-                gl.uniform3fv_with_f32_array(
-                    Some(&uniform_location),
-                    &render_state.w.to_f32_array(),
-                );
-            })),
-        ),
-        UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
+            ProgramId::RayTracer,
             String::from("u_selected_object"),
             UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
                 let gl = ctx.gl();
@@ -482,7 +483,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             })),
         ),
         UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
+            ProgramId::RayTracer,
             String::from("u_cursor_point"),
             UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
                 let gl = ctx.gl();
@@ -497,7 +498,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             })),
         ),
         UniformLink::new(
-            RAY_TRACER_PROGRAM_ID,
+            ProgramId::RayTracer,
             String::from("u_enable_debugging"),
             UniformCallback::new(Rc::new(move |ctx: &UniformContext<StateHandle>| {
                 let gl = ctx.gl();

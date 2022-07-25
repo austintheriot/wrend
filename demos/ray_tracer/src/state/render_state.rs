@@ -11,7 +11,7 @@ pub const MOVEMENT_SPEED: f64 = 0.001;
 /// This must match the amount in the shader itself
 /// @todo programmatically set the value in the shader before compiling
 /// Or use the `MAX_FRAGMENT_UNIFORM_VECTORS` provided by the WebGL context
-pub const MAX_NUM_SPHERES: u8 = 50;
+pub const MAX_NUM_SPHERES: u8 = 15;
 
 /// so high that it's unlikely to be a real id of an object in the shader
 pub const NO_SELECTED_OBJECT_ID: i32 = 1000;
@@ -116,7 +116,7 @@ impl Default for RenderState {
 
         let samples_per_pixel = 1;
         let max_depth = 8;
-        let should_average = true;
+        let should_average = false;
         let should_render = true;
         let should_save = false;
         let even_odd_count = 0;
@@ -127,7 +127,7 @@ impl Default for RenderState {
         let should_update_to_match_window_size = false;
         let last_resize_time = 0.;
 
-        let is_paused = true;
+        let is_paused = false;
 
         let look_sensitivity = 0.1;
         let keydown_map = KeydownMap::default();

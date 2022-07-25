@@ -20,7 +20,7 @@ impl TextureId {
         match self {
             TextureId::PrevRender => 0,
             TextureId::AveragedRenderA => 1,
-            TextureId::AveragedRenderB => 1,
+            TextureId::AveragedRenderB => 2,
         }
     }
 }

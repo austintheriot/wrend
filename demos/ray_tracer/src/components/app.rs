@@ -184,6 +184,8 @@ pub fn app() -> Html {
                     .build()
                     .expect("Renderer should successfully build");
 
+                renderer.update_uniforms();
+                renderer.render();
                 let new_animation_handle =
                     renderer.into_animation_handle(AnimationCallback::new(Rc::new(|renderer| {
                         renderer.update_uniforms();
@@ -204,7 +206,7 @@ pub fn app() -> Html {
     html! {
         <div class="ray-tracer">
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
-            <canvas ref={canvas_ref} height={1000} width={1000} />
+            <canvas ref={canvas_ref} />
         </div>
     }
 }
