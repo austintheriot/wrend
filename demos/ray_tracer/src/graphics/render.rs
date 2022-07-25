@@ -1,7 +1,7 @@
 use super::{
     attribute_id::AttributeId, buffer_id::BufferId, fragment_shader_id::FragmentShaderId,
     framebuffer_id::FramebufferId, program_id::ProgramId, texture_id::TextureId,
-    transform_feedback_id::TransformFeedbackId, uniform_id::UniformId, vao_id::VAOId,
+    transform_feedback_id::TransformFeedbackId, vao_id::VAOId,
     vertex_shader_id::VertexShaderId,
 };
 use crate::state::state_handle::StateHandle;
@@ -25,7 +25,7 @@ pub fn render(
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
-        UniformId,
+        String,
         BufferId,
         AttributeId,
         TextureId,

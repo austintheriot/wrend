@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::{ops::Deref, rc::Rc};
 
 /// Enables accepting either a single item or many items when taking function arguments
 pub struct Bridge<Item>(Vec<Item>);
@@ -53,103 +53,6 @@ impl<Item> From<(Item, Item, Item, Item, Item)> for Bridge<Item> {
     }
 }
 
-impl<Item> From<[Item; 1]> for Bridge<Item> {
-    fn from(items: [Item; 1]) -> Self {
-        Bridge(Vec::from(items))
-    }
-}
-
-impl<Item> From<[Item; 2]> for Bridge<Item> {
-    fn from(items: [Item; 2]) -> Self {
-        Bridge(Vec::from(items))
-    }
-}
-
-impl<Item> From<[Item; 3]> for Bridge<Item> {
-    fn from(items: [Item; 3]) -> Self {
-        Bridge(Vec::from(items))
-    }
-}
-
-impl<Item> From<[Item; 4]> for Bridge<Item> {
-    fn from(items: [Item; 4]) -> Self {
-        Bridge(Vec::from(items))
-    }
-}
-
-impl<Item> From<[Item; 5]> for Bridge<Item> {
-    fn from(items: [Item; 5]) -> Self {
-        Bridge(Vec::from(items))
-    }
-}
-
-impl<Item> From<[Item; 6]> for Bridge<Item> {
-    fn from(items: [Item; 6]) -> Self {
-        Bridge(Vec::from(items))
-    }
-}
-
-impl<Item> From<[Item; 7]> for Bridge<Item> {
-    fn from(items: [Item; 7]) -> Self {
-        Bridge(Vec::from(items))
-    }
-}
-
-
-impl<Item> From<[Item; 8]> for Bridge<Item> {
-    fn from(items: [Item; 8]) -> Self {
-        Bridge(Vec::from(items))
-    }
-}
-
-
-impl<Item> From<[Item; 9]> for Bridge<Item> {
-    fn from(items: [Item; 9]) -> Self {
-        Bridge(Vec::from(items))
-    }
-}
-
-
-impl<Item> From<[Item; 10]> for Bridge<Item> {
-    fn from(items: [Item; 10]) -> Self {
-        Bridge(Vec::from(items))
-    }
-}
-
-
-impl<Item> From<[Item; 11]> for Bridge<Item> {
-    fn from(items: [Item; 11]) -> Self {
-        Bridge(Vec::from(items))
-    }
-}
-
-
-impl<Item> From<[Item; 12]> for Bridge<Item> {
-    fn from(items: [Item; 12]) -> Self {
-        Bridge(Vec::from(items))
-    }
-}
-
-
-impl<Item> From<[Item; 13]> for Bridge<Item> {
-    fn from(items: [Item; 13]) -> Self {
-        Bridge(Vec::from(items))
-    }
-}
-
-
-impl<Item> From<[Item; 14]> for Bridge<Item> {
-    fn from(items: [Item; 14]) -> Self {
-        Bridge(Vec::from(items))
-    }
-}
-
-impl<Item> From<[Item; 15]> for Bridge<Item> {
-    fn from(items: [Item; 15]) -> Self {
-        Bridge(Vec::from(items))
-    }
-}
-
 impl<Item> From<Item> for Bridge<Item> {
     fn from(items: Item) -> Self {
         Bridge(vec![items])
@@ -179,3 +82,40 @@ impl<Item: Clone> From<&[Item]> for Bridge<Item> {
         Bridge(items.to_vec())
     }
 }
+
+
+impl<Item: Clone> From<Rc<[Item]>> for Bridge<Item> {
+    fn from(items: Rc<[Item]>) -> Self {
+        Bridge(items.to_vec())
+    }
+}
+
+impl<Item> From<Box<[Item]>> for Bridge<Item> {
+    fn from(items: Box<[Item]>) -> Self {
+        Bridge(Vec::from(items))
+    }
+}
+
+
+impl<Item> From<Box<Vec<Item>>> for Bridge<Item> {
+    fn from(items: Box<Vec<Item>>) -> Self {
+        Bridge(*items)
+    }
+}
+
+
+impl<Item: Clone> From<Rc<Vec<Item>>> for Bridge<Item> {
+    fn from(items: Rc<Vec<Item>>) -> Self {
+        Bridge((*items).to_owned())
+    }
+}
+
+// enables any sized array to be used as a bridge
+impl<const U: usize, Item> From<[Item; U]> for Bridge<Item> {
+    fn from(items: [Item; U]) -> Self {
+        Bridge(Vec::from(items))
+    }
+}
+
+
+

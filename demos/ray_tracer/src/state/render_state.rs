@@ -8,6 +8,11 @@ pub type RenderStateCount = u32;
 
 pub const MOVEMENT_SPEED: f64 = 0.001;
 
+/// This must match the amount in the shader itself
+/// @todo programmatically set the value in the shader before compiling
+/// Or use the `MAX_FRAGMENT_UNIFORM_VECTORS` provided by the WebGL context
+pub const MAX_NUM_SPHERES: u8 = 50;
+
 /// so high that it's unlikely to be a real id of an object in the shader
 pub const NO_SELECTED_OBJECT_ID: i32 = 1000;
 

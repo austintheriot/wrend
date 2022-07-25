@@ -79,7 +79,7 @@ out vec4 o_color;
 uniform sampler2D u_texture;
 uniform float u_width;
 uniform float u_height;
-uniform float u_time;
+uniform float u_now;
 uniform int u_samples_per_pixel;
 uniform float u_aspect_ratio;
 uniform float u_viewport_height;
@@ -100,7 +100,7 @@ uniform vec3 u_w;
 uniform int u_enable_debugging;
 uniform int u_selected_object;
 uniform vec3 u_cursor_point;
-uniform Sphere[15] u_sphere_list;
+uniform Sphere[50] u_sphere_list;
 
 // FUNCTIONS //////////////////////////////////////////////////////
 vec3 ray_at(in Ray r, float hit_t) {
@@ -353,7 +353,7 @@ Ray get_ray_from_camera(in vec2 st) {
 // set up global seed for simmulated randomness
 void init_global_seed() {
   // I got this seed initialization from reinder https://www.shadertoy.com/view/llVcDz
-  global_seed = float(base_hash(floatBitsToUint(v_position))) / float(0xffffffffU) + u_time;
+  global_seed = float(base_hash(floatBitsToUint(v_position))) / float(0xffffffffU) + u_now;
 }
 
 // accumulates color from each ray and averages them out

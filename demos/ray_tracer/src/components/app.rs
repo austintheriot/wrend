@@ -1,14 +1,25 @@
 use crate::{
     graphics::{
-        attribute_id::AttributeId, buffer_id::BufferId, create_buffer::create_quad_vertex_buffer,
+        attribute_id::AttributeId,
+        buffer_id::BufferId,
+        create_buffer::create_quad_vertex_buffer,
         create_framebuffer::create_render_framebuffer,
         create_position_attribute::create_position_attribute,
-        create_texture::make_create_render_texture, fragment_shader_id::FragmentShaderId,
-        framebuffer_id::FramebufferId, program_id::ProgramId, render::render,
-        texture_id::TextureId, uniform_id::UniformId, vao_id::VAOId,
+        create_texture::make_create_render_texture,
+        create_uniforms::{
+            create_general_ray_tracer_uniform_links, create_general_uniform_links,
+            create_sphere_uniform_links,
+        },
+        fragment_shader_id::FragmentShaderId,
+        framebuffer_id::FramebufferId,
+        program_id::ProgramId,
+        render::render,
+        texture_id::TextureId,
+        vao_id::VAOId,
         vertex_shader_id::VertexShaderId,
     },
     state::{app_state::AppState, state_handle::StateHandle},
+    utils::clamped_screen_dimensions,
 };
 use std::rc::Rc;
 use ui::route::Route;
@@ -16,7 +27,7 @@ use web_sys::HtmlCanvasElement;
 use wrend::{
     AnimationCallback, AttributeCreateCallback, AttributeLink, BufferCreateCallback, BufferLink,
     FramebufferCreateCallback, FramebufferLink, ProgramLinkBuilder, RenderCallback, Renderer,
-    TextureCreateCallback, TextureLink, UniformCallback, UniformContext, UniformLink,
+    TextureCreateCallback, TextureLink,
 };
 
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
@@ -94,42 +105,6 @@ pub fn app() -> Html {
                     )),
                 );
 
-                let u_prev_render_texture = UniformLink::new(
-                    ProgramId::PassThrough,
-                    UniformId::UPrevRenderTexture,
-                    UniformCallback::new(Rc::new(|ctx| {
-                        let gl = ctx.gl();
-                        let uniform_location = ctx.uniform_location();
-                        gl.uniform1ui(Some(uniform_location), TextureId::PrevRender.location());
-                    })),
-                );
-
-                let u_averaged_render_texture_a = UniformLink::new(
-                    ProgramId::PassThrough,
-                    UniformId::UAveragedRenderTextureA,
-                    UniformCallback::new(Rc::new(|ctx| {
-                        let gl = ctx.gl();
-                        let uniform_location = ctx.uniform_location();
-                        gl.uniform1ui(
-                            Some(uniform_location),
-                            TextureId::AveragedRenderA.location(),
-                        );
-                    })),
-                );
-
-                let u_averaged_render_texture_b = UniformLink::new(
-                    ProgramId::PassThrough,
-                    UniformId::UAveragedRenderTextureB,
-                    UniformCallback::new(Rc::new(|ctx| {
-                        let gl = ctx.gl();
-                        let uniform_location = ctx.uniform_location();
-                        gl.uniform1ui(
-                            Some(uniform_location),
-                            TextureId::AveragedRenderB.location(),
-                        );
-                    })),
-                );
-
                 let prev_render_framebuffer_link = FramebufferLink::new(
                     FramebufferId::PrevRender,
                     FramebufferCreateCallback::new(Rc::new(create_render_framebuffer)),
@@ -148,32 +123,27 @@ pub fn app() -> Html {
                     Some(TextureId::AveragedRenderB),
                 );
 
-                let u_now_link_init_and_update_callback =
-                    Rc::new(|ctx: &UniformContext<StateHandle>| {
-                        let gl = ctx.gl();
-                        let uniform_location = ctx.uniform_location();
-                        gl.uniform1f(Some(uniform_location), (ctx.now() / 2000.) as f32);
-                    });
-
-                let mut u_now = UniformLink::new(
-                    ProgramId::RayTracer,
-                    UniformId::UNow,
-                    UniformCallback::new(u_now_link_init_and_update_callback.clone()),
-                );
-
-                u_now.set_update_callback(UniformCallback::new(
-                    u_now_link_init_and_update_callback.clone(),
-                ));
-
                 let render_callback = RenderCallback::new(Rc::new(render));
 
-                let app_state_handle = StateHandle::new(app_state);
+                let state_handle = StateHandle::new(app_state);
+
+                // sync state and canvas size
+                {
+                    let (width, height) = clamped_screen_dimensions();
+                    let mut app_state_ref = state_handle.borrow_mut();
+                    let render_state_mut = app_state_ref.render_state_mut();
+                    render_state_mut.width = width;
+                    render_state_mut.height = height;
+                    render_state_mut.update_pipeline();
+                    canvas.set_width(render_state_mut.width);
+                    canvas.set_height(render_state_mut.height);
+                }
 
                 let mut renderer_builder = Renderer::builder();
 
                 renderer_builder
                     .set_canvas(canvas)
-                    .set_user_ctx(app_state_handle)
+                    .set_user_ctx(state_handle)
                     .set_render_callback(render_callback)
                     .add_vertex_shader_src(VertexShaderId::Quad, QUAD_VERTEX_SHADER.to_string())
                     .add_fragment_shader_src(
@@ -191,7 +161,7 @@ pub fn app() -> Html {
                     .add_program_links([
                         ray_tracer_program_link,
                         average_renders_program_link,
-                        pass_through_program_link
+                        pass_through_program_link,
                     ])
                     .add_buffer_link(vertex_buffer_link)
                     .add_attribute_link(a_quad_vertex_link)
@@ -205,12 +175,9 @@ pub fn app() -> Html {
                         averaged_render_a_framebuffer_link,
                         averaged_render_b_framebuffer_link,
                     ])
-                    .add_uniform_links([
-                        u_now,
-                        u_prev_render_texture,
-                        u_averaged_render_texture_a,
-                        u_averaged_render_texture_b,
-                    ])
+                    .add_uniform_links(create_general_uniform_links())
+                    .add_uniform_links(create_general_ray_tracer_uniform_links())
+                    .add_uniform_links(create_sphere_uniform_links())
                     .add_vao_link(VAOId::Quad);
 
                 let renderer = renderer_builder

@@ -8,10 +8,10 @@ use crate::{
     WebGlContextError,
 };
 use std::collections::{HashMap, HashSet};
-use wasm_bindgen::JsValue;
+use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{
-    window, HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram, WebGlShader,
-    WebGlTransformFeedback, WebGlVertexArrayObject,
+    window, HtmlAnchorElement, HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram,
+    WebGlShader, WebGlTransformFeedback, WebGlVertexArrayObject,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -221,6 +221,26 @@ impl<
         (self.render_callback)(self);
 
         self
+    }
+
+    pub fn save_image(&self) {
+        let window = window().unwrap();
+        let document = window.document().unwrap();
+        let body = document.body().unwrap();
+        let a: HtmlAnchorElement = document.create_element("a").unwrap().dyn_into().unwrap();
+        let data_url = self
+            .canvas
+            .to_data_url()
+            .unwrap()
+            .replace("image/png", "image/octet-stream");
+
+        a.style().set_css_text("display: none;");
+        a.set_href(&data_url);
+        a.set_download("image.png");
+
+        body.append_child(&a).unwrap();
+        a.click();
+        body.remove_child(&a).unwrap();
     }
 
     /// Begins the animation process.
