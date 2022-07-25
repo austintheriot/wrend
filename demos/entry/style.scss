@@ -6,13 +6,7 @@
 @use '../flow_field/style.scss' as flow-field;
 @use '../flow_field_colorful/style.scss' as flow-field-colorful;
 @use '../simplex_noise/style.scss' as simplex-noise;
-
-* {
-  font-family: 'Roboto', sans-serif;
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+@use '../ui/global-styles.scss';
 
 .home {
   padding: 1rem;

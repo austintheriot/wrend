@@ -112,12 +112,24 @@ impl<
         self.fragment_shaders.get(fragment_shader_id)
     }
 
+    pub fn fragment_shaders(&self) -> &HashMap<FragmentShaderId, WebGlShader> {
+        &self.fragment_shaders
+    }
+
     pub fn vertex_shader(&self, vertex_shader_id: &VertexShaderId) -> Option<&WebGlShader> {
         self.vertex_shaders.get(vertex_shader_id)
     }
 
+    pub fn vertex_shaders(&self) -> &HashMap<VertexShaderId, WebGlShader> {
+        &self.vertex_shaders
+    }
+
     pub fn program(&self, program_id: &ProgramId) -> Option<&WebGlProgram> {
         self.programs.get(program_id)
+    }
+
+    pub fn programs(&self) -> &HashMap<ProgramId, WebGlProgram> {
+        &self.programs
     }
 
     pub fn uniform(
@@ -127,8 +139,16 @@ impl<
         self.uniforms.get(uniform_id)
     }
 
+    pub fn uniforms(&self) -> &HashMap<UniformId, Uniform<ProgramId, UniformId, UserCtx>> {
+        &self.uniforms
+    }
+
     pub fn buffer(&self, buffer_id: &BufferId) -> Option<&Buffer<BufferId>> {
         self.buffers.get(buffer_id)
+    }
+
+    pub fn buffers(&self) -> &HashMap<BufferId, Buffer<BufferId>> {
+        &self.buffers
     }
 
     pub fn attribute(
@@ -138,8 +158,18 @@ impl<
         self.attributes.get(attribute_id)
     }
 
+    pub fn attributes(
+        &self,
+    ) -> &HashMap<AttributeId, Attribute<VertexArrayObjectId, BufferId, AttributeId>> {
+        &self.attributes
+    }
+
     pub fn texture(&self, texture_id: &TextureId) -> Option<&Texture<TextureId>> {
         self.textures.get(texture_id)
+    }
+
+    pub fn textures(&self) -> &HashMap<TextureId, Texture<TextureId>> {
+        &self.textures
     }
 
     pub fn framebuffer(

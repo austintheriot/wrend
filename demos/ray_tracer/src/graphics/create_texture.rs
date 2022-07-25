@@ -1,24 +1,22 @@
 use std::rc::Rc;
 use web_sys::{WebGl2RenderingContext, WebGlTexture};
 use wrend::TextureCreateContext;
-
+use crate::state::app_context::AppContext;
 use super::texture_id::TextureId;
-use crate::state::state_handle::StateHandle;
 
 pub fn make_create_render_texture(
     texture_id: TextureId,
-) -> Rc<dyn Fn(&TextureCreateContext<StateHandle>) -> WebGlTexture> {
-    let callback = move |ctx: &TextureCreateContext<StateHandle>| {
+) -> Rc<dyn Fn(&TextureCreateContext<AppContext>) -> WebGlTexture> {
+    let callback = move |ctx: &TextureCreateContext<AppContext>| {
         let gl = ctx.gl();
         let webgl_texture = gl
             .create_texture()
             .expect("Should be able to create textures from WebGL context");
 
-        let app_state_ref = ctx.user_ctx().as_ref().unwrap().borrow();
-        let render_state = app_state_ref.render_state();
+        let render_state = ctx.user_ctx().as_ref().unwrap().render_state.borrow();
         let width = render_state.width();
         let height = render_state.height();
-        std::mem::drop(app_state_ref);
+        std::mem::drop(render_state);
 
         gl.active_texture(WebGl2RenderingContext::TEXTURE0 + texture_id.location());
         gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(&webgl_texture));

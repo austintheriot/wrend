@@ -370,7 +370,7 @@ impl RenderState {
 pub fn update_render_dimensions_to_match_window(
     state: &mut RenderState,
     gl: &WebGl2RenderingContext,
-    textures: &[WebGlTexture; 2],
+    textures: &[WebGlTexture],
     canvas: &HtmlCanvasElement,
     now: f64,
 ) {

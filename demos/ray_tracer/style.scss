@@ -1,3 +1,8 @@
+@use '../ui/global-styles.scss';
+@use './src/components/canvas.scss';
+@use './src/components/menu.scss';
+@use './src/components/button.scss';
+
 .ray-tracer {
   * {
     font-family: 'Roboto', sans-serif;
@@ -10,14 +15,5 @@
     position: absolute;
     top: 1rem;
     left: 1rem;
-  }
-
-  canvas {
-    display: block;
-    width: 100vw;
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
   }
 }

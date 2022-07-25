@@ -1,0 +1,34 @@
+.button {
+    width: fit-content;
+    height: fit-content;
+    padding: 1rem;
+    border: none;
+    cursor: pointer;
+    display: block;
+
+    color: black;
+    border-radius: var(--border-radius-lg);
+    background: linear-gradient(145deg, #f0f0f0, #cacaca);
+    box-shadow: 5px 5px 10px #b3b3b3,
+        -5px -5px 10px #ffffff;
+
+    &:focus {
+        outline: none;
+    }
+
+    &.pressed {
+        color: white;
+        background: linear-gradient(145deg, rgba(var(--electric-blue-rgb), 0.85), rgba(var(--electric-blue-rgb), 0.6));
+        box-shadow: 6px 6px 12px #d0d0d0,
+            -6px -6px 12px #f0f0f0;
+    }
+
+    &:disabled {
+        cursor: auto;
+    }
+}
+
+.keyboard-user .button:focus {
+    outline: var(--focus-outline);
+    outline-offset: var(--focus-outline-offset);
+}

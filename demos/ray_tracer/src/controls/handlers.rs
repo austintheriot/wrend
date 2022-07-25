@@ -1,92 +1,88 @@
 use crate::state::{
+    app_context::AppContext,
     render_state::{update_cursor_position_in_world, RenderState},
-    state_handle::StateHandle,
 };
+use log::info;
+use wasm_bindgen::JsValue;
 use web_sys::{Event, KeyboardEvent, MouseEvent, WheelEvent};
 use yew::Callback;
 
-pub fn make_handle_wheel(state_handle: StateHandle) -> Callback<WheelEvent> {
+pub fn make_handle_wheel(app_context: AppContext) -> Callback<WheelEvent> {
     Callback::from(move |e: WheelEvent| {
-        let mut app_state_ref = state_handle.borrow_mut();
-        let render_state = app_state_ref.render_state_mut();
-
+        let mut render_state = app_context.render_state.borrow_mut();
         let adjustment = 1. + 0.03 * e.delta_y().signum();
         let new_value = render_state.camera_field_of_view * adjustment;
         render_state.set_fov(new_value);
     })
 }
 
-pub fn make_handle_reset(state_handle: StateHandle) -> Callback<Event> {
+pub fn make_handle_reset(app_context: AppContext) -> Callback<Event> {
     Callback::from(move |_| {
-        let mut app_state_ref = state_handle.borrow_mut();
-        let render_state = app_state_ref.render_state_mut();
+        let mut render_state = app_context.render_state.borrow_mut();
         *render_state = RenderState::default();
     })
 }
 
-pub fn make_handle_keydown(state_handle: StateHandle) -> Callback<KeyboardEvent> {
+pub fn make_handle_keydown(app_context: AppContext) -> Callback<KeyboardEvent> {
     Callback::from(move |e: KeyboardEvent| {
-        let mut app_state_ref = state_handle.borrow_mut();
+        let mut render_state = app_context.render_state.borrow_mut();
         match e.key().as_str() {
-            "w" | "W" => app_state_ref.render_state_mut().keydown_map.w = true,
-            "a" | "A" => app_state_ref.render_state_mut().keydown_map.a = true,
-            "s" | "S" => app_state_ref.render_state_mut().keydown_map.s = true,
-            "d" | "D" => app_state_ref.render_state_mut().keydown_map.d = true,
-            " " => app_state_ref.render_state_mut().keydown_map.space = true,
-            "Shift" => app_state_ref.render_state_mut().keydown_map.shift = true,
-            "Escape" => app_state_ref.render_state_mut().is_paused = true,
+            "w" | "W" => render_state.keydown_map.w = true,
+            "a" | "A" => render_state.keydown_map.a = true,
+            "s" | "S" => render_state.keydown_map.s = true,
+            "d" | "D" => render_state.keydown_map.d = true,
+            " " => render_state.keydown_map.space = true,
+            "Shift" => render_state.keydown_map.shift = true,
+            "Escape" => render_state.is_paused = true,
             _ => {}
         }
     })
 }
 
-pub fn make_handle_keyup(state_handle: StateHandle) -> Callback<KeyboardEvent> {
+pub fn make_handle_keyup(app_context: AppContext) -> Callback<KeyboardEvent> {
     Callback::from(move |e: KeyboardEvent| {
-        let mut app_state_ref = state_handle.borrow_mut();
+        let mut render_state = app_context.render_state.borrow_mut();
         match e.key().as_str() {
-            "w" | "W" => app_state_ref.render_state_mut().keydown_map.w = false,
-            "a" | "A" => app_state_ref.render_state_mut().keydown_map.a = false,
-            "s" | "S" => app_state_ref.render_state_mut().keydown_map.s = false,
-            "d" | "D" => app_state_ref.render_state_mut().keydown_map.d = false,
-            "Shift" => app_state_ref.render_state_mut().keydown_map.shift = false,
-            " " => app_state_ref.render_state_mut().keydown_map.space = false,
+            "w" | "W" => render_state.keydown_map.w = false,
+            "a" | "A" => render_state.keydown_map.a = false,
+            "s" | "S" => render_state.keydown_map.s = false,
+            "d" | "D" => render_state.keydown_map.d = false,
+            "Shift" => render_state.keydown_map.shift = false,
+            " " => render_state.keydown_map.space = false,
             _ => {}
         }
     })
 }
 
-pub fn make_handle_resize(state_handle: StateHandle) -> impl Fn() + 'static {
-    move || {
-        let mut app_state_ref = state_handle.borrow_mut();
-        app_state_ref
-            .render_state_mut()
-            .should_update_to_match_window_size = true;
+pub fn make_handle_resize(app_context: AppContext) -> impl Fn(JsValue) + 'static {
+    move |_| {
+        info!("Calling resize handler");
+        let mut render_state = app_context.render_state.borrow_mut();
+        render_state.should_update_to_match_window_size = true;
     }
 }
 
-pub fn make_handle_mouse_move(state_handle: StateHandle) -> Callback<MouseEvent> {
+pub fn make_handle_mouse_move(app_context: AppContext) -> Callback<MouseEvent> {
     Callback::from(move |e: MouseEvent| {
-        let mut app_state_ref = state_handle.borrow_mut();
-        let mut render_state_mut = app_state_ref.render_state_mut();
+        let mut render_state = app_context.render_state.borrow_mut();
         // camera should move slower when more "zoomed in"
         let dx = (e.movement_x() as f64)
-            * render_state_mut.look_sensitivity
-            * render_state_mut.camera_field_of_view;
+            * render_state.look_sensitivity
+            * render_state.camera_field_of_view;
         let dy = -(e.movement_y() as f64)
-            * render_state_mut.look_sensitivity
-            * render_state_mut.camera_field_of_view;
-        let yaw = render_state_mut.yaw + dx;
-        let pitch = render_state_mut.pitch + dy;
-        render_state_mut.set_camera_angles(yaw, pitch);
-        update_cursor_position_in_world(&mut render_state_mut);
+            * render_state.look_sensitivity
+            * render_state.camera_field_of_view;
+        let yaw = render_state.yaw + dx;
+        let pitch = render_state.pitch + dy;
+        render_state.set_camera_angles(yaw, pitch);
+        update_cursor_position_in_world(&mut render_state);
     })
 }
 
-pub fn make_handle_save(state_handle: StateHandle) -> Callback<Event> {
+pub fn make_handle_save(app_context: AppContext) -> Callback<Event> {
     Callback::from(move |_| {
-        let mut app_state_ref = state_handle.borrow_mut();
-        let mut render_state_mut = app_state_ref.render_state_mut();
-        render_state_mut.should_render = true;
-        render_state_mut.should_save = true;
+        let mut render_state = app_context.render_state.borrow_mut();
+        render_state.should_render = true;
+        render_state.should_save = true;
     })
 }

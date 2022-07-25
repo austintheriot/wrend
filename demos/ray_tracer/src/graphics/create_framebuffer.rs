@@ -1,8 +1,9 @@
-use crate::state::state_handle::StateHandle;
 use web_sys::{WebGl2RenderingContext, WebGlFramebuffer};
 use wrend::FramebufferCreateContext;
 
-pub fn create_render_framebuffer(ctx: &FramebufferCreateContext<StateHandle>) -> WebGlFramebuffer {
+use crate::state::app_context::AppContext;
+
+pub fn create_render_framebuffer(ctx: &FramebufferCreateContext<AppContext>) -> WebGlFramebuffer {
     let texture_a = ctx
         .webgl_texture()
         .as_ref()

@@ -1,0 +1,10 @@
+.menu {
+    position: fixed;
+    top: 50%;
+    width: 50%;
+    transform: translate(-50%, -50);
+    width: calc(100% - 2rem);
+    max-width: 600px;
+    height: calc(100% - 2rem);
+    max-height: 600px;
+}
