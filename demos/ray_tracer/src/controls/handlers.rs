@@ -2,10 +2,11 @@ use crate::state::{
     render_state::{update_cursor_position_in_world, RenderState},
     state_handle::StateHandle,
 };
-use web_sys::{KeyboardEvent, MouseEvent, WheelEvent};
+use web_sys::{Event, KeyboardEvent, MouseEvent, WheelEvent};
+use yew::Callback;
 
-pub fn make_handle_wheel(state_handle: StateHandle) -> Box<dyn Fn(WheelEvent)> {
-    Box::new(move |e: WheelEvent| {
+pub fn make_handle_wheel(state_handle: StateHandle) -> Callback<WheelEvent> {
+    Callback::from(move |e: WheelEvent| {
         let mut app_state_ref = state_handle.borrow_mut();
         let render_state = app_state_ref.render_state_mut();
 
@@ -15,16 +16,16 @@ pub fn make_handle_wheel(state_handle: StateHandle) -> Box<dyn Fn(WheelEvent)> {
     })
 }
 
-pub fn make_handle_reset(state_handle: StateHandle) -> Box<dyn Fn()> {
-    Box::new(move || {
+pub fn make_handle_reset(state_handle: StateHandle) -> Callback<Event> {
+    Callback::from(move |_| {
         let mut app_state_ref = state_handle.borrow_mut();
         let render_state = app_state_ref.render_state_mut();
         *render_state = RenderState::default();
     })
 }
 
-pub fn make_handle_keydown(state_handle: StateHandle) -> Box<dyn Fn(KeyboardEvent)> {
-    Box::new(move |e: KeyboardEvent| {
+pub fn make_handle_keydown(state_handle: StateHandle) -> Callback<KeyboardEvent> {
+    Callback::from(move |e: KeyboardEvent| {
         let mut app_state_ref = state_handle.borrow_mut();
         match e.key().as_str() {
             "w" | "W" => app_state_ref.render_state_mut().keydown_map.w = true,
@@ -39,8 +40,8 @@ pub fn make_handle_keydown(state_handle: StateHandle) -> Box<dyn Fn(KeyboardEven
     })
 }
 
-pub fn make_handle_keyup(state_handle: StateHandle) -> Box<dyn Fn(KeyboardEvent)> {
-    Box::new(move |e: KeyboardEvent| {
+pub fn make_handle_keyup(state_handle: StateHandle) -> Callback<KeyboardEvent> {
+    Callback::from(move |e: KeyboardEvent| {
         let mut app_state_ref = state_handle.borrow_mut();
         match e.key().as_str() {
             "w" | "W" => app_state_ref.render_state_mut().keydown_map.w = false,
@@ -54,17 +55,17 @@ pub fn make_handle_keyup(state_handle: StateHandle) -> Box<dyn Fn(KeyboardEvent)
     })
 }
 
-pub fn make_handle_resize(state_handle: StateHandle) -> Box<dyn Fn()> {
-    Box::new(move || {
+pub fn make_handle_resize(state_handle: StateHandle) -> impl Fn() + 'static {
+    move || {
         let mut app_state_ref = state_handle.borrow_mut();
         app_state_ref
             .render_state_mut()
             .should_update_to_match_window_size = true;
-    })
+    }
 }
 
-pub fn make_handle_mouse_move(state_handle: StateHandle) -> Box<dyn Fn(MouseEvent)> {
-    Box::new(move |e: MouseEvent| {
+pub fn make_handle_mouse_move(state_handle: StateHandle) -> Callback<MouseEvent> {
+    Callback::from(move |e: MouseEvent| {
         let mut app_state_ref = state_handle.borrow_mut();
         let mut render_state_mut = app_state_ref.render_state_mut();
         // camera should move slower when more "zoomed in"
@@ -81,8 +82,8 @@ pub fn make_handle_mouse_move(state_handle: StateHandle) -> Box<dyn Fn(MouseEven
     })
 }
 
-pub fn make_handle_save(state_handle: StateHandle) -> Box<dyn Fn()> {
-    Box::new(move || {
+pub fn make_handle_save(state_handle: StateHandle) -> Callback<Event> {
+    Callback::from(move |_| {
         let mut app_state_ref = state_handle.borrow_mut();
         let mut render_state_mut = app_state_ref.render_state_mut();
         render_state_mut.should_render = true;

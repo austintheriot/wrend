@@ -1,4 +1,5 @@
 use crate::{
+    controls::{make_handle_resize, Listener},
     graphics::{
         attribute_id::AttributeId,
         buffer_id::BufferId,
@@ -23,7 +24,7 @@ use crate::{
 };
 use std::rc::Rc;
 use ui::route::Route;
-use web_sys::HtmlCanvasElement;
+use web_sys::{window, HtmlCanvasElement};
 use wrend::{
     AnimationCallback, AttributeCreateCallback, AttributeLink, BufferCreateCallback, BufferLink,
     FramebufferCreateCallback, FramebufferLink, ProgramLinkBuilder, RenderCallback, Renderer,
@@ -43,11 +44,13 @@ pub fn app() -> Html {
     let canvas_ref = use_node_ref();
     let app_state = use_mut_ref(AppState::default);
     let animation_handle = use_mut_ref(|| None);
+    let listeners = use_mut_ref(Vec::new);
 
     use_effect_with_deps(
         {
             let canvas_ref = canvas_ref.clone();
             let animation_handle = animation_handle;
+            let listeners = listeners.clone();
             move |_| {
                 let canvas: HtmlCanvasElement = canvas_ref
                     .cast()
@@ -127,6 +130,15 @@ pub fn app() -> Html {
 
                 let state_handle = StateHandle::new(app_state);
 
+                canvas.focus().unwrap();
+
+                // add global listeners
+                listeners.borrow_mut().push(Listener::new(
+                    window().unwrap().as_ref(),
+                    "resize",
+                    make_handle_resize(state_handle.clone()),
+                ));
+
                 // sync state and canvas size
                 {
                     let (width, height) = clamped_screen_dimensions();
@@ -197,7 +209,7 @@ pub fn app() -> Html {
                 // save handle to keep animation going
                 *animation_handle.borrow_mut() = Some(new_animation_handle);
 
-                || {}
+                move || {}
             }
         },
         (),
@@ -206,7 +218,9 @@ pub fn app() -> Html {
     html! {
         <div class="ray-tracer">
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
-            <canvas ref={canvas_ref} />
+            <canvas
+                ref={canvas_ref}
+            />
         </div>
     }
 }
