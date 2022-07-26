@@ -78,20 +78,25 @@ pub fn menu() -> Html {
     };
 
     html! {
-        <div class="menu">
-            <Button onclick={handle_enable_button_click}>
-                {"Enable"}
-            </Button>
-            <Button onclick={handle_cancel_button_click}>
-                {"Cancel"}
-            </Button>
-            <Button onclick={handle_save_button_click}>
-                {"Save Image"}
-            </Button>
-            <Button onclick={handle_reset_button_click}>
-                {"Reset"}
-            </Button>
-            <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
-        </div>
+        <>
+            <div class="underlay" />
+            <div class="menu">
+                <h2>{"Paused"}</h2>
+                <p>{"Please enable first-person viewing mode"}</p>
+                <Button onclick={handle_enable_button_click}>
+                    {"Enable"}
+                </Button>
+                <Button onclick={handle_cancel_button_click}>
+                    {"Cancel"}
+                </Button>
+                <Button onclick={handle_save_button_click}>
+                    {"Save Image"}
+                </Button>
+                <Button onclick={handle_reset_button_click}>
+                    {"Reset"}
+                </Button>
+                <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
+            </div>
+        </>
     }
 }
