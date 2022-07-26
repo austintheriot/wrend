@@ -1,3 +1,5 @@
+/// This enum can be used to index `KeydownState`
+#[derive(Debug, PartialEq, Clone, Copy, Eq, PartialOrd, Ord)]
 pub enum KeydownKey {
     W,
     A,

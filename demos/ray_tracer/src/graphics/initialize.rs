@@ -37,7 +37,7 @@ const RAY_TRACER_FRAGMENT_SHADER: &str = include_str!("../shaders/ray_tracer.gls
 const AVERAGE_RENDERS_FRAGMENT_SHADERS: &str = include_str!("../shaders/average_renders.glsl");
 const PASS_THROUGH_FRAGMENT_SHADER: &str = include_str!("../shaders/pass_through.glsl");
 
-/// Builds the entire graphics pipeline & renderer and returns an animation handle
+/// Builds the entire graphics pipeline / renderer and returns a handle to the started animation
 pub fn build_renderer(
     canvas: HtmlCanvasElement,
     app_context: AppContext,

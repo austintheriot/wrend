@@ -1,6 +1,8 @@
 use super::keydown_key::KeydownKey;
 use std::ops::{Index, IndexMut};
 
+/// Keeps track of what keys are currently being held down 
+/// (used for updating the user's location in the world)
 #[derive(Default, Debug, PartialEq, Clone, Copy, Eq, PartialOrd, Ord)]
 pub struct KeydownState {
     w: bool,
@@ -12,7 +14,7 @@ pub struct KeydownState {
 }
 
 impl KeydownState {
-    pub fn all_false(&self) -> bool {
+    pub fn no_keys_down(&self) -> bool {
         !self.w && !self.a && !self.s && !self.d && !self.space && !self.shift
     }
 

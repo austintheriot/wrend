@@ -4,6 +4,7 @@ use std::rc::Rc;
 use web_sys::{WebGl2RenderingContext, WebGlTexture};
 use wrend::TextureCreateContext;
 
+/// Creates a texture that will eventually hold a complete render from WebGL
 pub fn make_create_render_texture(
     texture_id: TextureId,
 ) -> Rc<dyn Fn(&TextureCreateContext<AppContext>) -> WebGlTexture> {
@@ -14,7 +15,7 @@ pub fn make_create_render_texture(
             .expect("Should be able to create textures from WebGL context");
 
         let render_state = ctx.user_ctx().as_ref().unwrap().render_state.borrow();
-        let pipeline = render_state.pipeline();
+        let pipeline = render_state.camera();
         let width = pipeline.width();
         let height = pipeline.height();
         std::mem::drop(render_state);

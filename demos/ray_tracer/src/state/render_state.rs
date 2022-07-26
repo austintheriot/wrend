@@ -1,4 +1,4 @@
-use super::pipeline::Pipeline;
+use super::camera::Camera;
 use crate::{
     controls::{keydown_key::KeydownKey, KeydownState},
     objects::{self, HitResult, Material, MaterialType, Ray, Sphere},
@@ -11,7 +11,8 @@ pub type RenderStateCount = u32;
 
 pub const MOVEMENT_SPEED: f64 = 0.001;
 
-/// in ms
+/// The interval that must elapse before the canvas size is synced with the window size
+/// stored in `ms`
 pub const RESIZE_UPDATE_DEBOUNCE_INTERVAL: f64 = 500.0;
 
 /// This must match the amount in the shader itself
@@ -19,12 +20,13 @@ pub const RESIZE_UPDATE_DEBOUNCE_INTERVAL: f64 = 500.0;
 /// Or use the `MAX_FRAGMENT_UNIFORM_VECTORS` provided by the WebGL context
 pub const MAX_NUM_SPHERES: u8 = 15;
 
-/// so high that it's unlikely to be a real id of an object in the shader
+/// So high that it's unlikely to be a real id of an object in the shader
+/// Since GLSL has no concept of `None`, it's easier to store this as a plain number
 pub const NO_SELECTED_OBJECT_ID: i32 = 1000;
 
 #[derive(Clone, Debug, PartialEq, PartialOrd)]
 pub struct RenderState {
-    pipeline: Pipeline,
+    camera: Camera,
 
     // RENDER STATE
     samples_per_pixel: u32,
@@ -33,8 +35,6 @@ pub struct RenderState {
     sphere_list: Vec<Sphere>,
     /// is the modal up that asks the user to enable first-person viewing mode?
     is_paused: bool,
-    /// If the render should render incrementally, averaging together previous frames
-    should_average: bool,
     /// Whether the browser should save a screenshot of the canvas
     should_save_image: bool,
     /// Used to alternate which framebuffer to render to
@@ -49,7 +49,7 @@ pub struct RenderState {
     prev_now: f64,
     /// this is necessary after the user resizes their viewport
     window_size_out_of_sync: bool,
-    last_resize_time: f64,
+    prev_resize_sync_time: f64,
 
     // MOVEMENT
     keydown_state: KeydownState,
@@ -59,10 +59,6 @@ pub struct RenderState {
     debugging_enabled: i32,
     cursor_point: Vec3,
     selected_object: i32,
-
-    // ANALYTICS
-    prev_fps_update_time: f64,
-    prev_fps: [f64; 50],
 }
 
 impl RenderState {
@@ -106,8 +102,8 @@ impl RenderState {
         self.render_count
     }
 
-    pub fn last_resize_time(&self) -> f64 {
-        self.last_resize_time
+    pub fn prev_resize_sync_time(&self) -> f64 {
+        self.prev_resize_sync_time
     }
 
     pub fn window_size_out_of_sync(&self) -> bool {
@@ -118,12 +114,12 @@ impl RenderState {
         self.look_sensitivity
     }
 
-    pub fn pipeline(&self) -> &Pipeline {
-        &self.pipeline
+    pub fn camera(&self) -> &Camera {
+        &self.camera
     }
 
-    pub fn pipeline_mut(&mut self) -> &mut Pipeline {
-        &mut self.pipeline
+    pub fn camera_mut(&mut self) -> &mut Camera {
+        &mut self.camera
     }
 
     pub fn keydown_state(&self) -> &KeydownState {
@@ -140,14 +136,11 @@ impl RenderState {
     }
 
     pub fn inc_render_count(&mut self) -> &mut Self {
-        self.render_count = (self.render_count + 1).min(u32::MAX);
+        self.render_count = self.render_count.wrapping_add(1);
         self
     }
 
-    pub fn set_window_size_out_of_sync(
-        &mut self,
-        window_size_out_of_sync: bool,
-    )-> &mut Self {
+    pub fn set_window_size_out_of_sync(&mut self, window_size_out_of_sync: bool) -> &mut Self {
         self.window_size_out_of_sync = window_size_out_of_sync;
         self
     }
@@ -167,7 +160,9 @@ impl RenderState {
         self
     }
 
-    pub fn update_render_dimensions_to_match_window(
+    /// Synchronizes the window's size with internal state
+    /// WebGL, the canvas, and all appropriate textures
+    pub fn sync_dimensions(
         &mut self,
         gl: &WebGl2RenderingContext,
         textures: &[WebGlTexture],
@@ -175,18 +170,23 @@ impl RenderState {
         now: f64,
     ) -> &mut Self {
         // update state
-        self.last_resize_time = now;
+        self.prev_resize_sync_time = now;
+
+        // sync internal state
         let (width, height) = utils::clamped_screen_dimensions();
-        let render_state_pipeline: &mut Pipeline = self.as_mut();
+        let render_state_pipeline: &mut Camera = self.as_mut();
         render_state_pipeline.set_width_and_height(width, height);
 
-        // sync width/height-dependent objects with state
+        // sync canvas
         canvas.set_width(width);
         canvas.set_height(height);
+
+        //sync WebGL
         gl.viewport(0, 0, width as i32, height as i32);
+
+        // sync textures
         for texture in textures.iter() {
             gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(texture));
-            // load empty texture into gpu -- this will get rendered into later
             gl.tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_u8_array(
                 WebGl2RenderingContext::TEXTURE_2D,
                 0,
@@ -204,12 +204,12 @@ impl RenderState {
         self
     }
 
-    pub fn update_position(&mut self, dt: f64)-> &mut Self {
-        if self.keydown_state.all_false() {
+    pub fn update_position(&mut self, dt: f64) -> &mut Self {
+        if self.keydown_state.no_keys_down() {
             return self;
         }
-        
-        let pipeline = self.pipeline();
+
+        let pipeline = self.camera();
         let camera_front = pipeline.camera_front();
         let vup = pipeline.vup();
         let fov = pipeline.camera_field_of_view();
@@ -232,7 +232,7 @@ impl RenderState {
         };
 
         if new_camera_origin != camera_origin {
-            self.pipeline_mut().set_camera_origin(new_camera_origin);
+            self.camera_mut().set_camera_origin(new_camera_origin);
         }
 
         self
@@ -240,7 +240,7 @@ impl RenderState {
 
     /// focus on whatever object is selected by the cursor if there was a collision
     pub fn update_cursor_position_in_world(&mut self) -> &mut Self {
-        let pipeline = self.pipeline();
+        let pipeline = self.camera();
         let camera_origin = pipeline.camera_origin();
         let lower_left_corner = pipeline.lower_left_corner();
         let horizontal = pipeline.horizontal();
@@ -257,15 +257,15 @@ impl RenderState {
         if let HitResult::Hit { data } = objects::get_center_hit(spheres, ray) {
             let distance = (data.hit_point - camera_origin).length();
             if aperture > 0. {
-                // there is no blurring if aperture is zerp
-                self.pipeline_mut().set_focus_distance(distance);
+                // there is no blurring if aperture is zero
+                self.camera_mut().set_focus_distance(distance);
             }
             self.cursor_point = data.hit_point;
             self.selected_object = data.uuid;
         } else {
             if aperture > 0. {
                 // there is no blurring if aperture is zerp
-                self.pipeline_mut().set_focus_distance(10.0);
+                self.camera_mut().set_focus_distance(10.0);
             }
             self.cursor_point = Vec3::new(0., 0., 0.);
             self.selected_object = NO_SELECTED_OBJECT_ID;
@@ -279,11 +279,10 @@ impl Default for RenderState {
     fn default() -> Self {
         // just uses default 1x1px size at first:
         // this is updated at initialization time
-        let pipeline = Pipeline::default();
+        let pipeline = Camera::default();
         let samples_per_pixel = 1;
         let max_depth = 8;
-        let should_average = false;
-        let should_save = false;
+        let should_save_image = false;
         let count = 0;
         let render_count = 0;
         let last_frame_weight = 1.;
@@ -291,152 +290,34 @@ impl Default for RenderState {
         let prev_now = 0.;
         // let width / height become synced on the first render
         let window_size_out_of_sync = true;
-        let last_resize_time = 0.0;
+        let prev_resize_sync_time = 0.0;
 
         let is_paused = true;
 
         let look_sensitivity = 0.1;
         let keydown_state = KeydownState::default();
 
-        let prev_fps_update_time = 0.;
-        let prev_fps = [0.; 50];
-
-        let mut sphere_list = vec![
-            // ground
-            Sphere {
-                center: Vec3::new(0., -100.5, -1.),
-                radius: 100.,
-                material: Material {
-                    material_type: MaterialType::Diffuse,
-                    albedo: Vec3::new(0.75, 0.6, 0.5),
-                    fuzz: 0.,
-                    refraction_index: 0.,
-                },
-                uuid: 0,
-            },
-            // center (blue)
-            Sphere {
-                center: Vec3::new(0., 0., -1.),
-                radius: 0.5,
-                material: Material {
-                    material_type: MaterialType::Diffuse,
-                    albedo: Vec3::new(0.3, 0.3, 0.4),
-                    fuzz: 0.,
-                    refraction_index: 0.,
-                },
-                uuid: 0,
-            },
-            // left
-            Sphere {
-                center: Vec3::new(-1.1, 0., -1.),
-                radius: 0.5,
-                material: Material {
-                    material_type: MaterialType::Metal,
-                    albedo: Vec3::new(1.0, 1.0, 1.0),
-                    fuzz: 0.,
-                    refraction_index: 0.,
-                },
-                uuid: 0,
-            },
-            // right
-            Sphere {
-                center: Vec3::new(1.1, 0., -1.),
-                radius: 0.5,
-                material: Material {
-                    material_type: MaterialType::Glass,
-                    albedo: Vec3::new(1.0, 1.0, 1.0),
-                    fuzz: 0.,
-                    refraction_index: 1.5,
-                },
-                uuid: 0,
-            },
-            // back left (shiny)
-            Sphere {
-                center: Vec3::new(-0.5, -0.35, -0.55),
-                radius: -0.15,
-                material: Material {
-                    material_type: MaterialType::Metal,
-                    albedo: Vec3::new(1.0, 1.0, 1.0),
-                    fuzz: 0.,
-                    refraction_index: 0.,
-                },
-                uuid: 0,
-            },
-            // front left (fuzzy)
-            Sphere {
-                center: Vec3::new(-0.75, -0.4, -0.35),
-                radius: -0.1,
-                material: Material {
-                    material_type: MaterialType::Metal,
-                    albedo: Vec3::new(1.0, 1.0, 1.0),
-                    fuzz: 0.,
-                    refraction_index: 0.,
-                },
-                uuid: 0,
-            },
-            // behind
-            Sphere {
-                center: Vec3::new(0., 1.2, 4.),
-                radius: 2.,
-                material: Material {
-                    material_type: MaterialType::Diffuse,
-                    albedo: Vec3::new(1.0, 0.8, 0.8),
-                    fuzz: 0.,
-                    refraction_index: 0.,
-                },
-                uuid: 0,
-            },
-            // distant (moon)
-            Sphere {
-                center: Vec3::new(150., 20., -500.),
-                radius: 100.,
-                material: Material {
-                    material_type: MaterialType::Diffuse,
-                    albedo: Vec3::new(0.95, 0.95, 1.0),
-                    fuzz: 0.,
-                    refraction_index: 0.,
-                },
-                uuid: 0,
-            },
-            // distant moon's moon
-            Sphere {
-                center: Vec3::new(170., -20., -350.),
-                radius: 30.,
-                material: Material {
-                    material_type: MaterialType::Diffuse,
-                    albedo: Vec3::new(1.0, 1.0, 1.0),
-                    fuzz: 0.,
-                    refraction_index: 0.,
-                },
-                uuid: 0,
-            },
-        ];
-
         let enable_debugging = 0;
         let cursor_point = Vec3::new(0., 0., 0.);
         let selected_object = NO_SELECTED_OBJECT_ID;
 
-        objects::set_sphere_uuids(&mut sphere_list);
+        let sphere_list = create_default_sphere_list();
 
         RenderState {
-            pipeline,
+            camera: pipeline,
 
             samples_per_pixel,
             max_depth,
 
             is_paused,
-            should_average,
-            should_save_image: should_save,
+            should_save_image,
             count,
             render_count,
             last_frame_weight,
             max_render_count,
             prev_now,
             window_size_out_of_sync,
-            last_resize_time,
-
-            prev_fps_update_time,
-            prev_fps,
+            prev_resize_sync_time,
 
             keydown_state,
             look_sensitivity,
@@ -450,15 +331,15 @@ impl Default for RenderState {
     }
 }
 
-impl AsMut<Pipeline> for RenderState {
-    fn as_mut(&mut self) -> &mut Pipeline {
-        &mut self.pipeline
+impl AsMut<Camera> for RenderState {
+    fn as_mut(&mut self) -> &mut Camera {
+        &mut self.camera
     }
 }
 
-impl AsRef<Pipeline> for RenderState {
-    fn as_ref(&self) -> &Pipeline {
-        &self.pipeline
+impl AsRef<Camera> for RenderState {
+    fn as_ref(&self) -> &Camera {
+        &self.camera
     }
 }
 
@@ -472,4 +353,121 @@ impl AsRef<KeydownState> for RenderState {
     fn as_ref(&self) -> &KeydownState {
         &self.keydown_state
     }
+}
+
+pub fn create_default_sphere_list() -> Vec<Sphere> {
+    let mut sphere_list = vec![
+        // ground
+        Sphere {
+            center: Vec3::new(0., -100.5, -1.),
+            radius: 100.,
+            material: Material {
+                material_type: MaterialType::Diffuse,
+                albedo: Vec3::new(0.75, 0.6, 0.5),
+                fuzz: 0.,
+                refraction_index: 0.,
+            },
+            uuid: 0,
+        },
+        // center (blue)
+        Sphere {
+            center: Vec3::new(0., 0., -1.),
+            radius: 0.5,
+            material: Material {
+                material_type: MaterialType::Diffuse,
+                albedo: Vec3::new(0.3, 0.3, 0.4),
+                fuzz: 0.,
+                refraction_index: 0.,
+            },
+            uuid: 0,
+        },
+        // left
+        Sphere {
+            center: Vec3::new(-1.1, 0., -1.),
+            radius: 0.5,
+            material: Material {
+                material_type: MaterialType::Metal,
+                albedo: Vec3::new(1.0, 1.0, 1.0),
+                fuzz: 0.,
+                refraction_index: 0.,
+            },
+            uuid: 0,
+        },
+        // right
+        Sphere {
+            center: Vec3::new(1.1, 0., -1.),
+            radius: 0.5,
+            material: Material {
+                material_type: MaterialType::Glass,
+                albedo: Vec3::new(1.0, 1.0, 1.0),
+                fuzz: 0.,
+                refraction_index: 1.5,
+            },
+            uuid: 0,
+        },
+        // back left (shiny)
+        Sphere {
+            center: Vec3::new(-0.5, -0.35, -0.55),
+            radius: -0.15,
+            material: Material {
+                material_type: MaterialType::Metal,
+                albedo: Vec3::new(1.0, 1.0, 1.0),
+                fuzz: 0.,
+                refraction_index: 0.,
+            },
+            uuid: 0,
+        },
+        // front left (fuzzy)
+        Sphere {
+            center: Vec3::new(-0.75, -0.4, -0.35),
+            radius: -0.1,
+            material: Material {
+                material_type: MaterialType::Metal,
+                albedo: Vec3::new(1.0, 1.0, 1.0),
+                fuzz: 0.,
+                refraction_index: 0.,
+            },
+            uuid: 0,
+        },
+        // behind
+        Sphere {
+            center: Vec3::new(0., 1.2, 4.),
+            radius: 2.,
+            material: Material {
+                material_type: MaterialType::Diffuse,
+                albedo: Vec3::new(1.0, 0.8, 0.8),
+                fuzz: 0.,
+                refraction_index: 0.,
+            },
+            uuid: 0,
+        },
+        // distant (moon)
+        Sphere {
+            center: Vec3::new(150., 20., -500.),
+            radius: 100.,
+            material: Material {
+                material_type: MaterialType::Diffuse,
+                albedo: Vec3::new(0.95, 0.95, 1.0),
+                fuzz: 0.,
+                refraction_index: 0.,
+            },
+            uuid: 0,
+        },
+        // distant moon's moon
+        Sphere {
+            center: Vec3::new(170., -20., -350.),
+            radius: 30.,
+            material: Material {
+                material_type: MaterialType::Diffuse,
+                albedo: Vec3::new(1.0, 1.0, 1.0),
+                fuzz: 0.,
+                refraction_index: 0.,
+            },
+            uuid: 0,
+        },
+    ];
+
+    objects::set_sphere_uuids(&mut sphere_list);
+
+    sphere_list
 }

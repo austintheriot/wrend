@@ -1,7 +1,7 @@
 use wasm_bindgen::{convert::FromWasmAbi, prelude::Closure, JsCast, JsValue};
 use web_sys::EventTarget;
 
-/// Safe wrapper around listener callbacks that cleans them up once `Listener` is dropped.
+/// Safe wrapper around eventListener callbacks that cleans them up once the `Listener` struct is dropped
 /// For more information, see https://github.com/rustwasm/wasm-bindgen/issues/993
 pub struct Listener<Arg: FromWasmAbi + 'static = JsValue> {
     element: EventTarget,

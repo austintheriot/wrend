@@ -218,7 +218,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
-            let pipeline = render_state.pipeline();
+            let pipeline = render_state.camera();
             gl.uniform1f(Some(uniform_location), pipeline.width() as f32);
         })),
     );
@@ -233,7 +233,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
-            let pipeline = render_state.pipeline();
+            let pipeline = render_state.camera();
             gl.uniform1f(Some(uniform_location), pipeline.height() as f32);
         })),
     );
@@ -309,7 +309,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
-            let pipeline = render_state.pipeline();
+            let pipeline = render_state.camera();
             gl.uniform3fv_with_f32_array(
                 Some(uniform_location),
                 &pipeline.camera_origin().to_f32_array(),
@@ -327,7 +327,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
-            let pipeline = render_state.pipeline();
+            let pipeline = render_state.camera();
             gl.uniform3fv_with_f32_array(
                 Some(uniform_location),
                 &pipeline.horizontal().to_f32_array(),
@@ -345,7 +345,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
-            let pipeline = render_state.pipeline();
+            let pipeline = render_state.camera();
             gl.uniform3fv_with_f32_array(
                 Some(uniform_location),
                 &pipeline.vertical().to_f32_array(),
@@ -363,7 +363,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
-            let pipeline = render_state.pipeline();
+            let pipeline = render_state.camera();
             gl.uniform3fv_with_f32_array(
                 Some(uniform_location),
                 &pipeline.lower_left_corner().to_f32_array(),
@@ -400,17 +400,6 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
     // ),
     // let mut uniform_link = UniformLink::new(
     //     ProgramId::RayTracer,
-    //     String::from("u_should_average"),
-    //     UniformCallback::new(Rc::new(move |ctx: &UniformContext<AppContext>| {
-    //         let gl = ctx.gl();
-    //         let uniform_location = ctx.uniform_location();
-    //         let user_ctx = ctx.user_ctx().unwrap();
-    //         let render_state = user_ctx.render_state.borrow();
-    //         gl.uniform1i(Some(&uniform_location), render_state.should_average as i32);
-    //     })),
-    // ),
-    // let mut uniform_link = UniformLink::new(
-    //     ProgramId::RayTracer,
     //     String::from("u_last_frame_weight"),
     //     UniformCallback::new(Rc::new(move |ctx: &UniformContext<AppContext>| {
     //         let gl = ctx.gl();
@@ -431,7 +420,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
-            let pipeline = render_state.pipeline();
+            let pipeline = render_state.camera();
             gl.uniform1f(Some(uniform_location), pipeline.lens_radius() as f32);
         })),
     );
@@ -446,7 +435,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
-            let pipeline = render_state.pipeline();
+            let pipeline = render_state.camera();
             gl.uniform3fv_with_f32_array(Some(uniform_location), &pipeline.u().to_f32_array());
         })),
     );
@@ -461,7 +450,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
-            let pipeline = render_state.pipeline();
+            let pipeline = render_state.camera();
             gl.uniform3fv_with_f32_array(Some(uniform_location), &pipeline.v().to_f32_array());
         })),
     );

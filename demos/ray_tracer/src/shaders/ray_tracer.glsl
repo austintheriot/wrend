@@ -98,7 +98,6 @@ uniform Sphere[15] u_sphere_list;
 // uniform float u_viewport_width;
 // uniform float u_focal_length;
 // uniform int u_render_count;
-// uniform bool u_should_average;
 // uniform float u_last_frame_weight;
 // uniform vec3 u_w;
 

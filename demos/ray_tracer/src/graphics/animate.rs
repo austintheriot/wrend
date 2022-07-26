@@ -9,6 +9,7 @@ use crate::state::{app_context::AppContext, render_state::RESIZE_UPDATE_DEBOUNCE
 use web_sys::{window, WebGlTexture};
 use wrend::Renderer;
 
+/// This callback is called on every frame of the global animation cycle
 pub fn animate(
     renderer: &Renderer<
         VertexShaderId,
@@ -53,7 +54,7 @@ pub fn animate(
     let should_run_resize_fn = {
         let render_state = render_state.borrow();
         (render_state.window_size_out_of_sync()
-            && now - render_state.last_resize_time() > RESIZE_UPDATE_DEBOUNCE_INTERVAL)
+            && now - render_state.prev_resize_sync_time() > RESIZE_UPDATE_DEBOUNCE_INTERVAL)
             || render_state.render_count() == 0
     };
 
@@ -61,7 +62,7 @@ pub fn animate(
     if should_run_resize_fn {
         let mut render_state = render_state.borrow_mut();
         render_state.set_window_size_out_of_sync(false);
-        render_state.update_render_dimensions_to_match_window(gl, &all_textures, canvas, now);
+        render_state.sync_dimensions(gl, &all_textures, canvas, now);
     }
 
     if should_render {

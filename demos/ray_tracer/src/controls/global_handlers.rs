@@ -8,11 +8,12 @@ pub fn make_handle_wheel(app_context: AppContext) -> impl Fn(WheelEvent) + 'stat
             return;
         }
 
+        const ADJUSTMENT_SPEED: f64 = 0.05;
         let mut render_state = app_context.render_state.borrow_mut();
-        let adjustment = 1. + 0.03 * e.delta_y().signum();
-        let new_camera_field_of_view = render_state.pipeline().camera_field_of_view() * adjustment;
+        let adjustment = 1.0 + ADJUSTMENT_SPEED * e.delta_y().signum();
+        let new_camera_field_of_view = render_state.camera().camera_field_of_view() * adjustment;
         render_state
-            .pipeline_mut()
+            .camera_mut()
             .set_camera_field_of_view(new_camera_field_of_view);
     }
 }
@@ -63,15 +64,15 @@ pub fn make_handle_mouse_move(app_context: AppContext) -> impl Fn(MouseEvent) + 
 
         let mut render_state = app_context.render_state.borrow_mut();
         let look_sensitivity = render_state.look_sensitivity();
-        let camera_field_of_view = render_state.pipeline().camera_field_of_view();
+        let camera_field_of_view = render_state.camera().camera_field_of_view();
 
         // camera should move slower when more "zoomed in"
         let dx = (e.movement_x() as f64) * look_sensitivity * camera_field_of_view;
         let dy = -(e.movement_y() as f64) * look_sensitivity * camera_field_of_view;
-        let yaw = render_state.pipeline().yaw() + dx;
-        let pitch = render_state.pipeline().pitch() + dy;
+        let yaw = render_state.camera().yaw() + dx;
+        let pitch = render_state.camera().pitch() + dy;
 
-        render_state.pipeline_mut().set_pitch_and_yaw(pitch, yaw);
+        render_state.camera_mut().set_pitch_and_yaw(pitch, yaw);
         render_state.update_cursor_position_in_world();
     }
 }

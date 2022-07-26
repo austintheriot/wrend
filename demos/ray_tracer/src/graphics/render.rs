@@ -9,8 +9,6 @@ use wrend::{Renderer, QUAD};
 
 // reusable draw call for both canvas and framebuffer
 fn draw_quad(gl: &WebGl2RenderingContext) {
-    gl.clear_color(0.0, 0.0, 0.0, 1.0);
-    gl.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT);
     gl.draw_arrays(
         WebGl2RenderingContext::TRIANGLES,
         0,

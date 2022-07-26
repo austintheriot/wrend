@@ -1,9 +1,10 @@
 use std::f64::consts::PI;
-
 use wrend::{degrees_to_radians, Vec3};
 
+/// This struct is in charge of updating all the camera / viewport data that is
+/// used within the ray_tracer shader to perform a render
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
-pub struct Pipeline {
+pub struct Camera {
     width: u32,
     height: u32,
     aspect_ratio: f64,
@@ -30,7 +31,7 @@ pub struct Pipeline {
     look_at: Vec3,
 }
 
-impl Default for Pipeline {
+impl Default for Camera {
     fn default() -> Self {
         Self {
             width: Self::DEFAULT_WIDTH,
@@ -60,7 +61,7 @@ impl Default for Pipeline {
     }
 }
 
-impl Pipeline {
+impl Camera {
     const DEFAULT_WIDTH: u32 = 1;
     const DEFAULT_HEIGHT: u32 = 1;
     const DEFAULT_APERTURE: f64 = 0.;
@@ -69,15 +70,14 @@ impl Pipeline {
     const DEFAULT_CAMERA_FIELD_OF_VIEW: f64 = PI / 3.;
     const DEFAULT_FOCAL_LENGTH: f64 = 1.0;
     const DEFAULT_PITCH: f64 = 0.0;
-    // look down the z axis by default
-    const DEFAULT_YAW: f64 = -90.0;
+    const DEFAULT_YAW: f64 = -90.0; // look down the z axis by default
     const DEFAULT_VUP: Vec3 = Vec3::new(0., 1., 0.);
     const DEFAULT_CAMERA_ORIGIN: Vec3 = Vec3::new(0., 0., 1.);
 
     pub fn new(width: u32, height: u32) -> Self {
         let mut new_pipeline = Self::default();
         new_pipeline.set_width_and_height(width, height);
-        new_pipeline.update_pipeline();
+        new_pipeline.update();
         new_pipeline
     }
 
@@ -144,31 +144,32 @@ impl Pipeline {
     pub fn set_width_and_height(&mut self, width: u32, height: u32) {
         self.width = width;
         self.height = height;
-        self.update_pipeline();
+        self.update();
     }
 
     pub fn set_camera_field_of_view(&mut self, camera_field_of_view: f64) {
         self.camera_field_of_view = camera_field_of_view.clamp(0.0001, PI * 0.75);
-        self.update_pipeline();
+        self.update();
     }
 
     pub fn set_pitch_and_yaw(&mut self, pitch: f64, yaw: f64) {
         self.pitch = f64::clamp(pitch, -89., 89.);
         self.yaw = yaw;
-        self.update_pipeline();
+        self.update();
     }
 
     pub fn set_camera_origin(&mut self, camera_origin: Vec3) {
         self.camera_origin = camera_origin;
-        self.update_pipeline();
+        self.update();
     }
 
     pub fn set_focus_distance(&mut self, focus_distance: f64) {
         self.focus_distance = focus_distance;
-        self.update_pipeline();
+        self.update();
     }
 
-    fn update_pipeline(&mut self) {
+    /// runs through entire pipeline to update all constants
+    fn update(&mut self) {
         self.aspect_ratio = (self.width as f64) / (self.height as f64);
         self.camera_h = (self.camera_field_of_view / 2.).tan();
         self.camera_front = Vec3::new(
