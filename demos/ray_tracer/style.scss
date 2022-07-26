@@ -2,18 +2,3 @@
 @use './src/components/canvas.scss';
 @use './src/components/menu.scss';
 @use './src/components/button.scss';
-
-.ray-tracer {
-  * {
-    font-family: 'Roboto', sans-serif;
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-
-  a {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-  }
-}

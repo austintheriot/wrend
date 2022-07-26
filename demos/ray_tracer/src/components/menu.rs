@@ -1,10 +1,11 @@
 use wasm_bindgen::JsCast;
 use web_sys::{window, HtmlCanvasElement};
 use yew::prelude::*;
-
 use crate::components::button::Button;
 use crate::state::app_context::{AppContext, AppContextError};
 use crate::state::ui_state_action::UiStateAction;
+use ui::route::Route;
+use yew_router::prelude::*;
 
 #[function_component(Menu)]
 pub fn menu() -> Html {
@@ -69,6 +70,7 @@ pub fn menu() -> Html {
             <Button onclick={handle_reset_button_click}>
                 {"Reset"}
             </Button>
+            <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
         </div>
     }
 }
