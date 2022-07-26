@@ -5,7 +5,7 @@ use super::{
     framebuffer_id::FramebufferId, program_id::ProgramId, texture_id::TextureId,
     transform_feedback_id::TransformFeedbackId, vao_id::VAOId, vertex_shader_id::VertexShaderId,
 };
-use crate::state::app_context::AppContext;
+use crate::state::{app_context::AppContext, render_state::RESIZE_UPDATE_DEBOUNCE_INTERVAL};
 use web_sys::{window, WebGlTexture};
 use wrend::Renderer;
 
@@ -52,14 +52,15 @@ pub fn animate(
 
     let should_run_resize_fn = {
         let render_state = render_state.borrow();
-        render_state.should_update_to_match_window_size()
-            && now - render_state.last_resize_time() > 500.
+        (render_state.window_size_out_of_sync()
+            && now - render_state.last_resize_time() > RESIZE_UPDATE_DEBOUNCE_INTERVAL)
+            || render_state.render_count() == 0
     };
 
     // debounce resize handler
     if should_run_resize_fn {
         let mut render_state = render_state.borrow_mut();
-        render_state.set_should_update_to_match_window_size(false);
+        render_state.set_window_size_out_of_sync(false);
         render_state.update_render_dimensions_to_match_window(gl, &all_textures, canvas, now);
     }
 

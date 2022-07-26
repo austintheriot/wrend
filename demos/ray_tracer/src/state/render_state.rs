@@ -11,6 +11,9 @@ pub type RenderStateCount = u32;
 
 pub const MOVEMENT_SPEED: f64 = 0.001;
 
+/// in ms
+pub const RESIZE_UPDATE_DEBOUNCE_INTERVAL: f64 = 500.0;
+
 /// This must match the amount in the shader itself
 /// @todo programmatically set the value in the shader before compiling
 /// Or use the `MAX_FRAGMENT_UNIFORM_VECTORS` provided by the WebGL context
@@ -45,7 +48,7 @@ pub struct RenderState {
     /// Used for calculating time delta in animation loop
     prev_now: f64,
     /// this is necessary after the user resizes their viewport
-    should_update_to_match_window_size: bool,
+    window_size_out_of_sync: bool,
     last_resize_time: f64,
 
     // MOVEMENT
@@ -107,8 +110,8 @@ impl RenderState {
         self.last_resize_time
     }
 
-    pub fn should_update_to_match_window_size(&self) -> bool {
-        self.should_update_to_match_window_size
+    pub fn window_size_out_of_sync(&self) -> bool {
+        self.window_size_out_of_sync
     }
 
     pub fn look_sensitivity(&self) -> f64 {
@@ -141,11 +144,11 @@ impl RenderState {
         self
     }
 
-    pub fn set_should_update_to_match_window_size(
+    pub fn set_window_size_out_of_sync(
         &mut self,
-        should_update_to_match_window_size: bool,
+        window_size_out_of_sync: bool,
     )-> &mut Self {
-        self.should_update_to_match_window_size = should_update_to_match_window_size;
+        self.window_size_out_of_sync = window_size_out_of_sync;
         self
     }
 
@@ -274,8 +277,9 @@ impl RenderState {
 
 impl Default for RenderState {
     fn default() -> Self {
-        let (width, height) = utils::clamped_screen_dimensions();
-
+        // just uses default 1x1px size at first:
+        // this is updated at initialization time
+        let pipeline = Pipeline::default();
         let samples_per_pixel = 1;
         let max_depth = 8;
         let should_average = false;
@@ -285,8 +289,9 @@ impl Default for RenderState {
         let last_frame_weight = 1.;
         let max_render_count = 100_000;
         let prev_now = 0.;
-        let should_update_to_match_window_size = false;
-        let last_resize_time = 0.;
+        // let width / height become synced on the first render
+        let window_size_out_of_sync = true;
+        let last_resize_time = 0.0;
 
         let is_paused = true;
 
@@ -414,7 +419,7 @@ impl Default for RenderState {
         objects::set_sphere_uuids(&mut sphere_list);
 
         RenderState {
-            pipeline: Pipeline::new(width, height),
+            pipeline,
 
             samples_per_pixel,
             max_depth,
@@ -427,7 +432,7 @@ impl Default for RenderState {
             last_frame_weight,
             max_render_count,
             prev_now,
-            should_update_to_match_window_size,
+            window_size_out_of_sync,
             last_resize_time,
 
             prev_fps_update_time,

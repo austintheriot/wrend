@@ -51,7 +51,7 @@ pub fn make_handle_resize(app_context: AppContext) -> impl Fn(JsValue) + 'static
         app_context
             .render_state
             .borrow_mut()
-            .set_should_update_to_match_window_size(true);
+            .set_window_size_out_of_sync(true);
     }
 }
 
