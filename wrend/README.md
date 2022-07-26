@@ -15,6 +15,10 @@ The following use cases should guide the development of this library:
 - Ray tracing
 
 ## Todo
+- Fix callback system (model after Yew's `Callback` type--using generic instead of dynamic dispatch)
+
+- Make using uniform links more ergonomic: use builder pattern, etc.
+
 - Make a trait for Texture numbers that is available from the Renderer?
 
 - Cleanup:

@@ -1,5 +1,4 @@
 use std::f64::consts::PI;
-use log::info;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlTexture};
 use wrend::{degrees_to_radians, Vec3};
 
@@ -53,11 +52,8 @@ pub struct RenderState {
     // RENDER STATE
     /// is the modal up that asks the user to enable first-person viewing mode?
     pub is_paused: bool,
-    /// If the render should render incrementally, pubaveraging together previous frames
+    /// If the render should render incrementally, averaging together previous frames
     pub should_average: bool,
-    /// Unless averaging is taking place, pubthis is set to false after revery render
-    /// only updated back to true if something changes (i.e. input)
-    pub should_render: bool,
     /// Whether the browser should save a screenshot of the canvas
     pub should_save: bool,
     /// Used to alternate which framebuffer to render to
@@ -122,7 +118,6 @@ impl Default for RenderState {
         let samples_per_pixel = 1;
         let max_depth = 8;
         let should_average = false;
-        let should_render = true;
         let should_save = false;
         let even_odd_count = 0;
         let render_count = 0;
@@ -132,7 +127,7 @@ impl Default for RenderState {
         let should_update_to_match_window_size = false;
         let last_resize_time = 0.;
 
-        let is_paused = false;
+        let is_paused = true;
 
         let look_sensitivity = 0.1;
         let keydown_map = KeydownMap::default();
@@ -284,7 +279,6 @@ impl Default for RenderState {
 
             is_paused,
             should_average,
-            should_render,
             should_save,
             even_odd_count,
             render_count,
@@ -355,7 +349,6 @@ impl RenderState {
 
         if self != &prev_state {
             self.render_count = 0;
-            self.should_render = true;
         }
     }
 
@@ -428,7 +421,6 @@ pub fn update_position(state: &mut RenderState, dt: f64) {
     // move slower when more "zoomed in"
     let fov = state.camera_field_of_view;
     if state.keydown_map.w {
-        info!("w is currently pressed");
         state.camera_origin += &camera_front * MOVEMENT_SPEED * dt * fov;
     }
     if state.keydown_map.a {
@@ -452,10 +444,6 @@ pub fn update_position(state: &mut RenderState, dt: f64) {
 }
 
 pub fn update_render_globals(state: &mut RenderState) {
-    if !state.should_average {
-        // only continuously render when averaging is being done
-        state.should_render = false;
-    }
     state.even_odd_count += 1;
     state.render_count = (state.render_count + 1).min(state.max_render_count);
 }

@@ -1,7 +1,6 @@
 use super::{program_id::ProgramId, texture_id::TextureId};
 use crate::state::{app_context::AppContext, render_state::MAX_NUM_SPHERES};
 use std::{rc::Rc, vec};
-use log::info;
 use wrend::{UniformCallback, UniformContext, UniformLink};
 
 /// Programmatically create uniforms for every possible WebGL sphere
@@ -210,7 +209,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
     );
     uniform_link.set_use_init_callback_for_update(true);
     general_ray_tracer_uniform_links.push(uniform_link);
-    
+
     let mut uniform_link = UniformLink::new(
         ProgramId::RayTracer,
         String::from("u_width"),
@@ -219,7 +218,6 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
-            info!("updating width: {:?}", render_state.width);
             gl.uniform1f(Some(uniform_location), render_state.width as f32);
         })),
     );
@@ -248,15 +246,10 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
-            // @todo: revisit this
-            //  increase sample rate when paused (such as on first render and when resizing)
-            // it's ok to do some heavy lifting here, since it's not being continually rendered at this output
-            let samples_per_pixel = if render_state.is_paused {
-                render_state.samples_per_pixel.max(25)
-            } else {
-                render_state.samples_per_pixel
-            };
-            gl.uniform1i(Some(uniform_location), samples_per_pixel as i32);
+            gl.uniform1i(
+                Some(uniform_location),
+                render_state.samples_per_pixel as i32,
+            );
         })),
     );
     uniform_link.set_use_init_callback_for_update(true);
@@ -446,10 +439,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
-            gl.uniform3fv_with_f32_array(
-                Some(uniform_location),
-                &render_state.u.to_f32_array(),
-            );
+            gl.uniform3fv_with_f32_array(Some(uniform_location), &render_state.u.to_f32_array());
         })),
     );
     uniform_link.set_use_init_callback_for_update(true);
@@ -463,10 +453,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
-            gl.uniform3fv_with_f32_array(
-                Some(uniform_location),
-                &render_state.v.to_f32_array(),
-            );
+            gl.uniform3fv_with_f32_array(Some(uniform_location), &render_state.v.to_f32_array());
         })),
     );
     uniform_link.set_use_init_callback_for_update(true);

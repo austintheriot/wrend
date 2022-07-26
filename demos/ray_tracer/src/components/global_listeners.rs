@@ -1,13 +1,13 @@
-use std::{any::Any, cell::RefCell, rc::Rc};
-
 use crate::{
     controls::{
-        make_handle_keydown, make_handle_keyup, make_handle_mouse_move, make_handle_resize,
-        make_handle_wheel, Listener,
+        make_handle_keydown, make_handle_keyup, make_handle_mouse_move,
+        make_handle_pointer_lock_change, make_handle_resize, make_handle_wheel, Listener,
     },
     state::app_context::{AppContext, AppContextError},
 };
-use web_sys::{window, EventTarget};
+use std::{any::Any, cell::RefCell, rc::Rc};
+use wasm_bindgen::JsCast;
+use web_sys::{window, EventTarget, HtmlCanvasElement};
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
@@ -25,6 +25,14 @@ pub fn global_listeners(props: &KeyboardListenerProps) -> Html {
             // add global listeners
             let window = window().unwrap();
             let window_event_target: &EventTarget = window.as_ref();
+            let document = window.document().unwrap();
+            let document_event_target: &EventTarget = document.as_ref();
+            let canvas: HtmlCanvasElement = document
+                .query_selector("canvas")
+                .unwrap()
+                .unwrap()
+                .dyn_into()
+                .unwrap();
 
             listener_mut_ref.borrow_mut().push(Box::new(Listener::new(
                 window_event_target,
@@ -54,6 +62,12 @@ pub fn global_listeners(props: &KeyboardListenerProps) -> Html {
                 window_event_target,
                 "mousemove",
                 make_handle_mouse_move(app_context.clone()),
+            )));
+
+            listener_mut_ref.borrow_mut().push(Box::new(Listener::new(
+                document_event_target,
+                "pointerlockchange",
+                make_handle_pointer_lock_change(app_context.clone(), document.clone(), canvas),
             )));
 
             || {}

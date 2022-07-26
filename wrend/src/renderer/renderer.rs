@@ -8,7 +8,6 @@ use crate::{
     WebGlContextError,
 };
 use std::collections::{HashMap, HashSet};
-use log::info;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{
     window, HtmlAnchorElement, HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram,
@@ -521,7 +520,6 @@ impl<
         let uniform_link_bridge: Bridge<_> = uniform_links.into();
         let uniform_links: Vec<_> = uniform_link_bridge.into();
 
-        info!("Adding new uniform links: {:#?}", uniform_links);
         for uniform_link in uniform_links {
             self.add_uniform_link(uniform_link);
         }

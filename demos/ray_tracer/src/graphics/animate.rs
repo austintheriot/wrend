@@ -7,9 +7,10 @@ use super::{
 };
 use crate::state::{
     app_context::AppContext,
-    render_state::{update_position, update_render_dimensions_to_match_window},
+    render_state::{
+        update_position, update_render_dimensions_to_match_window, update_render_globals,
+    },
 };
-use log::info;
 use web_sys::{window, WebGlTexture};
 use wrend::Renderer;
 
@@ -47,12 +48,9 @@ pub fn animate(
     // OR unless it's the very first frame
     let should_render = {
         let render_state = render_state.borrow();
-        (render_state.should_render && !render_state.is_paused)
-            || (render_state.should_render && render_state.is_paused && render_state.should_save)
-            || (render_state.should_render
-                && render_state.is_paused
-                && !render_state.should_save
-                && render_state.render_count == 0)
+        !render_state.is_paused
+            || (render_state.is_paused && render_state.should_save)
+            || (render_state.is_paused && render_state.render_count == 0)
     };
 
     let should_run_resize_fn = {
@@ -64,16 +62,16 @@ pub fn animate(
     // debounce resize handler
     if should_run_resize_fn {
         let mut render_state = render_state.borrow_mut();
-        info!("Running debounced resize function");
         render_state.should_update_to_match_window_size = false;
         update_render_dimensions_to_match_window(&mut render_state, gl, &all_textures, canvas, now);
     }
 
     if should_render {
+        update_render_globals(&mut render_state.borrow_mut());
         renderer.update_uniforms();
         renderer.render();
 
-            {
+        {
             let mut render_state = render_state.borrow_mut();
             if render_state.should_save {
                 render_state.should_save = false;
