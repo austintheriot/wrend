@@ -1,6 +1,6 @@
 use web_sys::window;
 
-pub const MAX_CANVAS_SIZE: u32 = 1280;
+pub const MAX_CANVAS_SIZE: u32 = 400;
 
 // limit max canvas dimensions to a reasonable number
 // (to prevent off-the-charts GPU work on large screen sizes)
