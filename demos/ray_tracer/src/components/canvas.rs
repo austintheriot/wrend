@@ -1,6 +1,7 @@
 use crate::{
     controls::{make_handle_resize, Listener},
     graphics::{
+        animate::animate,
         attribute_id::AttributeId,
         buffer_id::BufferId,
         create_buffer::create_quad_vertex_buffer,
@@ -19,15 +20,12 @@ use crate::{
         vao_id::VAOId,
         vertex_shader_id::VertexShaderId,
     },
-    state::{
-        app_context::{AppContext, AppContextError},
-        render_state::{update_position, update_render_dimensions_to_match_window},
-    },
+    state::app_context::{AppContext, AppContextError},
     utils::clamped_screen_dimensions,
 };
-use log::info;
+
 use std::rc::Rc;
-use web_sys::{window, HtmlCanvasElement, WebGlTexture};
+use web_sys::{window, HtmlCanvasElement};
 use wrend::{
     AnimationCallback, AttributeCreateCallback, AttributeLink, BufferCreateCallback, BufferLink,
     FramebufferCreateCallback, FramebufferLink, ProgramLinkBuilder, RenderCallback, Renderer,
@@ -49,7 +47,7 @@ pub fn canvas() -> Html {
 
     use_effect_with_deps(
         {
-            let app_context = app_context.clone();
+            let app_context = app_context;
             let canvas_ref = canvas_ref.clone();
             let animation_handle = animation_handle;
 
@@ -195,66 +193,8 @@ pub fn canvas() -> Html {
                     .build()
                     .expect("Renderer should successfully build");
 
-                renderer.update_uniforms();
-                renderer.render();
                 let new_animation_handle =
-                    renderer.into_animation_handle(AnimationCallback::new(Rc::new(|renderer| {
-                        let gl = renderer.gl();
-                        let canvas = renderer.canvas();
-                        let mut render_state = renderer
-                            .user_ctx()
-                            .as_ref()
-                            .unwrap()
-                            .render_state
-                            .borrow_mut();
-                        let all_textures: Vec<WebGlTexture> = renderer
-                            .textures()
-                            .values()
-                            .into_iter()
-                            .map(|texture| texture.webgl_texture().clone())
-                            .collect();
-                        let now = window().unwrap().performance().unwrap().now();
-                        let dt = now - render_state.prev_now;
-                        render_state.prev_now = now;
-
-                        update_position(&mut render_state, dt);
-
-                        // don't render while paused unless trying to save
-                        // OR unless it's the very first frame
-                        let should_render = (render_state.should_render && !render_state.is_paused)
-                            || (render_state.should_render
-                                && render_state.is_paused
-                                && render_state.should_save)
-                            || (render_state.should_render
-                                && render_state.is_paused
-                                && !render_state.should_save
-                                && render_state.render_count == 0);
-
-                        // debounce resize handler
-                        if render_state.should_update_to_match_window_size
-                            && now - render_state.last_resize_time > 500.
-                        {
-                            info!("Running debounced resize function");
-                            render_state.should_update_to_match_window_size = false;
-                            update_render_dimensions_to_match_window(
-                                &mut render_state,
-                                &gl,
-                                &all_textures,
-                                canvas,
-                                now,
-                            );
-                        }
-
-                        if should_render {
-                            renderer.update_uniforms();
-                            renderer.render();
-
-                            if render_state.should_save {
-                                render_state.should_save = false;
-                                renderer.save_image();
-                            }
-                        }
-                    })));
+                    renderer.into_animation_handle(AnimationCallback::new(Rc::new(animate)));
 
                 new_animation_handle.start_animating();
 

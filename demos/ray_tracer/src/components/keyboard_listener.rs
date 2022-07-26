@@ -30,7 +30,7 @@ pub fn keyboard_listener(props: &KeyboardListenerProps) -> Html {
                         if app_context.ui_state.is_keyboard_user() {
                             return;
                         }
-                        
+
                         // once we know the use is keyboard listener, no reason to keep listening
                         listener_mut_ref.borrow_mut().take();
                         if let "Tab" = e.key().as_str() {

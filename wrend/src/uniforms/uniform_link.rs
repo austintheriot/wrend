@@ -1,5 +1,5 @@
-use crate::Id;
 use crate::Bridge;
+use crate::Id;
 use crate::UniformCallback;
 use crate::UniformShouldUpdateCallback;
 use std::fmt::Debug;

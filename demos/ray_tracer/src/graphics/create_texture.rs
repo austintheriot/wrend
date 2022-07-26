@@ -1,8 +1,8 @@
+use super::texture_id::TextureId;
+use crate::state::app_context::AppContext;
 use std::rc::Rc;
 use web_sys::{WebGl2RenderingContext, WebGlTexture};
 use wrend::TextureCreateContext;
-use crate::state::app_context::AppContext;
-use super::texture_id::TextureId;
 
 pub fn make_create_render_texture(
     texture_id: TextureId,

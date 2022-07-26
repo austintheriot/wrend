@@ -43,13 +43,7 @@ impl<Item> From<(Item, Item, Item, Item)> for Bridge<Item> {
 
 impl<Item> From<(Item, Item, Item, Item, Item)> for Bridge<Item> {
     fn from(items: (Item, Item, Item, Item, Item)) -> Self {
-        Bridge(vec![
-            items.0,
-            items.1,
-            items.2,
-            items.3,
-            items.4,
-        ])
+        Bridge(vec![items.0, items.1, items.2, items.3, items.4])
     }
 }
 
@@ -83,7 +77,6 @@ impl<Item: Clone> From<&[Item]> for Bridge<Item> {
     }
 }
 
-
 impl<Item: Clone> From<Rc<[Item]>> for Bridge<Item> {
     fn from(items: Rc<[Item]>) -> Self {
         Bridge(items.to_vec())
@@ -96,13 +89,11 @@ impl<Item> From<Box<[Item]>> for Bridge<Item> {
     }
 }
 
-
 impl<Item> From<Box<Vec<Item>>> for Bridge<Item> {
     fn from(items: Box<Vec<Item>>) -> Self {
         Bridge(*items)
     }
 }
-
 
 impl<Item: Clone> From<Rc<Vec<Item>>> for Bridge<Item> {
     fn from(items: Rc<Vec<Item>>) -> Self {
@@ -116,6 +107,3 @@ impl<const U: usize, Item> From<[Item; U]> for Bridge<Item> {
         Bridge(Vec::from(items))
     }
 }
-
-
-

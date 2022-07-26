@@ -1,4 +1,4 @@
-use super::{Ray, HitResult};
+use super::{HitResult, Ray};
 
 /// Any object can test whether the ray has hit it
 /// t_min and t_max represent the range along a ray

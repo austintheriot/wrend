@@ -1,4 +1,4 @@
-use crate::{AttributeLocation, Id, Bridge, IdName};
+use crate::{AttributeLocation, Bridge, Id, IdName};
 use std::fmt::Debug;
 use std::hash::Hash;
 use web_sys::WebGlBuffer;

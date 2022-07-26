@@ -1,4 +1,4 @@
-use super::{Hit, Ray, HitResult};
+use super::{Hit, HitResult, Ray};
 
 #[derive(Default)]
 pub struct HittableList {

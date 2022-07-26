@@ -1,8 +1,12 @@
 use std::f64::consts::PI;
-use web_sys::{HtmlCanvasElement, WebGlTexture, WebGl2RenderingContext};
+use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlTexture};
 use wrend::{degrees_to_radians, Vec3};
 
-use crate::{objects::{Sphere, Material, MaterialType, self, HitResult, Ray}, controls::KeydownMap, utils};
+use crate::{
+    controls::KeydownMap,
+    objects::{self, HitResult, Material, MaterialType, Ray, Sphere},
+    utils,
+};
 
 pub type RenderStateCount = u32;
 
@@ -366,7 +370,6 @@ impl RenderState {
     }
 }
 
-
 pub fn update_render_dimensions_to_match_window(
     state: &mut RenderState,
     gl: &WebGl2RenderingContext,
@@ -419,8 +422,8 @@ pub fn update_position(state: &mut RenderState, dt: f64) {
         return;
     }
 
-    let camera_front = state.camera_front.clone();
-    let vup = state.vup.clone();
+    let camera_front = state.camera_front;
+    let vup = state.vup;
     // move slower when more "zoomed in"
     let fov = state.camera_field_of_view;
     if state.keydown_map.w {
@@ -458,7 +461,7 @@ pub fn update_render_globals(state: &mut RenderState) {
 /// focus on whatever object is selected by the cursor if there was a collision
 pub fn update_cursor_position_in_world(state: &mut RenderState) {
     let ray = Ray {
-        origin: state.camera_origin.clone(),
+        origin: state.camera_origin,
         direction: &state.lower_left_corner + &state.horizontal / 2. + &state.vertical / 2.
             - &state.camera_origin,
     };
@@ -471,7 +474,7 @@ pub fn update_cursor_position_in_world(state: &mut RenderState) {
             // there is no blurring if aperture is zerp
             state.focus_distance = distance;
         }
-        state.cursor_point = data.hit_point.clone();
+        state.cursor_point = data.hit_point;
         state.selected_object = data.uuid;
     } else {
         if state.aperture > 0. {

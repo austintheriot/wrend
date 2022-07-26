@@ -1,3 +1,4 @@
+pub mod animate;
 pub mod attribute_id;
 pub mod buffer_id;
 pub mod create_buffer;

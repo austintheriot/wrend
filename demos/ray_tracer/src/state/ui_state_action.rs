@@ -1,4 +1,4 @@
 #[derive(Debug, Clone)]
 pub enum UiStateAction {
-    SetIsKeyboardUser
+    SetIsKeyboardUser,
 }

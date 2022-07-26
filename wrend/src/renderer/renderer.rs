@@ -672,8 +672,7 @@ impl<
     ) -> &mut Self {
         let vao_link_bridge: Bridge<_> = vao_links.into();
         let vao_links: Vec<_> = vao_link_bridge.into();
-        let vao_links: Vec<VertexArrayObjectId> =
-            vao_links.into_iter().map(|link| link.into()).collect();
+        let vao_links: Vec<VertexArrayObjectId> = vao_links.into_iter().collect();
 
         for vao_link in vao_links {
             self.add_vao_link(vao_link);

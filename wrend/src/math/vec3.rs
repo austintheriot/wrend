@@ -142,7 +142,6 @@ impl From<&Vec3> for [f64; 3] {
     }
 }
 
-
 impl From<Vec3> for [f32; 3] {
     fn from(vec3: Vec3) -> Self {
         [vec3.0 as f32, vec3.1 as f32, vec3.2 as f32]
@@ -155,13 +154,11 @@ impl From<&Vec3> for [f32; 3] {
     }
 }
 
-
 impl From<Vec3> for (f64, f64, f64) {
     fn from(vec3: Vec3) -> Self {
         (vec3.0, vec3.1, vec3.2)
     }
 }
-
 
 impl Neg for Vec3 {
     type Output = Vec3;

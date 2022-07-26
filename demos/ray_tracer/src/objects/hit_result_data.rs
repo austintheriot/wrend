@@ -48,9 +48,9 @@ impl HitResultDataBuilder {
     pub fn front_face_and_normal(mut self, r: &Ray, outward_normal: &Vec3) -> Self {
         self.front_face = Vec3::dot(&r.direction, outward_normal) < 0.;
         self.normal = if self.front_face {
-            outward_normal.clone()
+            *outward_normal
         } else {
-            -outward_normal.clone()
+            -*outward_normal
         };
         self
     }
