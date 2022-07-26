@@ -15,8 +15,8 @@ pub struct KeyboardListenerProps {
     pub children: Children,
 }
 
-#[function_component(GlobalListeners)]
-pub fn global_listeners(props: &KeyboardListenerProps) -> Html {
+#[function_component(GlobalControlListeners)]
+pub fn global_control_listeners(props: &KeyboardListenerProps) -> Html {
     let app_context = use_context::<AppContext>().expect(AppContextError::NOT_FOUND);
     let listener_mut_ref: Rc<RefCell<Vec<Box<dyn Any>>>> = use_mut_ref(|| Vec::with_capacity(10));
 

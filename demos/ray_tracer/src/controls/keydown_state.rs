@@ -15,6 +15,11 @@ impl KeydownState {
     pub fn all_false(&self) -> bool {
         !self.w && !self.a && !self.s && !self.d && !self.space && !self.shift
     }
+
+    pub fn set_all_false(&mut self) -> &mut Self {
+        *self = Default::default();
+        self
+    }
 }
 
 impl Index<KeydownKey> for KeydownState {

@@ -1,5 +1,5 @@
 use crate::components::canvas::Canvas;
-use crate::components::global_listeners::GlobalListeners;
+use crate::components::global_control_listeners::GlobalControlListeners;
 use crate::components::keyboard_listener::KeyboardListener;
 use crate::components::menu::Menu;
 use crate::state::app_context::AppContext;
@@ -10,12 +10,12 @@ pub fn app() -> Html {
     html! {
         <ContextProvider<AppContext> context={AppContext::default()}>
             <KeyboardListener>
-                <GlobalListeners>
+                <GlobalControlListeners>
                     <div class="ray-tracer">
                         <Canvas />
                         <Menu />
                     </div>
-                </ GlobalListeners>
+                </ GlobalControlListeners>
             </ KeyboardListener>
         </ContextProvider<AppContext>>
 
