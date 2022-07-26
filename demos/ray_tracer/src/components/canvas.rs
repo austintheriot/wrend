@@ -126,18 +126,10 @@ pub fn canvas() -> Html {
 
                 let render_callback = RenderCallback::new(Rc::new(render));
 
+                let (width, height) = clamped_screen_dimensions();
                 canvas.focus().unwrap();
-
-                // sync state and canvas size
-                {
-                    let (width, height) = clamped_screen_dimensions();
-                    let mut render_state = app_context.render_state.borrow_mut();
-                    render_state
-                        .pipeline_mut()
-                        .set_width_and_height(width, height);
-                    canvas.set_width(width);
-                    canvas.set_height(height);
-                }
+                canvas.set_width(width);
+                canvas.set_height(height);
 
                 let mut renderer_builder = Renderer::builder();
 

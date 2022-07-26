@@ -3,7 +3,6 @@
 in vec2 a_quad_vertex;
 
 out vec2 v_tex_coord;
-
 out vec2 v_quad_vertex;
 
 void main() {
