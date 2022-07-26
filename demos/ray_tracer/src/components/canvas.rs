@@ -131,12 +131,12 @@ pub fn canvas() -> Html {
                 // sync state and canvas size
                 {
                     let (width, height) = clamped_screen_dimensions();
-                    let mut render_state_mut = app_context.render_state.borrow_mut();
-                    render_state_mut.width = width;
-                    render_state_mut.height = height;
-                    render_state_mut.update_pipeline();
-                    canvas.set_width(render_state_mut.width);
-                    canvas.set_height(render_state_mut.height);
+                    let mut render_state = app_context.render_state.borrow_mut();
+                    render_state
+                        .pipeline_mut()
+                        .set_width_and_height(width, height);
+                    canvas.set_width(width);
+                    canvas.set_height(height);
                 }
 
                 let mut renderer_builder = Renderer::builder();

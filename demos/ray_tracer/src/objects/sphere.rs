@@ -60,6 +60,8 @@ pub fn set_sphere_uuids(spheres: &mut Vec<Sphere>) {
     }
 }
 
+/// Shoots a ray from the center of the screen to detect any collisions
+/// This is useful when doing auto-focusing using the center of the screen
 pub fn get_center_hit(spheres: &Vec<Sphere>, ray: Ray) -> HitResult {
     let mut prev_hit_result = HitResult::NoHit;
     let mut closest_so_far = f64::INFINITY;

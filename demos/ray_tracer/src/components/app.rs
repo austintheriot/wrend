@@ -1,6 +1,6 @@
 use crate::components::canvas::Canvas;
-use crate::components::keyboard_listener::KeyboardListener;
 use crate::components::global_listeners::GlobalListeners;
+use crate::components::keyboard_listener::KeyboardListener;
 use crate::components::menu::Menu;
 use crate::state::app_context::AppContext;
 use yew::{function_component, html, prelude::*};

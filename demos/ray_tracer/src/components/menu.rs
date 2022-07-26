@@ -1,10 +1,10 @@
-use wasm_bindgen::JsCast;
-use web_sys::{window, HtmlCanvasElement};
-use yew::prelude::*;
 use crate::components::button::Button;
 use crate::state::app_context::{AppContext, AppContextError};
 use crate::state::ui_state_action::UiStateAction;
 use ui::route::Route;
+use wasm_bindgen::JsCast;
+use web_sys::{window, HtmlCanvasElement};
+use yew::prelude::*;
 use yew_router::prelude::*;
 
 #[function_component(Menu)]
@@ -35,7 +35,7 @@ pub fn menu() -> Html {
     let handle_cancel_button_click = {
         let app_context = app_context.clone();
         Callback::from(move |_: MouseEvent| {
-            app_context.render_state.borrow_mut().is_paused = false;
+            app_context.render_state.borrow_mut().set_is_paused(false);
             app_context
                 .ui_state
                 .dispatch(UiStateAction::SetShowMenu(false));
@@ -45,12 +45,14 @@ pub fn menu() -> Html {
     let handle_save_button_click = {
         let app_context = app_context.clone();
         Callback::from(move |_: MouseEvent| {
-            app_context.render_state.borrow_mut().should_save = true;
+            app_context
+                .render_state
+                .borrow_mut()
+                .set_should_save_image(true);
         })
     };
 
     let handle_reset_button_click = {
-        let app_context = app_context.clone();
         Callback::from(move |_: MouseEvent| {
             *app_context.render_state.borrow_mut() = Default::default();
         })

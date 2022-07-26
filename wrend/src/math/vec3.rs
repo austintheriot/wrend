@@ -17,19 +17,19 @@ use std::ops::SubAssign;
 pub struct Vec3(f64, f64, f64);
 
 impl Vec3 {
-    pub fn new(x: f64, y: f64, z: f64) -> Self {
+    pub const fn new(x: f64, y: f64, z: f64) -> Self {
         Vec3(x, y, z)
     }
 
-    pub fn new_with_tuple(tuple: (f64, f64, f64)) -> Self {
+    pub const fn new_with_tuple(tuple: (f64, f64, f64)) -> Self {
         Vec3(tuple.0, tuple.1, tuple.2)
     }
 
-    pub fn new_with_array(array: [f64; 3]) -> Self {
+    pub const fn new_with_array(array: [f64; 3]) -> Self {
         Vec3(array[0], array[1], array[2])
     }
 
-    pub fn splat(value: f64) -> Self {
+    pub const fn splat(value: f64) -> Self {
         Vec3(value, value, value)
     }
 
@@ -41,27 +41,27 @@ impl Vec3 {
         self.into()
     }
 
-    pub fn x(&self) -> f64 {
+    pub const fn x(&self) -> f64 {
         self.0
     }
 
-    pub fn y(&self) -> f64 {
+    pub const fn y(&self) -> f64 {
         self.1
     }
 
-    pub fn z(&self) -> f64 {
+    pub const fn z(&self) -> f64 {
         self.2
     }
 
-    pub fn r(&self) -> f64 {
+    pub const fn r(&self) -> f64 {
         self.0
     }
 
-    pub fn g(&self) -> f64 {
+    pub const fn g(&self) -> f64 {
         self.1
     }
 
-    pub fn b(&self) -> f64 {
+    pub const fn b(&self) -> f64 {
         self.2
     }
 
@@ -73,11 +73,15 @@ impl Vec3 {
         self.0.powi(2) + self.1.powi(2) + self.2.powi(2)
     }
 
-    pub fn dot(a: &Vec3, b: &Vec3) -> f64 {
+    pub fn dot(a: impl Into<Vec3>, b: impl Into<Vec3>) -> f64 {
+        let a = a.into();
+        let b = b.into();
         a.0 * b.0 + a.1 * b.1 + a.2 * b.2
     }
 
-    pub fn cross(a: &Vec3, b: &Vec3) -> Vec3 {
+    pub fn cross(a: impl Into<Vec3>, b: impl Into<Vec3>) -> Vec3 {
+        let a = a.into();
+        let b = b.into();
         Vec3(
             a.1 * b.2 - a.2 * b.1,
             a.2 * b.0 - a.0 * b.2,
@@ -127,6 +131,12 @@ impl Vec3 {
     pub fn is_near_zero(&self) -> bool {
         let threshold = 1e-10;
         self.x() < threshold && self.y() < threshold && self.z() < threshold
+    }
+}
+
+impl From<&Vec3> for Vec3 {
+    fn from(vec3: &Vec3) -> Self {
+        *vec3
     }
 }
 
@@ -238,14 +248,6 @@ impl<V: Into<Vec3>> Add<V> for Vec3 {
     fn add(self, rhs: V) -> Self::Output {
         let rhs = rhs.into();
         Vec3(self.0 + rhs.0, self.1 + rhs.1, self.2 + rhs.2)
-    }
-}
-
-impl Add<&Vec3> for Vec3 {
-    type Output = Vec3;
-
-    fn add(self, rhs: &Vec3) -> Self::Output {
-        self + *rhs
     }
 }
 

@@ -1,12 +1,11 @@
-use std::f64::consts::PI;
-use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlTexture};
-use wrend::{degrees_to_radians, Vec3};
-
+use super::pipeline::Pipeline;
 use crate::{
-    controls::KeydownMap,
+    controls::{keydown_key::KeydownKey, KeydownState},
     objects::{self, HitResult, Material, MaterialType, Ray, Sphere},
     utils,
 };
+use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlTexture};
+use wrend::Vec3;
 
 pub type RenderStateCount = u32;
 
@@ -22,104 +21,266 @@ pub const NO_SELECTED_OBJECT_ID: i32 = 1000;
 
 #[derive(Clone, Debug, PartialEq, PartialOrd)]
 pub struct RenderState {
-    count: u32,
-    pub width: u32,
-    pub height: u32,
-    pub aspect_ratio: f64,
-    pub samples_per_pixel: u32,
-    pub max_depth: u32,
-    pub focal_length: f64,
-    pub camera_origin: Vec3,
-    pub pitch: f64,
-    pub yaw: f64,
-    pub camera_front: Vec3,
-    pub vup: Vec3,
-    /// stored in radians
-    pub camera_field_of_view: f64,
-    pub u: Vec3,
-    pub v: Vec3,
-    pub w: Vec3,
-    pub aperture: f64,
-    pub lens_radius: f64,
-    pub focus_distance: f64,
-    pub viewport_height: f64,
-    pub viewport_width: f64,
-    pub horizontal: Vec3,
-    pub vertical: Vec3,
-    pub lower_left_corner: Vec3,
-    pub sphere_list: Vec<Sphere>,
+    pipeline: Pipeline,
 
     // RENDER STATE
+    samples_per_pixel: u32,
+    /// number of ray reflections to calculate
+    max_depth: u32,
+    sphere_list: Vec<Sphere>,
     /// is the modal up that asks the user to enable first-person viewing mode?
-    pub is_paused: bool,
+    is_paused: bool,
     /// If the render should render incrementally, averaging together previous frames
-    pub should_average: bool,
+    should_average: bool,
     /// Whether the browser should save a screenshot of the canvas
-    pub should_save: bool,
+    should_save_image: bool,
     /// Used to alternate which framebuffer to render to
-    pub even_odd_count: u32,
+    count: u32,
     /// Used for averaging previous frames together
-    pub render_count: u32,
+    render_count: u32,
     /// The weight of the last frame compared to the each frame before.
-    pub last_frame_weight: f32,
+    last_frame_weight: f32,
     /// Limiting the counted renders allows creating a sliding average of frames
-    pub max_render_count: u32,
+    max_render_count: u32,
     /// Used for calculating time delta in animation loop
-    pub prev_now: f64,
+    prev_now: f64,
     /// this is necessary after the user resizes their viewport
-    pub should_update_to_match_window_size: bool,
-    pub last_resize_time: f64,
+    should_update_to_match_window_size: bool,
+    last_resize_time: f64,
 
     // MOVEMENT
-    pub keydown_map: KeydownMap,
-    pub look_sensitivity: f64,
+    keydown_state: KeydownState,
+    look_sensitivity: f64,
 
     // DEBUGGING
-    pub enable_debugging: i32,
-    pub cursor_point: Vec3,
-    pub selected_object: i32,
+    debugging_enabled: i32,
+    cursor_point: Vec3,
+    selected_object: i32,
 
     // ANALYTICS
-    pub prev_fps_update_time: f64,
-    pub prev_fps: [f64; 50],
+    prev_fps_update_time: f64,
+    prev_fps: [f64; 50],
+}
+
+impl RenderState {
+    pub fn samples_per_pixel(&self) -> u32 {
+        self.samples_per_pixel
+    }
+
+    pub fn sphere_list(&self) -> &[Sphere] {
+        &self.sphere_list
+    }
+
+    pub fn max_depth(&self) -> u32 {
+        self.max_depth
+    }
+
+    pub fn selected_object(&self) -> i32 {
+        self.selected_object
+    }
+
+    pub fn cursor_point(&self) -> Vec3 {
+        self.cursor_point
+    }
+
+    pub fn prev_now(&self) -> f64 {
+        self.prev_now
+    }
+
+    pub fn debugging_enabled(&self) -> i32 {
+        self.debugging_enabled
+    }
+
+    pub fn is_paused(&self) -> bool {
+        self.is_paused
+    }
+
+    pub fn should_save_image(&self) -> bool {
+        self.should_save_image
+    }
+
+    pub fn render_count(&self) -> u32 {
+        self.render_count
+    }
+
+    pub fn last_resize_time(&self) -> f64 {
+        self.last_resize_time
+    }
+
+    pub fn should_update_to_match_window_size(&self) -> bool {
+        self.should_update_to_match_window_size
+    }
+
+    pub fn look_sensitivity(&self) -> f64 {
+        self.look_sensitivity
+    }
+
+    pub fn pipeline(&self) -> &Pipeline {
+        &self.pipeline
+    }
+
+    pub fn pipeline_mut(&mut self) -> &mut Pipeline {
+        &mut self.pipeline
+    }
+
+    pub fn keydown_state(&self) -> &KeydownState {
+        &self.keydown_state
+    }
+
+    pub fn keydown_state_mut(&mut self) -> &mut KeydownState {
+        &mut self.keydown_state
+    }
+
+    pub fn inc_count(&mut self) -> &mut Self {
+        self.count = self.count.wrapping_add(1);
+        self
+    }
+
+    pub fn inc_render_count(&mut self) -> &mut Self {
+        self.render_count = (self.render_count + 1).min(u32::MAX);
+        self
+    }
+
+    pub fn set_should_update_to_match_window_size(
+        &mut self,
+        should_update_to_match_window_size: bool,
+    )-> &mut Self {
+        self.should_update_to_match_window_size = should_update_to_match_window_size;
+        self
+    }
+
+    pub fn set_is_paused(&mut self, is_paused: bool) -> &mut Self {
+        self.is_paused = is_paused;
+        self
+    }
+
+    pub fn set_prev_now(&mut self, prev_now: f64) -> &mut Self {
+        self.prev_now = prev_now;
+        self
+    }
+
+    pub fn set_should_save_image(&mut self, should_save_image: bool) -> &mut Self {
+        self.should_save_image = should_save_image;
+        self
+    }
+
+    pub fn update_render_dimensions_to_match_window(
+        &mut self,
+        gl: &WebGl2RenderingContext,
+        textures: &[WebGlTexture],
+        canvas: &HtmlCanvasElement,
+        now: f64,
+    ) -> &mut Self {
+        // update state
+        self.last_resize_time = now;
+        let (width, height) = utils::clamped_screen_dimensions();
+        let render_state_pipeline: &mut Pipeline = self.as_mut();
+        render_state_pipeline.set_width_and_height(width, height);
+
+        // sync width/height-dependent objects with state
+        canvas.set_width(width);
+        canvas.set_height(height);
+        gl.viewport(0, 0, width as i32, height as i32);
+        for texture in textures.iter() {
+            gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(texture));
+            // load empty texture into gpu -- this will get rendered into later
+            gl.tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_u8_array(
+                WebGl2RenderingContext::TEXTURE_2D,
+                0,
+                WebGl2RenderingContext::RGBA as i32,
+                width as i32,
+                height as i32,
+                0,
+                WebGl2RenderingContext::RGBA,
+                WebGl2RenderingContext::UNSIGNED_BYTE,
+                None,
+            )
+            .unwrap();
+        }
+
+        self
+    }
+
+    pub fn update_position(&mut self, dt: f64)-> &mut Self {
+        if self.keydown_state.all_false() {
+            return self;
+        }
+        
+        let pipeline = self.pipeline();
+        let camera_front = pipeline.camera_front();
+        let vup = pipeline.vup();
+        let fov = pipeline.camera_field_of_view();
+        let camera_origin = pipeline.camera_origin();
+
+        let new_camera_origin = if self.keydown_state[KeydownKey::W] {
+            camera_origin + &camera_front * MOVEMENT_SPEED * dt * fov
+        } else if self.keydown_state[KeydownKey::A] {
+            camera_origin - Vec3::cross(&camera_front, &vup) * MOVEMENT_SPEED * dt * fov
+        } else if self.keydown_state[KeydownKey::S] {
+            camera_origin - &camera_front * MOVEMENT_SPEED * dt * fov
+        } else if self.keydown_state[KeydownKey::D] {
+            camera_origin + Vec3::cross(&camera_front, &vup) * MOVEMENT_SPEED * dt * fov
+        } else if self.keydown_state[KeydownKey::Space] {
+            camera_origin + &vup * MOVEMENT_SPEED * dt * fov
+        } else if self.keydown_state[KeydownKey::Shift] {
+            camera_origin - &vup * MOVEMENT_SPEED * dt * fov
+        } else {
+            camera_origin
+        };
+
+        if new_camera_origin != camera_origin {
+            self.pipeline_mut().set_camera_origin(new_camera_origin);
+        }
+
+        self
+    }
+
+    /// focus on whatever object is selected by the cursor if there was a collision
+    pub fn update_cursor_position_in_world(&mut self) -> &mut Self {
+        let pipeline = self.pipeline();
+        let camera_origin = pipeline.camera_origin();
+        let lower_left_corner = pipeline.lower_left_corner();
+        let horizontal = pipeline.horizontal();
+        let vertical = pipeline.vertical();
+        let aperture = pipeline.aperture();
+
+        let ray = Ray {
+            origin: camera_origin,
+            direction: lower_left_corner + horizontal / 2. + vertical / 2. - camera_origin,
+        };
+
+        let spheres = &self.sphere_list;
+
+        if let HitResult::Hit { data } = objects::get_center_hit(spheres, ray) {
+            let distance = (data.hit_point - camera_origin).length();
+            if aperture > 0. {
+                // there is no blurring if aperture is zerp
+                self.pipeline_mut().set_focus_distance(distance);
+            }
+            self.cursor_point = data.hit_point;
+            self.selected_object = data.uuid;
+        } else {
+            if aperture > 0. {
+                // there is no blurring if aperture is zerp
+                self.pipeline_mut().set_focus_distance(10.0);
+            }
+            self.cursor_point = Vec3::new(0., 0., 0.);
+            self.selected_object = NO_SELECTED_OBJECT_ID;
+        }
+
+        self
+    }
 }
 
 impl Default for RenderState {
     fn default() -> Self {
         let (width, height) = utils::clamped_screen_dimensions();
-        let aspect_ratio = (width as f64) / (height as f64);
-        let aperture = 0.;
-        let focus_distance = 0.75;
-        let lens_radius = aperture / 2.0;
-
-        let camera_field_of_view = PI / 3.;
-        let camera_h = (camera_field_of_view / 2.).tan();
-        let camera_origin = Vec3::new(0., 0., 1.);
-        let pitch = 0.;
-        let yaw = -90.; // look down the z axis by default
-        let camera_front = Vec3::new(
-            f64::cos(degrees_to_radians(yaw)) * f64::cos(degrees_to_radians(pitch)),
-            f64::sin(degrees_to_radians(pitch)),
-            f64::sin(degrees_to_radians(yaw)) * f64::cos(degrees_to_radians(pitch)),
-        );
-        let look_at = &camera_origin + &camera_front;
-        let vup = Vec3::new(0., 1., 0.);
-        let w = Vec3::normalize(&camera_origin - &look_at);
-        let u = Vec3::normalize(Vec3::cross(&vup, &w));
-        let v = Vec3::cross(&w, &u);
-        let viewport_height = 2. * camera_h;
-        let viewport_width = viewport_height * aspect_ratio;
-        let horizontal = focus_distance * viewport_width * &u;
-        let vertical = focus_distance * viewport_height * &v;
-        let focal_length = 1.;
-        let lower_left_corner =
-            &camera_origin - &horizontal / 2. - &vertical / 2. - focus_distance * &w;
 
         let samples_per_pixel = 1;
         let max_depth = 8;
         let should_average = false;
         let should_save = false;
-        let even_odd_count = 0;
+        let count = 0;
         let render_count = 0;
         let last_frame_weight = 1.;
         let max_render_count = 100_000;
@@ -130,7 +291,7 @@ impl Default for RenderState {
         let is_paused = true;
 
         let look_sensitivity = 0.1;
-        let keydown_map = KeydownMap::default();
+        let keydown_state = KeydownState::default();
 
         let prev_fps_update_time = 0.;
         let prev_fps = [0.; 50];
@@ -253,34 +414,15 @@ impl Default for RenderState {
         objects::set_sphere_uuids(&mut sphere_list);
 
         RenderState {
-            width,
-            height,
-            aperture,
-            u,
-            v,
-            w,
-            focus_distance,
-            lens_radius,
-            aspect_ratio,
+            pipeline: Pipeline::new(width, height),
+
             samples_per_pixel,
             max_depth,
-            focal_length,
-            pitch,
-            yaw,
-            camera_origin,
-            camera_front,
-            vup,
-            camera_field_of_view,
-            viewport_height,
-            viewport_width,
-            horizontal,
-            vertical,
-            lower_left_corner,
 
             is_paused,
             should_average,
-            should_save,
-            even_odd_count,
+            should_save_image: should_save,
+            count,
             render_count,
             last_frame_weight,
             max_render_count,
@@ -291,188 +433,38 @@ impl Default for RenderState {
             prev_fps_update_time,
             prev_fps,
 
-            keydown_map,
+            keydown_state,
             look_sensitivity,
 
-            enable_debugging,
+            debugging_enabled: enable_debugging,
             cursor_point,
             selected_object,
 
             sphere_list,
-            count: 0,
         }
     }
 }
 
-impl RenderState {
-    pub fn count(&self) -> RenderStateCount {
-        self.count
-    }
-
-    pub fn width(&self) -> u32 {
-        self.width
-    }
-
-    pub fn height(&self) -> u32 {
-        self.height
-    }
-
-    pub fn inc_count(&mut self) -> &mut Self {
-        self.count = self.count.wrapping_add(1);
-        self
-    }
-
-    // updates all "downstream" variables once a rendering/camera variable has been changed
-    pub fn update_pipeline(&mut self) {
-        // for comparing if any changes occured
-        let prev_state = self.clone();
-
-        self.aspect_ratio = (self.width as f64) / (self.height as f64);
-        let camera_h = (self.camera_field_of_view / 2.).tan();
-        self.camera_front = Vec3::new(
-            f64::cos(degrees_to_radians(self.yaw)) * f64::cos(degrees_to_radians(self.pitch)),
-            f64::sin(degrees_to_radians(self.pitch)),
-            f64::sin(degrees_to_radians(self.yaw)) * f64::cos(degrees_to_radians(self.pitch)),
-        );
-        let look_at = &self.camera_origin + &self.camera_front;
-        self.w = Vec3::normalize(&self.camera_origin - &look_at);
-        self.u = Vec3::normalize(Vec3::cross(&self.vup, &self.w));
-        self.v = Vec3::cross(&self.w, &self.u);
-        self.viewport_height = 2. * camera_h;
-        self.viewport_width = self.viewport_height * self.aspect_ratio;
-        self.horizontal = self.focus_distance * self.viewport_width * &self.u;
-        self.vertical = self.focus_distance * self.viewport_height * &self.v;
-        self.lower_left_corner = &self.camera_origin
-            - &self.horizontal / 2.
-            - &self.vertical / 2.
-            - self.focus_distance * &self.w;
-
-        if self != &prev_state {
-            self.render_count = 0;
-        }
-    }
-
-    pub fn set_fov(&mut self, new_fov_radians: f64) {
-        self.camera_field_of_view = new_fov_radians.clamp(0.0001, PI * 0.75);
-        self.update_pipeline();
-    }
-
-    pub fn set_camera_angles(&mut self, yaw: f64, pitch: f64) {
-        self.yaw = yaw;
-        self.pitch = f64::clamp(pitch, -89., 89.);
-        self.update_pipeline();
+impl AsMut<Pipeline> for RenderState {
+    fn as_mut(&mut self) -> &mut Pipeline {
+        &mut self.pipeline
     }
 }
 
-pub fn update_render_dimensions_to_match_window(
-    state: &mut RenderState,
-    gl: &WebGl2RenderingContext,
-    textures: &[WebGlTexture],
-    canvas: &HtmlCanvasElement,
-    now: f64,
-) {
-    // update state
-    state.last_resize_time = now;
-    let (width, height) = utils::clamped_screen_dimensions();
-    state.width = width;
-    state.height = height;
-    state.update_pipeline();
-
-    // sync width/height-dependent objects with state
-    canvas.set_width(state.width);
-    canvas.set_height(state.height);
-    gl.viewport(0, 0, state.width as i32, state.height as i32);
-    for texture in textures.iter() {
-        gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(texture));
-        // load empty texture into gpu -- this will get rendered into later
-        gl.tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_u8_array(
-            WebGl2RenderingContext::TEXTURE_2D,
-            0,
-            WebGl2RenderingContext::RGBA as i32,
-            state.width as i32,
-            state.height as i32,
-            0,
-            WebGl2RenderingContext::RGBA,
-            WebGl2RenderingContext::UNSIGNED_BYTE,
-            None,
-        )
-        .unwrap();
+impl AsRef<Pipeline> for RenderState {
+    fn as_ref(&self) -> &Pipeline {
+        &self.pipeline
     }
 }
 
-pub fn update_moving_fps_array(now: f64, state: &mut RenderState, dt: f64) {
-    // calculate moving fps
-    state.prev_now = now;
-    let fps = 1000. / dt;
-    let last_index = state.prev_fps.len() - 1;
-    for (i, el) in state.prev_fps.into_iter().skip(1).enumerate() {
-        state.prev_fps[i] = el;
+impl AsMut<KeydownState> for RenderState {
+    fn as_mut(&mut self) -> &mut KeydownState {
+        &mut self.keydown_state
     }
-    state.prev_fps[last_index] = fps;
 }
 
-pub fn update_position(state: &mut RenderState, dt: f64) {
-    if state.keydown_map.all_false() {
-        return;
+impl AsRef<KeydownState> for RenderState {
+    fn as_ref(&self) -> &KeydownState {
+        &self.keydown_state
     }
-
-    let camera_front = state.camera_front;
-    let vup = state.vup;
-    // move slower when more "zoomed in"
-    let fov = state.camera_field_of_view;
-    if state.keydown_map.w {
-        state.camera_origin += &camera_front * MOVEMENT_SPEED * dt * fov;
-    }
-    if state.keydown_map.a {
-        state.camera_origin -= Vec3::cross(&camera_front, &vup) * MOVEMENT_SPEED * dt * fov;
-    }
-    if state.keydown_map.s {
-        state.camera_origin -= &camera_front * MOVEMENT_SPEED * dt * fov;
-    }
-    if state.keydown_map.d {
-        state.camera_origin += Vec3::cross(&camera_front, &vup) * MOVEMENT_SPEED * dt * fov;
-    }
-    if state.keydown_map.space {
-        state.camera_origin += &vup * MOVEMENT_SPEED * dt * fov;
-    }
-    if state.keydown_map.shift {
-        state.camera_origin -= &vup * MOVEMENT_SPEED * dt * fov;
-    }
-
-    update_cursor_position_in_world(state);
-    state.update_pipeline();
-}
-
-pub fn update_render_globals(state: &mut RenderState) {
-    state.even_odd_count += 1;
-    state.render_count = (state.render_count + 1).min(state.max_render_count);
-}
-
-/// focus on whatever object is selected by the cursor if there was a collision
-pub fn update_cursor_position_in_world(state: &mut RenderState) {
-    let ray = Ray {
-        origin: state.camera_origin,
-        direction: &state.lower_left_corner + &state.horizontal / 2. + &state.vertical / 2.
-            - &state.camera_origin,
-    };
-
-    let spheres = &state.sphere_list;
-
-    if let HitResult::Hit { data } = objects::get_center_hit(spheres, ray) {
-        let distance = (&data.hit_point - &state.camera_origin).length();
-        if state.aperture > 0. {
-            // there is no blurring if aperture is zerp
-            state.focus_distance = distance;
-        }
-        state.cursor_point = data.hit_point;
-        state.selected_object = data.uuid;
-    } else {
-        if state.aperture > 0. {
-            // there is no blurring if aperture is zerp
-            state.focus_distance = 10.;
-        }
-        state.cursor_point = Vec3::new(0., 0., 0.);
-        state.selected_object = NO_SELECTED_OBJECT_ID;
-    }
-    state.update_pipeline();
 }

@@ -14,8 +14,9 @@ pub fn make_create_render_texture(
             .expect("Should be able to create textures from WebGL context");
 
         let render_state = ctx.user_ctx().as_ref().unwrap().render_state.borrow();
-        let width = render_state.width();
-        let height = render_state.height();
+        let pipeline = render_state.pipeline();
+        let width = pipeline.width();
+        let height = pipeline.height();
         std::mem::drop(render_state);
 
         gl.active_texture(WebGl2RenderingContext::TEXTURE0 + texture_id.location());

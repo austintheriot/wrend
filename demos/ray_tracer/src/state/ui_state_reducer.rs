@@ -13,7 +13,7 @@ impl Reducible for UiState {
             }
             UiStateAction::SetShowMenu(show_menu) => {
                 next_state.set_show_menu(show_menu);
-            },
+            }
         }
         Rc::new(next_state)
     }

@@ -15,7 +15,7 @@ pub fn create_sphere_uniform_links() -> Vec<UniformLink<ProgramId, String, AppCo
                 let uniform_location = ctx.uniform_location();
                 let user_ctx = ctx.user_ctx().unwrap();
                 let render_state = user_ctx.render_state.borrow();
-                let sphere = &render_state.sphere_list.get(i);
+                let sphere = &render_state.sphere_list().get(i);
                 if let Some(sphere) = sphere {
                     let sphere_center: [f32; 3] = sphere.center.into();
                     gl.uniform3fv_with_f32_array(Some(uniform_location), sphere_center.as_slice());
@@ -33,7 +33,7 @@ pub fn create_sphere_uniform_links() -> Vec<UniformLink<ProgramId, String, AppCo
                 let uniform_location = ctx.uniform_location();
                 let user_ctx = ctx.user_ctx().unwrap();
                 let render_state = user_ctx.render_state.borrow();
-                let sphere = &render_state.sphere_list.get(i);
+                let sphere = &render_state.sphere_list().get(i);
                 if let Some(sphere) = sphere {
                     gl.uniform1f(Some(uniform_location), sphere.radius as f32);
                 }
@@ -50,7 +50,7 @@ pub fn create_sphere_uniform_links() -> Vec<UniformLink<ProgramId, String, AppCo
                 let uniform_location = ctx.uniform_location();
                 let user_ctx = ctx.user_ctx().unwrap();
                 let render_state = user_ctx.render_state.borrow();
-                let sphere = &render_state.sphere_list.get(i);
+                let sphere = &render_state.sphere_list().get(i);
                 if let Some(sphere) = sphere {
                     gl.uniform1i(
                         Some(uniform_location),
@@ -70,7 +70,7 @@ pub fn create_sphere_uniform_links() -> Vec<UniformLink<ProgramId, String, AppCo
                 let uniform_location = ctx.uniform_location();
                 let user_ctx = ctx.user_ctx().unwrap();
                 let render_state = user_ctx.render_state.borrow();
-                let sphere = &render_state.sphere_list.get(i);
+                let sphere = &render_state.sphere_list().get(i);
                 if let Some(sphere) = sphere {
                     gl.uniform3fv_with_f32_array(
                         Some(uniform_location),
@@ -90,7 +90,7 @@ pub fn create_sphere_uniform_links() -> Vec<UniformLink<ProgramId, String, AppCo
                 let uniform_location = ctx.uniform_location();
                 let user_ctx = ctx.user_ctx().unwrap();
                 let render_state = user_ctx.render_state.borrow();
-                let sphere = &render_state.sphere_list.get(i);
+                let sphere = &render_state.sphere_list().get(i);
                 if let Some(sphere) = sphere {
                     gl.uniform1f(Some(uniform_location), sphere.material.fuzz);
                 }
@@ -107,7 +107,7 @@ pub fn create_sphere_uniform_links() -> Vec<UniformLink<ProgramId, String, AppCo
                 let uniform_location = ctx.uniform_location();
                 let user_ctx = ctx.user_ctx().unwrap();
                 let render_state = user_ctx.render_state.borrow();
-                let sphere = &render_state.sphere_list.get(i);
+                let sphere = &render_state.sphere_list().get(i);
                 if let Some(sphere) = sphere {
                     gl.uniform1f(Some(uniform_location), sphere.material.refraction_index);
                 }
@@ -124,7 +124,7 @@ pub fn create_sphere_uniform_links() -> Vec<UniformLink<ProgramId, String, AppCo
                 let uniform_location = ctx.uniform_location();
                 let user_ctx = ctx.user_ctx().unwrap();
                 let render_state = user_ctx.render_state.borrow();
-                let sphere = &render_state.sphere_list.get(i);
+                let sphere = &render_state.sphere_list().get(i);
                 let active_state = sphere.map(|_| 1).unwrap_or(0);
                 gl.uniform1i(Some(uniform_location), active_state);
             })),
@@ -140,7 +140,7 @@ pub fn create_sphere_uniform_links() -> Vec<UniformLink<ProgramId, String, AppCo
                 let uniform_location = ctx.uniform_location();
                 let user_ctx = ctx.user_ctx().unwrap();
                 let render_state = user_ctx.render_state.borrow();
-                let sphere = &render_state.sphere_list.get(i);
+                let sphere = &render_state.sphere_list().get(i);
                 if let Some(sphere) = sphere {
                     gl.uniform1i(Some(uniform_location), sphere.uuid as i32);
                 }
@@ -218,7 +218,8 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
-            gl.uniform1f(Some(uniform_location), render_state.width as f32);
+            let pipeline = render_state.pipeline();
+            gl.uniform1f(Some(uniform_location), pipeline.width() as f32);
         })),
     );
     uniform_link.set_use_init_callback_for_update(true);
@@ -232,7 +233,8 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
-            gl.uniform1f(Some(uniform_location), render_state.height as f32);
+            let pipeline = render_state.pipeline();
+            gl.uniform1f(Some(uniform_location), pipeline.height() as f32);
         })),
     );
     uniform_link.set_use_init_callback_for_update(true);
@@ -248,7 +250,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let render_state = user_ctx.render_state.borrow();
             gl.uniform1i(
                 Some(uniform_location),
-                render_state.samples_per_pixel as i32,
+                render_state.samples_per_pixel() as i32,
             );
         })),
     );
@@ -307,9 +309,10 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
+            let pipeline = render_state.pipeline();
             gl.uniform3fv_with_f32_array(
                 Some(uniform_location),
-                &render_state.camera_origin.to_f32_array(),
+                &pipeline.camera_origin().to_f32_array(),
             );
         })),
     );
@@ -324,9 +327,10 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
+            let pipeline = render_state.pipeline();
             gl.uniform3fv_with_f32_array(
                 Some(uniform_location),
-                &render_state.horizontal.to_f32_array(),
+                &pipeline.horizontal().to_f32_array(),
             );
         })),
     );
@@ -341,9 +345,10 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
+            let pipeline = render_state.pipeline();
             gl.uniform3fv_with_f32_array(
                 Some(uniform_location),
-                &render_state.vertical.to_f32_array(),
+                &pipeline.vertical().to_f32_array(),
             );
         })),
     );
@@ -358,9 +363,10 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
+            let pipeline = render_state.pipeline();
             gl.uniform3fv_with_f32_array(
                 Some(uniform_location),
-                &render_state.lower_left_corner.to_f32_array(),
+                &pipeline.lower_left_corner().to_f32_array(),
             );
         })),
     );
@@ -375,7 +381,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
-            gl.uniform1i(Some(uniform_location), render_state.max_depth as i32);
+            gl.uniform1i(Some(uniform_location), render_state.max_depth() as i32);
         })),
     );
     uniform_link.set_use_init_callback_for_update(true);
@@ -425,7 +431,8 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
-            gl.uniform1f(Some(uniform_location), render_state.lens_radius as f32);
+            let pipeline = render_state.pipeline();
+            gl.uniform1f(Some(uniform_location), pipeline.lens_radius() as f32);
         })),
     );
     uniform_link.set_use_init_callback_for_update(true);
@@ -439,7 +446,8 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
-            gl.uniform3fv_with_f32_array(Some(uniform_location), &render_state.u.to_f32_array());
+            let pipeline = render_state.pipeline();
+            gl.uniform3fv_with_f32_array(Some(uniform_location), &pipeline.u().to_f32_array());
         })),
     );
     uniform_link.set_use_init_callback_for_update(true);
@@ -453,7 +461,8 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
-            gl.uniform3fv_with_f32_array(Some(uniform_location), &render_state.v.to_f32_array());
+            let pipeline = render_state.pipeline();
+            gl.uniform3fv_with_f32_array(Some(uniform_location), &pipeline.v().to_f32_array());
         })),
     );
     uniform_link.set_use_init_callback_for_update(true);
@@ -481,7 +490,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
-            gl.uniform1i(Some(uniform_location), render_state.selected_object);
+            gl.uniform1i(Some(uniform_location), render_state.selected_object());
         })),
     );
     uniform_link.set_use_init_callback_for_update(true);
@@ -497,7 +506,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let render_state = user_ctx.render_state.borrow();
             gl.uniform3fv_with_f32_array(
                 Some(uniform_location),
-                &render_state.cursor_point.to_f32_array(),
+                &render_state.cursor_point().to_f32_array(),
             );
         })),
     );
@@ -512,7 +521,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
-            gl.uniform1i(Some(uniform_location), render_state.enable_debugging);
+            gl.uniform1i(Some(uniform_location), render_state.debugging_enabled());
         })),
     );
     uniform_link.set_use_init_callback_for_update(true);

@@ -1,5 +1,5 @@
 #[derive(Debug, Clone)]
 pub enum UiStateAction {
     SetIsKeyboardUser,
-    SetShowMenu(bool)
+    SetShowMenu(bool),
 }

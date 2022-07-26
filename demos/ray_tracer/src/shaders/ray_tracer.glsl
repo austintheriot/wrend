@@ -75,31 +75,32 @@ in vec2 v_quad_vertex;
 out vec4 o_color;
 
 // video frame, received as a 2d texture
-uniform sampler2D u_texture;
 uniform float u_width;
 uniform float u_height;
 uniform float u_now;
 uniform int u_samples_per_pixel;
-// uniform float u_aspect_ratio;
-// uniform float u_viewport_height;
-// uniform float u_viewport_width;
-// uniform float u_focal_length;
 uniform vec3 u_camera_origin;
 uniform vec3 u_horizontal;
 uniform vec3 u_vertical;
 uniform vec3 u_lower_left_corner;
 uniform int u_max_depth;
-// uniform int u_render_count;
-// uniform bool u_should_average;
-// uniform float u_last_frame_weight;
 uniform float u_lens_radius;
 uniform vec3 u_u;
 uniform vec3 u_v;
-// uniform vec3 u_w;
 uniform int u_enable_debugging;
 uniform int u_selected_object;
 uniform vec3 u_cursor_point;
 uniform Sphere[15] u_sphere_list;
+
+// uniform sampler2D u_texture;
+// uniform float u_aspect_ratio;
+// uniform float u_viewport_height;
+// uniform float u_viewport_width;
+// uniform float u_focal_length;
+// uniform int u_render_count;
+// uniform bool u_should_average;
+// uniform float u_last_frame_weight;
+// uniform vec3 u_w;
 
 // FUNCTIONS //////////////////////////////////////////////////////
 vec3 ray_at(in Ray r, float hit_t) {
