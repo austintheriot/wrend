@@ -8,6 +8,7 @@ use crate::{
     WebGlContextError,
 };
 use std::collections::{HashMap, HashSet};
+use log::info;
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{
     window, HtmlAnchorElement, HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram,
@@ -520,6 +521,7 @@ impl<
         let uniform_link_bridge: Bridge<_> = uniform_links.into();
         let uniform_links: Vec<_> = uniform_link_bridge.into();
 
+        info!("Adding new uniform links: {:#?}", uniform_links);
         for uniform_link in uniform_links {
             self.add_uniform_link(uniform_link);
         }
@@ -855,6 +857,7 @@ impl<
     ) -> Result<Uniform<ProgramId, UniformId, UserCtx>, CreateUniformError> {
         let uniform_id = uniform_link.uniform_id().clone();
         let program_ids = uniform_link.program_ids().clone();
+        let use_init_callback_for_update = uniform_link.use_init_callback_for_update();
         let gl = self.gl.as_ref().ok_or(CreateUniformError::NoContext)?;
         let now = Self::now();
         let user_ctx = self.user_ctx.as_ref().map(Clone::clone);
@@ -891,6 +894,7 @@ impl<
             initialize_callback,
             update_callback,
             should_update_callback,
+            use_init_callback_for_update,
         );
 
         Ok(uniform)

@@ -1,4 +1,5 @@
 use std::f64::consts::PI;
+use log::info;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlTexture};
 use wrend::{degrees_to_radians, Vec3};
 
@@ -427,6 +428,7 @@ pub fn update_position(state: &mut RenderState, dt: f64) {
     // move slower when more "zoomed in"
     let fov = state.camera_field_of_view;
     if state.keydown_map.w {
+        info!("w is currently pressed");
         state.camera_origin += &camera_front * MOVEMENT_SPEED * dt * fov;
     }
     if state.keydown_map.a {

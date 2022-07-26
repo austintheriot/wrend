@@ -1,30 +1,20 @@
-use crate::state::{
-    app_context::AppContext,
-    render_state::{update_cursor_position_in_world, RenderState},
-};
+use crate::state::{app_context::AppContext, render_state::update_cursor_position_in_world};
 use log::info;
 use wasm_bindgen::JsValue;
-use web_sys::{Event, KeyboardEvent, MouseEvent, WheelEvent};
-use yew::Callback;
+use web_sys::{KeyboardEvent, MouseEvent, WheelEvent};
 
-pub fn make_handle_wheel(app_context: AppContext) -> Callback<WheelEvent> {
-    Callback::from(move |e: WheelEvent| {
+pub fn make_handle_wheel(app_context: AppContext) -> impl Fn(WheelEvent) + 'static {
+    move |e: WheelEvent| {
         let mut render_state = app_context.render_state.borrow_mut();
         let adjustment = 1. + 0.03 * e.delta_y().signum();
         let new_value = render_state.camera_field_of_view * adjustment;
         render_state.set_fov(new_value);
-    })
+    }
 }
 
-pub fn make_handle_reset(app_context: AppContext) -> Callback<Event> {
-    Callback::from(move |_| {
-        let mut render_state = app_context.render_state.borrow_mut();
-        *render_state = RenderState::default();
-    })
-}
-
-pub fn make_handle_keydown(app_context: AppContext) -> Callback<KeyboardEvent> {
-    Callback::from(move |e: KeyboardEvent| {
+pub fn make_handle_keydown(app_context: AppContext) -> impl Fn(KeyboardEvent) + 'static {
+    move |e: KeyboardEvent| {
+        info!("Keydown pressed!");
         let mut render_state = app_context.render_state.borrow_mut();
         match e.key().as_str() {
             "w" | "W" => render_state.keydown_map.w = true,
@@ -36,11 +26,11 @@ pub fn make_handle_keydown(app_context: AppContext) -> Callback<KeyboardEvent> {
             "Escape" => render_state.is_paused = true,
             _ => {}
         }
-    })
+    }
 }
 
-pub fn make_handle_keyup(app_context: AppContext) -> Callback<KeyboardEvent> {
-    Callback::from(move |e: KeyboardEvent| {
+pub fn make_handle_keyup(app_context: AppContext) -> impl Fn(KeyboardEvent) + 'static {
+    move |e: KeyboardEvent| {
         let mut render_state = app_context.render_state.borrow_mut();
         match e.key().as_str() {
             "w" | "W" => render_state.keydown_map.w = false,
@@ -51,7 +41,7 @@ pub fn make_handle_keyup(app_context: AppContext) -> Callback<KeyboardEvent> {
             " " => render_state.keydown_map.space = false,
             _ => {}
         }
-    })
+    }
 }
 
 pub fn make_handle_resize(app_context: AppContext) -> impl Fn(JsValue) + 'static {
@@ -62,8 +52,8 @@ pub fn make_handle_resize(app_context: AppContext) -> impl Fn(JsValue) + 'static
     }
 }
 
-pub fn make_handle_mouse_move(app_context: AppContext) -> Callback<MouseEvent> {
-    Callback::from(move |e: MouseEvent| {
+pub fn make_handle_mouse_move(app_context: AppContext) -> impl Fn(MouseEvent) + 'static {
+    move |e: MouseEvent| {
         let mut render_state = app_context.render_state.borrow_mut();
         // camera should move slower when more "zoomed in"
         let dx = (e.movement_x() as f64)
@@ -76,13 +66,5 @@ pub fn make_handle_mouse_move(app_context: AppContext) -> Callback<MouseEvent> {
         let pitch = render_state.pitch + dy;
         render_state.set_camera_angles(yaw, pitch);
         update_cursor_position_in_world(&mut render_state);
-    })
-}
-
-pub fn make_handle_save(app_context: AppContext) -> Callback<Event> {
-    Callback::from(move |_| {
-        let mut render_state = app_context.render_state.borrow_mut();
-        render_state.should_render = true;
-        render_state.should_save = true;
-    })
+    }
 }

@@ -15,6 +15,7 @@ pub struct Uniform<ProgramId: Id, UniformId: Id, UserCtx: Clone> {
     initialize_callback: UniformCallback<UserCtx>,
     update_callback: Option<UniformCallback<UserCtx>>,
     should_update_callback: Option<UniformShouldUpdateCallback<UserCtx>>,
+    use_init_callback_for_update: bool,
 }
 
 impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Uniform<ProgramId, UniformId, UserCtx> {
@@ -27,6 +28,7 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Uniform<ProgramId, UniformId,
         initialize_callback: UniformCallback<UserCtx>,
         update_callback: Option<UniformCallback<UserCtx>>,
         should_update_callback: Option<UniformShouldUpdateCallback<UserCtx>>,
+        use_init_callback_for_update: bool,
     ) -> Self {
         Self {
             program_ids,
@@ -35,6 +37,7 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Uniform<ProgramId, UniformId,
             initialize_callback,
             update_callback,
             should_update_callback,
+            use_init_callback_for_update,
         }
     }
 
@@ -83,8 +86,10 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Uniform<ProgramId, UniformId,
 
             let ctx = UniformContext::new(gl.clone(), now, uniform_location.clone(), user_ctx);
             let should_update_callback = self.should_update_callback().unwrap_or_default();
-            if let Some(update_callback) = &self.update_callback {
-                if should_update_callback(&ctx) {
+            if (should_update_callback)(&ctx) {
+                if self.use_init_callback_for_update {
+                    (self.initialize_callback)(&ctx);
+                } else if let Some(update_callback) = &self.update_callback {
                     (update_callback)(&ctx)
                 }
             }

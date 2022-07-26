@@ -1,5 +1,4 @@
 use crate::{
-    controls::{make_handle_resize, Listener},
     graphics::{
         animate::animate,
         attribute_id::AttributeId,
@@ -25,7 +24,7 @@ use crate::{
 };
 
 use std::rc::Rc;
-use web_sys::{window, HtmlCanvasElement};
+use web_sys::HtmlCanvasElement;
 use wrend::{
     AnimationCallback, AttributeCreateCallback, AttributeLink, BufferCreateCallback, BufferLink,
     FramebufferCreateCallback, FramebufferLink, ProgramLinkBuilder, RenderCallback, Renderer,
@@ -43,7 +42,6 @@ pub fn canvas() -> Html {
     let app_context = use_context::<AppContext>().expect(AppContextError::NOT_FOUND);
     let canvas_ref = use_node_ref();
     let animation_handle = use_mut_ref(|| None);
-    let listeners = use_mut_ref(Vec::new);
 
     use_effect_with_deps(
         {
@@ -129,13 +127,6 @@ pub fn canvas() -> Html {
                 let render_callback = RenderCallback::new(Rc::new(render));
 
                 canvas.focus().unwrap();
-
-                // add global listeners
-                listeners.borrow_mut().push(Listener::new(
-                    window().unwrap().as_ref(),
-                    "resize",
-                    make_handle_resize(app_context.clone()),
-                ));
 
                 // sync state and canvas size
                 {

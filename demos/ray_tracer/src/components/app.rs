@@ -1,5 +1,6 @@
 use crate::components::canvas::Canvas;
 use crate::components::keyboard_listener::KeyboardListener;
+use crate::components::global_listeners::GlobalListeners;
 use crate::components::menu::Menu;
 use crate::state::app_context::AppContext;
 use ui::route::Route;
@@ -11,11 +12,13 @@ pub fn app() -> Html {
     html! {
         <ContextProvider<AppContext> context={AppContext::default()}>
             <KeyboardListener>
-                <div class="ray-tracer">
-                    <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
-                    <Canvas />
-                    <Menu />
-                </div>
+                <GlobalListeners>
+                    <div class="ray-tracer">
+                        <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
+                        <Canvas />
+                        <Menu />
+                    </div>
+                </ GlobalListeners>
             </ KeyboardListener>
         </ContextProvider<AppContext>>
 

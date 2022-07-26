@@ -14,6 +14,7 @@ pub struct UniformLink<ProgramId: Id, UniformId: Id, UserCtx: Clone> {
     initialize_callback: UniformCallback<UserCtx>,
     update_callback: Option<UniformCallback<UserCtx>>,
     should_update_callback: Option<UniformShouldUpdateCallback<UserCtx>>,
+    use_init_callback_for_update: bool,
 }
 
 impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> UniformLink<ProgramId, UniformId, UserCtx> {
@@ -28,6 +29,7 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> UniformLink<ProgramId, Unifor
             program_ids,
             uniform_id,
             initialize_callback,
+            use_init_callback_for_update: false,
             should_update_callback: None,
             update_callback: None,
         }
@@ -70,6 +72,18 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> UniformLink<ProgramId, Unifor
         self.update_callback.replace(callback);
         self
     }
+
+    pub fn use_init_callback_for_update(&self) -> bool {
+        self.use_init_callback_for_update
+    }
+
+    pub fn set_use_init_callback_for_update(
+        &mut self,
+        use_init_callback_for_update: bool,
+    ) -> &mut Self {
+        self.use_init_callback_for_update = use_init_callback_for_update;
+        self
+    }
 }
 
 impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Debug
@@ -82,6 +96,10 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Debug
             .field("initialize_callback", &self.initialize_callback)
             .field("update_callback", &self.update_callback)
             .field("should_update_callback", &self.should_update_callback)
+            .field(
+                "use_init_callback_for_update",
+                &self.use_init_callback_for_update,
+            )
             .finish()
     }
 }

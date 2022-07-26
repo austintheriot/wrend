@@ -73,7 +73,7 @@ pub fn animate(
         renderer.update_uniforms();
         renderer.render();
 
-        {
+            {
             let mut render_state = render_state.borrow_mut();
             if render_state.should_save {
                 render_state.should_save = false;
