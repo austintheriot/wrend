@@ -153,46 +153,50 @@ pub fn create_sphere_uniform_links() -> Vec<UniformLink<ProgramId, String, AppCo
     sphere_uniforms
 }
 
-pub fn create_general_uniform_links() -> Vec<UniformLink<ProgramId, String, AppContext>> {
-    vec![
-        UniformLink::new(
-            ProgramId::AverageRenders,
-            String::from("u_averaged_render_texture_a"),
-            UniformCallback::new(Rc::new(|ctx| {
-                let gl = ctx.gl();
-                let uniform_location = ctx.uniform_location();
-                gl.uniform1i(
-                    Some(uniform_location),
-                    TextureId::AveragedRenderA.location() as i32,
-                );
-            })),
-        ),
-        UniformLink::new(
-            ProgramId::AverageRenders,
-            String::from("u_averaged_render_texture_b"),
-            UniformCallback::new(Rc::new(|ctx| {
-                let gl = ctx.gl();
-                let uniform_location = ctx.uniform_location();
-                gl.uniform1i(
-                    Some(uniform_location),
-                    TextureId::AveragedRenderB.location() as i32,
-                );
-            })),
-        ),
-        UniformLink::new(
-            ProgramId::AverageRenders,
-            String::from("u_prev_render_texture"),
-            UniformCallback::new(Rc::new(|ctx| {
-                let gl = ctx.gl();
-                let uniform_location = ctx.uniform_location();
-                gl.uniform1i(
-                    Some(uniform_location),
-                    TextureId::PrevRender.location() as i32,
-                );
-            })),
-        ),
-    ]
+pub fn create_shared_uniform_links() -> Vec<UniformLink<ProgramId, String, AppContext>> {
+    let mut shared_uniform_links = vec![UniformLink::new(
+        [ProgramId::AverageRenders, ProgramId::PassThrough],
+        String::from("u_averaged_render_texture"),
+        UniformCallback::new(Rc::new(|ctx| {
+            let gl = ctx.gl();
+            let uniform_location = ctx.uniform_location();
+            gl.uniform1i(
+                Some(uniform_location),
+                // the location is the same for both `A` and `B`
+                TextureId::AveragedRenderA.location() as i32,
+            );
+        })),
+    ), 
+    UniformLink::new(
+        [ProgramId::AverageRenders, ProgramId::PassThrough],
+        String::from("u_prev_render_texture"),
+        UniformCallback::new(Rc::new(|ctx| {
+            let gl = ctx.gl();
+            let uniform_location = ctx.uniform_location();
+            gl.uniform1i(
+                Some(uniform_location),
+                TextureId::PrevRender.location() as i32,
+            );
+        })),
+    )];
+
+    let mut uniform_link = UniformLink::new(
+        [ProgramId::AverageRenders, ProgramId::PassThrough],
+        String::from("u_render_count"),
+        UniformCallback::new(Rc::new(move |ctx: &UniformContext<AppContext>| {
+            let gl = ctx.gl();
+            let uniform_location = ctx.uniform_location();
+            let user_ctx = ctx.user_ctx().unwrap();
+            let render_state = user_ctx.render_state.borrow();
+            gl.uniform1i(Some(&uniform_location), render_state.render_count() as i32);
+        })),
+    );
+    uniform_link.set_use_init_callback_for_update(true);
+    shared_uniform_links.push(uniform_link);
+
+    shared_uniform_links
 }
+
 
 pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, String, AppContext>>
 {
@@ -387,17 +391,6 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
     uniform_link.set_use_init_callback_for_update(true);
     general_ray_tracer_uniform_links.push(uniform_link);
 
-    // let mut uniform_link = UniformLink::new(
-    //     ProgramId::RayTracer,
-    //     String::from("u_render_count"),
-    //     UniformCallback::new(Rc::new(move |ctx: &UniformContext<AppContext>| {
-    //         let gl = ctx.gl();
-    //         let uniform_location = ctx.uniform_location();
-    //         let user_ctx = ctx.user_ctx().unwrap();
-    //         let render_state = user_ctx.render_state.borrow();
-    //         gl.uniform1i(Some(&uniform_location), render_state.render_count as i32);
-    //     })),
-    // ),
     // let mut uniform_link = UniformLink::new(
     //     ProgramId::RayTracer,
     //     String::from("u_last_frame_weight"),

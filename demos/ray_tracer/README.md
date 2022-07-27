@@ -4,3 +4,4 @@
 - Add progressive rendering
 - Add ability to create / move objects
 - Fix error with pointer lock control
+- Stop rendering once maximum averages are reached

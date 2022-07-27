@@ -1,10 +1,12 @@
+use std::ops::Add;
+
 use super::camera::Camera;
 use crate::{
     controls::{keydown_key::KeydownKey, KeydownState},
     objects::{self, HitResult, Material, MaterialType, Ray, Sphere},
     utils,
 };
-use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlTexture};
+use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlTexture, window};
 use wrend::Vec3;
 
 pub type RenderStateCount = u32;
@@ -24,6 +26,8 @@ pub const MAX_NUM_SPHERES: u8 = 15;
 /// Since GLSL has no concept of `None`, it's easier to store this as a plain number
 pub const NO_SELECTED_OBJECT_ID: i32 = 1000;
 
+pub const MAX_FRAME_AVERAGES: u32 = 100_000;
+
 #[derive(Clone, Debug, PartialEq, PartialOrd)]
 pub struct RenderState {
     camera: Camera,
@@ -37,9 +41,8 @@ pub struct RenderState {
     is_paused: bool,
     /// Whether the browser should save a screenshot of the canvas
     should_save_image: bool,
-    /// Used to alternate which framebuffer to render to
-    count: u32,
     /// Used for averaging previous frames together
+    /// and also for determine which framebuffer to render to
     render_count: u32,
     /// The weight of the last frame compared to the each frame before.
     last_frame_weight: f32,
@@ -59,6 +62,60 @@ pub struct RenderState {
     debugging_enabled: i32,
     cursor_point: Vec3,
     selected_object: i32,
+}
+
+impl Default for RenderState {
+    fn default() -> Self {
+        // just uses default 1x1px size at first:
+        // this is updated at initialization time
+        let pipeline = Camera::default();
+        let samples_per_pixel = 1;
+        let max_depth = 8;
+        let should_save_image = false;
+        let render_count = 0;
+        let last_frame_weight = 1.;
+        let max_render_count = 100_000;
+        let prev_now = 0.;
+        // let width / height become synced on the first render
+        let window_size_out_of_sync = true;
+        let prev_resize_sync_time = 0.0;
+
+        let is_paused = true;
+
+        let look_sensitivity = 0.1;
+        let keydown_state = KeydownState::default();
+
+        let enable_debugging = 0;
+        let cursor_point = Vec3::new(0., 0., 0.);
+        let selected_object = NO_SELECTED_OBJECT_ID;
+
+        let sphere_list = create_default_sphere_list();
+
+        RenderState {
+            camera: pipeline,
+
+            samples_per_pixel,
+            max_depth,
+
+            is_paused,
+            should_save_image,
+            render_count,
+            last_frame_weight,
+            max_render_count,
+            prev_now,
+            window_size_out_of_sync,
+            prev_resize_sync_time,
+
+            keydown_state,
+            look_sensitivity,
+
+            debugging_enabled: enable_debugging,
+            cursor_point,
+            selected_object,
+
+            sphere_list,
+        }
+    }
 }
 
 impl RenderState {
@@ -130,13 +187,13 @@ impl RenderState {
         &mut self.keydown_state
     }
 
-    pub fn inc_count(&mut self) -> &mut Self {
-        self.count = self.count.wrapping_add(1);
+    pub fn reset_render_count(&mut self) -> &mut Self {
+        self.render_count = 0;
         self
     }
 
     pub fn inc_render_count(&mut self) -> &mut Self {
-        self.render_count = self.render_count.wrapping_add(1);
+        self.render_count = self.render_count.add(1).min(MAX_FRAME_AVERAGES);
         self
     }
 
@@ -165,12 +222,14 @@ impl RenderState {
     pub fn sync_dimensions(
         &mut self,
         gl: &WebGl2RenderingContext,
-        textures: &[WebGlTexture],
+        render_textures: &[WebGlTexture],
         canvas: &HtmlCanvasElement,
         now: f64,
     ) -> &mut Self {
         // update state
         self.prev_resize_sync_time = now;
+        self.reset_render_count();
+        self.set_window_size_out_of_sync(false);
 
         // sync internal state
         let (width, height) = utils::clamped_screen_dimensions();
@@ -184,8 +243,8 @@ impl RenderState {
         //sync WebGL
         gl.viewport(0, 0, width as i32, height as i32);
 
-        // sync textures
-        for texture in textures.iter() {
+        // sync textures that get rendered into
+        for texture in render_textures.iter() {
             gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(texture));
             gl.tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_u8_array(
                 WebGl2RenderingContext::TEXTURE_2D,
@@ -204,7 +263,11 @@ impl RenderState {
         self
     }
 
-    pub fn update_position(&mut self, dt: f64) -> &mut Self {
+    pub fn update_position(&mut self) -> &mut Self {
+        let now = window().unwrap().performance().unwrap().now();
+        let dt = now - self.prev_now();
+        self.set_prev_now(now);
+
         if self.keydown_state.no_keys_down() {
             return self;
         }
@@ -272,62 +335,6 @@ impl RenderState {
         }
 
         self
-    }
-}
-
-impl Default for RenderState {
-    fn default() -> Self {
-        // just uses default 1x1px size at first:
-        // this is updated at initialization time
-        let pipeline = Camera::default();
-        let samples_per_pixel = 1;
-        let max_depth = 8;
-        let should_save_image = false;
-        let count = 0;
-        let render_count = 0;
-        let last_frame_weight = 1.;
-        let max_render_count = 100_000;
-        let prev_now = 0.;
-        // let width / height become synced on the first render
-        let window_size_out_of_sync = true;
-        let prev_resize_sync_time = 0.0;
-
-        let is_paused = true;
-
-        let look_sensitivity = 0.1;
-        let keydown_state = KeydownState::default();
-
-        let enable_debugging = 0;
-        let cursor_point = Vec3::new(0., 0., 0.);
-        let selected_object = NO_SELECTED_OBJECT_ID;
-
-        let sphere_list = create_default_sphere_list();
-
-        RenderState {
-            camera: pipeline,
-
-            samples_per_pixel,
-            max_depth,
-
-            is_paused,
-            should_save_image,
-            count,
-            render_count,
-            last_frame_weight,
-            max_render_count,
-            prev_now,
-            window_size_out_of_sync,
-            prev_resize_sync_time,
-
-            keydown_state,
-            look_sensitivity,
-
-            debugging_enabled: enable_debugging,
-            cursor_point,
-            selected_object,
-
-            sphere_list,
-        }
     }
 }
 
@@ -467,6 +474,7 @@ pub fn create_default_sphere_list() -> Vec<Sphere> {
         },
     ];
 
+    // @todo: clean this up: make a wrapper type or something
     objects::set_sphere_uuids(&mut sphere_list);
 
     sphere_list

@@ -172,6 +172,22 @@ impl<
         &self.textures
     }
 
+    pub fn textures_by_id(
+        &self,
+        texture_ids: impl Into<Bridge<TextureId>>,
+    ) -> Vec<&Texture<TextureId>> {
+        let texture_ids: Bridge<_> = texture_ids.into();
+        let texture_ids: Vec<_> = texture_ids.into();
+        let mut textures = Vec::with_capacity(texture_ids.len());
+        for texture_id in texture_ids {
+            let texture = self.texture(&texture_id);
+            if let Some(texture) = texture {
+                textures.push(texture);
+            }
+        }
+        textures
+    }
+
     pub fn framebuffer(
         &self,
         framebuffer_id: &FramebufferId,
@@ -799,7 +815,7 @@ impl<
     fn compile_fragment_shaders(&mut self) -> Result<&mut Self, CompileShaderError> {
         for (id, fragment_shader_src) in self.fragment_shader_sources.iter() {
             let fragment_shader =
-                self.compile_shader(ShaderType::FragmentShader, fragment_shader_src)?;
+                self.compile_shader(id.clone(), ShaderType::FragmentShader, fragment_shader_src)?;
             self.fragment_shaders.insert((*id).clone(), fragment_shader);
         }
 
@@ -809,7 +825,8 @@ impl<
     /// Takes the list of vertex shader sources and their ids and saves compiled `WebGlShader`s to state
     fn compile_vertex_shaders(&mut self) -> Result<&mut Self, CompileShaderError> {
         for (id, vertex_shader_src) in self.vertex_shader_sources.iter() {
-            let vertex_shader = self.compile_shader(ShaderType::VertexShader, vertex_shader_src)?;
+            let vertex_shader =
+                self.compile_shader(id.clone(), ShaderType::VertexShader, vertex_shader_src)?;
             self.vertex_shaders.insert((*id).clone(), vertex_shader);
         }
 
@@ -1128,16 +1145,21 @@ impl<
     }
 
     /// Takes the string source of a shader and compiles to using the current WebGL2RenderingContext
-    fn compile_shader(
+    fn compile_shader<ShaderId: Id>(
         &self,
+        shader_id: ShaderId,
         shader_type: ShaderType,
         source: &str,
     ) -> Result<WebGlShader, CompileShaderError> {
-        let gl = self.gl.as_ref().ok_or(CompileShaderError::NoContext)?;
+        let gl = self.gl.as_ref().ok_or(CompileShaderError::NoContext {
+            shader_id: format!("{shader_id:#?}"),
+        })?;
 
-        let shader = gl
-            .create_shader(shader_type.into())
-            .ok_or(CompileShaderError::NoShaderReturned)?;
+        let shader =
+            gl.create_shader(shader_type.into())
+                .ok_or(CompileShaderError::NoShaderReturned {
+                    shader_id: format!("{shader_id:#?}"),
+                })?;
 
         gl.shader_source(&shader, source);
         gl.compile_shader(&shader);
@@ -1150,8 +1172,13 @@ impl<
             Ok(shader)
         } else {
             let inner_error = match gl.get_shader_info_log(&shader) {
-                Some(known_error) => CompileShaderError::KnownError(known_error),
-                None => CompileShaderError::UnknownError,
+                Some(known_error) => CompileShaderError::KnownError {
+                    shader_id: format!("{shader_id:#?}"),
+                    error: known_error,
+                },
+                None => CompileShaderError::UnknownError {
+                    shader_id: format!("{shader_id:#?}"),
+                },
             };
             Err(inner_error)?
         }

@@ -92,13 +92,10 @@ uniform int u_selected_object;
 uniform vec3 u_cursor_point;
 uniform Sphere[15] u_sphere_list;
 
-// uniform sampler2D u_texture;
 // uniform float u_aspect_ratio;
 // uniform float u_viewport_height;
 // uniform float u_viewport_width;
 // uniform float u_focal_length;
-// uniform int u_render_count;
-// uniform float u_last_frame_weight;
 // uniform vec3 u_w;
 
 // FUNCTIONS //////////////////////////////////////////////////////

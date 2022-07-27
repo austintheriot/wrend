@@ -28,22 +28,19 @@ pub fn animate(
     let gl = renderer.gl();
     let canvas = renderer.canvas();
     let render_state = Rc::clone(&renderer.user_ctx().as_ref().unwrap().render_state);
-    let all_textures: Vec<WebGlTexture> = renderer
-        .textures()
-        .values()
+    let now = window().unwrap().performance().unwrap().now();
+    let render_textures: Vec<WebGlTexture> = renderer
+        .textures_by_id([
+            TextureId::PrevRender,
+            TextureId::AveragedRenderA,
+            TextureId::AveragedRenderB,
+        ])
         .into_iter()
         .map(|texture| texture.webgl_texture().clone())
         .collect();
-    let now = window().unwrap().performance().unwrap().now();
-    let dt = now - render_state.borrow().prev_now();
-    {
-        let mut render_state = render_state.borrow_mut();
-        render_state.set_prev_now(now);
-        render_state.update_position(dt);
-    }
 
-    // don't render while paused unless trying to save
-    // OR unless it's the very first frame
+    render_state.borrow_mut().update_position();
+
     let should_render = {
         let render_state = render_state.borrow();
         !render_state.is_paused()
@@ -51,7 +48,7 @@ pub fn animate(
             || render_state.render_count() == 0
     };
 
-    let should_run_resize_fn = {
+    let should_sync_dimensions = {
         let render_state = render_state.borrow();
         (render_state.window_size_out_of_sync()
             && now - render_state.prev_resize_sync_time() > RESIZE_UPDATE_DEBOUNCE_INTERVAL)
@@ -59,18 +56,17 @@ pub fn animate(
     };
 
     // debounce resize handler
-    if should_run_resize_fn {
+    if should_sync_dimensions {
         let mut render_state = render_state.borrow_mut();
-        render_state.set_window_size_out_of_sync(false);
-        render_state.sync_dimensions(gl, &all_textures, canvas, now);
+        render_state.sync_dimensions(gl, &render_textures, canvas, now);
     }
 
     if should_render {
-        render_state.borrow_mut().inc_count();
-        render_state.borrow_mut().inc_render_count();
         renderer.update_uniforms();
         renderer.render();
+        render_state.borrow_mut().inc_render_count();
 
+        // screenshots should be saved immediately after rendering
         {
             let mut render_state = render_state.borrow_mut();
             if render_state.should_save_image() {

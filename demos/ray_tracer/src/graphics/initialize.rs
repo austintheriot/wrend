@@ -8,20 +8,20 @@ use crate::{
         create_position_attribute::create_position_attribute,
         create_texture::make_create_render_texture,
         create_uniforms::{
-            create_general_ray_tracer_uniform_links, create_general_uniform_links,
-            create_sphere_uniform_links,
+            create_general_ray_tracer_uniform_links,
+            create_shared_uniform_links, create_sphere_uniform_links,
         },
         fragment_shader_id::FragmentShaderId,
         framebuffer_id::FramebufferId,
         program_id::ProgramId,
         render::render,
         texture_id::TextureId,
+        transform_feedback_id::TransformFeedbackId,
         vao_id::VAOId,
         vertex_shader_id::VertexShaderId,
     },
     state::app_context::AppContext,
 };
-
 use std::rc::Rc;
 use web_sys::HtmlCanvasElement;
 use wrend::{
@@ -29,8 +29,6 @@ use wrend::{
     BufferCreateCallback, BufferLink, FramebufferCreateCallback, FramebufferLink,
     ProgramLinkBuilder, RenderCallback, Renderer, TextureCreateCallback, TextureLink,
 };
-
-use super::transform_feedback_id::TransformFeedbackId;
 
 const QUAD_VERTEX_SHADER: &str = include_str!("../shaders/quad_vertex.glsl");
 const RAY_TRACER_FRAGMENT_SHADER: &str = include_str!("../shaders/ray_tracer.glsl");
@@ -158,9 +156,9 @@ pub fn build_renderer(
             averaged_render_a_framebuffer_link,
             averaged_render_b_framebuffer_link,
         ])
-        .add_uniform_links(create_general_uniform_links())
         .add_uniform_links(create_general_ray_tracer_uniform_links())
         .add_uniform_links(create_sphere_uniform_links())
+        .add_uniform_links(create_shared_uniform_links())
         .add_vao_link(VAOId::Quad);
 
     let renderer = renderer_builder
