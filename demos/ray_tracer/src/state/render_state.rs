@@ -296,6 +296,7 @@ impl RenderState {
 
         if new_camera_origin != camera_origin {
             self.camera_mut().set_camera_origin(new_camera_origin);
+            self.reset_render_count();
         }
 
         self
