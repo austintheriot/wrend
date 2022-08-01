@@ -15,7 +15,7 @@ use web_sys::HtmlCanvasElement;
 use wrend::{
     AnimationCallback, AttributeCreateCallback, AttributeLink, BufferCreateCallback, BufferLink,
     FramebufferCreateCallback, FramebufferLink, ProgramLinkBuilder, RenderCallback, Renderer,
-    TextureCreateCallback, TextureLink, UniformCallback, UniformContext, UniformLink,
+    TextureCreateCallback, TextureLink, UniformContext, UniformLink,
 };
 
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
@@ -74,11 +74,11 @@ pub fn app() -> Html {
                 let u_simplex_noise_texture = UniformLink::new(
                     ProgramId::PassThrough,
                     UniformId::USimplexNoiseTexture,
-                    UniformCallback::new(|ctx: &UniformContext<_>| {
+                    |ctx: &UniformContext<_>| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
                         gl.uniform1i(Some(uniform_location), 1);
-                    }),
+                    },
                 );
 
                 let simplex_noise_framebuffer_link = FramebufferLink::new(
@@ -97,12 +97,10 @@ pub fn app() -> Html {
                 let mut u_now = UniformLink::new(
                     ProgramId::SimplexNoise,
                     UniformId::UNow,
-                    UniformCallback::new(u_now_link_init_and_update_callback.clone()),
+                    u_now_link_init_and_update_callback.clone(),
                 );
 
-                u_now.set_update_callback(UniformCallback::new(
-                    u_now_link_init_and_update_callback.clone(),
-                ));
+                u_now.set_update_callback(u_now_link_init_and_update_callback.clone());
 
                 let render_callback = RenderCallback::new(Rc::new(render));
                 let render_state_handle: RenderStateHandle = render_state.into();

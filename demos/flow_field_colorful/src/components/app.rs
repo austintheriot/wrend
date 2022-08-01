@@ -33,7 +33,7 @@ use wrend::{
     AnimationCallback, AttributeCreateCallback, AttributeLink, BufferCreateCallback, BufferLink,
     CallbackWithContext, FramebufferCreateCallback, FramebufferLink, GetContextCallback,
     ProgramLinkBuilder, RenderCallback, Renderer, TextureCreateCallback, TextureLink,
-    TransformFeedbackLink, UniformCallback, UniformContext, UniformLink, WebGlContextError,
+    TransformFeedbackLink, UniformContext, UniformLink, WebGlContextError,
 };
 
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, Callback};
@@ -148,11 +148,11 @@ pub fn app() -> Html {
                 let u_white_noise_texture = UniformLink::new(
                     ProgramId::PerlinNoise,
                     UniformId::UWhiteNoiseTexture,
-                    UniformCallback::new(|ctx: &UniformContext<_>| {
+                    |ctx: &UniformContext<_>| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
                         gl.uniform1i(Some(uniform_location), 0);
-                    }),
+                    },
                 );
 
                 let perlin_noise_texture_link = TextureLink::new(
@@ -163,11 +163,11 @@ pub fn app() -> Html {
                 let u_perlin_noise_texture = UniformLink::new(
                     (ProgramId::PassThrough, ProgramId::UpdateParticles),
                     UniformId::UPerlinNoiseTexture,
-                    UniformCallback::new(|ctx: &UniformContext<_>| {
+                    |ctx: &UniformContext<_>| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
                         gl.uniform1i(Some(uniform_location), 1);
-                    }),
+                    },
                 );
 
                 let perlin_noise_framebuffer_link = FramebufferLink::new(
@@ -190,7 +190,7 @@ pub fn app() -> Html {
                 let u_now = UniformLink::new(
                     ProgramId::PerlinNoise,
                     UniformId::UNow,
-                    UniformCallback::new(u_now_link_init_and_update_callback.clone()),
+                    u_now_link_init_and_update_callback.clone(),
                 );
 
                 let transform_feedback_link =

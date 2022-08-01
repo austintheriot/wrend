@@ -5,7 +5,7 @@ use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 use wrend::{
     AnimationCallback, AttributeCreateCallback, AttributeCreateContext, AttributeLink,
     BufferCreateCallback, BufferCreateContext, BufferLink, Id, IdDefault, IdName, ProgramLink,
-    RenderCallback, Renderer, UniformCallback, UniformContext, UniformLink, QUAD,
+    RenderCallback, Renderer, UniformContext, UniformLink, QUAD,
 };
 use yew::{
     function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, use_state_eq,
@@ -191,12 +191,10 @@ pub fn app() -> Html {
                 let mut u_now_link = UniformLink::new(
                     ProgramId,
                     UniformId::UNow,
-                    UniformCallback::new(u_now_link_init_and_update_callback.clone()),
+                    u_now_link_init_and_update_callback.clone(),
                 );
 
-                u_now_link.set_update_callback(UniformCallback::new(
-                    u_now_link_init_and_update_callback.clone(),
-                ));
+                u_now_link.set_update_callback(u_now_link_init_and_update_callback.clone());
 
                 renderer_builder
                     .set_canvas(canvas)

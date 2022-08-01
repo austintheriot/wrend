@@ -47,8 +47,11 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> UniformLink<ProgramId, Unifor
         self.initialize_callback.clone()
     }
 
-    pub fn set_initialize_callback(&mut self, callback: UniformCallback<UserCtx>) -> &mut Self {
-        self.initialize_callback = callback;
+    pub fn set_initialize_callback(
+        &mut self,
+        callback: impl Into<UniformCallback<UserCtx>>,
+    ) -> &mut Self {
+        self.initialize_callback = callback.into();
         self
     }
 
@@ -58,9 +61,9 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> UniformLink<ProgramId, Unifor
 
     pub fn set_should_update_callback(
         &mut self,
-        callback: UniformShouldUpdateCallback<UserCtx>,
+        callback: impl Into<UniformShouldUpdateCallback<UserCtx>>,
     ) -> &mut Self {
-        self.should_update_callback.replace(callback);
+        self.should_update_callback.replace(callback.into());
         self
     }
 
@@ -68,8 +71,11 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> UniformLink<ProgramId, Unifor
         self.update_callback.as_ref().map(Clone::clone)
     }
 
-    pub fn set_update_callback(&mut self, callback: UniformCallback<UserCtx>) -> &mut Self {
-        self.update_callback.replace(callback);
+    pub fn set_update_callback(
+        &mut self,
+        callback: impl Into<UniformCallback<UserCtx>>,
+    ) -> &mut Self {
+        self.update_callback.replace(callback.into());
         self
     }
 
