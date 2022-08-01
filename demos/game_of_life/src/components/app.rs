@@ -14,8 +14,8 @@ use ui::route::Route;
 use web_sys::HtmlCanvasElement;
 use wrend::{
     AnimationCallback, AttributeCreateCallback, AttributeLink, BufferCreateCallback, BufferLink,
-    FramebufferCreateCallback, FramebufferLink, ProgramLink, RenderCallback, Renderer,
-    TextureCreateCallback, TextureLink, UniformContext, UniformLink,
+    FramebufferLink, ProgramLink, RenderCallback, Renderer, TextureCreateCallback, TextureLink,
+    UniformContext, UniformLink,
 };
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
 use yew_router::prelude::*;
@@ -83,17 +83,11 @@ pub fn app() -> Html {
                     TextureCreateCallback::new(Rc::new(create_texture)),
                 );
 
-                let framebuffer_a_link = FramebufferLink::new(
-                    FramebufferId::A,
-                    FramebufferCreateCallback::new(Rc::new(create_frame_buffer)),
-                    Some(TextureId::A),
-                );
+                let framebuffer_a_link =
+                    FramebufferLink::new(FramebufferId::A, create_frame_buffer, Some(TextureId::A));
 
-                let framebuffer_b_link = FramebufferLink::new(
-                    FramebufferId::B,
-                    FramebufferCreateCallback::new(Rc::new(create_frame_buffer)),
-                    Some(TextureId::B),
-                );
+                let framebuffer_b_link =
+                    FramebufferLink::new(FramebufferId::B, create_frame_buffer, Some(TextureId::B));
                 let render_callback = RenderCallback::new(Rc::new(render));
 
                 let mut renderer_builder = Renderer::builder();

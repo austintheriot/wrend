@@ -26,8 +26,8 @@ use std::rc::Rc;
 use web_sys::HtmlCanvasElement;
 use wrend::{
     AnimationCallback, AnimationHandle, AttributeCreateCallback, AttributeLink,
-    BufferCreateCallback, BufferLink, FramebufferCreateCallback, FramebufferLink,
-    ProgramLinkBuilder, RenderCallback, Renderer, TextureCreateCallback, TextureLink,
+    BufferCreateCallback, BufferLink, FramebufferLink, ProgramLinkBuilder, RenderCallback,
+    Renderer, TextureCreateCallback, TextureLink,
 };
 
 const QUAD_VERTEX_SHADER: &str = include_str!("../shaders/quad_vertex.glsl");
@@ -102,19 +102,19 @@ pub fn build_renderer(
 
     let prev_render_framebuffer_link = FramebufferLink::new(
         FramebufferId::PrevRender,
-        FramebufferCreateCallback::new(Rc::new(create_render_framebuffer)),
+        create_render_framebuffer,
         Some(TextureId::PrevRender),
     );
 
     let averaged_render_a_framebuffer_link = FramebufferLink::new(
         FramebufferId::AveragedRenderA,
-        FramebufferCreateCallback::new(Rc::new(create_render_framebuffer)),
+        create_render_framebuffer,
         Some(TextureId::AveragedRenderA),
     );
 
     let averaged_render_b_framebuffer_link = FramebufferLink::new(
         FramebufferId::AveragedRenderB,
-        FramebufferCreateCallback::new(Rc::new(create_render_framebuffer)),
+        create_render_framebuffer,
         Some(TextureId::AveragedRenderB),
     );
 

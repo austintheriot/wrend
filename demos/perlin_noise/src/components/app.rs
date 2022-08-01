@@ -21,8 +21,8 @@ use ui::route::Route;
 use web_sys::HtmlCanvasElement;
 use wrend::{
     AnimationCallback, AttributeCreateCallback, AttributeLink, BufferCreateCallback, BufferLink,
-    FramebufferCreateCallback, FramebufferLink, ProgramLinkBuilder, RenderCallback, Renderer,
-    TextureCreateCallback, TextureLink, UniformContext, UniformLink,
+    FramebufferLink, ProgramLinkBuilder, RenderCallback, Renderer, TextureCreateCallback,
+    TextureLink, UniformContext, UniformLink,
 };
 
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
@@ -105,7 +105,7 @@ pub fn app() -> Html {
 
                 let perlin_noise_framebuffer_link = FramebufferLink::new(
                     FramebufferId::PerlinNoise,
-                    FramebufferCreateCallback::new(Rc::new(create_frame_buffer)),
+                    create_frame_buffer,
                     Some(TextureId::PerlinNoise),
                 );
 

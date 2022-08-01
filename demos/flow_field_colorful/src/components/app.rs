@@ -31,9 +31,9 @@ use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, MouseEvent, WebGl2RenderingContext, WebGlContextAttributes};
 use wrend::{
     AnimationCallback, AttributeCreateCallback, AttributeLink, BufferCreateCallback, BufferLink,
-    CallbackWithContext, FramebufferCreateCallback, FramebufferLink, GetContextCallback,
-    ProgramLinkBuilder, RenderCallback, Renderer, TextureCreateCallback, TextureLink,
-    TransformFeedbackLink, UniformContext, UniformLink, WebGlContextError,
+    CallbackWithContext, FramebufferLink, GetContextCallback, ProgramLinkBuilder, RenderCallback,
+    Renderer, TextureCreateCallback, TextureLink, TransformFeedbackLink, UniformContext,
+    UniformLink, WebGlContextError,
 };
 
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, Callback};
@@ -172,7 +172,7 @@ pub fn app() -> Html {
 
                 let perlin_noise_framebuffer_link = FramebufferLink::new(
                     FramebufferId::PerlinNoise,
-                    FramebufferCreateCallback::new(Rc::new(create_perlin_noise_framebuffer)),
+                    create_perlin_noise_framebuffer,
                     Some(TextureId::PerlinNoise),
                 );
 
