@@ -3,7 +3,7 @@ use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 use wrend::{
     AttributeCreateCallback, AttributeLink, BufferCreateCallback, BufferCreateContext, BufferLink,
-    Id, IdDefault, IdName, ProgramLink, RenderCallback, Renderer, QUAD,
+    Id, IdDefault, IdName, ProgramLink, RenderCallback, Renderer, QUAD, AttributeCreateContext,
 };
 use yew::{
     function_component, html, use_effect_with_deps, use_node_ref, use_state_eq, UseStateHandle,
@@ -100,7 +100,7 @@ pub fn app() -> Html {
                     ProgramId,
                     BufferId::VertexBuffer,
                     PositionAttributeId,
-                    AttributeCreateCallback::new(Rc::new(|ctx| {
+                    AttributeCreateCallback::new(|ctx: &AttributeCreateContext<_>| {
                         let gl = ctx.gl();
                         let attribute_location = ctx.attribute_location();
                         let webgl_buffer = ctx.webgl_buffer();
@@ -113,7 +113,7 @@ pub fn app() -> Html {
                             0,
                             0,
                         );
-                    })),
+                    }),
                 );
 
                 let render_callback = RenderCallback::new(Rc::new(

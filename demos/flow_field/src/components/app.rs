@@ -157,7 +157,7 @@ pub fn app() -> Html {
 
                 let perlin_noise_framebuffer_link = FramebufferLink::new(
                     FramebufferId::PerlinNoise,
-                    FramebufferCreateCallback::new(Rc::new(create_perlin_noise_framebuffer)),
+                    FramebufferCreateCallback::new(create_perlin_noise_framebuffer),
                     Some(TextureId::PerlinNoise),
                 );
 

@@ -1,4 +1,4 @@
-use std::{fmt::Debug, ops::Deref, rc::Rc};
+use std::{fmt::Debug, ops::Deref};
 
 use crate::{CallbackWithContext, UniformContext};
 
@@ -19,7 +19,7 @@ impl<UserCtx: Clone> Deref for UniformShouldUpdateCallback<UserCtx> {
 
 impl<UserCtx: Clone> Default for UniformShouldUpdateCallback<UserCtx> {
     fn default() -> Self {
-        Self(CallbackWithContext::new(Rc::new(|_| true)))
+        Self(CallbackWithContext::new(|_: &UniformContext<UserCtx>| true))
     }
 }
 

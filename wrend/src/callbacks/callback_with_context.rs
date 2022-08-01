@@ -21,17 +21,8 @@ pub struct CallbackWithContext<Ctx, Returns = CallbackWithContextDefaultReturnTy
 }
 
 impl<Ctx, Return> CallbackWithContext<Ctx, Return> {
-    pub fn new(
-        callback: Rc<CallbackWithContextFnType<Ctx, Return>>,
-    ) -> CallbackWithContext<Ctx, Return> {
-        CallbackWithContext {
-            callback,
-            uuid: Uuid::new_v4(),
-        }
-    }
-
-    pub fn to_owned_callback(&self) -> Rc<CallbackWithContextFnType<Ctx, Return>> {
-        Rc::clone(&self.callback)
+    pub fn new(callback: impl Into<CallbackWithContext<Ctx, Return>>) -> CallbackWithContext<Ctx, Return> {
+        callback.into()
     }
 }
 
@@ -81,7 +72,7 @@ impl<Ctx, Return> Hash for CallbackWithContext<Ctx, Return> {
 impl<Ctx, Return> Clone for CallbackWithContext<Ctx, Return> {
     fn clone(&self) -> Self {
         Self {
-            callback: self.callback.clone(),
+            callback: Rc::clone(&self.callback),
             uuid: self.uuid,
         }
     }
@@ -96,21 +87,21 @@ impl<Ctx, Return> Debug for CallbackWithContext<Ctx, Return> {
     }
 }
 
-impl<Ctx, Return> From<Rc<CallbackWithContextFnType<Ctx, Return>>>
-    for CallbackWithContext<Ctx, Return>
-{
-    fn from(callback: Rc<CallbackWithContextFnType<Ctx, Return>>) -> Self {
-        CallbackWithContext {
-            callback,
+impl<Ctx, Return, F: Fn(&Ctx) -> Return + 'static> From<F> for CallbackWithContext<Ctx, Return> {
+    fn from(callback: F) -> Self {
+        Self {
+            callback: Rc::new(callback),
             uuid: Uuid::new_v4(),
         }
     }
 }
 
-impl<Ctx: 'static, Return: 'static> From<fn(&Ctx) -> Return> for CallbackWithContext<Ctx, Return> {
-    fn from(callback: fn(&Ctx) -> Return) -> Self {
+impl<Ctx, Return, F: Fn(&Ctx) -> Return + 'static> From<Rc<F>>
+    for CallbackWithContext<Ctx, Return>
+{
+    fn from(callback: Rc<F>) -> Self {
         CallbackWithContext {
-            callback: Rc::new(callback),
+            callback,
             uuid: Uuid::new_v4(),
         }
     }

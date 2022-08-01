@@ -23,14 +23,18 @@ impl GetContextCallback {
     }
 }
 
-impl From<Rc<dyn Fn(&HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError>>>
-    for GetContextCallback
+impl<F: Fn(&HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError> + 'static>
+    From<F> for GetContextCallback
 {
-    fn from(
-        callback: Rc<
-            dyn Fn(&HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError>,
-        >,
-    ) -> Self {
+    fn from(callback: F) -> Self {
+        Self(CallbackWithContext::new(callback))
+    }
+}
+
+impl<F: Fn(&HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError> + 'static>
+    From<Rc<F>> for GetContextCallback
+{
+    fn from(callback: Rc<F>) -> Self {
         Self(CallbackWithContext::new(callback))
     }
 }
@@ -50,7 +54,7 @@ impl From<CallbackWithContext<HtmlCanvasElement, Result<WebGl2RenderingContext, 
 
 impl Default for GetContextCallback {
     fn default() -> Self {
-        Self(CallbackWithContext::new(Rc::new(|canvas| {
+        Self(CallbackWithContext::new(|canvas: &HtmlCanvasElement| {
             let gl = canvas
                 .get_context("webgl2")
                 .map_err(|_| WebGlContextError::RetrievalError)?;
@@ -62,7 +66,7 @@ impl Default for GetContextCallback {
                 .map_err(|_| WebGlContextError::TypeConversionError)?;
 
             Ok(gl)
-        })))
+        }))
     }
 }
 
