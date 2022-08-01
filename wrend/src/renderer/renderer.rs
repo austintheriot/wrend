@@ -294,18 +294,20 @@ impl<
     /// If no animation callback has been provided, then the empty animation callback is run.
     pub fn into_animation_handle(
         self,
-        animation_callback: AnimationCallback<
-            VertexShaderId,
-            FragmentShaderId,
-            ProgramId,
-            UniformId,
-            BufferId,
-            AttributeId,
-            TextureId,
-            FramebufferId,
-            TransformFeedbackId,
-            VertexArrayObjectId,
-            UserCtx,
+        animation_callback: impl Into<
+            AnimationCallback<
+                VertexShaderId,
+                FragmentShaderId,
+                ProgramId,
+                UniformId,
+                BufferId,
+                AttributeId,
+                TextureId,
+                FramebufferId,
+                TransformFeedbackId,
+                VertexArrayObjectId,
+                UserCtx,
+            >,
         >,
     ) -> AnimationHandle<
         VertexShaderId,
@@ -320,7 +322,7 @@ impl<
         VertexArrayObjectId,
         UserCtx,
     > {
-        AnimationHandle::new(animation_callback, self)
+        AnimationHandle::new(animation_callback.into(), self)
     }
 
     /// Gets current DOMHighResTimeStamp from performance.now()

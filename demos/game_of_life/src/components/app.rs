@@ -9,13 +9,12 @@ use crate::{
     },
     state::render_state::RenderState,
 };
-use std::rc::Rc;
+
 use ui::route::Route;
 use web_sys::HtmlCanvasElement;
 use wrend::{
-    AnimationCallback, AttributeCreateCallback, AttributeLink, BufferCreateCallback, BufferLink,
-    FramebufferLink, ProgramLink, RenderCallback, Renderer, TextureCreateCallback, TextureLink,
-    UniformContext, UniformLink,
+    AttributeLink, BufferLink, FramebufferLink, ProgramLink, Renderer, TextureLink, UniformContext,
+    UniformLink,
 };
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
 use yew_router::prelude::*;
@@ -51,16 +50,14 @@ pub fn app() -> Html {
                     FragmentShaderId::PassThrough,
                 );
 
-                let vertex_buffer_link = BufferLink::new(
-                    BufferId::VertexBuffer,
-                    BufferCreateCallback::new(Rc::new(create_vertex_buffer)),
-                );
+                let vertex_buffer_link =
+                    BufferLink::new(BufferId::VertexBuffer, create_vertex_buffer);
 
                 let a_position_gol_life = AttributeLink::new(
                     (ProgramId::GameOfLife, ProgramId::PassThrough),
                     BufferId::VertexBuffer,
                     AttributeId,
-                    AttributeCreateCallback::new(Rc::new(create_position_attribute)),
+                    create_position_attribute,
                 );
 
                 let u_texture = UniformLink::new(
@@ -73,29 +70,22 @@ pub fn app() -> Html {
                     },
                 );
 
-                let texture_a_link = TextureLink::new(
-                    TextureId::A,
-                    TextureCreateCallback::new(Rc::new(create_texture)),
-                );
+                let texture_a_link = TextureLink::new(TextureId::A, create_texture);
 
-                let texture_b_link = TextureLink::new(
-                    TextureId::B,
-                    TextureCreateCallback::new(Rc::new(create_texture)),
-                );
+                let texture_b_link = TextureLink::new(TextureId::B, create_texture);
 
                 let framebuffer_a_link =
                     FramebufferLink::new(FramebufferId::A, create_frame_buffer, Some(TextureId::A));
 
                 let framebuffer_b_link =
                     FramebufferLink::new(FramebufferId::B, create_frame_buffer, Some(TextureId::B));
-                let render_callback = RenderCallback::new(Rc::new(render));
 
                 let mut renderer_builder = Renderer::builder();
 
                 renderer_builder
                     .set_canvas(canvas)
                     .set_user_ctx(render_state)
-                    .set_render_callback(render_callback)
+                    .set_render_callback(render)
                     .add_vertex_shader_src(VertexShaderId, VERTEX_SHADER.to_string())
                     .add_fragment_shader_src(
                         FragmentShaderId::GameOfLife,
@@ -121,11 +111,11 @@ pub fn app() -> Html {
                     .build()
                     .expect("Renderer should successfully build");
 
-                let new_animation_handle = renderer.into_animation_handle(AnimationCallback::new(
+                let new_animation_handle = renderer.into_animation_handle(
                     |renderer: &Renderer<_, _, _, _, _, _, _, _, _, _, _>| {
                         renderer.render();
                     },
-                ));
+                );
 
                 new_animation_handle.start_animating();
 

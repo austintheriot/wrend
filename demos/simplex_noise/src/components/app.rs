@@ -13,9 +13,8 @@ use std::rc::Rc;
 use ui::route::Route;
 use web_sys::HtmlCanvasElement;
 use wrend::{
-    AnimationCallback, AttributeCreateCallback, AttributeLink, BufferCreateCallback, BufferLink,
-    FramebufferLink, ProgramLinkBuilder, RenderCallback, Renderer, TextureCreateCallback,
-    TextureLink, UniformContext, UniformLink,
+    AttributeLink, BufferLink, FramebufferLink, ProgramLinkBuilder, Renderer, TextureLink,
+    UniformContext, UniformLink,
 };
 
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
@@ -54,22 +53,18 @@ pub fn app() -> Html {
                     .build()
                     .expect("Should build SimplexNoise ProgramLink successfully");
 
-                let vertex_buffer_link = BufferLink::new(
-                    BufferId::VertexBuffer,
-                    BufferCreateCallback::new(Rc::new(create_vertex_buffer)),
-                );
+                let vertex_buffer_link =
+                    BufferLink::new(BufferId::VertexBuffer, create_vertex_buffer);
 
                 let a_position_link = AttributeLink::new(
                     (ProgramId::PassThrough, ProgramId::SimplexNoise),
                     BufferId::VertexBuffer,
                     AttributeId,
-                    AttributeCreateCallback::new(Rc::new(create_position_attribute)),
+                    create_position_attribute,
                 );
 
-                let simplex_noise_texture_link = TextureLink::new(
-                    TextureId::SimplexNoise,
-                    TextureCreateCallback::new(Rc::new(create_simplex_noise_texture)),
-                );
+                let simplex_noise_texture_link =
+                    TextureLink::new(TextureId::SimplexNoise, create_simplex_noise_texture);
 
                 let u_simplex_noise_texture = UniformLink::new(
                     ProgramId::PassThrough,
@@ -102,7 +97,6 @@ pub fn app() -> Html {
 
                 u_now.set_update_callback(u_now_link_init_and_update_callback.clone());
 
-                let render_callback = RenderCallback::new(Rc::new(render));
                 let render_state_handle: RenderStateHandle = render_state.into();
 
                 let mut renderer_builder = Renderer::builder();
@@ -110,7 +104,7 @@ pub fn app() -> Html {
                 renderer_builder
                     .set_canvas(canvas)
                     .set_user_ctx(render_state_handle)
-                    .set_render_callback(render_callback)
+                    .set_render_callback(render)
                     .add_vertex_shader_src(VertexShaderId::Quad, VERTEX_SHADER.to_string())
                     .add_fragment_shader_src(
                         FragmentShaderId::SimplexNoise,
@@ -135,12 +129,12 @@ pub fn app() -> Html {
                     .build()
                     .expect("Renderer should successfully build");
 
-                let new_animation_handle = renderer.into_animation_handle(AnimationCallback::new(
-                    Rc::new(|renderer: &Renderer<_, _, _, _, _, _, _, _, _, _, _>| {
+                let new_animation_handle = renderer.into_animation_handle(
+                    |renderer: &Renderer<_, _, _, _, _, _, _, _, _, _, _>| {
                         renderer.update_uniforms();
                         renderer.render();
-                    }),
-                ));
+                    },
+                );
 
                 new_animation_handle.start_animating();
 

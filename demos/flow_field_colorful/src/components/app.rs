@@ -30,9 +30,8 @@ use ui::route::Route;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, MouseEvent, WebGl2RenderingContext, WebGlContextAttributes};
 use wrend::{
-    AnimationCallback, AttributeCreateCallback, AttributeLink, BufferCreateCallback, BufferLink,
-    FramebufferLink, ProgramLinkBuilder, RenderCallback, Renderer, TextureCreateCallback,
-    TextureLink, TransformFeedbackLink, UniformContext, UniformLink, WebGlContextError,
+    AttributeLink, BufferLink, FramebufferLink, ProgramLinkBuilder, Renderer, TextureLink,
+    TransformFeedbackLink, UniformContext, UniformLink, WebGlContextError,
 };
 
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, Callback};
@@ -91,58 +90,48 @@ pub fn app() -> Html {
                     .build()
                     .expect("Should build DrawParticles ProgramLink successfully");
 
-                let vertex_buffer_link = BufferLink::new(
-                    BufferId::QuadVertexBuffer,
-                    BufferCreateCallback::new(Rc::new(create_quad_vertex_buffer)),
-                );
+                let vertex_buffer_link =
+                    BufferLink::new(BufferId::QuadVertexBuffer, create_quad_vertex_buffer);
 
-                let particle_buffer_a_link = BufferLink::new(
-                    BufferId::ParticleBufferA,
-                    BufferCreateCallback::new(Rc::new(create_particle_buffer_a)),
-                );
+                let particle_buffer_a_link =
+                    BufferLink::new(BufferId::ParticleBufferA, create_particle_buffer_a);
 
-                let particle_buffer_b_link = BufferLink::new(
-                    BufferId::ParticleBufferB,
-                    BufferCreateCallback::new(Rc::new(create_particle_buffer_b)),
-                );
+                let particle_buffer_b_link =
+                    BufferLink::new(BufferId::ParticleBufferB, create_particle_buffer_b);
 
-                let particle_color_buffer_link = BufferLink::new(
-                    BufferId::ParticleColorBuffer,
-                    BufferCreateCallback::new(Rc::new(create_particle_color_buffer)),
-                );
+                let particle_color_buffer_link =
+                    BufferLink::new(BufferId::ParticleColorBuffer, create_particle_color_buffer);
 
                 let a_particle_color_link = AttributeLink::new(
                     VAOId::DrawParticles,
                     BufferId::ParticleColorBuffer,
                     AttributeId::AParticleColor,
-                    AttributeCreateCallback::new(Rc::new(create_particle_color_attribute)),
+                    create_particle_color_attribute,
                 );
 
                 let a_particle_position_link_a = AttributeLink::new(
                     (VAOId::DrawParticles, VAOId::UpdateParticlesA),
                     BufferId::ParticleBufferA,
                     AttributeId::AParticlePosition,
-                    AttributeCreateCallback::new(Rc::new(create_particle_position_attribute)),
+                    create_particle_position_attribute,
                 );
 
                 let a_particle_position_link_b = AttributeLink::new(
                     (VAOId::DrawParticles, VAOId::UpdateParticlesB),
                     BufferId::ParticleBufferB,
                     AttributeId::AParticlePosition,
-                    AttributeCreateCallback::new(Rc::new(create_particle_position_attribute)),
+                    create_particle_position_attribute,
                 );
 
                 let a_quad_vertex_link = AttributeLink::new(
                     (VAOId::PassThrough, VAOId::PerlinNoise),
                     BufferId::QuadVertexBuffer,
                     AttributeId::AQuadVertex,
-                    AttributeCreateCallback::new(Rc::new(create_quad_vertex_attribute)),
+                    create_quad_vertex_attribute,
                 );
 
-                let white_noise_texture_link = TextureLink::new(
-                    TextureId::WhiteNoise,
-                    TextureCreateCallback::new(Rc::new(create_white_noise_texture)),
-                );
+                let white_noise_texture_link =
+                    TextureLink::new(TextureId::WhiteNoise, create_white_noise_texture);
 
                 let u_white_noise_texture = UniformLink::new(
                     ProgramId::PerlinNoise,
@@ -154,10 +143,8 @@ pub fn app() -> Html {
                     },
                 );
 
-                let perlin_noise_texture_link = TextureLink::new(
-                    TextureId::PerlinNoise,
-                    TextureCreateCallback::new(Rc::new(create_perlin_noise_texture)),
-                );
+                let perlin_noise_texture_link =
+                    TextureLink::new(TextureId::PerlinNoise, create_perlin_noise_texture);
 
                 let u_perlin_noise_texture = UniformLink::new(
                     (ProgramId::PassThrough, ProgramId::UpdateParticles),
@@ -195,7 +182,6 @@ pub fn app() -> Html {
                 let transform_feedback_link =
                     TransformFeedbackLink::new(TransformFeedbackId::Particle);
 
-                let render_callback = RenderCallback::new(Rc::new(render));
                 let render_state_handle: RenderStateHandle = render_state.into();
 
                 // provide custom attributes when getting WebGL context
@@ -220,7 +206,7 @@ pub fn app() -> Html {
                 renderer_builder
                     .set_canvas(canvas)
                     .set_user_ctx(render_state_handle)
-                    .set_render_callback(render_callback)
+                    .set_render_callback(render)
                     .add_vertex_shader_src(VertexShaderId::Quad, QUAD_VERTEX_SHADER.to_string())
                     .add_fragment_shader_src(
                         FragmentShaderId::PerlinNoise,
@@ -276,12 +262,12 @@ pub fn app() -> Html {
                     .build()
                     .expect("Renderer should successfully build");
 
-                let new_animation_handle = renderer.into_animation_handle(AnimationCallback::new(
-                    Rc::new(|renderer: &Renderer<_, _, _, _, _, _, _, _, _, _, _>| {
+                let new_animation_handle = renderer.into_animation_handle(
+                    |renderer: &Renderer<_, _, _, _, _, _, _, _, _, _, _>| {
                         renderer.update_uniforms();
                         renderer.render();
-                    }),
-                ));
+                    },
+                );
 
                 new_animation_handle.start_animating();
 

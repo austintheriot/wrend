@@ -1,10 +1,8 @@
-use std::rc::Rc;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 use wrend::{
-    AttributeCreateCallback, AttributeCreateContext, AttributeLink, BufferCreateCallback,
-    BufferCreateContext, BufferLink, Id, IdDefault, IdName, ProgramLink, RenderCallback, Renderer,
-    QUAD,
+    AttributeCreateContext, AttributeLink, BufferCreateContext, BufferLink, Id, IdDefault, IdName,
+    ProgramLink, Renderer, QUAD,
 };
 use yew::{
     function_component, html, use_effect_with_deps, use_node_ref, use_state_eq, UseStateHandle,
@@ -77,31 +75,29 @@ pub fn app() -> Html {
 
                 let vertex_buffer_link = BufferLink::new(
                     BufferId::VertexBuffer,
-                    BufferCreateCallback::new(Rc::new(
-                        |ctx: &BufferCreateContext<UseStateHandle<i32>>| {
-                            let gl = ctx.gl();
-                            let buffer = gl.create_buffer().unwrap();
-                            gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&buffer));
+                    |ctx: &BufferCreateContext<UseStateHandle<i32>>| {
+                        let gl = ctx.gl();
+                        let buffer = gl.create_buffer().unwrap();
+                        gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&buffer));
 
-                            // requires `unsafe` since we're creating a raw view into wasm memory,
-                            // but this array is static, so it shouldn't cause any issues
-                            let vertex_array = unsafe { js_sys::Float32Array::view(&QUAD) };
-                            gl.buffer_data_with_array_buffer_view(
-                                WebGl2RenderingContext::ARRAY_BUFFER,
-                                &vertex_array,
-                                WebGl2RenderingContext::STATIC_DRAW,
-                            );
+                        // requires `unsafe` since we're creating a raw view into wasm memory,
+                        // but this array is static, so it shouldn't cause any issues
+                        let vertex_array = unsafe { js_sys::Float32Array::view(&QUAD) };
+                        gl.buffer_data_with_array_buffer_view(
+                            WebGl2RenderingContext::ARRAY_BUFFER,
+                            &vertex_array,
+                            WebGl2RenderingContext::STATIC_DRAW,
+                        );
 
-                            buffer
-                        },
-                    )),
+                        buffer
+                    },
                 );
 
                 let a_position_link = AttributeLink::new(
                     ProgramId,
                     BufferId::VertexBuffer,
                     PositionAttributeId,
-                    AttributeCreateCallback::new(|ctx: &AttributeCreateContext<_>| {
+                    |ctx: &AttributeCreateContext<_>| {
                         let gl = ctx.gl();
                         let attribute_location = ctx.attribute_location();
                         let webgl_buffer = ctx.webgl_buffer();
@@ -114,43 +110,41 @@ pub fn app() -> Html {
                             0,
                             0,
                         );
-                    }),
+                    },
                 );
 
-                let render_callback = RenderCallback::new(Rc::new(
-                    |renderer: &Renderer<
-                        VertexShaderId,
-                        FragmentShaderId,
-                        ProgramId,
-                        IdDefault,
-                        BufferId,
-                        PositionAttributeId,
-                        IdDefault,
-                        IdDefault,
-                        IdDefault,
-                        ProgramId,
-                        UseStateHandle<i32>,
-                    >| {
-                        let gl = renderer.gl();
-                        let canvas: HtmlCanvasElement = gl.canvas().unwrap().dyn_into().unwrap();
+                let render_callback = |renderer: &Renderer<
+                    VertexShaderId,
+                    FragmentShaderId,
+                    ProgramId,
+                    IdDefault,
+                    BufferId,
+                    PositionAttributeId,
+                    IdDefault,
+                    IdDefault,
+                    IdDefault,
+                    ProgramId,
+                    UseStateHandle<i32>,
+                >| {
+                    let gl = renderer.gl();
+                    let canvas: HtmlCanvasElement = gl.canvas().unwrap().dyn_into().unwrap();
 
-                        renderer.use_program(&ProgramId);
-                        renderer.use_vao(&ProgramId);
+                    renderer.use_program(&ProgramId);
+                    renderer.use_vao(&ProgramId);
 
-                        // sync canvas dimensions with viewport
-                        gl.viewport(0, 0, canvas.width() as i32, canvas.height() as i32);
+                    // sync canvas dimensions with viewport
+                    gl.viewport(0, 0, canvas.width() as i32, canvas.height() as i32);
 
-                        // clear canvas
-                        gl.clear_color(0.0, 0.0, 0.0, 0.0);
-                        gl.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT);
+                    // clear canvas
+                    gl.clear_color(0.0, 0.0, 0.0, 0.0);
+                    gl.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT);
 
-                        // draw
-                        let primitive_type = WebGl2RenderingContext::TRIANGLES; // draws a triangle after shader is run every 3 times
-                        let offset = 0;
-                        let count = 6; // this will execute vertex shader 3 times
-                        gl.draw_arrays(primitive_type, offset, count);
-                    },
-                ));
+                    // draw
+                    let primitive_type = WebGl2RenderingContext::TRIANGLES; // draws a triangle after shader is run every 3 times
+                    let offset = 0;
+                    let count = 6; // this will execute vertex shader 3 times
+                    gl.draw_arrays(primitive_type, offset, count);
+                };
 
                 let mut renderer_builder = Renderer::builder();
 

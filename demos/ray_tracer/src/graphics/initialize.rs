@@ -22,12 +22,11 @@ use crate::{
     },
     state::app_context::AppContext,
 };
-use std::rc::Rc;
+
 use web_sys::HtmlCanvasElement;
 use wrend::{
-    AnimationCallback, AnimationHandle, AttributeCreateCallback, AttributeLink,
-    BufferCreateCallback, BufferLink, FramebufferLink, ProgramLinkBuilder, RenderCallback,
-    Renderer, TextureCreateCallback, TextureLink,
+    AnimationHandle, AttributeLink, BufferLink, FramebufferLink, ProgramLinkBuilder, Renderer,
+    TextureLink,
 };
 
 const QUAD_VERTEX_SHADER: &str = include_str!("../shaders/quad_vertex.glsl");
@@ -73,31 +72,28 @@ pub fn build_renderer(
         .build()
         .expect("Should build PassThrough ProgramLink successfully");
 
-    let vertex_buffer_link = BufferLink::new(
-        BufferId::QuadVertexBuffer,
-        BufferCreateCallback::new(Rc::new(create_quad_vertex_buffer)),
-    );
+    let vertex_buffer_link = BufferLink::new(BufferId::QuadVertexBuffer, create_quad_vertex_buffer);
 
     let a_quad_vertex_link = AttributeLink::new(
         VAOId::Quad,
         BufferId::QuadVertexBuffer,
         AttributeId,
-        AttributeCreateCallback::new(Rc::new(create_position_attribute)),
+        create_position_attribute,
     );
 
     let prev_render_texture_link = TextureLink::new(
         TextureId::PrevRender,
-        TextureCreateCallback::new(make_create_render_texture(TextureId::PrevRender)),
+        make_create_render_texture(TextureId::PrevRender),
     );
 
     let averaged_render_a_texture_link = TextureLink::new(
         TextureId::AveragedRenderA,
-        TextureCreateCallback::new(make_create_render_texture(TextureId::AveragedRenderA)),
+        make_create_render_texture(TextureId::AveragedRenderA),
     );
 
     let averaged_render_b_texture_link = TextureLink::new(
         TextureId::AveragedRenderB,
-        TextureCreateCallback::new(make_create_render_texture(TextureId::AveragedRenderB)),
+        make_create_render_texture(TextureId::AveragedRenderB),
     );
 
     let prev_render_framebuffer_link = FramebufferLink::new(
@@ -118,14 +114,12 @@ pub fn build_renderer(
         Some(TextureId::AveragedRenderB),
     );
 
-    let render_callback = RenderCallback::new(Rc::new(render));
-
     let mut renderer_builder = Renderer::builder();
 
     renderer_builder
         .set_canvas(canvas)
         .set_user_ctx(app_context)
-        .set_render_callback(render_callback)
+        .set_render_callback(render)
         .add_vertex_shader_src(VertexShaderId::Quad, QUAD_VERTEX_SHADER.to_string())
         .add_fragment_shader_src(
             FragmentShaderId::RayTracer,
@@ -165,8 +159,7 @@ pub fn build_renderer(
         .build()
         .expect("Renderer should successfully build");
 
-    let new_animation_handle =
-        renderer.into_animation_handle(AnimationCallback::new(Rc::new(animate)));
+    let new_animation_handle = renderer.into_animation_handle(animate);
 
     new_animation_handle.start_animating();
 

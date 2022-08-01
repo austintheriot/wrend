@@ -13,11 +13,11 @@ pub struct TextureLink<TextureId: Id, UserCtx> {
 impl<TextureId: Id, UserCtx> TextureLink<TextureId, UserCtx> {
     pub fn new(
         texture_id: TextureId,
-        create_texture_callback: TextureCreateCallback<UserCtx>,
+        create_texture_callback: impl Into<TextureCreateCallback<UserCtx>>,
     ) -> Self {
         Self {
             texture_id,
-            create_texture_callback,
+            create_texture_callback: create_texture_callback.into(),
         }
     }
 
