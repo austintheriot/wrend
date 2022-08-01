@@ -21,7 +21,9 @@ pub struct CallbackWithContext<Ctx, Returns = CallbackWithContextDefaultReturnTy
 }
 
 impl<Ctx, Return> CallbackWithContext<Ctx, Return> {
-    pub fn new(callback: impl Into<CallbackWithContext<Ctx, Return>>) -> CallbackWithContext<Ctx, Return> {
+    pub fn new(
+        callback: impl Into<CallbackWithContext<Ctx, Return>>,
+    ) -> CallbackWithContext<Ctx, Return> {
         callback.into()
     }
 }

@@ -74,11 +74,11 @@ pub fn app() -> Html {
                 let u_simplex_noise_texture = UniformLink::new(
                     ProgramId::PassThrough,
                     UniformId::USimplexNoiseTexture,
-                    UniformCallback::new(Rc::new(|ctx| {
+                    UniformCallback::new(|ctx: &UniformContext<_>| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
                         gl.uniform1i(Some(uniform_location), 1);
-                    })),
+                    }),
                 );
 
                 let simplex_noise_framebuffer_link = FramebufferLink::new(
@@ -137,11 +137,12 @@ pub fn app() -> Html {
                     .build()
                     .expect("Renderer should successfully build");
 
-                let new_animation_handle =
-                    renderer.into_animation_handle(AnimationCallback::new(Rc::new(|renderer| {
+                let new_animation_handle = renderer.into_animation_handle(AnimationCallback::new(
+                    Rc::new(|renderer: &Renderer<_, _, _, _, _, _, _, _, _, _, _>| {
                         renderer.update_uniforms();
                         renderer.render();
-                    })));
+                    }),
+                ));
 
                 new_animation_handle.start_animating();
 

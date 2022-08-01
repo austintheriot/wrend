@@ -6,7 +6,7 @@ use crate::{
     objects::{self, HitResult, Material, MaterialType, Ray, Sphere},
     utils,
 };
-use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlTexture, window};
+use web_sys::{window, HtmlCanvasElement, WebGl2RenderingContext, WebGlTexture};
 use wrend::Vec3;
 
 pub type RenderStateCount = u32;

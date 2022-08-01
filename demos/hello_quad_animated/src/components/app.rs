@@ -3,9 +3,9 @@ use ui::route::Route;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 use wrend::{
-    AnimationCallback, AttributeCreateCallback, AttributeLink, BufferCreateCallback,
-    BufferCreateContext, BufferLink, Id, IdDefault, IdName, ProgramLink, RenderCallback, Renderer,
-    UniformCallback, UniformContext, UniformLink, QUAD,
+    AnimationCallback, AttributeCreateCallback, AttributeCreateContext, AttributeLink,
+    BufferCreateCallback, BufferCreateContext, BufferLink, Id, IdDefault, IdName, ProgramLink,
+    RenderCallback, Renderer, UniformCallback, UniformContext, UniformLink, QUAD,
 };
 use yew::{
     function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, use_state_eq,
@@ -127,7 +127,7 @@ pub fn app() -> Html {
                     ProgramId,
                     BufferId::VertexBuffer,
                     PositionAttributeId,
-                    AttributeCreateCallback::new(Rc::new(|ctx| {
+                    AttributeCreateCallback::new(Rc::new(|ctx: &AttributeCreateContext<_>| {
                         let gl = ctx.gl();
                         let attribute_location = ctx.attribute_location();
                         let webgl_buffer = ctx.webgl_buffer();
@@ -214,11 +214,12 @@ pub fn app() -> Html {
                     .build()
                     .expect("Renderer should successfully build");
 
-                let new_animation_handle =
-                    renderer.into_animation_handle(AnimationCallback::new(Rc::new(|renderer| {
+                let new_animation_handle = renderer.into_animation_handle(AnimationCallback::new(
+                    Rc::new(|renderer: &Renderer<_, _, _, _, _, _, _, _, _, _, _>| {
                         renderer.update_uniforms();
                         renderer.render();
-                    })));
+                    }),
+                ));
 
                 new_animation_handle.start_animating();
 

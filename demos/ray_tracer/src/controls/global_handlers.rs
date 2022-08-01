@@ -12,7 +12,7 @@ pub fn make_handle_wheel(app_context: AppContext) -> impl Fn(WheelEvent) + 'stat
         let mut render_state = app_context.render_state.borrow_mut();
         let adjustment = 1.0 + ADJUSTMENT_SPEED * e.delta_y().signum();
         let new_camera_field_of_view = render_state.camera().camera_field_of_view() * adjustment;
-       
+
         render_state
             .camera_mut()
             .set_camera_field_of_view(new_camera_field_of_view);

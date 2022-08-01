@@ -21,14 +21,14 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> UniformLink<ProgramId, Unifor
     pub fn new(
         program_ids: impl Into<Bridge<ProgramId>>,
         uniform_id: UniformId,
-        initialize_callback: UniformCallback<UserCtx>,
+        initialize_callback: impl Into<UniformCallback<UserCtx>>,
     ) -> Self {
         let program_id_bridge: Bridge<ProgramId> = program_ids.into();
         let program_ids = program_id_bridge.into();
         Self {
             program_ids,
             uniform_id,
-            initialize_callback,
+            initialize_callback: initialize_callback.into(),
             use_init_callback_for_update: false,
             should_update_callback: None,
             update_callback: None,

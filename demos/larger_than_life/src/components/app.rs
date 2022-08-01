@@ -14,7 +14,7 @@ use web_sys::HtmlCanvasElement;
 use wrend::{
     AnimationCallback, AttributeCreateCallback, AttributeLink, BufferCreateCallback, BufferLink,
     FramebufferCreateCallback, FramebufferLink, ProgramLink, RenderCallback, Renderer,
-    TextureCreateCallback, TextureLink, UniformCallback, UniformLink,
+    TextureCreateCallback, TextureLink, UniformCallback, UniformContext, UniformLink,
 };
 
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
@@ -66,11 +66,11 @@ pub fn app() -> Html {
                 let u_texture = UniformLink::new(
                     (ProgramId::GameOfLife, ProgramId::PassThrough),
                     UniformId::UTexture,
-                    UniformCallback::new(Rc::new(|ctx| {
+                    UniformCallback::new(|ctx: &UniformContext<_>| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
                         gl.uniform1i(Some(uniform_location), 0);
-                    })),
+                    }),
                 );
 
                 let texture_a_link = TextureLink::new(
@@ -128,10 +128,11 @@ pub fn app() -> Html {
                     .build()
                     .expect("Renderer should successfully build");
 
-                let new_animation_handle =
-                    renderer.into_animation_handle(AnimationCallback::new(Rc::new(|renderer| {
+                let new_animation_handle = renderer.into_animation_handle(AnimationCallback::new(
+                    Rc::new(|renderer: &Renderer<_, _, _, _, _, _, _, _, _, _, _>| {
                         renderer.render();
-                    })));
+                    }),
+                ));
 
                 new_animation_handle.start_animating();
 

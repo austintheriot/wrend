@@ -89,14 +89,14 @@ pub fn render(
     gl.active_texture(WebGl2RenderingContext::TEXTURE0 + TextureId::PrevRender.location());
     gl.bind_texture(
         WebGl2RenderingContext::TEXTURE_2D,
-        Some(&read_prev_render_texture),
+        Some(read_prev_render_texture),
     );
     gl.active_texture(
         WebGl2RenderingContext::TEXTURE0 + read_averaged_render_texture_id.location(),
     );
     gl.bind_texture(
         WebGl2RenderingContext::TEXTURE_2D,
-        Some(&read_averaged_render_texture),
+        Some(read_averaged_render_texture),
     );
     gl.bind_framebuffer(
         WebGl2RenderingContext::FRAMEBUFFER,
@@ -110,14 +110,14 @@ pub fn render(
     gl.active_texture(WebGl2RenderingContext::TEXTURE0 + TextureId::PrevRender.location());
     gl.bind_texture(
         WebGl2RenderingContext::TEXTURE_2D,
-        Some(&read_prev_render_texture),
+        Some(read_prev_render_texture),
     );
     gl.active_texture(
         WebGl2RenderingContext::TEXTURE0 + write_averaged_render_texture_id.location(),
     );
     gl.bind_texture(
         WebGl2RenderingContext::TEXTURE_2D,
-        Some(&write_averaged_render_texture),
+        Some(write_averaged_render_texture),
     );
     gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, None);
     draw_quad(gl);

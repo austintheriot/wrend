@@ -2,8 +2,9 @@ use std::rc::Rc;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 use wrend::{
-    AttributeCreateCallback, AttributeLink, BufferCreateCallback, BufferCreateContext, BufferLink,
-    Id, IdDefault, IdName, ProgramLink, RenderCallback, Renderer, QUAD, AttributeCreateContext,
+    AttributeCreateCallback, AttributeCreateContext, AttributeLink, BufferCreateCallback,
+    BufferCreateContext, BufferLink, Id, IdDefault, IdName, ProgramLink, RenderCallback, Renderer,
+    QUAD,
 };
 use yew::{
     function_component, html, use_effect_with_deps, use_node_ref, use_state_eq, UseStateHandle,

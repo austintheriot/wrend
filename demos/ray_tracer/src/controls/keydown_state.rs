@@ -1,7 +1,7 @@
 use super::keydown_key::KeydownKey;
 use std::ops::{Index, IndexMut};
 
-/// Keeps track of what keys are currently being held down 
+/// Keeps track of what keys are currently being held down
 /// (used for updating the user's location in the world)
 #[derive(Default, Debug, PartialEq, Clone, Copy, Eq, PartialOrd, Ord)]
 pub struct KeydownState {

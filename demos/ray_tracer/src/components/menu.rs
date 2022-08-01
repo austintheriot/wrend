@@ -12,7 +12,7 @@ pub fn menu() -> Html {
     let app_context = use_context::<AppContext>().expect(AppContextError::NOT_FOUND);
     let show_menu = app_context.ui_state.show_menu();
 
-    // if menu is opened, make sure all keydown settings are `false` 
+    // if menu is opened, make sure all keydown settings are `false`
     // to prevent unintended movement while the view is paused
     use_effect_with_deps(
         {

@@ -8,8 +8,8 @@ use crate::{
         create_position_attribute::create_position_attribute,
         create_texture::make_create_render_texture,
         create_uniforms::{
-            create_general_ray_tracer_uniform_links,
-            create_shared_uniform_links, create_sphere_uniform_links,
+            create_general_ray_tracer_uniform_links, create_shared_uniform_links,
+            create_sphere_uniform_links,
         },
         fragment_shader_id::FragmentShaderId,
         framebuffer_id::FramebufferId,

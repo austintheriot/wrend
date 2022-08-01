@@ -1,14 +1,14 @@
 use super::texture_id::TextureId;
 use crate::state::app_context::AppContext;
-use std::rc::Rc;
+
 use web_sys::{WebGl2RenderingContext, WebGlTexture};
 use wrend::TextureCreateContext;
 
 /// Creates a texture that will eventually hold a complete render from WebGL
 pub fn make_create_render_texture(
     texture_id: TextureId,
-) -> Rc<dyn Fn(&TextureCreateContext<AppContext>) -> WebGlTexture> {
-    let callback = move |ctx: &TextureCreateContext<AppContext>| {
+) -> impl Fn(&TextureCreateContext<AppContext>) -> WebGlTexture {
+    move |ctx: &TextureCreateContext<AppContext>| {
         let gl = ctx.gl();
         let webgl_texture = gl
             .create_texture()
@@ -60,7 +60,5 @@ pub fn make_create_render_texture(
         .unwrap();
 
         webgl_texture
-    };
-
-    Rc::new(callback)
+    }
 }
