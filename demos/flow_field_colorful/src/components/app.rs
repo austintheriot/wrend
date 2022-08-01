@@ -31,9 +31,8 @@ use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, MouseEvent, WebGl2RenderingContext, WebGlContextAttributes};
 use wrend::{
     AnimationCallback, AttributeCreateCallback, AttributeLink, BufferCreateCallback, BufferLink,
-    CallbackWithContext, FramebufferLink, GetContextCallback, ProgramLinkBuilder, RenderCallback,
-    Renderer, TextureCreateCallback, TextureLink, TransformFeedbackLink, UniformContext,
-    UniformLink, WebGlContextError,
+    FramebufferLink, ProgramLinkBuilder, RenderCallback, Renderer, TextureCreateCallback,
+    TextureLink, TransformFeedbackLink, UniformContext, UniformLink, WebGlContextError,
 };
 
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, Callback};
@@ -200,24 +199,22 @@ pub fn app() -> Html {
                 let render_state_handle: RenderStateHandle = render_state.into();
 
                 // provide custom attributes when getting WebGL context
-                let get_context_callback = GetContextCallback::new(CallbackWithContext::new(
-                    Rc::new(|canvas: &HtmlCanvasElement| {
-                        let mut webgl_context_attributes = WebGlContextAttributes::new();
-                        webgl_context_attributes.preserve_drawing_buffer(true);
+                let get_context_callback = |canvas: &HtmlCanvasElement| {
+                    let mut webgl_context_attributes = WebGlContextAttributes::new();
+                    webgl_context_attributes.preserve_drawing_buffer(true);
 
-                        let gl = canvas
-                            .get_context_with_context_options("webgl2", &webgl_context_attributes)
-                            .map_err(|_| WebGlContextError::RetrievalError)?;
+                    let gl = canvas
+                        .get_context_with_context_options("webgl2", &webgl_context_attributes)
+                        .map_err(|_| WebGlContextError::RetrievalError)?;
 
-                        let gl = gl.ok_or(WebGlContextError::NotFoundError)?;
+                    let gl = gl.ok_or(WebGlContextError::NotFoundError)?;
 
-                        let gl: WebGl2RenderingContext = gl
-                            .dyn_into()
-                            .map_err(|_| WebGlContextError::TypeConversionError)?;
+                    let gl: WebGl2RenderingContext = gl
+                        .dyn_into()
+                        .map_err(|_| WebGlContextError::TypeConversionError)?;
 
-                        Ok(gl)
-                    }),
-                ));
+                    Ok(gl)
+                };
 
                 let mut renderer_builder = Renderer::builder();
                 renderer_builder
