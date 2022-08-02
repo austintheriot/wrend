@@ -162,8 +162,10 @@ pub fn app() -> Html {
                     Some(TextureId::PerlinNoise),
                 );
 
-                let u_now_link_init_and_update_callback =
-                    Rc::new(|ctx: &UniformContext<RenderStateHandle>| {
+                let u_now_link = UniformLink::new(
+                    ProgramId::PerlinNoise,
+                    UniformId::UNow,
+                    |ctx: &UniformContext<RenderStateHandle>| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
                         const TIME_CONSTANT: f64 = 50_000.0;
@@ -171,12 +173,7 @@ pub fn app() -> Html {
                         let time_offset = Math::random() as f32 * MAX_OFFSET;
                         let final_time = (ctx.now() / TIME_CONSTANT) as f32 + time_offset;
                         gl.uniform1f(Some(uniform_location), final_time);
-                    });
-
-                let u_now = UniformLink::new(
-                    ProgramId::PerlinNoise,
-                    UniformId::UNow,
-                    u_now_link_init_and_update_callback.clone(),
+                    },
                 );
 
                 let transform_feedback_link =
@@ -249,7 +246,7 @@ pub fn app() -> Html {
                     .add_framebuffer_link(perlin_noise_framebuffer_link)
                     .add_uniform_link(u_perlin_noise_texture)
                     .add_uniform_link(u_white_noise_texture)
-                    .add_uniform_link(u_now)
+                    .add_uniform_link(u_now_link)
                     .add_transform_feedback_link(transform_feedback_link)
                     .add_vao_link(VAOId::PerlinNoise)
                     .add_vao_link(VAOId::PassThrough)

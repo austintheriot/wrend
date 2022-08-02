@@ -82,20 +82,16 @@ pub fn app() -> Html {
                     Some(TextureId::SimplexNoise),
                 );
 
-                let u_now_link_init_and_update_callback =
-                    Rc::new(|ctx: &UniformContext<RenderStateHandle>| {
-                        let gl = ctx.gl();
-                        let uniform_location = ctx.uniform_location();
-                        gl.uniform1f(Some(uniform_location), (ctx.now() / 2000.) as f32);
-                    });
-
                 let mut u_now = UniformLink::new(
                     ProgramId::SimplexNoise,
                     UniformId::UNow,
-                    u_now_link_init_and_update_callback.clone(),
+                    |ctx: &UniformContext<RenderStateHandle>| {
+                        let gl = ctx.gl();
+                        let uniform_location = ctx.uniform_location();
+                        gl.uniform1f(Some(uniform_location), (ctx.now() / 2000.) as f32);
+                    },
                 );
-
-                u_now.set_update_callback(u_now_link_init_and_update_callback.clone());
+                u_now.set_use_init_callback_for_update(true);
 
                 let render_state_handle: RenderStateHandle = render_state.into();
 
