@@ -9,7 +9,7 @@ use crate::{
     },
     state::{render_state::RenderState, render_state_handle::RenderStateHandle},
 };
-use std::rc::Rc;
+
 use ui::route::Route;
 use web_sys::HtmlCanvasElement;
 use wrend::{

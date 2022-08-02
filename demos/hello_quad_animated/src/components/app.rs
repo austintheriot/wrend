@@ -1,4 +1,3 @@
-use std::rc::Rc;
 use ui::route::Route;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};

@@ -4,22 +4,17 @@ use std::{ops::Deref, rc::Rc};
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 
+pub type GetContextCallbackInner = CallbackWithContext<
+    dyn Fn(&HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError>,
+>;
+
 /// Wrapper around CallbackWithContext to provide a default implementation
 #[derive(Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct GetContextCallback(
-    CallbackWithContext<HtmlCanvasElement, Result<WebGl2RenderingContext, WebGlContextError>>,
-);
+pub struct GetContextCallback(GetContextCallbackInner);
 
 impl GetContextCallback {
-    pub fn new(
-        callback: impl Into<
-            CallbackWithContext<
-                HtmlCanvasElement,
-                Result<WebGl2RenderingContext, WebGlContextError>,
-            >,
-        >,
-    ) -> Self {
-        Self(callback.into())
+    pub fn new(callback: impl Into<GetContextCallback>) -> Self {
+        callback.into()
     }
 }
 
@@ -27,7 +22,10 @@ impl<F: Fn(&HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextErr
     From<F> for GetContextCallback
 {
     fn from(callback: F) -> Self {
-        Self(CallbackWithContext::new(callback))
+        Self(CallbackWithContext::from(Rc::new(callback)
+            as Rc<
+                dyn Fn(&HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError>,
+            >))
     }
 }
 
@@ -35,26 +33,18 @@ impl<F: Fn(&HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextErr
     From<Rc<F>> for GetContextCallback
 {
     fn from(callback: Rc<F>) -> Self {
-        Self(CallbackWithContext::new(callback))
-    }
-}
-
-impl From<CallbackWithContext<HtmlCanvasElement, Result<WebGl2RenderingContext, WebGlContextError>>>
-    for GetContextCallback
-{
-    fn from(
-        callback: CallbackWithContext<
-            HtmlCanvasElement,
-            Result<WebGl2RenderingContext, WebGlContextError>,
-        >,
-    ) -> Self {
-        Self(callback)
+        Self(CallbackWithContext::from(
+            callback
+                as Rc<
+                    dyn Fn(&HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError>,
+                >,
+        ))
     }
 }
 
 impl Default for GetContextCallback {
     fn default() -> Self {
-        Self(CallbackWithContext::new(|canvas: &HtmlCanvasElement| {
+        Self::new(|canvas: &HtmlCanvasElement| {
             let gl = canvas
                 .get_context("webgl2")
                 .map_err(|_| WebGlContextError::RetrievalError)?;
@@ -66,13 +56,12 @@ impl Default for GetContextCallback {
                 .map_err(|_| WebGlContextError::TypeConversionError)?;
 
             Ok(gl)
-        }))
+        })
     }
 }
 
 impl Deref for GetContextCallback {
-    type Target =
-        CallbackWithContext<HtmlCanvasElement, Result<WebGl2RenderingContext, WebGlContextError>>;
+    type Target = GetContextCallbackInner;
 
     fn deref(&self) -> &Self::Target {
         &self.0
