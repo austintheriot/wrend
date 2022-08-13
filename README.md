@@ -2,11 +2,11 @@
 
 **W**ebGL2 **Rend**er Library
 
+Note: **This library is currently experimental and not considered stable for public use**.
+
 ## About 
 
 Wrend is a wrapper library around raw WebGL2, written in Rust, to make working with WebGL & Rust together in the browser more convenient.
-
-Note: **This library is currently experimental and not considered stable for public use**.
 
 ## Why
 
