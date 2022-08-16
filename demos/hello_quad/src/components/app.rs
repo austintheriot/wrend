@@ -7,6 +7,8 @@ use wrend::{
 use yew::{
     function_component, html, use_effect_with_deps, use_node_ref, use_state_eq, UseStateHandle,
 };
+use yew_router::prelude::*;
+use ui::route::Route;
 
 const VERTEX_SHADER: &str = include_str!("../shaders/vertex.glsl");
 const FRAGMENT_SHADER: &str = include_str!("../shaders/fragment.glsl");
@@ -173,6 +175,9 @@ pub fn app() -> Html {
     );
 
     html! {
-        <canvas class="hello-quad" ref={canvas_ref} />
+        <>
+            <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
+            <canvas class="hello-quad" ref={canvas_ref} />
+        </>
     }
 }
