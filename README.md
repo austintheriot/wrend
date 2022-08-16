@@ -4,7 +4,7 @@
 
 Note: **This library is currently experimental and not considered stable for public use**.
 
-## About 
+## About
 
 Wrend is a wrapper library around raw WebGL2, written in Rust, to make working with WebGL & Rust together in the browser more convenient.
 

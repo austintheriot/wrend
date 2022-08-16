@@ -1,12 +1,9 @@
-const path = require('path');
-const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const path = require("path");
+const CopyPlugin = require("copy-webpack-plugin");
+const WasmPackPlugin = require("@wasm-tool/wasm-pack-plugin");
 
 const distPath = path.resolve(__dirname, "dist");
-const devPath = path.resolve(__dirname, "pkg");
 const staticFilesSrc = path.resolve(__dirname, "static");
-const getStaticFilesOutputDir = (isProduction) => isProduction ? distPath : devPath;
 
 // there is a lot of "magic" happening in the index.html and 404.html files 
 // to make this repo compatible as a SPA with GitHub pages.
@@ -19,58 +16,39 @@ const getStaticFilesOutputDir = (isProduction) => isProduction ? distPath : devP
 // in our Yew app
 const REPO_SLUG = '/wrend/';
 
-module.exports = (env, argv) => {
-  const isProduction = argv.mode === 'production';
-  return {
-    devServer: {
-      port: 8000,
-      static: {
-        directory: getStaticFilesOutputDir(isProduction),
-      },
-      historyApiFallback: {
-        index: REPO_SLUG
-      },
+module.exports = {
+  mode: "production",
+  devServer: {
+    port: 8000,
+    static: {
+      directory: distPath,
     },
-    experiments: {
-      syncWebAssembly: true,
+    historyApiFallback: {
+      index: REPO_SLUG
     },
-    entry: './index.js',
-    ignoreWarnings: [
-      // suppress all webpack compile warnings
-      (warning) => true,
-    ],
-    output: {
-      // this makes URLs compatible with GitHub pages, which is 
-      // hosted at this project's repo name currently
-      publicPath: REPO_SLUG,
-      // this is local path to output to
-      path: distPath,
-      filename: "main.js",
-      webassemblyModuleFilename: "main.wasm",
-    },
-    module: {
-      rules: [
-        {
-          test: /\.s[ac]ss$/i,
-          use: [
-            'style-loader',
-            'css-loader',
-            'sass-loader',
-          ],
-        },
-      ],
-    },
-    plugins: [
-      new CopyWebpackPlugin({
-        patterns: [{
-          from: staticFilesSrc, to: getStaticFilesOutputDir(isProduction)
-        }],
-      }),
-      new WasmPackPlugin({
-        crateDirectory: ".",
-      }),
-      new CleanWebpackPlugin(),
-    ],
-    watch: argv.mode !== 'production'
-  };
+    open: true,
+  },
+  experiments: {
+    syncWebAssembly: true,
+  },
+  entry: "./js/index.js",
+  output: {
+    // this makes URLs compatible with GitHub pages, which is 
+    // hosted at this project's repo name currently
+    publicPath: REPO_SLUG,
+    // this is local path to output to
+    path: distPath,
+    filename: "main.js",
+  },
+  plugins: [
+    new CopyPlugin({
+      patterns: [{
+        from: staticFilesSrc, to: distPath
+      }]
+    }),
+
+    new WasmPackPlugin({
+      crateDirectory: __dirname,
+    }),
+  ]
 };

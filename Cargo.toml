@@ -3,11 +3,12 @@
 members = [
     "wrend",
     "demos/ui",
+    "demos/_entry",
     "demos/entry",
     "demos/hello_quad",
     "demos/hello_quad_animated",
     "demos/game_of_life",
     "demos/larger_than_life",
     "demos/perlin_noise",
-    "demos/simplex_noise"
+    "demos/simplex_noise",
 ]
