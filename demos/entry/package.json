@@ -2,14 +2,16 @@
   "homepage": "",
   "version": "0.1.0",
   "scripts": {
-    "build": "rimraf dist pkg && webpack",
+    "build": "rimraf dist pkg && webpack --mode production",
     "start": "rimraf dist pkg && webpack-dev-server --mode development",
     "serve": "rimraf dist pkg && webpack-dev-server --mode production",
-    "test": "cargo test && wasm-pack test --headless"
+    "test": "cargo test",
+    "deploy": "npm run build && gh-pages -d dist"
   },
   "devDependencies": {
     "@wasm-tool/wasm-pack-plugin": "^1.6.0",
     "copy-webpack-plugin": "^11.0.0",
+    "gh-pages": "^4.0.0",
     "rimraf": "^3.0.2",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0",
