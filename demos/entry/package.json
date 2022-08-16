@@ -1,10 +1,10 @@
 {
-  "author": "You <you@example.com>",
-  "name": "rust-webpack-template",
+  "homepage": "",
   "version": "0.1.0",
   "scripts": {
     "build": "rimraf dist pkg && webpack",
-    "start": "rimraf dist pkg && webpack-dev-server",
+    "start": "rimraf dist pkg && webpack-dev-server --mode development",
+    "serve": "rimraf dist pkg && webpack-dev-server --mode production",
     "test": "cargo test && wasm-pack test --headless"
   },
   "devDependencies": {

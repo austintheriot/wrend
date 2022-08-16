@@ -17,7 +17,6 @@ const staticFilesSrc = path.resolve(__dirname, "static");
 const REPO_SLUG = '/wrend/';
 
 module.exports = {
-  mode: "production",
   devServer: {
     port: 8000,
     static: {
@@ -26,7 +25,7 @@ module.exports = {
     historyApiFallback: {
       index: REPO_SLUG
     },
-    open: true,
+    open: ['/wrend'],
   },
   experiments: {
     syncWebAssembly: true,
@@ -50,5 +49,6 @@ module.exports = {
     new WasmPackPlugin({
       crateDirectory: __dirname,
     }),
-  ]
+  ],
+  watch: true,
 };
