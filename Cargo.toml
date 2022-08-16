@@ -3,7 +3,6 @@
 members = [
     "wrend",
     "demos/ui",
-    "demos/_entry",
     "demos/entry",
     "demos/hello_quad",
     "demos/hello_quad_animated",

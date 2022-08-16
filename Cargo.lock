@@ -3,39 +3,6 @@
 version = 3
 
 [[package]]
-name = "_entry"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "console_error_panic_hook",
- "cpal",
- "flow_field",
- "flow_field_colorful",
- "game_of_life",
- "getrandom",
- "hello_quad",
- "hello_quad_animated",
- "js-sys",
- "larger_than_life",
- "lazy_static",
- "log",
- "perlin_noise",
- "rand",
- "ray_tracer",
- "simplex_noise",
- "thiserror",
- "ui",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "wasm-logger",
- "web-sys",
- "wee_alloc",
- "wrend",
- "yew",
- "yew-router",
-]
-
-[[package]]
 name = "alsa"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
