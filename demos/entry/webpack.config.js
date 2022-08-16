@@ -16,39 +16,45 @@ const staticFilesSrc = path.resolve(__dirname, "static");
 // in our Yew app
 const REPO_SLUG = '/wrend/';
 
-module.exports = {
-  devServer: {
-    port: 8000,
-    static: {
-      directory: distPath,
+module.exports = (env, argv) => {
+  const isProduction = argv.mode === 'production';
+  return {
+    devServer: {
+      port: 8000,
+      static: {
+        directory: distPath,
+      },
+      historyApiFallback: {
+        index: REPO_SLUG
+      },
+      open: ['/wrend'],
     },
-    historyApiFallback: {
-      index: REPO_SLUG
+    experiments: {
+      syncWebAssembly: true,
     },
-    open: ['/wrend'],
-  },
-  experiments: {
-    syncWebAssembly: true,
-  },
-  entry: "./js/index.js",
-  output: {
-    // this makes URLs compatible with GitHub pages, which is 
-    // hosted at this project's repo name currently
-    publicPath: REPO_SLUG,
-    // this is local path to output to
-    path: distPath,
-    filename: "main.js",
-  },
-  plugins: [
-    new CopyPlugin({
-      patterns: [{
-        from: staticFilesSrc, to: distPath
-      }]
-    }),
+    entry: "./js/index.js",
+    output: {
+      // this makes URLs compatible with GitHub pages, which is 
+      // hosted at this project's repo name currently
+      publicPath: REPO_SLUG,
+      // this is local path to output to
+      path: distPath,
+      filename: "main.js",
+    },
+    plugins: [
+      new CopyPlugin({
+        patterns: [{
+          from: staticFilesSrc, to: distPath
+        }]
+      }),
 
-    new WasmPackPlugin({
-      crateDirectory: __dirname,
-    }),
-  ],
-  watch: true,
+      new WasmPackPlugin({
+        crateDirectory: __dirname,
+      }),
+    ],
+    mode: isProduction ? "production" : "development",
+    watchOptions: {
+      ignored: /node_modules/,
+    },
+  }
 };
