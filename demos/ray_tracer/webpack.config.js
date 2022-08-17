@@ -22,12 +22,7 @@ module.exports = (env, argv) => {
       syncWebAssembly: true,
     },
     entry: './index.js',
-    ignoreWarnings: [
-      // suppress all webpack compile warnings
-      (warning) => true,
-    ],
     output: {
-      // this is local path to output to
       path: distPath,
       filename: "main.js",
     },

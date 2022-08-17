@@ -1,35 +1,30 @@
 const path = require('path');
 const WasmPackPlugin = require('@wasm-tool/wasm-pack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const CopyPlugin = require("copy-webpack-plugin");
 
 const distPath = path.resolve(__dirname, "dist");
-const devPath = path.resolve(__dirname, "pkg");
 const staticFilesSrc = path.resolve(__dirname, "static");
-const getStaticFilesOutputDir = (isProduction) => isProduction ? distPath : devPath;
 
 module.exports = (env, argv) => {
   const isProduction = argv.mode === 'production';
   return {
     devServer: {
-      static: {
-        directory: getStaticFilesOutputDir(isProduction),
-      },
       port: 8000,
+      static: {
+        directory: distPath,
+      },
+      historyApiFallback: {
+        index: '/'
+      },
+      open: true,
     },
     experiments: {
       syncWebAssembly: true,
     },
     entry: './index.js',
-    ignoreWarnings: [
-      // suppress all webpack compile warnings
-      (warning) => true,
-    ],
     output: {
-      // this is local path to output to
       path: distPath,
       filename: "main.js",
-      webassemblyModuleFilename: "main.wasm",
     },
     module: {
       rules: [
@@ -44,16 +39,17 @@ module.exports = (env, argv) => {
       ],
     },
     plugins: [
-      new CopyWebpackPlugin({
+      new CopyPlugin({
         patterns: [{
-          from: staticFilesSrc, to: getStaticFilesOutputDir(isProduction)
-        }],
+          from: staticFilesSrc, to: distPath
+        }]
       }),
+
       new WasmPackPlugin({
-        crateDirectory: ".",
+        crateDirectory: __dirname,
+        forceMode: isProduction ? "production" : "development",
       }),
-      new CleanWebpackPlugin(),
     ],
-    watch: argv.mode !== 'production'
+    mode: isProduction ? "production" : "development",
   };
 };
