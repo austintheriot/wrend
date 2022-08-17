@@ -59,18 +59,16 @@ pub struct RenderState {
     look_sensitivity: f64,
 
     // DEBUGGING
-    debugging_enabled: i32,
+    enable_debugging: i32,
     cursor_point: Vec3,
     selected_object: i32,
 }
 
 impl Default for RenderState {
     fn default() -> Self {
-        // just uses default 1x1px size at first:
-        // this is updated at initialization time
-        let pipeline = Camera::default();
+        let camera = Camera::default();
         let samples_per_pixel = 1;
-        let max_depth = 8;
+        let max_depth = 16;
         let should_save_image = false;
         let render_count = 0;
         let last_frame_weight = 1.;
@@ -92,7 +90,7 @@ impl Default for RenderState {
         let sphere_list = create_default_sphere_list();
 
         RenderState {
-            camera: pipeline,
+            camera,
 
             samples_per_pixel,
             max_depth,
@@ -109,7 +107,7 @@ impl Default for RenderState {
             keydown_state,
             look_sensitivity,
 
-            debugging_enabled: enable_debugging,
+            enable_debugging,
             cursor_point,
             selected_object,
 
@@ -143,8 +141,8 @@ impl RenderState {
         self.prev_now
     }
 
-    pub fn debugging_enabled(&self) -> i32 {
-        self.debugging_enabled
+    pub fn enable_debugging(&self) -> i32 {
+        self.enable_debugging
     }
 
     pub fn is_paused(&self) -> bool {
@@ -226,12 +224,11 @@ impl RenderState {
         canvas: &HtmlCanvasElement,
         now: f64,
     ) -> &mut Self {
-        // update state
+        // sync internal state
         self.prev_resize_sync_time = now;
         self.reset_render_count();
         self.set_window_size_out_of_sync(false);
 
-        // sync internal state
         let (width, height) = utils::clamped_screen_dimensions();
         let render_state_pipeline: &mut Camera = self.as_mut();
         render_state_pipeline.set_width_and_height(width, height);
@@ -263,6 +260,7 @@ impl RenderState {
         self
     }
 
+    /// Updates the player's current position in the world
     pub fn update_position(&mut self) -> &mut Self {
         let now = window().unwrap().performance().unwrap().now();
         let dt = now - self.prev_now();
@@ -302,7 +300,10 @@ impl RenderState {
         self
     }
 
-    /// focus on whatever object is selected by the cursor if there was a collision
+    /// Finds the point of intersection between the center of the user's camera.
+    /// The point itself is saved in state along with the ID of any object that was intersected.
+    /// 
+    /// This enables the possibility of focusing the camera focal point based on whatever is currently in view.
     pub fn update_cursor_position_in_world(&mut self) -> &mut Self {
         let pipeline = self.camera();
         let camera_origin = pipeline.camera_origin();
@@ -363,6 +364,8 @@ impl AsRef<KeydownState> for RenderState {
     }
 }
 
+/// This is the default list of objects that initially populate the world
+/// @todo this is messy--clean it up
 pub fn create_default_sphere_list() -> Vec<Sphere> {
     let mut sphere_list = vec![
         // ground

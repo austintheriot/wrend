@@ -504,7 +504,7 @@ pub fn create_general_ray_tracer_uniform_links() -> Vec<UniformLink<ProgramId, S
             let uniform_location = ctx.uniform_location();
             let user_ctx = ctx.user_ctx().unwrap();
             let render_state = user_ctx.render_state.borrow();
-            gl.uniform1i(Some(uniform_location), render_state.debugging_enabled());
+            gl.uniform1i(Some(uniform_location), render_state.enable_debugging());
         },
     );
     uniform_link.set_use_init_callback_for_update(true);

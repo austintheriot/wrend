@@ -1,8 +1,10 @@
 use web_sys::window;
 
+/// This constant can be updated to limit the screen dimensions to something smaller
 pub const MAX_CANVAS_SIZE: u32 = u32::MAX;
 
-// limit max canvas dimensions to a reasonable number
+// Returns the width of the screen or `MAX_CANVAS_SIZE`--whichever is smaller.
+// Limits the canvas dimensions to a reasonable number
 // (to prevent off-the-charts GPU work on large screen sizes)
 pub fn clamped_screen_dimensions() -> (u32, u32) {
     let window = window().unwrap();
