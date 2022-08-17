@@ -1,6 +1,6 @@
 # wrend
 
-## **W**ebGL2 **Rend**ering Library
+a.k.a **W**ebGL2 **Rend**ering Library
 
 Note: **This library is currently experimental and not considered stable for public use**.
 
