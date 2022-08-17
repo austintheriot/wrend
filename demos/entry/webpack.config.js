@@ -62,11 +62,9 @@ module.exports = (env, argv) => {
 
       new WasmPackPlugin({
         crateDirectory: __dirname,
+        forceMode: isProduction ? "production" : "development",
       }),
     ],
     mode: isProduction ? "production" : "development",
-    watchOptions: {
-      ignored: /node_modules/,
-    },
   }
 };
