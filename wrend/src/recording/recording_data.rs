@@ -1,8 +1,15 @@
-use crate::{AnimationCallback, Id, IdDefault, IdName, Renderer};
+use crate::{AnimationHandle, Id, IdDefault, IdName};
 use std::ops::{Deref, DerefMut};
+use wasm_bindgen::prelude::wasm_bindgen;
+use web_sys::{HtmlCanvasElement, MediaRecorder, MediaRecorderOptions, MediaStream};
+
+#[wasm_bindgen(module = "/src/recording/captureStream.js")]
+extern "C" {
+    fn captureStreamFromCanvas(canvas: HtmlCanvasElement) -> MediaStream;
+}
 
 #[derive(Clone)]
-pub struct AnimationData<
+pub struct RecordingData<
     VertexShaderId: Id = IdDefault,
     FragmentShaderId: Id = IdDefault,
     ProgramId: Id = IdDefault,
@@ -15,8 +22,9 @@ pub struct AnimationData<
     VertexArrayObjectId: Id = IdDefault,
     UserCtx: Clone + 'static = (),
 > {
-    request_id: i32,
-    animation_callback: AnimationCallback<
+    media_stream: MediaStream,
+    media_recorder: MediaRecorder,
+    animation_handle: AnimationHandle<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -29,20 +37,6 @@ pub struct AnimationData<
         VertexArrayObjectId,
         UserCtx,
     >,
-    renderer: Renderer<
-        VertexShaderId,
-        FragmentShaderId,
-        ProgramId,
-        UniformId,
-        BufferId,
-        AttributeId,
-        TextureId,
-        FramebufferId,
-        TransformFeedbackId,
-        VertexArrayObjectId,
-        UserCtx,
-    >,
-    is_animating: bool,
 }
 
 impl<
@@ -58,7 +52,7 @@ impl<
         VertexArrayObjectId: Id,
         UserCtx: Clone + 'static,
     >
-    AnimationData<
+    RecordingData<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -72,60 +66,8 @@ impl<
         UserCtx,
     >
 {
-    pub fn set_request_id(&mut self, id: i32) {
-        self.request_id = id;
-    }
-
-    pub fn request_id(&self) -> i32 {
-        self.request_id
-    }
-
-    pub fn call_animation_callback(&mut self) {
-        (self.animation_callback)(&mut self.renderer);
-    }
-
-    pub fn set_is_animating(&mut self, is_animating: bool) -> &mut Self {
-        self.is_animating = is_animating;
-        self
-    }
-
-    pub fn is_animating(&self) -> bool {
-        self.is_animating
-    }
-
-    pub fn renderer(
-        &self,
-    ) -> &Renderer<
-        VertexShaderId,
-        FragmentShaderId,
-        ProgramId,
-        UniformId,
-        BufferId,
-        AttributeId,
-        TextureId,
-        FramebufferId,
-        TransformFeedbackId,
-        VertexArrayObjectId,
-        UserCtx,
-    > {
-        &self.renderer
-    }
-
     pub fn new(
-        animation_callback: AnimationCallback<
-            VertexShaderId,
-            FragmentShaderId,
-            ProgramId,
-            UniformId,
-            BufferId,
-            AttributeId,
-            TextureId,
-            FramebufferId,
-            TransformFeedbackId,
-            VertexArrayObjectId,
-            UserCtx,
-        >,
-        renderer: Renderer<
+        animation_handle: AnimationHandle<
             VertexShaderId,
             FragmentShaderId,
             ProgramId,
@@ -139,11 +81,20 @@ impl<
             UserCtx,
         >,
     ) -> Self {
+        let canvas = animation_handle.canvas();
+        let media_stream = captureStreamFromCanvas(canvas);
+        let mut media_recorder_options = MediaRecorderOptions::new();
+        media_recorder_options.mime_type("video/webm; codecs=vp9");
+
+        let media_recorder = MediaRecorder::new_with_media_stream_and_media_recorder_options(
+            &media_stream,
+            &media_recorder_options,
+        ).expect("Should be able to build media recorder");
+
         Self {
-            animation_callback,
-            renderer,
-            request_id: 0,
-            is_animating: false,
+            media_stream,
+            media_recorder,
+            animation_handle,
         }
     }
 }
@@ -160,8 +111,22 @@ impl<
         TransformFeedbackId: Id,
         VertexArrayObjectId: Id,
         UserCtx: Clone,
-    > Deref
-    for AnimationData<
+    > From<
+    AnimationHandle<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        AttributeId,
+        TextureId,
+        FramebufferId,
+        TransformFeedbackId,
+        VertexArrayObjectId,
+        UserCtx,
+    >
+    >
+    for RecordingData<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -175,7 +140,52 @@ impl<
         UserCtx,
     >
 {
-    type Target = Renderer<
+    fn from(animation_handle: AnimationHandle<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        AttributeId,
+        TextureId,
+        FramebufferId,
+        TransformFeedbackId,
+        VertexArrayObjectId,
+        UserCtx,
+    >) -> Self {
+        Self::new(animation_handle)
+    }
+}
+
+
+impl<
+        VertexShaderId: Id,
+        FragmentShaderId: Id,
+        ProgramId: Id,
+        UniformId: Id + IdName,
+        BufferId: Id,
+        AttributeId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
+        TransformFeedbackId: Id,
+        VertexArrayObjectId: Id,
+        UserCtx: Clone,
+    > Deref
+    for RecordingData<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        AttributeId,
+        TextureId,
+        FramebufferId,
+        TransformFeedbackId,
+        VertexArrayObjectId,
+        UserCtx,
+    >
+{
+    type Target = AnimationHandle<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -190,7 +200,7 @@ impl<
     >;
 
     fn deref(&self) -> &Self::Target {
-        &self.renderer
+        &self.animation_handle
     }
 }
 
@@ -207,7 +217,7 @@ impl<
         VertexArrayObjectId: Id,
         UserCtx: Clone,
     > DerefMut
-    for AnimationData<
+    for RecordingData<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -223,7 +233,7 @@ impl<
 {
     fn deref_mut(
         &mut self,
-    ) -> &mut Renderer<
+    ) -> &mut AnimationHandle<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -236,6 +246,6 @@ impl<
         VertexArrayObjectId,
         UserCtx,
     > {
-        &mut self.renderer
+        &mut self.animation_handle
     }
 }

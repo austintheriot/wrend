@@ -35,4 +35,8 @@ features = [
   "WebGlTransformFeedback",
   "WebGlContextAttributes",
   'Performance',
+  "MediaStream",
+  "CanvasCaptureMediaStream",
+  "MediaRecorder",
+  "MediaRecorderOptions"
 ]

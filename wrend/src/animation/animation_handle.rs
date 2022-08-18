@@ -1,9 +1,9 @@
-use crate::{AnimationCallback, AnimationData, Id, IdName, Renderer};
+use crate::{AnimationCallback, AnimationData, Id, IdName, RecordingHandle, Renderer};
 use std::cell::RefCell;
 use std::rc::Rc;
 use wasm_bindgen::prelude::Closure;
 use wasm_bindgen::JsCast;
-use web_sys::window;
+use web_sys::{window, HtmlCanvasElement, WebGl2RenderingContext};
 
 #[derive(Clone)]
 pub struct AnimationHandle<
@@ -119,20 +119,48 @@ impl<
 
                 // schedule another requestAnimationFrame callback
                 let animation_id = Self::request_animation_frame(f.borrow().as_ref().unwrap());
-                animation_data.borrow_mut().set_id(animation_id);
+                animation_data.borrow_mut().set_request_id(animation_id);
             }) as Box<dyn Fn()>));
         }
 
         let id = Self::request_animation_frame(g.borrow().as_ref().unwrap());
-        animation_data.borrow_mut().set_id(id);
+        animation_data.borrow_mut().set_request_id(id);
     }
 
     pub fn stop_animating(&self) {
         self.animation_data.borrow_mut().set_is_animating(false);
         window()
             .unwrap()
-            .cancel_animation_frame(self.animation_data.borrow().id())
+            .cancel_animation_frame(self.animation_data.borrow().request_id())
             .expect("Should be able to cancel animation frame")
+    }
+
+    /// Returns the inner canvas element
+    pub fn canvas(&self) -> HtmlCanvasElement {
+        self.animation_data.borrow().canvas().clone()
+    }
+
+    /// Returns the inner WebGl2RenderingContext
+    pub fn gl(&self) -> WebGl2RenderingContext {
+        self.animation_data.borrow().gl().clone()
+    }
+
+    pub fn into_recording_handle(
+        self,
+    ) -> RecordingHandle<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        AttributeId,
+        TextureId,
+        FramebufferId,
+        TransformFeedbackId,
+        VertexArrayObjectId,
+        UserCtx,
+    > {
+        self.into()
     }
 
     fn request_animation_frame(f: &Closure<dyn Fn()>) -> i32 {

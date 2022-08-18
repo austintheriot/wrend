@@ -10,4 +10,5 @@ members = [
     "demos/larger_than_life",
     "demos/perlin_noise",
     "demos/simplex_noise",
+    "demos/recording_demo"
 ]

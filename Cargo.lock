@@ -1187,6 +1187,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "recording_demo"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "console_error_panic_hook",
+ "cpal",
+ "getrandom",
+ "js-sys",
+ "lazy_static",
+ "log",
+ "rand",
+ "thiserror",
+ "ui",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wee_alloc",
+ "wrend",
+ "yew",
+ "yew-router",
+]
+
+[[package]]
 name = "redox_syscall"
 version = "0.2.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
