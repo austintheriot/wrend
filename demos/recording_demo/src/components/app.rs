@@ -212,6 +212,8 @@ pub fn app() -> Html {
 
                 let new_recording_handle = animation_handle.into_recording_handle();
 
+                new_recording_handle.start_recording();
+
                 // save handle to keep animation going
                 *recording_handle.borrow_mut() = Some(new_recording_handle);
 

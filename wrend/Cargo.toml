@@ -38,5 +38,6 @@ features = [
   "MediaStream",
   "CanvasCaptureMediaStream",
   "MediaRecorder",
-  "MediaRecorderOptions"
+  "MediaRecorderOptions",
+  "BlobEvent"
 ]

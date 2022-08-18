@@ -22,6 +22,7 @@ pub struct RecordingData<
     VertexArrayObjectId: Id = IdDefault,
     UserCtx: Clone + 'static = (),
 > {
+    recorded_chunks: Vec<u8>,
     media_stream: MediaStream,
     media_recorder: MediaRecorder,
     animation_handle: AnimationHandle<
@@ -95,7 +96,16 @@ impl<
             media_stream,
             media_recorder,
             animation_handle,
+            recorded_chunks: Vec::new(),
         }
+    }
+
+    pub fn media_recorder(&self) -> &MediaRecorder {
+        &self.media_recorder
+    }
+
+    pub fn media_recorder_mut(&mut self) -> &mut MediaRecorder {
+        &mut self.media_recorder
     }
 }
 
