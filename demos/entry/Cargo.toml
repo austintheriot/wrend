@@ -55,6 +55,7 @@ simplex_noise = { path = '../simplex_noise' }
 flow_field = { path = '../flow_field' }
 flow_field_colorful = { path = '../flow_field_colorful' }
 ray_tracer = { path = '../ray_tracer' }
+recording_demo = { path = '../recording_demo' }
 
 # `wee_alloc` is a tiny allocator for wasm that is only ~1K in code size
 # compared to the default allocator's ~10K. However, it is slower than the default

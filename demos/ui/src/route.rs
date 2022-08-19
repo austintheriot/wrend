@@ -25,4 +25,6 @@ pub enum Route {
     FlowFieldColorful,
     #[at("/ray-tracer")]
     RayTracer,
+    #[at("/recording-demo")]
+    RecordingDemo,
 }

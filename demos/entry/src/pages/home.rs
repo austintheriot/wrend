@@ -51,9 +51,14 @@ pub fn home() -> Html {
         </Link<Route>>
         <Link<Route>
         to={Route::RayTracer}
-    >
-        {"RayTracer"}
-    </Link<Route>>
+        >
+            {"Ray Tracer"}
+        </Link<Route>>
+        <Link<Route>
+            to={Route::RecordingDemo}
+        >
+            {"Recording Demo"}
+        </Link<Route>>
      </div>
             }
 }

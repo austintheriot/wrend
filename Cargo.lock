@@ -273,6 +273,7 @@ dependencies = [
  "perlin_noise",
  "rand",
  "ray_tracer",
+ "recording_demo",
  "simplex_noise",
  "thiserror",
  "ui",
