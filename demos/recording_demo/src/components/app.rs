@@ -1,13 +1,15 @@
+use std::rc::Rc;
+
 use ui::route::Route;
 use wasm_bindgen::JsCast;
-use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
+use web_sys::{HtmlCanvasElement, MouseEvent, WebGl2RenderingContext};
 use wrend::{
     AttributeCreateContext, AttributeLink, BufferCreateContext, BufferLink, Id, IdDefault, IdName,
     ProgramLink, Renderer, UniformContext, UniformLink, QUAD,
 };
 use yew::{
     function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, use_state_eq,
-    UseStateHandle,
+    Callback, UseStateHandle,
 };
 use yew_router::prelude::*;
 
@@ -91,6 +93,7 @@ pub fn app() -> Html {
     use_effect_with_deps(
         {
             let canvas_ref = canvas_ref.clone();
+            let recording_handle = Rc::clone(&recording_handle);
             move |_| {
                 let canvas: HtmlCanvasElement = canvas_ref
                     .cast()
@@ -201,15 +204,15 @@ pub fn app() -> Html {
                     .build()
                     .expect("Renderer should successfully build");
 
-       
                 let mut renderer_handle = renderer.into_renderer_handle();
-                renderer_handle.set_animation_callback(Some(|renderer: &Renderer<_, _, _, _, _, _, _, _, _, _, _>| {
-                    renderer.update_uniforms();
-                    renderer.render();
-                }));
+                renderer_handle.set_animation_callback(Some(
+                    |renderer: &Renderer<_, _, _, _, _, _, _, _, _, _, _>| {
+                        renderer.update_uniforms();
+                        renderer.render();
+                    },
+                ));
 
                 renderer_handle.start_animating();
-                renderer_handle.start_recording();
 
                 // save handle to keep animation going
                 *recording_handle.borrow_mut() = Some(renderer_handle);
@@ -220,9 +223,35 @@ pub fn app() -> Html {
         (),
     );
 
+    let handle_start_recording = {
+        let recording_handle = Rc::clone(&recording_handle);
+        Callback::from(move |_: MouseEvent| {
+            let recording_handle = recording_handle.borrow();
+            if let Some(recording_handle) = &*recording_handle {
+                recording_handle.start_recording();
+            }
+        })
+    };
+
+    let handle_stop_recording = {
+        let recording_handle = Rc::clone(&recording_handle);
+        Callback::from(move |_: MouseEvent| {
+            let recording_handle = recording_handle.borrow();
+            if let Some(recording_handle) = &*recording_handle {
+                recording_handle.stop_recording();
+            }
+        })
+    };
+
     html! {
         <div class="recording-demo">
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
+            <button type="button" onclick={handle_start_recording}>
+                {"Start Recording"}
+            </button>
+            <button type="button" onclick={handle_stop_recording}>
+                {"Stop Recording"}
+            </button>
             <canvas ref={canvas_ref} />
         </div>
     }
