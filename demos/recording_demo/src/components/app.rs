@@ -3,7 +3,7 @@ use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 use wrend::{
     AttributeCreateContext, AttributeLink, BufferCreateContext, BufferLink, Id, IdDefault, IdName,
-    ProgramLink, RecordingHandle, Renderer, UniformContext, UniformLink, QUAD,
+    ProgramLink, Renderer, UniformContext, UniformLink, QUAD,
 };
 use yew::{
     function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, use_state_eq,
@@ -201,21 +201,18 @@ pub fn app() -> Html {
                     .build()
                     .expect("Renderer should successfully build");
 
-                let animation_handle = renderer.into_animation_handle(
-                    |renderer: &Renderer<_, _, _, _, _, _, _, _, _, _, _>| {
-                        renderer.update_uniforms();
-                        renderer.render();
-                    },
-                );
+       
+                let mut renderer_handle = renderer.into_renderer_handle();
+                renderer_handle.set_animation_callback(Some(|renderer: &Renderer<_, _, _, _, _, _, _, _, _, _, _>| {
+                    renderer.update_uniforms();
+                    renderer.render();
+                }));
 
-                animation_handle.start_animating();
-
-                let new_recording_handle = animation_handle.into_recording_handle();
-
-                new_recording_handle.start_recording();
+                renderer_handle.start_animating();
+                renderer_handle.start_recording();
 
                 // save handle to keep animation going
-                *recording_handle.borrow_mut() = Some(new_recording_handle);
+                *recording_handle.borrow_mut() = Some(renderer_handle);
 
                 || {}
             }

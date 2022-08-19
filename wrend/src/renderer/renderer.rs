@@ -1,9 +1,9 @@
 use crate::{
-    AnimationCallback, AnimationHandle, Attribute, AttributeCreateContext, AttributeLink, Bridge,
-    Buffer, BufferLink, BuildRendererError, CompileShaderError, CreateAttributeError,
-    CreateBufferError, CreateTextureError, CreateTransformFeedbackError, CreateUniformError,
-    CreateVAOError, Framebuffer, FramebufferLink, GetContextCallback, Id, IdDefault, IdName,
-    LinkProgramError, ProgramLink, RenderCallback, RendererBuilderError, SaveContextError,
+    Attribute, AttributeCreateContext, AttributeLink, Bridge, Buffer, BufferLink,
+    BuildRendererError, CompileShaderError, CreateAttributeError, CreateBufferError,
+    CreateTextureError, CreateTransformFeedbackError, CreateUniformError, CreateVAOError,
+    Framebuffer, FramebufferLink, GetContextCallback, Id, IdDefault, IdName, LinkProgramError,
+    ProgramLink, RenderCallback, RendererBuilderError, RendererHandle, SaveContextError,
     ShaderType, Texture, TextureLink, TransformFeedbackLink, Uniform, UniformContext, UniformLink,
     WebGlContextError,
 };
@@ -292,24 +292,9 @@ impl<
     /// Begins the animation process.
     ///
     /// If no animation callback has been provided, then the empty animation callback is run.
-    pub fn into_animation_handle(
+    pub fn into_renderer_handle(
         self,
-        animation_callback: impl Into<
-            AnimationCallback<
-                VertexShaderId,
-                FragmentShaderId,
-                ProgramId,
-                UniformId,
-                BufferId,
-                AttributeId,
-                TextureId,
-                FramebufferId,
-                TransformFeedbackId,
-                VertexArrayObjectId,
-                UserCtx,
-            >,
-        >,
-    ) -> AnimationHandle<
+    ) -> RendererHandle<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -322,7 +307,7 @@ impl<
         VertexArrayObjectId,
         UserCtx,
     > {
-        AnimationHandle::new(animation_callback.into(), self)
+        self.into()
     }
 
     /// Gets current DOMHighResTimeStamp from performance.now()
@@ -330,6 +315,38 @@ impl<
     /// WebGL is limited to an f32, so using performance.now() (for now) to limit the size of the f64
     fn now() -> f64 {
         window().unwrap().performance().unwrap().now()
+    }
+}
+
+impl<
+        VertexShaderId: Id,
+        FragmentShaderId: Id,
+        ProgramId: Id,
+        UniformId: Id + IdName,
+        BufferId: Id,
+        AttributeId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
+        TransformFeedbackId: Id,
+        VertexArrayObjectId: Id,
+        UserCtx: Clone,
+    > AsRef<HtmlCanvasElement>
+    for Renderer<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        AttributeId,
+        TextureId,
+        FramebufferId,
+        TransformFeedbackId,
+        VertexArrayObjectId,
+        UserCtx,
+    >
+{
+    fn as_ref(&self) -> &HtmlCanvasElement {
+        self.canvas()
     }
 }
 

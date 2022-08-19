@@ -25,8 +25,8 @@ use crate::{
 
 use web_sys::HtmlCanvasElement;
 use wrend::{
-    AnimationHandle, AttributeLink, BufferLink, FramebufferLink, ProgramLinkBuilder, Renderer,
-    TextureLink,
+    AttributeLink, BufferLink, FramebufferLink, ProgramLinkBuilder, Renderer,
+    TextureLink, RendererHandle,
 };
 
 const QUAD_VERTEX_SHADER: &str = include_str!("../shaders/quad_vertex.glsl");
@@ -38,7 +38,7 @@ const PASS_THROUGH_FRAGMENT_SHADER: &str = include_str!("../shaders/pass_through
 pub fn build_renderer(
     canvas: HtmlCanvasElement,
     app_context: AppContext,
-) -> AnimationHandle<
+) -> RendererHandle<
     VertexShaderId,
     FragmentShaderId,
     ProgramId,
@@ -159,9 +159,10 @@ pub fn build_renderer(
         .build()
         .expect("Renderer should successfully build");
 
-    let new_animation_handle = renderer.into_animation_handle(animate);
+    let mut new_renderer_handle = renderer.into_renderer_handle();
+    new_renderer_handle.set_animation_callback(Some(animate));
 
-    new_animation_handle.start_animating();
+    new_renderer_handle.start_animating();
 
-    new_animation_handle
+    new_renderer_handle
 }

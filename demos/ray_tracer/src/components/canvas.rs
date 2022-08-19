@@ -10,21 +10,21 @@ use yew::{function_component, html, use_context, use_effect_with_deps, use_mut_r
 pub fn canvas() -> Html {
     let app_context = use_context::<AppContext>().expect(AppContextError::NOT_FOUND);
     let canvas_ref = use_node_ref();
-    let animation_handle = use_mut_ref(|| None);
+    let renderer_handle = use_mut_ref(|| None);
 
     use_effect_with_deps(
         {
             let app_context = app_context;
             let canvas_ref = canvas_ref.clone();
-            let animation_handle = animation_handle;
+            let renderer_handle = renderer_handle;
 
             move |_| {
                 let canvas: HtmlCanvasElement = canvas_ref
                     .cast()
                     .expect("Canvas ref should point to a canvas in the use_effect hook");
 
-                let new_animation_handle = build_renderer(canvas, app_context);
-                *animation_handle.borrow_mut() = Some(new_animation_handle);
+                let new_renderer_handle = build_renderer(canvas, app_context);
+                *renderer_handle.borrow_mut() = Some(new_renderer_handle);
 
                 move || {}
             }

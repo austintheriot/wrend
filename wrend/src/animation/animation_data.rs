@@ -1,5 +1,4 @@
 use crate::{AnimationCallback, Id, IdDefault, IdName, Renderer};
-use std::ops::{Deref, DerefMut};
 
 #[derive(Clone)]
 pub struct AnimationData<
@@ -16,31 +15,20 @@ pub struct AnimationData<
     UserCtx: Clone + 'static = (),
 > {
     request_id: i32,
-    animation_callback: AnimationCallback<
-        VertexShaderId,
-        FragmentShaderId,
-        ProgramId,
-        UniformId,
-        BufferId,
-        AttributeId,
-        TextureId,
-        FramebufferId,
-        TransformFeedbackId,
-        VertexArrayObjectId,
-        UserCtx,
-    >,
-    renderer: Renderer<
-        VertexShaderId,
-        FragmentShaderId,
-        ProgramId,
-        UniformId,
-        BufferId,
-        AttributeId,
-        TextureId,
-        FramebufferId,
-        TransformFeedbackId,
-        VertexArrayObjectId,
-        UserCtx,
+    animation_callback: Option<
+        AnimationCallback<
+            VertexShaderId,
+            FragmentShaderId,
+            ProgramId,
+            UniformId,
+            BufferId,
+            AttributeId,
+            TextureId,
+            FramebufferId,
+            TransformFeedbackId,
+            VertexArrayObjectId,
+            UserCtx,
+        >,
     >,
     is_animating: bool,
 }
@@ -72,46 +60,11 @@ impl<
         UserCtx,
     >
 {
-    pub fn set_request_id(&mut self, id: i32) {
-        self.request_id = id;
+    pub fn new() -> Self {
+        Self::default()
     }
 
-    pub fn request_id(&self) -> i32 {
-        self.request_id
-    }
-
-    pub fn call_animation_callback(&mut self) {
-        (self.animation_callback)(&mut self.renderer);
-    }
-
-    pub fn set_is_animating(&mut self, is_animating: bool) -> &mut Self {
-        self.is_animating = is_animating;
-        self
-    }
-
-    pub fn is_animating(&self) -> bool {
-        self.is_animating
-    }
-
-    pub fn renderer(
-        &self,
-    ) -> &Renderer<
-        VertexShaderId,
-        FragmentShaderId,
-        ProgramId,
-        UniformId,
-        BufferId,
-        AttributeId,
-        TextureId,
-        FramebufferId,
-        TransformFeedbackId,
-        VertexArrayObjectId,
-        UserCtx,
-    > {
-        &self.renderer
-    }
-
-    pub fn new(
+    pub fn new_with_animation_callback(
         animation_callback: AnimationCallback<
             VertexShaderId,
             FragmentShaderId,
@@ -125,7 +78,26 @@ impl<
             VertexArrayObjectId,
             UserCtx,
         >,
-        renderer: Renderer<
+    ) -> Self {
+        let mut animation_data = Self::default();
+        animation_data.set_animation_callback(Some(animation_callback));
+        animation_data
+    }
+
+    pub fn set_request_id(&mut self, id: i32) {
+        self.request_id = id;
+    }
+
+    pub fn request_id(&self) -> i32 {
+        self.request_id
+    }
+
+    /// Calls the internal animation callback.
+    ///
+    /// If no animation has been supplied yet, this is a no-op.
+    pub fn call_animation_callback(
+        &mut self,
+        renderer: &mut Renderer<
             VertexShaderId,
             FragmentShaderId,
             ProgramId,
@@ -138,104 +110,78 @@ impl<
             VertexArrayObjectId,
             UserCtx,
         >,
-    ) -> Self {
+    ) {
+        if let Some(animation_callback) = &self.animation_callback {
+            (animation_callback)(renderer);
+        }
+    }
+
+    pub fn set_animation_callback(
+        &mut self,
+        animation_callback: Option<
+            AnimationCallback<
+                VertexShaderId,
+                FragmentShaderId,
+                ProgramId,
+                UniformId,
+                BufferId,
+                AttributeId,
+                TextureId,
+                FramebufferId,
+                TransformFeedbackId,
+                VertexArrayObjectId,
+                UserCtx,
+            >,
+        >,
+    ) {
+        self.animation_callback = animation_callback;
+    }
+
+    pub fn set_is_animating(&mut self, is_animating: bool) -> &mut Self {
+        self.is_animating = is_animating;
+        self
+    }
+
+    pub fn is_animating(&self) -> bool {
+        self.is_animating
+    }
+}
+
+impl<
+        VertexShaderId: Id,
+        FragmentShaderId: Id,
+        ProgramId: Id,
+        UniformId: Id + IdName,
+        BufferId: Id,
+        AttributeId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
+        TransformFeedbackId: Id,
+        VertexArrayObjectId: Id,
+        UserCtx: Clone + 'static,
+    > Default
+    for AnimationData<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        AttributeId,
+        TextureId,
+        FramebufferId,
+        TransformFeedbackId,
+        VertexArrayObjectId,
+        UserCtx,
+    >
+{
+    fn default() -> Self {
         Self {
-            animation_callback,
-            renderer,
+            animation_callback: None,
+            // The `requestAnimationFrame` function is guaranteed to return a non-zero function,
+            // so using an initial value of `0` here is guaranteed to be safe if it is accidentally
+            // used to cancel a requested animation frame.
             request_id: 0,
             is_animating: false,
         }
-    }
-}
-
-impl<
-        VertexShaderId: Id,
-        FragmentShaderId: Id,
-        ProgramId: Id,
-        UniformId: Id + IdName,
-        BufferId: Id,
-        AttributeId: Id + IdName,
-        TextureId: Id,
-        FramebufferId: Id,
-        TransformFeedbackId: Id,
-        VertexArrayObjectId: Id,
-        UserCtx: Clone,
-    > Deref
-    for AnimationData<
-        VertexShaderId,
-        FragmentShaderId,
-        ProgramId,
-        UniformId,
-        BufferId,
-        AttributeId,
-        TextureId,
-        FramebufferId,
-        TransformFeedbackId,
-        VertexArrayObjectId,
-        UserCtx,
-    >
-{
-    type Target = Renderer<
-        VertexShaderId,
-        FragmentShaderId,
-        ProgramId,
-        UniformId,
-        BufferId,
-        AttributeId,
-        TextureId,
-        FramebufferId,
-        TransformFeedbackId,
-        VertexArrayObjectId,
-        UserCtx,
-    >;
-
-    fn deref(&self) -> &Self::Target {
-        &self.renderer
-    }
-}
-
-impl<
-        VertexShaderId: Id,
-        FragmentShaderId: Id,
-        ProgramId: Id,
-        UniformId: Id + IdName,
-        BufferId: Id,
-        AttributeId: Id + IdName,
-        TextureId: Id,
-        FramebufferId: Id,
-        TransformFeedbackId: Id,
-        VertexArrayObjectId: Id,
-        UserCtx: Clone,
-    > DerefMut
-    for AnimationData<
-        VertexShaderId,
-        FragmentShaderId,
-        ProgramId,
-        UniformId,
-        BufferId,
-        AttributeId,
-        TextureId,
-        FramebufferId,
-        TransformFeedbackId,
-        VertexArrayObjectId,
-        UserCtx,
-    >
-{
-    fn deref_mut(
-        &mut self,
-    ) -> &mut Renderer<
-        VertexShaderId,
-        FragmentShaderId,
-        ProgramId,
-        UniformId,
-        BufferId,
-        AttributeId,
-        TextureId,
-        FramebufferId,
-        TransformFeedbackId,
-        VertexArrayObjectId,
-        UserCtx,
-    > {
-        &mut self.renderer
     }
 }

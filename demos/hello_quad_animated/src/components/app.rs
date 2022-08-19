@@ -86,12 +86,12 @@ impl IdName for PositionAttributeId {
 pub fn app() -> Html {
     let canvas_ref = use_node_ref();
     let example_state = use_state_eq(|| 0);
-    let animation_handle = use_mut_ref(|| None);
+    let renderer_handle = use_mut_ref(|| None);
 
     use_effect_with_deps(
         {
             let canvas_ref = canvas_ref.clone();
-            let animation_handle = animation_handle;
+            let renderer_handle = renderer_handle;
             move |_| {
                 let canvas: HtmlCanvasElement = canvas_ref
                     .cast()
@@ -202,17 +202,18 @@ pub fn app() -> Html {
                     .build()
                     .expect("Renderer should successfully build");
 
-                let new_animation_handle = renderer.into_animation_handle(
+                let mut new_renderer_handle = renderer.into_renderer_handle();
+                new_renderer_handle.set_animation_callback(Some(
                     |renderer: &Renderer<_, _, _, _, _, _, _, _, _, _, _>| {
                         renderer.update_uniforms();
                         renderer.render();
                     },
-                );
+                ));
 
-                new_animation_handle.start_animating();
+                new_renderer_handle.start_animating();
 
                 // save handle to keep animation going
-                *animation_handle.borrow_mut() = Some(new_animation_handle);
+                *renderer_handle.borrow_mut() = Some(new_renderer_handle);
 
                 || {}
             }

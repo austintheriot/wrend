@@ -28,12 +28,12 @@ const PERLIN_NOISE_FRAGMENT_SHADER: &str = include_str!("../shaders/simplex_nois
 pub fn app() -> Html {
     let canvas_ref = use_node_ref();
     let render_state = use_mut_ref(RenderState::default);
-    let animation_handle = use_mut_ref(|| None);
+    let renderer_handle = use_mut_ref(|| None);
 
     use_effect_with_deps(
         {
             let canvas_ref = canvas_ref.clone();
-            let animation_handle = animation_handle;
+            let renderer_handle = renderer_handle;
             move |_| {
                 let canvas: HtmlCanvasElement = canvas_ref
                     .cast()
@@ -125,17 +125,16 @@ pub fn app() -> Html {
                     .build()
                     .expect("Renderer should successfully build");
 
-                let new_animation_handle = renderer.into_animation_handle(
-                    |renderer: &Renderer<_, _, _, _, _, _, _, _, _, _, _>| {
-                        renderer.update_uniforms();
-                        renderer.render();
-                    },
-                );
+                let mut new_renderer_handle = renderer.into_renderer_handle();
+                new_renderer_handle.set_animation_callback(Some(|renderer: &Renderer<_, _, _, _, _, _, _, _, _, _, _>| {
+                    renderer.update_uniforms();
+                    renderer.render();
+                }));
 
-                new_animation_handle.start_animating();
+                new_renderer_handle.start_animating();
 
                 // save handle to keep animation going
-                *animation_handle.borrow_mut() = Some(new_animation_handle);
+                *renderer_handle.borrow_mut() = Some(new_renderer_handle);
 
                 || {}
             }
