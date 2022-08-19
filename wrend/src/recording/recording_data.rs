@@ -1,4 +1,5 @@
 use js_sys::{Array, Uint8Array};
+use log::info;
 use wasm_bindgen::{prelude::wasm_bindgen, JsCast};
 use web_sys::{
     Blob, BlobEvent, BlobPropertyBag, Event, HtmlAnchorElement, HtmlCanvasElement, MediaRecorder,
@@ -26,7 +27,7 @@ pub struct RecordingData {
 
 impl RecordingData {
     /// How often (in ms) dataavailable events should be sent to record video
-    pub const SAVE_DATA_INTERVAL: i32 = 5000;
+    pub const SAVE_DATA_INTERVAL: i32 = 1000;
     pub const VIDEO_TYPE: &'static str = "video/webm";
 
     /// Creates a `MediaStream` and `MediaRecorder` that is ready to being recording video
@@ -34,15 +35,26 @@ impl RecordingData {
     pub fn new(canvas: impl AsRef<HtmlCanvasElement>) -> Self {
         let canvas = canvas.as_ref();
         let media_stream = captureStreamFromCanvas(canvas.clone());
+
+        // see https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Video_codecs#codec_details
+        // this Codec is not ideal, but it's one of the few that's broadly supported by both Chrome and Firefox
         let mut media_recorder_options = MediaRecorderOptions::new();
-        let mime_type = format!("{}; codecs=vp9", Self::VIDEO_TYPE);
+        let mime_type_vp9 = format!("{}; codecs=vp9", Self::VIDEO_TYPE);
+        let mime_type = if MediaRecorder::is_type_supported(&mime_type_vp9) {
+            mime_type_vp9
+        } else {
+            format!("{}; codecs=vp8", Self::VIDEO_TYPE)
+        };
         media_recorder_options.mime_type(&mime_type);
+        media_recorder_options.bits_per_second(u32::MAX);
 
         let media_recorder = MediaRecorder::new_with_media_stream_and_media_recorder_options(
             &media_stream,
             &media_recorder_options,
         )
         .expect("Should be able to build media recorder");
+        
+        info!("Using mimeType: {:?}", media_recorder.mime_type());
 
         Self {
             media_stream,
