@@ -1,11 +1,16 @@
 use crate::{AnimationCallback, AnimationData, Id, IdName, Listener, RecordingData, Renderer};
+use js_sys::{Array, ArrayBuffer, Uint8Array};
 use log::info;
 use std::cell::RefCell;
 use std::rc::Rc;
 use wasm_bindgen::prelude::Closure;
 use wasm_bindgen::JsCast;
-use web_sys::{window, BlobEvent, MediaRecorder};
+use wasm_bindgen_futures::JsFuture;
+use web_sys::{window, BlobEvent, Blob, Url, HtmlAnchorElement, BlobPropertyBag};
 
+/// The `RendererHandle` struct takes ownership of the `Renderer`, enabling it to
+/// perform more complex operations than would otherwise be possible, such as
+/// animating renders over time or recording canvas output.
 #[derive(Clone)]
 pub struct RendererHandle<
     VertexShaderId: Id,
@@ -55,8 +60,6 @@ pub struct RendererHandle<
         >,
     >,
     recording_data: Rc<RefCell<RecordingData>>,
-    recording_data_available_listener: Rc<RefCell<Option<Listener<MediaRecorder, BlobEvent>>>>,
-    recording_stop_listener: Rc<RefCell<Option<Listener<MediaRecorder, BlobEvent>>>>,
 }
 
 impl<
@@ -104,20 +107,88 @@ impl<
         let recording_data = RecordingData::new(&renderer);
         let media_recorder = recording_data.media_recorder().clone();
 
-        let handle_data_available =
-            Listener::new(media_recorder.clone(), "dataavailable", |e: BlobEvent| {
-                info!("Data available! {:#?}", e.data());
-            });
+        let recording_data = Rc::new(RefCell::new(recording_data));
+        let handle_data_available = {
+            let recording_data = recording_data.clone();
+            Listener::new(
+                media_recorder.clone(),
+                "dataavailable",
+                move |e: BlobEvent| {
+                    info!("Data available! {:#?}", e.data());
+                    if let Some(blob) = e.data() {
+                        let recording_data = recording_data.clone();
 
-        let handle_stop = Listener::new(media_recorder, "stop", |e| {
-            info!("Recording stopped! {:#?}", e);
-        });
+                        wasm_bindgen_futures::spawn_local(async move {
+                            let bytes_array_buffer: ArrayBuffer = JsFuture::from(
+                                blob.array_buffer(),
+                            )
+                            .await
+                            .expect("Should be able to get array buffer from recorded Blob data")
+                            .dyn_into()
+                            .unwrap();
+                            let bytes_array = Uint8Array::new(bytes_array_buffer.as_ref());
+                            let bytes = bytes_array.to_vec();
+                            recording_data
+                                .borrow_mut()
+                                .recorded_chunks_mut()
+                                .extend(bytes);
+
+                            info!("Data successfully read from Blob and saved in wasm memory");
+                        })
+                    }
+                },
+            )
+        };
+
+        let handle_stop = {
+            let recording_data = Rc::clone(&recording_data);
+            Listener::new(media_recorder, "stop", move|e| {
+                info!("Recording stopped! {:#?}", e);
+                let window = web_sys::window().unwrap();
+                let document = window.document().unwrap();
+                let body = document.body().unwrap();
+                let a: HtmlAnchorElement =
+                    document.create_element("a").unwrap().dyn_into().unwrap();
+                a.style().set_css_text("display: none;");
+                a.set_download("canvas.webm");
+                body.append_child(&a).unwrap();
+                let recorded_data_ref = recording_data.borrow();
+                let recorded_chunks = recorded_data_ref.recorded_chunks().as_slice();
+
+                // data must be passed to blob constructor inside of a javascript array
+                let blob_parts = Array::new_with_length(1);
+
+                // it is unsafe to get a raw view into WebAssembly memory, but because this memory gets immediately
+                // used, downloaded, and then view is discarded, it is safe so long as no new allocations are
+                // made in between acquiring the view and using it
+                let uint8_array = unsafe { Uint8Array::view(recorded_chunks) };
+                blob_parts.set(0, uint8_array.dyn_into().unwrap());
+
+                let mut blob_property_bag = BlobPropertyBag::new();
+                blob_property_bag.type_(RecordingData::VIDEO_TYPE);
+                let blob = Blob::new_with_buffer_source_sequence_and_options(blob_parts.as_ref(), &blob_property_bag).unwrap();
+
+                let url = Url::create_object_url_with_blob(&blob).unwrap();
+
+                a.set_href(&url);
+                a.click();
+
+                // release url from window memory when done to prevent memory leak
+                // (this does not get released automatically, unlike most of web memory)
+                Url::revoke_object_url(&url).unwrap();
+            })
+        };
+
+        recording_data
+            .borrow_mut()
+            .set_recording_data_available_listener(Some(handle_data_available));
+        recording_data
+            .borrow_mut()
+            .set_recording_stop_listener(Some(handle_stop));
 
         Self {
-            recording_data: Rc::new(RefCell::new(recording_data)),
+            recording_data,
             renderer: Rc::new(RefCell::new(renderer)),
-            recording_data_available_listener: Rc::new(RefCell::new(Some(handle_data_available))),
-            recording_stop_listener: Rc::new(RefCell::new(Some(handle_stop))),
             animation_data: Rc::new(RefCell::new(AnimationData::new())),
         }
     }
@@ -242,8 +313,12 @@ impl<
 {
     fn drop(&mut self) {
         // make sure recording listeners get dropped
-        self.recording_data_available_listener.borrow_mut().take();
-        self.recording_stop_listener.borrow_mut().take();
+        self.recording_data
+            .borrow_mut()
+            .set_recording_data_available_listener(None);
+        self.recording_data
+            .borrow_mut()
+            .set_recording_stop_listener(None);
         self.stop_recording();
         self.stop_animating();
     }

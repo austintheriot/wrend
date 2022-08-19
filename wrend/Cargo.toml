@@ -16,6 +16,7 @@ wasm-bindgen = { version = "0.2.78", features = ["serde-serialize"] }
 js-sys = "0.3.55"
 thiserror = "1.0.31"
 uuid = { version = "1.1.2", features = ["v4"] }
+wasm-bindgen-futures = "0.4.32"
 
 [dependencies.web-sys]
 version = "0.3.4"
@@ -40,5 +41,6 @@ features = [
   "MediaRecorder",
   "MediaRecorderOptions",
   "BlobEvent",
+  "BlobPropertyBag",
   "EventTarget",
 ]
