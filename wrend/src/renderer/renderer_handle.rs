@@ -1,12 +1,12 @@
 use crate::{AnimationCallback, AnimationData, Id, IdName, Listener, RecordingData, Renderer};
-use js_sys::{Array, ArrayBuffer, Uint8Array};
-use log::info;
+use js_sys::{ArrayBuffer, Uint8Array};
+use log::{info, warn};
 use std::cell::RefCell;
 use std::rc::Rc;
 use wasm_bindgen::prelude::Closure;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{window, BlobEvent, Blob, Url, HtmlAnchorElement, BlobPropertyBag};
+use web_sys::{window, BlobEvent};
 
 /// The `RendererHandle` struct takes ownership of the `Renderer`, enabling it to
 /// perform more complex operations than would otherwise be possible, such as
@@ -114,7 +114,7 @@ impl<
                 media_recorder.clone(),
                 "dataavailable",
                 move |e: BlobEvent| {
-                    info!("Data available! {:#?}", e.data());
+                    info!("Data available!");
                     if let Some(blob) = e.data() {
                         let recording_data = recording_data.clone();
 
@@ -133,49 +133,37 @@ impl<
                                 .recorded_chunks_mut()
                                 .extend(bytes);
 
-                            info!("Data successfully read from Blob and saved in wasm memory");
+                            // should wait until final chunks have been received to download video
+                            if !recording_data.borrow().is_recording() {
+                                recording_data.borrow().download_video();
+                            }
                         })
                     }
                 },
             )
         };
 
+        let handle_start = {
+            let recording_data = Rc::clone(&recording_data);
+            Listener::new(media_recorder.clone(), "start", move |_| {
+                info!("Recording started!");
+                recording_data.borrow_mut().set_is_recording(true);
+            })
+        };
+
         let handle_stop = {
             let recording_data = Rc::clone(&recording_data);
-            Listener::new(media_recorder, "stop", move|e| {
-                info!("Recording stopped! {:#?}", e);
-                let window = web_sys::window().unwrap();
-                let document = window.document().unwrap();
-                let body = document.body().unwrap();
-                let a: HtmlAnchorElement =
-                    document.create_element("a").unwrap().dyn_into().unwrap();
-                a.style().set_css_text("display: none;");
-                a.set_download("canvas.webm");
-                body.append_child(&a).unwrap();
-                let recorded_data_ref = recording_data.borrow();
-                let recorded_chunks = recorded_data_ref.recorded_chunks().as_slice();
+            Listener::new(media_recorder.clone(), "stop", move |_| {
+                info!("Recording stopped!");
+                recording_data.borrow_mut().set_is_recording(false);
+            })
+        };
 
-                // data must be passed to blob constructor inside of a javascript array
-                let blob_parts = Array::new_with_length(1);
-
-                // it is unsafe to get a raw view into WebAssembly memory, but because this memory gets immediately
-                // used, downloaded, and then view is discarded, it is safe so long as no new allocations are
-                // made in between acquiring the view and using it
-                let uint8_array = unsafe { Uint8Array::view(recorded_chunks) };
-                blob_parts.set(0, uint8_array.dyn_into().unwrap());
-
-                let mut blob_property_bag = BlobPropertyBag::new();
-                blob_property_bag.type_(RecordingData::VIDEO_TYPE);
-                let blob = Blob::new_with_buffer_source_sequence_and_options(blob_parts.as_ref(), &blob_property_bag).unwrap();
-
-                let url = Url::create_object_url_with_blob(&blob).unwrap();
-
-                a.set_href(&url);
-                a.click();
-
-                // release url from window memory when done to prevent memory leak
-                // (this does not get released automatically, unlike most of web memory)
-                Url::revoke_object_url(&url).unwrap();
+        let handle_error = {
+            let recording_data = Rc::clone(&recording_data);
+            Listener::new(media_recorder, "error", move |e| {
+                info!("Error occurred while recording video: {:?}", e);
+                recording_data.borrow_mut().set_is_recording(false);
             })
         };
 
@@ -184,7 +172,13 @@ impl<
             .set_recording_data_available_listener(Some(handle_data_available));
         recording_data
             .borrow_mut()
+            .set_recording_start_listener(Some(handle_start));
+        recording_data
+            .borrow_mut()
             .set_recording_stop_listener(Some(handle_stop));
+        recording_data
+            .borrow_mut()
+            .set_recording_error_listener(Some(handle_error));
 
         Self {
             recording_data,
@@ -260,20 +254,21 @@ impl<
 
     pub fn start_recording(&self) {
         // @todo: Add some MediaRecorder state checks here and/or internal state checks here
-        self.recording_data
+        if let Err(err) = self
+            .recording_data
             .borrow()
             .media_recorder()
-            .start_with_time_slice(1000)
-            .expect("Should be able to start media recorder");
+            .start_with_time_slice(RecordingData::SAVE_DATA_INTERVAL)
+        {
+            warn!("Error trying to start video recording: {:?}", err);
+        }
     }
 
     pub fn stop_recording(&self) {
         // @todo: Add some MediaRecorder state checks here and/or internal state checks here
-        self.recording_data
-            .borrow()
-            .media_recorder()
-            .stop()
-            .expect("Should be able to stop media recorder")
+        if let Err(err) = self.recording_data.borrow().media_recorder().stop() {
+            warn!("Error trying to stop video recording: {:?}", err);
+        }
     }
 
     fn request_animation_frame(f: &Closure<dyn Fn()>) -> i32 {
@@ -312,13 +307,7 @@ impl<
     >
 {
     fn drop(&mut self) {
-        // make sure recording listeners get dropped
-        self.recording_data
-            .borrow_mut()
-            .set_recording_data_available_listener(None);
-        self.recording_data
-            .borrow_mut()
-            .set_recording_stop_listener(None);
+        self.recording_data.borrow_mut().remove_all_listeners();
         self.stop_recording();
         self.stop_animating();
     }

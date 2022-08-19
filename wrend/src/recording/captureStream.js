@@ -3,6 +3,5 @@
 // so it must be implemented manually here in JavaScript
 export function captureStreamFromCanvas(canvas) {
     const mediaStream = canvas.captureStream();
-    console.log({mediaStream});
     return mediaStream;
 }

@@ -1,5 +1,9 @@
-use wasm_bindgen::prelude::wasm_bindgen;
-use web_sys::{BlobEvent, HtmlCanvasElement, MediaRecorder, MediaRecorderOptions, MediaStream};
+use js_sys::{Array, Uint8Array};
+use wasm_bindgen::{prelude::wasm_bindgen, JsCast};
+use web_sys::{
+    Blob, BlobEvent, BlobPropertyBag, Event, HtmlAnchorElement, HtmlCanvasElement, MediaRecorder,
+    MediaRecorderOptions, MediaStream, Url,
+};
 
 use crate::{Listener, RecordingUrl};
 
@@ -14,10 +18,15 @@ pub struct RecordingData {
     media_recorder: MediaRecorder,
     recording_data_available_listener: Option<Listener<MediaRecorder, BlobEvent>>,
     recording_stop_listener: Option<Listener<MediaRecorder, BlobEvent>>,
+    recording_start_listener: Option<Listener<MediaRecorder, Event>>,
+    recording_error_listener: Option<Listener<MediaRecorder, Event>>,
     recording_url: Option<RecordingUrl>,
+    is_recording: bool,
 }
 
 impl RecordingData {
+    /// How often (in ms) dataavailable events should be sent to record video
+    pub const SAVE_DATA_INTERVAL: i32 = 5000;
     pub const VIDEO_TYPE: &'static str = "video/webm";
 
     /// Creates a `MediaStream` and `MediaRecorder` that is ready to being recording video
@@ -42,7 +51,47 @@ impl RecordingData {
             recording_data_available_listener: None,
             recording_stop_listener: None,
             recording_url: None,
+            recording_start_listener: None,
+            recording_error_listener: None,
+            is_recording: false,
         }
+    }
+
+    pub fn download_video(&self) {
+        let window = web_sys::window().unwrap();
+        let document = window.document().unwrap();
+        let body = document.body().unwrap();
+        let a: HtmlAnchorElement = document.create_element("a").unwrap().dyn_into().unwrap();
+        a.style().set_css_text("display: none;");
+        a.set_download("canvas.webm");
+        body.append_child(&a).unwrap();
+        let recorded_chunks = self.recorded_chunks().as_slice();
+
+        // data must be passed to blob constructor inside of a javascript array
+        let blob_parts = Array::new_with_length(1);
+
+        // it is unsafe to get a raw view into WebAssembly memory, but because this memory gets immediately
+        // used, downloaded, and then view is discarded, it is safe so long as no new allocations are
+        // made in between acquiring the view and using it
+        let uint8_array = unsafe { Uint8Array::view(recorded_chunks) };
+        blob_parts.set(0, uint8_array.dyn_into().unwrap());
+
+        let mut blob_property_bag = BlobPropertyBag::new();
+        blob_property_bag.type_(RecordingData::VIDEO_TYPE);
+        let blob = Blob::new_with_buffer_source_sequence_and_options(
+            blob_parts.as_ref(),
+            &blob_property_bag,
+        )
+        .unwrap();
+
+        let url = Url::create_object_url_with_blob(&blob).unwrap();
+
+        a.set_href(&url);
+        a.click();
+
+        // release url from window memory when done to prevent memory leak
+        // (this does not get released automatically, unlike most of web memory)
+        Url::revoke_object_url(&url).unwrap();
     }
 
     pub fn set_recording_data_available_listener(
@@ -57,6 +106,27 @@ impl RecordingData {
         recording_stop_listener: Option<Listener<MediaRecorder, BlobEvent>>,
     ) {
         self.recording_stop_listener = recording_stop_listener;
+    }
+
+    pub fn set_recording_start_listener(
+        &mut self,
+        recording_start_listener: Option<Listener<MediaRecorder, Event>>,
+    ) {
+        self.recording_start_listener = recording_start_listener;
+    }
+
+    pub fn set_recording_error_listener(
+        &mut self,
+        recording_error_listener: Option<Listener<MediaRecorder, Event>>,
+    ) {
+        self.recording_error_listener = recording_error_listener;
+    }
+
+    pub fn remove_all_listeners(&mut self) {
+        self.recording_start_listener.take();
+        self.recording_stop_listener.take();
+        self.recording_data_available_listener.take();
+        self.recording_error_listener.take();
     }
 
     pub fn media_recorder(&self) -> &MediaRecorder {
@@ -89,5 +159,13 @@ impl RecordingData {
 
     pub fn set_recording_url(&mut self, recording_url: impl Into<RecordingUrl>) {
         self.recording_url = Some(recording_url.into());
+    }
+
+    pub fn is_recording(&self) -> bool {
+        self.is_recording
+    }
+
+    pub fn set_is_recording(&mut self, is_recording: bool) {
+        self.is_recording = is_recording;
     }
 }
