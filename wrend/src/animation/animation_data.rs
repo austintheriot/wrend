@@ -1,6 +1,6 @@
 use crate::{AnimationCallback, Id, IdDefault, IdName, Renderer};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AnimationData<
     VertexShaderId: Id = IdDefault,
     FragmentShaderId: Id = IdDefault,

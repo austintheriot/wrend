@@ -13,7 +13,7 @@ use web_sys::window;
 /// The `RendererHandle` struct takes ownership of the `Renderer`, enabling it to
 /// perform more complex operations than would otherwise be possible, such as
 /// animating renders over time or recording canvas output.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct RendererHandle<
     VertexShaderId: Id,
     FragmentShaderId: Id,
@@ -256,6 +256,22 @@ impl<
         }
     }
 
+    pub fn recorder_initialized(&self) -> bool {
+        self.recording_data.is_some()
+    }
+
+    pub fn is_animating(&self) -> bool {
+        self.animation_data.borrow().is_animating()
+    }
+
+    pub fn is_recording(&self) -> bool {
+        self.recording_data
+            .as_ref()
+            .map_or(false, |recording_data| {
+                recording_data.borrow().is_recording()
+            })
+    }
+
     fn request_animation_frame(f: &Closure<dyn Fn()>) -> i32 {
         window()
             .unwrap()
@@ -292,11 +308,20 @@ impl<
     >
 {
     fn drop(&mut self) {
+        // this would get dropped even if we didn't do it manually,
+        // but dropping the listeners here before the rest of the data gets dropped
+        // prevents them from accidentally firing when other clean up happens
         if let Some(recording_data) = &self.recording_data {
             recording_data.borrow_mut().remove_all_event_listeners();
         }
-        self.stop_recording();
-        self.stop_animating();
+
+        if self.is_recording() {
+            self.stop_recording();
+        }
+
+        if self.is_animating() {
+            self.stop_animating();
+        }
     }
 }
 

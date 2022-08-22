@@ -16,6 +16,8 @@ The following use cases should guide the development of this library:
 
 ## Todo
 
+- Bug: WebGL2 rendering contexts are not getting discarded when handle is dropped: enable this manually through browser extension (see MDN WebGL best practices article)
+
 - Only set up RecordingData when requested
 
 - Do not use dynamic functions for callbacks
