@@ -20,7 +20,10 @@ impl RecordingUrl {
 impl Drop for RecordingUrl {
     fn drop(&mut self) {
         if let Err(err) = Url::revoke_object_url(&self.0) {
-            warn!("Error occurred while attempting to revoke the Url used for recorded video: {:?}", err);
+            warn!(
+                "Error occurred while attempting to revoke the Url used for recorded video: {:?}",
+                err
+            );
         }
     }
 }

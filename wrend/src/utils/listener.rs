@@ -31,9 +31,9 @@ impl<Element: Deref<Target = EventTarget>, Arg: FromWasmAbi + 'static> Listener<
     pub fn element(&self) -> &Element {
         &self.element
     }
-    
+
     pub fn name(&self) -> &'static str {
-        &self.name
+        self.name
     }
 
     pub fn callback(&self) -> &Closure<dyn Fn(Arg)> {

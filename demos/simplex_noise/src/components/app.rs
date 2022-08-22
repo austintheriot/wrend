@@ -126,10 +126,12 @@ pub fn app() -> Html {
                     .expect("Renderer should successfully build");
 
                 let mut new_renderer_handle = renderer.into_renderer_handle();
-                new_renderer_handle.set_animation_callback(Some(|renderer: &Renderer<_, _, _, _, _, _, _, _, _, _, _>| {
-                    renderer.update_uniforms();
-                    renderer.render();
-                }));
+                new_renderer_handle.set_animation_callback(Some(
+                    |renderer: &Renderer<_, _, _, _, _, _, _, _, _, _, _>| {
+                        renderer.update_uniforms();
+                        renderer.render();
+                    },
+                ));
 
                 new_renderer_handle.start_animating();
 

@@ -302,7 +302,7 @@ impl RenderState {
 
     /// Finds the point of intersection between the center of the user's camera.
     /// The point itself is saved in state along with the ID of any object that was intersected.
-    /// 
+    ///
     /// This enables the possibility of focusing the camera focal point based on whatever is currently in view.
     pub fn update_cursor_position_in_world(&mut self) -> &mut Self {
         let pipeline = self.camera();

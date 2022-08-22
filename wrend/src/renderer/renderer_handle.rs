@@ -1,12 +1,14 @@
-use crate::{AnimationCallback, AnimationData, Id, IdName, Listener, RecordingData, Renderer};
-use js_sys::{ArrayBuffer, Uint8Array};
-use log::{error, info, warn};
+use crate::{
+    recording_handlers, AnimationCallback, AnimationData, Id, IdName, RecordingData, Renderer,
+};
+
+use log::warn;
 use std::cell::RefCell;
 use std::rc::Rc;
 use wasm_bindgen::prelude::Closure;
 use wasm_bindgen::JsCast;
-use wasm_bindgen_futures::JsFuture;
-use web_sys::{window, BlobEvent, Event, MediaRecorderErrorEvent};
+
+use web_sys::window;
 
 /// The `RendererHandle` struct takes ownership of the `Renderer`, enabling it to
 /// perform more complex operations than would otherwise be possible, such as
@@ -106,74 +108,35 @@ impl<
     ) -> Self {
         let recording_data = RecordingData::new(&renderer);
         let media_recorder = recording_data.media_recorder().clone();
-
         let recording_data = Rc::new(RefCell::new(recording_data));
-        let handle_data_available = {
-            let recording_data = recording_data.clone();
-            Listener::new(
-                media_recorder.clone(),
-                "dataavailable",
-                move |e: BlobEvent| {
-                    info!("Data available!");
-                    if let Some(blob) = e.data() {
-                        let recording_data = recording_data.clone();
-
-                        wasm_bindgen_futures::spawn_local(async move {
-                            let bytes_array_buffer: ArrayBuffer = JsFuture::from(
-                                blob.array_buffer(),
-                            )
-                            .await
-                            .expect("Should be able to get array buffer from recorded Blob data")
-                            .dyn_into()
-                            .expect("Should be able to interpret JsValue as an ArrayBuffer");
-                            let bytes_array = Uint8Array::new(bytes_array_buffer.as_ref());
-                            let bytes = bytes_array.to_vec();
-                            recording_data
-                                .borrow_mut()
-                                .recorded_chunks_mut()
-                                .extend(bytes);
-
-                            // should wait until final chunks have been received to download video
-                            if !recording_data.borrow().is_recording() {
-                                recording_data.borrow().download_video();
-                            }
-                        })
-                    }
-                },
-            )
-        };
-
-        let handle_start = {
-            let recording_data = Rc::clone(&recording_data);
-            Listener::new(media_recorder.clone(), "start", move |_: Event| {
-                info!("Recording started!");
-                recording_data.borrow_mut().set_is_recording(true);
-            })
-        };
-
-        let handle_stop = {
-            let recording_data = Rc::clone(&recording_data);
-            Listener::new(media_recorder.clone(), "stop", move |_: Event| {
-                info!("Recording stopped!");
-                recording_data.borrow_mut().set_is_recording(false);
-            })
-        };
-
-        let handle_error = {
-            let recording_data = Rc::clone(&recording_data);
-            Listener::new(media_recorder, "error", move |e: MediaRecorderErrorEvent| {
-                error!("Error occurred while recording video: {:?}", e);
-                recording_data.borrow_mut().set_is_recording(false);
-            })
-        };
 
         {
             let mut recording_data_ref = recording_data.borrow_mut();
             recording_data_ref
-                .add_event_listener(handle_data_available)
-                .add_event_listener(handle_start)
-                .add_event_listener(handle_error)
-                .add_event_listener(handle_stop);
+                .add_event_listener(recording_handlers::make_handle_dataavailable(
+                    media_recorder.clone(),
+                    Rc::clone(&recording_data),
+                ))
+                .add_event_listener(recording_handlers::make_handle_start(
+                    media_recorder.clone(),
+                    Rc::clone(&recording_data),
+                ))
+                .add_event_listener(recording_handlers::make_handle_error(
+                    media_recorder.clone(),
+                    Rc::clone(&recording_data),
+                ))
+                .add_event_listener(recording_handlers::make_handle_stop(
+                    media_recorder.clone(),
+                    Rc::clone(&recording_data),
+                ))
+                .add_event_listener(recording_handlers::make_handle_pause(
+                    media_recorder.clone(),
+                    Rc::clone(&recording_data),
+                ))
+                .add_event_listener(recording_handlers::make_handle_pause(
+                    media_recorder,
+                    Rc::clone(&recording_data),
+                ));
         }
 
         Self {
@@ -303,7 +266,9 @@ impl<
     >
 {
     fn drop(&mut self) {
-        self.recording_data.borrow_mut().remove_all_event_listeners();
+        self.recording_data
+            .borrow_mut()
+            .remove_all_event_listeners();
         self.stop_recording();
         self.stop_animating();
     }

@@ -25,8 +25,8 @@ use crate::{
 
 use web_sys::HtmlCanvasElement;
 use wrend::{
-    AttributeLink, BufferLink, FramebufferLink, ProgramLinkBuilder, Renderer,
-    TextureLink, RendererHandle,
+    AttributeLink, BufferLink, FramebufferLink, ProgramLinkBuilder, Renderer, RendererHandle,
+    TextureLink,
 };
 
 const QUAD_VERTEX_SHADER: &str = include_str!("../shaders/quad_vertex.glsl");
