@@ -16,6 +16,8 @@ The following use cases should guide the development of this library:
 
 ## Todo
 
+- Only set up RecordingData when requested
+
 - Do not use dynamic functions for callbacks
 
 - Enable recording video from canvas
