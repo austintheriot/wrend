@@ -13,6 +13,7 @@ extern "C" {
     fn captureStreamFromCanvas(canvas: HtmlCanvasElement) -> MediaStream;
 }
 
+#[derive(Debug)]
 pub struct RecordingData {
     recorded_chunks: Vec<u8>,
     media_stream: MediaStream,
