@@ -132,7 +132,7 @@ pub fn app() -> Html {
     html! {
         <div class="game-of-life">
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
-            <canvas ref={canvas_ref} height={1000} width={1000} />
+            <canvas ref={canvas_ref} height={250} width={250} />
         </div>
     }
 }

@@ -42,12 +42,12 @@ pub fn home() -> Html {
        <Link<Route>
            to={Route::FlowField}
        >
-           {"Flow Field"}
+           {"Particle Flow Field"}
        </Link<Route>>
        <Link<Route>
            to={Route::FlowFieldColorful}
        >
-           {"Flow Field Colorful"}
+           {"Particle Flow Field Colorful"}
        </Link<Route>>
        <Link<Route>
        to={Route::RayTracer}
