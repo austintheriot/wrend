@@ -27,6 +27,18 @@ impl<Element: Deref<Target = EventTarget>, Arg: FromWasmAbi + 'static> Listener<
             .unwrap();
         Self { element, name, cb }
     }
+
+    pub fn element(&self) -> &Element {
+        &self.element
+    }
+    
+    pub fn name(&self) -> &'static str {
+        &self.name
+    }
+
+    pub fn callback(&self) -> &Closure<dyn Fn(Arg)> {
+        &self.cb
+    }
 }
 
 impl<Element: Deref<Target = EventTarget>, Arg: FromWasmAbi + 'static> Drop

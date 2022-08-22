@@ -43,4 +43,5 @@ features = [
   "BlobEvent",
   "BlobPropertyBag",
   "EventTarget",
+  "MediaRecorderErrorEvent"
 ]

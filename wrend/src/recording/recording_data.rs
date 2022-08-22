@@ -1,8 +1,10 @@
+use std::{any::Any, ops::Deref};
+
 use js_sys::{Array, Uint8Array};
 use log::info;
-use wasm_bindgen::{prelude::wasm_bindgen, JsCast};
+use wasm_bindgen::{convert::FromWasmAbi, prelude::wasm_bindgen, JsCast};
 use web_sys::{
-    Blob, BlobEvent, BlobPropertyBag, Event, HtmlAnchorElement, HtmlCanvasElement, MediaRecorder,
+    Blob, BlobPropertyBag, EventTarget, HtmlAnchorElement, HtmlCanvasElement, MediaRecorder,
     MediaRecorderOptions, MediaStream, Url,
 };
 
@@ -18,10 +20,9 @@ pub struct RecordingData {
     recorded_chunks: Vec<u8>,
     media_stream: MediaStream,
     media_recorder: MediaRecorder,
-    recording_data_available_listener: Option<Listener<MediaRecorder, BlobEvent>>,
-    recording_stop_listener: Option<Listener<MediaRecorder, BlobEvent>>,
-    recording_start_listener: Option<Listener<MediaRecorder, Event>>,
-    recording_error_listener: Option<Listener<MediaRecorder, Event>>,
+    /// It is not necessary to interact with this data after it is stored.
+    /// It is only necessary to store the Listener, which removes event listeners when it is dropped
+    listeners: Vec<Box<dyn Any>>,
     recording_url: Option<RecordingUrl>,
     is_recording: bool,
 }
@@ -54,18 +55,15 @@ impl RecordingData {
             &media_recorder_options,
         )
         .expect("Should be able to build media recorder");
-        
+
         info!("Using mimeType: {:?}", media_recorder.mime_type());
 
         Self {
             media_stream,
             media_recorder,
-            recorded_chunks: Vec::new(),
-            recording_data_available_listener: None,
-            recording_stop_listener: None,
             recording_url: None,
-            recording_start_listener: None,
-            recording_error_listener: None,
+            recorded_chunks: Vec::new(),
+            listeners: Vec::new(),
             is_recording: false,
         }
     }
@@ -107,39 +105,20 @@ impl RecordingData {
         Url::revoke_object_url(&url).unwrap();
     }
 
-    pub fn set_recording_data_available_listener(
+    pub fn add_event_listener<
+        Element: Deref<Target = EventTarget> + 'static,
+        Arg: FromWasmAbi + 'static,
+    >(
         &mut self,
-        recording_data_available_listener: Option<Listener<MediaRecorder, BlobEvent>>,
-    ) {
-        self.recording_data_available_listener = recording_data_available_listener;
+        listener: Listener<Element, Arg>,
+    ) -> &mut Self {
+        self.listeners.push(Box::new(listener));
+        self
     }
 
-    pub fn set_recording_stop_listener(
-        &mut self,
-        recording_stop_listener: Option<Listener<MediaRecorder, BlobEvent>>,
-    ) {
-        self.recording_stop_listener = recording_stop_listener;
-    }
-
-    pub fn set_recording_start_listener(
-        &mut self,
-        recording_start_listener: Option<Listener<MediaRecorder, Event>>,
-    ) {
-        self.recording_start_listener = recording_start_listener;
-    }
-
-    pub fn set_recording_error_listener(
-        &mut self,
-        recording_error_listener: Option<Listener<MediaRecorder, Event>>,
-    ) {
-        self.recording_error_listener = recording_error_listener;
-    }
-
-    pub fn remove_all_listeners(&mut self) {
-        self.recording_start_listener.take();
-        self.recording_stop_listener.take();
-        self.recording_data_available_listener.take();
-        self.recording_error_listener.take();
+    pub fn remove_all_event_listeners(&mut self) -> &mut Self {
+        self.listeners.clear();
+        self
     }
 
     pub fn media_recorder(&self) -> &MediaRecorder {

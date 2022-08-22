@@ -1,12 +1,12 @@
 use crate::{AnimationCallback, AnimationData, Id, IdName, Listener, RecordingData, Renderer};
 use js_sys::{ArrayBuffer, Uint8Array};
-use log::{info, warn};
+use log::{error, info, warn};
 use std::cell::RefCell;
 use std::rc::Rc;
 use wasm_bindgen::prelude::Closure;
 use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
-use web_sys::{window, BlobEvent};
+use web_sys::{window, BlobEvent, Event, MediaRecorderErrorEvent};
 
 /// The `RendererHandle` struct takes ownership of the `Renderer`, enabling it to
 /// perform more complex operations than would otherwise be possible, such as
@@ -125,7 +125,7 @@ impl<
                             .await
                             .expect("Should be able to get array buffer from recorded Blob data")
                             .dyn_into()
-                            .unwrap();
+                            .expect("Should be able to interpret JsValue as an ArrayBuffer");
                             let bytes_array = Uint8Array::new(bytes_array_buffer.as_ref());
                             let bytes = bytes_array.to_vec();
                             recording_data
@@ -145,7 +145,7 @@ impl<
 
         let handle_start = {
             let recording_data = Rc::clone(&recording_data);
-            Listener::new(media_recorder.clone(), "start", move |_| {
+            Listener::new(media_recorder.clone(), "start", move |_: Event| {
                 info!("Recording started!");
                 recording_data.borrow_mut().set_is_recording(true);
             })
@@ -153,7 +153,7 @@ impl<
 
         let handle_stop = {
             let recording_data = Rc::clone(&recording_data);
-            Listener::new(media_recorder.clone(), "stop", move |_| {
+            Listener::new(media_recorder.clone(), "stop", move |_: Event| {
                 info!("Recording stopped!");
                 recording_data.borrow_mut().set_is_recording(false);
             })
@@ -161,24 +161,20 @@ impl<
 
         let handle_error = {
             let recording_data = Rc::clone(&recording_data);
-            Listener::new(media_recorder, "error", move |e| {
-                info!("Error occurred while recording video: {:?}", e);
+            Listener::new(media_recorder, "error", move |e: MediaRecorderErrorEvent| {
+                error!("Error occurred while recording video: {:?}", e);
                 recording_data.borrow_mut().set_is_recording(false);
             })
         };
 
-        recording_data
-            .borrow_mut()
-            .set_recording_data_available_listener(Some(handle_data_available));
-        recording_data
-            .borrow_mut()
-            .set_recording_start_listener(Some(handle_start));
-        recording_data
-            .borrow_mut()
-            .set_recording_stop_listener(Some(handle_stop));
-        recording_data
-            .borrow_mut()
-            .set_recording_error_listener(Some(handle_error));
+        {
+            let mut recording_data_ref = recording_data.borrow_mut();
+            recording_data_ref
+                .add_event_listener(handle_data_available)
+                .add_event_listener(handle_start)
+                .add_event_listener(handle_error)
+                .add_event_listener(handle_stop);
+        }
 
         Self {
             recording_data,
@@ -307,7 +303,7 @@ impl<
     >
 {
     fn drop(&mut self) {
-        self.recording_data.borrow_mut().remove_all_listeners();
+        self.recording_data.borrow_mut().remove_all_event_listeners();
         self.stop_recording();
         self.stop_animating();
     }
