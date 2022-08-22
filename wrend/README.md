@@ -53,3 +53,9 @@ The following use cases should guide the development of this library:
 - Make everything truly as modular as possible
   - Make it renderer agnostic?
   - Make recording codec customizable
+
+- Make cross-compatible /callable with vanilla JavaScript
+  - This would require making sure all returned handles can cross the WasmAbi
+  - It would also probably require a refactor of callbacks, so that plain JavaScript closures could be accepted as well
+    - This could be achieved with a enum for callbacks (one for plain Rust callbacks & one for JavaScript)
+    - Plain JavaScript `Function` types can be called with a simple `call0` function

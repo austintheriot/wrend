@@ -6,7 +6,7 @@ Note: **This library is currently experimental and not considered stable for pub
 
 ## About
 
-Wrend is a wrapper library around raw WebGL2 code and is written in Rust, which is compiled to WebAssembly for running in the browser. Its goal is to make working with WebGL & Rust together in the browser more convenient.
+Wrend is a wrapper library around raw WebGL2 code and is written in Rust, which is compiled to WebAssembly for running in the browser. Its goal is to make working with WebGL & Rust together in the browser more convenient. Though most of the demo app examples are built using Yew, `wrend` itself is framework agnostic and is designed to be used in a variety of settings with diverse rendering pipelines.
 
 ## Why
 
@@ -19,7 +19,6 @@ Another strength of Wrend is its flexibility: rather than focusing on pure raste
 See a list a list of all interactive demos: [Demos](https://austintheriot.github.io/wrend/)
 
 All of the following demos were created using the `wrend` library.
-
 
 ### [Ray Tracer](https://austintheriot.github.io/wrend/ray-tracer)
 
