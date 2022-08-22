@@ -43,5 +43,6 @@ features = [
   "BlobEvent",
   "BlobPropertyBag",
   "EventTarget",
-  "MediaRecorderErrorEvent"
+  "MediaRecorderErrorEvent",
+  "WebglLoseContext"
 ]

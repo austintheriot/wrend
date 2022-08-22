@@ -7,11 +7,13 @@ use crate::{
     ShaderType, Texture, TextureLink, TransformFeedbackLink, Uniform, UniformContext, UniformLink,
     WebGlContextError,
 };
+use js_sys::{Object};
+use log::{error, info};
 use std::collections::{HashMap, HashSet};
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{
     window, HtmlAnchorElement, HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram,
-    WebGlShader, WebGlTransformFeedback, WebGlVertexArrayObject,
+    WebGlShader, WebGlTransformFeedback, WebGlVertexArrayObject, WebglLoseContext,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -347,6 +349,49 @@ impl<
 {
     fn as_ref(&self) -> &HtmlCanvasElement {
         self.canvas()
+    }
+}
+
+impl<
+        VertexShaderId: Id,
+        FragmentShaderId: Id,
+        ProgramId: Id,
+        UniformId: Id + IdName,
+        BufferId: Id,
+        AttributeId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
+        TransformFeedbackId: Id,
+        VertexArrayObjectId: Id,
+        UserCtx: Clone,
+    > Drop
+    for Renderer<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        AttributeId,
+        TextureId,
+        FramebufferId,
+        TransformFeedbackId,
+        VertexArrayObjectId,
+        UserCtx,
+    >
+{
+    fn drop(&mut self) {
+        // see https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#lose_contexts_eagerly
+        let lose_context_extension = self
+            .gl()
+            .get_extension("WEBGL_lose_context")
+            .expect("Should be able to get WEBGL_lose_context extension")
+            .unwrap();
+        let lose_context_extension: WebglLoseContext = lose_context_extension.as_ref();
+        info!("{lose_context_extension:#?}");
+        // match lose_context_extension {
+        //     Ok(lose_context_extension) => lose_context_extension.lose_context(),
+        //     Err(err) => error!("Error trying to WEBGL_lose_context extension: {err:?}"),
+        // };
     }
 }
 
