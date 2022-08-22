@@ -47,3 +47,9 @@ The following use cases should guide the development of this library:
 - Make passing in buffer update / should_update callbacks optional
 
 - Return error when a duplicate item is added to HashMap?
+
+## Nice to Haves
+
+- Make everything truly as modular as possible
+  - Make it renderer agnostic?
+  - Make recording codec customizable

@@ -2,7 +2,7 @@ use crate::{
     recording_handlers, AnimationCallback, AnimationData, Id, IdName, RecordingData, Renderer,
 };
 
-use log::warn;
+use log::{error, info};
 use std::cell::RefCell;
 use std::rc::Rc;
 use wasm_bindgen::prelude::Closure;
@@ -61,7 +61,7 @@ pub struct RendererHandle<
             >,
         >,
     >,
-    recording_data: Rc<RefCell<RecordingData>>,
+    recording_data: Option<Rc<RefCell<RecordingData>>>,
 }
 
 impl<
@@ -106,7 +106,28 @@ impl<
             UserCtx,
         >,
     ) -> Self {
-        let recording_data = RecordingData::new(&renderer);
+        Self {
+            recording_data: None,
+            renderer: Rc::new(RefCell::new(renderer)),
+            animation_data: Rc::new(RefCell::new(AnimationData::new())),
+        }
+    }
+
+    /// Must be called before starting to record.
+    ///
+    /// This prevents unexpected initialization of a MediaRecorder, when the
+    /// user wasn't expecting to need one from the handle.
+    pub fn initialize_recorder(&mut self) {
+        if let Some(_) = &self.recording_data {
+            error!("Error initializing recorder: a recorder has already been initialized. This is a no-op");
+            return;
+        }
+
+        let canvas = {
+            let renderer_ref = self.renderer.borrow();
+            renderer_ref.canvas().clone()
+        };
+        let recording_data = RecordingData::new(&canvas);
         let media_recorder = recording_data.media_recorder().clone();
         let recording_data = Rc::new(RefCell::new(recording_data));
 
@@ -139,11 +160,9 @@ impl<
                 ));
         }
 
-        Self {
-            recording_data,
-            renderer: Rc::new(RefCell::new(renderer)),
-            animation_data: Rc::new(RefCell::new(AnimationData::new())),
-        }
+        self.recording_data.replace(recording_data);
+
+        info!("Recorder successfully initialized")
     }
 
     pub fn start_animating(&self) {
@@ -212,21 +231,28 @@ impl<
     }
 
     pub fn start_recording(&self) {
-        // @todo: Add some MediaRecorder state checks here and/or internal state checks here
-        if let Err(err) = self
-            .recording_data
-            .borrow()
-            .media_recorder()
-            .start_with_time_slice(RecordingData::SAVE_DATA_INTERVAL)
-        {
-            warn!("Error trying to start video recording: {:?}", err);
+        const ERROR_START: &'static str = "Error trying to start video recording";
+        if let Some(recording_data) = &self.recording_data {
+            if let Err(err) = recording_data
+                .borrow_mut()
+                .media_recorder()
+                .start_with_time_slice(RecordingData::SAVE_DATA_INTERVAL)
+            {
+                error!("{ERROR_START}: {err:?}");
+            }
+        } else {
+            error!("{ERROR_START}: recorder has not been initialized. Please call `initialize_recorder` before calling `start_recording`");
         }
     }
 
     pub fn stop_recording(&self) {
-        // @todo: Add some MediaRecorder state checks here and/or internal state checks here
-        if let Err(err) = self.recording_data.borrow().media_recorder().stop() {
-            warn!("Error trying to stop video recording: {:?}", err);
+        const ERROR_START: &'static str = "Error trying to stop video recording";
+        if let Some(recording_data) = &self.recording_data {
+            if let Err(err) = recording_data.borrow_mut().media_recorder().stop() {
+                error!("{ERROR_START}: {err:?}");
+            }
+        } else {
+            error!("{ERROR_START}: recorder has not been initialized. Please call `initialize_recorder` before calling `stop_recording`");
         }
     }
 
@@ -266,9 +292,9 @@ impl<
     >
 {
     fn drop(&mut self) {
-        self.recording_data
-            .borrow_mut()
-            .remove_all_event_listeners();
+        if let Some(recording_data) = &self.recording_data {
+            recording_data.borrow_mut().remove_all_event_listeners();
+        }
         self.stop_recording();
         self.stop_animating();
     }

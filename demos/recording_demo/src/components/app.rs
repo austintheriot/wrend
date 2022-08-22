@@ -223,11 +223,19 @@ pub fn app() -> Html {
         (),
     );
 
+    let handle_initialize_recorder = {
+        let recording_handle = Rc::clone(&recording_handle);
+        Callback::from(move |_: MouseEvent| {
+            if let Some(recording_handle) = &mut *recording_handle.borrow_mut() {
+                recording_handle.initialize_recorder();
+            }
+        })
+    };
+
     let handle_start_recording = {
         let recording_handle = Rc::clone(&recording_handle);
         Callback::from(move |_: MouseEvent| {
-            let recording_handle = recording_handle.borrow();
-            if let Some(recording_handle) = &*recording_handle {
+            if let Some(recording_handle) = &*recording_handle.borrow() {
                 recording_handle.start_recording();
             }
         })
@@ -236,8 +244,7 @@ pub fn app() -> Html {
     let handle_stop_recording = {
         let recording_handle = Rc::clone(&recording_handle);
         Callback::from(move |_: MouseEvent| {
-            let recording_handle = recording_handle.borrow();
-            if let Some(recording_handle) = &*recording_handle {
+            if let Some(recording_handle) = &*recording_handle.borrow() {
                 recording_handle.stop_recording();
             }
         })
@@ -246,6 +253,9 @@ pub fn app() -> Html {
     html! {
         <div class="recording-demo">
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
+            <button type="button" onclick={handle_initialize_recorder}>
+                {"Initialize Recorder"}
+            </button>
             <button type="button" onclick={handle_start_recording}>
                 {"Start Recording"}
             </button>
