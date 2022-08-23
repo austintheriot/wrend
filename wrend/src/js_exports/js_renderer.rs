@@ -1,4 +1,4 @@
-use crate::{JsAttribute, JsBuffer, JsFramebuffer, JsTexture, JsUniform, Renderer};
+use crate::{JsAttribute, JsBuffer, JsFramebuffer, JsTexture, JsUniform, Renderer, JsRendererBuilder};
 use js_sys::Object;
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -10,7 +10,7 @@ use web_sys::{
 /// Wrapper around `Renderer` to make it callable from JavaScript.
 ///
 /// Types are adjusted to only use JavaScript-compatible types and no generics.
-type JsRendererInner = Renderer<
+pub type JsRendererInner = Renderer<
     String,
     String,
     String,
@@ -29,21 +29,9 @@ pub struct JsRenderer(JsRendererInner);
 
 #[wasm_bindgen]
 impl JsRenderer {
-    // pub fn builder() -> RendererBuilder<
-    //     VertexShaderId,
-    //     FragmentShaderId,
-    //     ProgramId,
-    //     UniformId,
-    //     BufferId,
-    //     AttributeId,
-    //     TextureId,
-    //     FramebufferId,
-    //     TransformFeedbackId,
-    //     VertexArrayObjectId,
-    //     UserCtx,
-    // > {
-    //     RendererBuilder::default()
-    // }
+    pub fn builder() -> JsRendererBuilder {
+        JsRendererBuilder::default()
+    }
 
     pub fn canvas(&self) -> HtmlCanvasElement {
         self.deref().canvas().clone()
@@ -198,5 +186,11 @@ impl Deref for JsRenderer {
 impl DerefMut for JsRenderer {
     fn deref_mut(&mut self) -> &mut JsRendererInner {
         &mut self.0
+    }
+}
+
+impl From<JsRendererInner> for JsRenderer {
+    fn from(js_renderer_inner: JsRendererInner) -> Self {
+        Self(js_renderer_inner)
     }
 }
