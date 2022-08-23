@@ -1,0 +1,8 @@
+{
+    "scripts": {
+        "test": "wasm-pack test --chrome --headless",
+        "build": "wasm-pack build --out-dir pkg --dev",
+        "pack": "wasm-pack pack",
+        "publish": "wasm-pack publish"
+    }
+}

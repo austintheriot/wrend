@@ -1,17 +1,10 @@
-use std::{
-    collections::HashMap,
-    ops::{Deref, DerefMut},
-};
-
-use crate::{
-    Attribute, Buffer, Framebuffer, JsAttribute, JsBuffer, JsFramebuffer, JsRendererHandle,
-    JsTexture, JsUniform, Renderer, RendererHandle, Texture, Uniform,
-};
+use crate::{JsAttribute, JsBuffer, JsFramebuffer, JsTexture, JsUniform, Renderer};
 use js_sys::Object;
+use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::{
-    window, HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram, WebGlShader,
-    WebGlTransformFeedback, WebGlVertexArrayObject,
+    HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram, WebGlShader, WebGlTransformFeedback,
+    WebGlVertexArrayObject,
 };
 
 /// Wrapper around `Renderer` to make it callable from JavaScript.
@@ -53,15 +46,17 @@ impl JsRenderer {
     // }
 
     pub fn canvas(&self) -> HtmlCanvasElement {
-        self.canvas().clone()
+        self.deref().canvas().clone()
     }
 
     pub fn gl(&self) -> WebGl2RenderingContext {
-        self.gl().clone()
+        self.deref().gl().clone()
     }
 
     pub fn fragment_shader(&self, fragment_shader_id: String) -> Option<WebGlShader> {
-        self.fragment_shader(fragment_shader_id)
+        self.deref()
+            .fragment_shader(&fragment_shader_id)
+            .map(Clone::clone)
     }
 
     // pub fn fragment_shaders(&self) -> &HashMap<String, WebGlShader> {
@@ -69,7 +64,9 @@ impl JsRenderer {
     // }
 
     pub fn vertex_shader(&self, vertex_shader_id: String) -> Option<WebGlShader> {
-        self.vertex_shader(vertex_shader_id)
+        self.deref()
+            .vertex_shader(&vertex_shader_id)
+            .map(Clone::clone)
     }
 
     // pub fn vertex_shaders(&self) -> &HashMap<VertexShaderId, WebGlShader> {
@@ -77,7 +74,7 @@ impl JsRenderer {
     // }
 
     pub fn program(&self, program_id: String) -> Option<WebGlProgram> {
-        self.program(program_id)
+        self.deref().program(&program_id).map(Clone::clone)
     }
 
     // pub fn programs(&self) -> &HashMap<ProgramId, WebGlProgram> {
@@ -85,7 +82,7 @@ impl JsRenderer {
     // }
 
     pub fn uniform(&self, uniform_id: String) -> Option<JsUniform> {
-        self.uniform(uniform_id)
+        self.deref().uniform(&uniform_id).map(Into::into)
     }
 
     // pub fn uniforms(&self) -> &HashMap<UniformId, Uniform<ProgramId, UniformId, UserCtx>> {
@@ -148,7 +145,7 @@ impl JsRenderer {
 
     // @todo - enable ctx to be returned unconditionally (depending on if it's set or not)
     pub fn user_ctx(&self) -> Option<Object> {
-        self.user_ctx()
+        self.deref().user_ctx().map(Clone::clone)
     }
 
     /// Switches to using new program and its associated VAO
@@ -182,19 +179,12 @@ impl JsRenderer {
         self.deref().save_image();
     }
 
-    /// Begins the animation process.
-    ///
-    /// If no animation callback has been provided, then the empty animation callback is run.
+    // Begins the animation process.
+    //
+    // If no animation callback has been provided, then the empty animation callback is run.
     // pub fn into_renderer_handle(self) -> JsRendererHandle {
     //     self.into()
     // }
-
-    /// Gets current DOMHighResTimeStamp from performance.now()
-    ///
-    /// WebGL is limited to an f32, so using performance.now() (for now) to limit the size of the f64
-    fn now() -> f64 {
-        window().unwrap().performance().unwrap().now()
-    }
 }
 
 impl Deref for JsRenderer {

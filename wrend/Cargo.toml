@@ -1,12 +1,14 @@
 [package]
 name = "wrend"
 version = "0.1.0"
+authors = ["Austin Theriot <austinmtheriot@gmail.com>"]
 edition = "2021"
-authors = ["Austin Theriot"]
-license = "MIT OR Apache-2.0"
-description = "Rust wrapper around WebGL2 in the browser for faster, easier development"
+description = "A WebGL2 rendering library for Rust/Wasm in the browser"
+license = "MIT/Apache-2.0"
+repository = "https://github.com/austintheriot/wrend"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 # NOTE: These two crates enable the info!() logging macro, etc.
@@ -15,15 +17,17 @@ wasm-logger = "0.2.0"
 wasm-bindgen = { version = "0.2.82", features = ["serde-serialize"] }
 js-sys = "0.3.55"
 thiserror = "1.0.31"
-uuid = { version = "1.1.2", features = ["v4"] }
+uuid = { version = "1.1.2", features = ["v4", "js"] }
 wasm-bindgen-futures = "0.4.32"
 
 [dependencies.web-sys]
 version = "0.3.4"
 features = [
   'Window',
+  'CssStyleDeclaration',
   'Document',
   'Element',
+  'HtmlAnchorElement',
   'HtmlCanvasElement',
   'WebGlBuffer',
   'WebGl2RenderingContext',
@@ -32,6 +36,7 @@ features = [
   'WebGlUniformLocation',
   'WebGlFramebuffer',
   'WebGlTexture',
+  'Url',
   "WebGlVertexArrayObject",
   "WebGlTransformFeedback",
   "WebGlContextAttributes",
@@ -40,8 +45,9 @@ features = [
   "CanvasCaptureMediaStream",
   "MediaRecorder",
   "MediaRecorderOptions",
+  'Blob',
   "BlobEvent",
   "BlobPropertyBag",
   "EventTarget",
-  "MediaRecorderErrorEvent"
+  "MediaRecorderErrorEvent",
 ]

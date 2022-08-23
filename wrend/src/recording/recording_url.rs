@@ -1,6 +1,5 @@
-use std::ops::Deref;
-
 use log::warn;
+use std::ops::Deref;
 use web_sys::Url;
 
 /// Wrapper around a raw string url. Should not be modified in place.

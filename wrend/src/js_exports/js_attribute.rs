@@ -1,4 +1,4 @@
-use crate::{Attribute, Buffer};
+use crate::Attribute;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 pub type JsAttributeInner = Attribute<String, String, String>;

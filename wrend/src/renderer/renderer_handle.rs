@@ -231,7 +231,7 @@ impl<
     }
 
     pub fn start_recording(&self) {
-        const ERROR_START: &'static str = "Error trying to start video recording";
+        const ERROR_START: &str = "Error trying to start video recording";
         if let Some(recording_data) = &self.recording_data {
             if let Err(err) = recording_data
                 .borrow_mut()
@@ -246,7 +246,7 @@ impl<
     }
 
     pub fn stop_recording(&self) {
-        const ERROR_START: &'static str = "Error trying to stop video recording";
+        const ERROR_START: &str = "Error trying to stop video recording";
         if let Some(recording_data) = &self.recording_data {
             if let Err(err) = recording_data.borrow_mut().media_recorder().stop() {
                 error!("{ERROR_START}: {err:?}");

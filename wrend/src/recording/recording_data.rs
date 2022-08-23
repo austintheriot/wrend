@@ -1,14 +1,12 @@
-use std::{any::Any, ops::Deref};
-
+use crate::{Listener, RecordingUrl};
 use js_sys::{Array, Uint8Array};
 use log::info;
+use std::{any::Any, ops::Deref};
 use wasm_bindgen::{convert::FromWasmAbi, prelude::wasm_bindgen, JsCast};
 use web_sys::{
     Blob, BlobPropertyBag, EventTarget, HtmlAnchorElement, HtmlCanvasElement, MediaRecorder,
     MediaRecorderOptions, MediaStream, Url,
 };
-
-use crate::{Listener, RecordingUrl};
 
 #[wasm_bindgen(module = "/src/recording/captureStream.js")]
 extern "C" {
