@@ -14,6 +14,7 @@ mod textures;
 mod transform_feedback;
 mod uniforms;
 mod utils;
+mod js_exports;
 
 pub use animation::*;
 pub use attributes::*;
@@ -31,3 +32,4 @@ pub use textures::*;
 pub use transform_feedback::*;
 pub use uniforms::*;
 pub use utils::*;
+pub use js_exports::*;

@@ -27,7 +27,7 @@ codegen-units = 1
 cpal = { version = "0.13.5", features = ["wasm-bindgen"] }
 # The `wasm-bindgen` crate provides the bare minimum functionality needed
 # to interact with JavaScript.
-wasm-bindgen = "0.2.78"
+wasm-bindgen = "0.2.82"
 wasm-bindgen-futures = "0.4.31"
 js-sys = "0.3.55"
 anyhow = "1.0.58"
