@@ -51,24 +51,30 @@ pub fn build_renderer(
     VAOId,
     AppContext,
 > {
-    let ray_tracer_program_link = ProgramLinkBuilder::new()
+    let mut ray_tracer_program_link = ProgramLinkBuilder::new();
+    ray_tracer_program_link
         .set_vertex_shader_id(VertexShaderId::Quad)
         .set_program_id(ProgramId::RayTracer)
-        .set_fragment_shader_id(FragmentShaderId::RayTracer)
+        .set_fragment_shader_id(FragmentShaderId::RayTracer);
+    let ray_tracer_program_link = ray_tracer_program_link
         .build()
         .expect("Should build RayTracer ProgramLink successfully");
 
-    let average_renders_program_link = ProgramLinkBuilder::new()
+    let mut average_renders_program_link = ProgramLinkBuilder::new();
+    average_renders_program_link
         .set_vertex_shader_id(VertexShaderId::Quad)
         .set_program_id(ProgramId::AverageRenders)
-        .set_fragment_shader_id(FragmentShaderId::AverageRenders)
+        .set_fragment_shader_id(FragmentShaderId::AverageRenders);
+    let average_renders_program_link = average_renders_program_link
         .build()
         .expect("Should build AverageRenders ProgramLink successfully");
 
-    let pass_through_program_link = ProgramLinkBuilder::new()
+    let mut pass_through_program_link = ProgramLinkBuilder::new();
+    pass_through_program_link
         .set_vertex_shader_id(VertexShaderId::Quad)
         .set_program_id(ProgramId::PassThrough)
-        .set_fragment_shader_id(FragmentShaderId::PassThrough)
+        .set_fragment_shader_id(FragmentShaderId::PassThrough);
+    let pass_through_program_link = pass_through_program_link
         .build()
         .expect("Should build PassThrough ProgramLink successfully");
 

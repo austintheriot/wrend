@@ -39,17 +39,21 @@ pub fn app() -> Html {
                     .cast()
                     .expect("Canvas ref should point to a canvas in the use_effect hook");
 
-                let pass_through_program_link = ProgramLinkBuilder::new()
+                let mut pass_through_program_link = ProgramLinkBuilder::new();
+                pass_through_program_link
                     .set_vertex_shader_id(VertexShaderId::Quad)
                     .set_program_id(ProgramId::PassThrough)
-                    .set_fragment_shader_id(FragmentShaderId::PassThrough)
+                    .set_fragment_shader_id(FragmentShaderId::PassThrough);
+                let pass_through_program_link = pass_through_program_link
                     .build()
                     .expect("Should build PassThrough ProgramLink successfully");
 
-                let simplex_noise_program_link = ProgramLinkBuilder::new()
+                let mut simplex_noise_program_link = ProgramLinkBuilder::new();
+                simplex_noise_program_link
                     .set_vertex_shader_id(VertexShaderId::Quad)
                     .set_program_id(ProgramId::SimplexNoise)
-                    .set_fragment_shader_id(FragmentShaderId::SimplexNoise)
+                    .set_fragment_shader_id(FragmentShaderId::SimplexNoise);
+                let simplex_noise_program_link = simplex_noise_program_link
                     .build()
                     .expect("Should build SimplexNoise ProgramLink successfully");
 

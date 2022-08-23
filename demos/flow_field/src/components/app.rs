@@ -58,32 +58,40 @@ pub fn app() -> Html {
                     .cast()
                     .expect("Canvas ref should point to a canvas in the use_effect hook");
 
-                let pass_through_program_link = ProgramLinkBuilder::new()
+                let mut pass_through_program_link = ProgramLinkBuilder::new();
+                pass_through_program_link
                     .set_program_id(ProgramId::PassThrough)
                     .set_vertex_shader_id(VertexShaderId::Quad)
-                    .set_fragment_shader_id(FragmentShaderId::PassThrough)
+                    .set_fragment_shader_id(FragmentShaderId::PassThrough);
+                let pass_through_program_link = pass_through_program_link
                     .build()
                     .expect("Should build PassThrough ProgramLink successfully");
 
-                let perlin_noise_program_link = ProgramLinkBuilder::new()
+                let mut perlin_noise_program_link = ProgramLinkBuilder::new();
+                perlin_noise_program_link
                     .set_program_id(ProgramId::PerlinNoise)
                     .set_vertex_shader_id(VertexShaderId::Quad)
-                    .set_fragment_shader_id(FragmentShaderId::PerlinNoise)
+                    .set_fragment_shader_id(FragmentShaderId::PerlinNoise);
+                let perlin_noise_program_link = perlin_noise_program_link
                     .build()
                     .expect("Should build PerlinNoise ProgramLink successfully");
 
-                let update_particles_program_link = ProgramLinkBuilder::new()
+                let mut update_particles_program_link = ProgramLinkBuilder::new();
+                update_particles_program_link
                     .set_program_id(ProgramId::UpdateParticles)
                     .set_vertex_shader_id(VertexShaderId::UpdateParticles)
                     .set_fragment_shader_id(FragmentShaderId::UpdateParticles)
-                    .set_transform_feedback_varyings(["o_position".to_string()])
+                    .set_transform_feedback_varyings(["o_position".to_string()]);
+                let update_particles_program_link = update_particles_program_link
                     .build()
                     .expect("Should build UpdateParticles ProgramLink successfully");
 
-                let draw_particles_program_link = ProgramLinkBuilder::new()
+                let mut draw_particles_program_link = ProgramLinkBuilder::new();
+                draw_particles_program_link
                     .set_program_id(ProgramId::DrawParticles)
                     .set_vertex_shader_id(VertexShaderId::DrawParticles)
-                    .set_fragment_shader_id(FragmentShaderId::DrawParticles)
+                    .set_fragment_shader_id(FragmentShaderId::DrawParticles);
+                let draw_particles_program_link = draw_particles_program_link
                     .build()
                     .expect("Should build DrawParticles ProgramLink successfully");
 
