@@ -3,7 +3,7 @@ import { JsRenderer, JsRendererBuilder } from 'wrend';
 
 const main = () => {
   console.log({ JsRenderer })
-  let renderer = JsRenderer.builder().add_fragment_shader_src("test", "main() {}").build();
+  const renderer = JsRenderer.builder();
   console.log({ renderer })
 };
 
