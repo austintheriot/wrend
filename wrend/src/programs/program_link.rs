@@ -100,25 +100,25 @@ impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id>
         Self::default()
     }
 
-    pub fn set_program_id(mut self, program_id: ProgramId) -> Self {
+    pub fn set_program_id(&mut self, program_id: ProgramId) -> &mut Self {
         self.program_id = Some(program_id);
         self
     }
 
-    pub fn set_vertex_shader_id(mut self, vertex_shader_id: VertexShaderId) -> Self {
+    pub fn set_vertex_shader_id(&mut self, vertex_shader_id: VertexShaderId) -> &mut Self {
         self.vertex_shader_id = Some(vertex_shader_id);
         self
     }
 
-    pub fn set_fragment_shader_id(mut self, fragment_shader_id: FragmentShaderId) -> Self {
+    pub fn set_fragment_shader_id(&mut self, fragment_shader_id: FragmentShaderId) -> &mut Self {
         self.fragment_shader_id = Some(fragment_shader_id);
         self
     }
 
     pub fn set_transform_feedback_varyings(
-        mut self,
+        &mut self,
         transform_feedback_varyings: impl Into<Vec<String>>,
-    ) -> Self {
+    ) -> &mut Self {
         self.transform_feedback_varyings = transform_feedback_varyings.into();
         self
     }
