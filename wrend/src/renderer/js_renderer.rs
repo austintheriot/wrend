@@ -1,7 +1,7 @@
 use crate::{JsAttribute, JsBuffer, JsFramebuffer, JsTexture, JsUniform, Renderer, JsRendererBuilder};
 use js_sys::Object;
 use std::ops::{Deref, DerefMut};
-use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 use web_sys::{
     HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram, WebGlShader, WebGlTransformFeedback,
     WebGlVertexArrayObject,

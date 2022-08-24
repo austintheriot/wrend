@@ -1,3 +1,4 @@
+use js_sys::Function;
 use std::{
     fmt::Debug,
     hash::{Hash, Hasher},
@@ -5,6 +6,7 @@ use std::{
     rc::Rc,
 };
 use uuid::Uuid;
+use wasm_bindgen::JsValue;
 
 /// Type alias for the default return type of the callback type
 pub type CallbackWithContextDefaultReturnType = ();
@@ -14,6 +16,13 @@ pub type CallbackWithContextDefaultReturnType = ();
 pub struct CallbackWithContext<F: ?Sized> {
     callback: Rc<F>,
     uuid: Uuid,
+}
+
+impl CallbackWithContext<Function> {
+    pub fn call(&self, arg: impl Deref<Target=JsValue>) -> Result<JsValue, JsValue> {
+        let this = JsValue::NULL;
+        self.deref().call1(&this, arg.deref())
+    }
 }
 
 impl<F: ?Sized> CallbackWithContext<F> {

@@ -1,5 +1,7 @@
+use js_sys::Function;
+
 use crate::renderer::renderer::Renderer;
-use crate::{CallbackWithContext, Id, IdDefault, IdName};
+use crate::{CallbackWithContext, Either, Id, IdDefault, IdName};
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -17,22 +19,25 @@ pub struct RenderCallback<
     VertexArrayObjectId: Id = IdDefault,
     UserCtx: Clone + 'static = (),
 >(
-    CallbackWithContext<
-        dyn Fn(
-            &Renderer<
-                VertexShaderId,
-                FragmentShaderId,
-                ProgramId,
-                UniformId,
-                BufferId,
-                AttributeId,
-                TextureId,
-                FramebufferId,
-                TransformFeedbackId,
-                VertexArrayObjectId,
-                UserCtx,
-            >,
-        ),
+    Either<
+        CallbackWithContext<
+            dyn Fn(
+                &Renderer<
+                    VertexShaderId,
+                    FragmentShaderId,
+                    ProgramId,
+                    UniformId,
+                    BufferId,
+                    AttributeId,
+                    TextureId,
+                    FramebufferId,
+                    TransformFeedbackId,
+                    VertexArrayObjectId,
+                    UserCtx,
+                >,
+            ),
+        >,
+        CallbackWithContext<Function>,
     >,
 );
 
@@ -95,22 +100,25 @@ impl<
         UserCtx,
     >
 {
-    type Target = CallbackWithContext<
-        dyn Fn(
-            &Renderer<
-                VertexShaderId,
-                FragmentShaderId,
-                ProgramId,
-                UniformId,
-                BufferId,
-                AttributeId,
-                TextureId,
-                FramebufferId,
-                TransformFeedbackId,
-                VertexArrayObjectId,
-                UserCtx,
-            >,
-        ),
+    type Target = Either<
+        CallbackWithContext<
+            dyn Fn(
+                &Renderer<
+                    VertexShaderId,
+                    FragmentShaderId,
+                    ProgramId,
+                    UniformId,
+                    BufferId,
+                    AttributeId,
+                    TextureId,
+                    FramebufferId,
+                    TransformFeedbackId,
+                    VertexArrayObjectId,
+                    UserCtx,
+                >,
+            ),
+        >,
+        CallbackWithContext<Function>,
     >;
 
     fn deref(&self) -> &Self::Target {
@@ -161,24 +169,56 @@ impl<
     >
 {
     fn from(callback: F) -> Self {
-        Self(CallbackWithContext::from(Rc::new(callback)
-            as Rc<
-                dyn Fn(
-                    &Renderer<
-                        VertexShaderId,
-                        FragmentShaderId,
-                        ProgramId,
-                        UniformId,
-                        BufferId,
-                        AttributeId,
-                        TextureId,
-                        FramebufferId,
-                        TransformFeedbackId,
-                        VertexArrayObjectId,
-                        UserCtx,
-                    >,
-                ),
-            >))
+        Self(Either::new_left(Box::new(CallbackWithContext::from(Rc::new(callback)
+        as Rc<
+            dyn Fn(
+                &Renderer<
+                    VertexShaderId,
+                    FragmentShaderId,
+                    ProgramId,
+                    UniformId,
+                    BufferId,
+                    AttributeId,
+                    TextureId,
+                    FramebufferId,
+                    TransformFeedbackId,
+                    VertexArrayObjectId,
+                    UserCtx,
+                >,
+            ),
+        >))))
+    }
+}
+
+impl<
+        VertexShaderId: Id,
+        FragmentShaderId: Id,
+        ProgramId: Id,
+        UniformId: Id + IdName,
+        BufferId: Id,
+        AttributeId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
+        TransformFeedbackId: Id,
+        VertexArrayObjectId: Id,
+        UserCtx: Clone,
+    > From<Function>
+    for RenderCallback<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        AttributeId,
+        TextureId,
+        FramebufferId,
+        TransformFeedbackId,
+        VertexArrayObjectId,
+        UserCtx,
+    >
+{
+    fn from(callback: Function) -> Self {
+        Self(Either::new_right(Box::new(CallbackWithContext::from(callback))))
     }
 }
 
@@ -225,7 +265,7 @@ impl<
     >
 {
     fn from(callback: Rc<F>) -> Self {
-        Self(CallbackWithContext::from(
+        Self(Either::new_left(Box::new(CallbackWithContext::from(
             callback
                 as Rc<
                     dyn Fn(
@@ -244,6 +284,6 @@ impl<
                         >,
                     ),
                 >,
-        ))
+        ))))
     }
 }

@@ -1,13 +1,16 @@
 use crate::{
     Attribute, AttributeCreateContext, AttributeLink, Bridge, Buffer, BufferLink,
     BuildRendererError, CompileShaderError, CreateAttributeError, CreateBufferError,
-    CreateTextureError, CreateTransformFeedbackError, CreateUniformError, CreateVAOError,
+    CreateTextureError, CreateTransformFeedbackError, CreateUniformError, CreateVAOError, Either,
     Framebuffer, FramebufferLink, GetContextCallback, Id, IdDefault, IdName, LinkProgramError,
     ProgramLink, RenderCallback, RendererBuilderError, RendererHandle, SaveContextError,
     ShaderType, Texture, TextureLink, TransformFeedbackLink, Uniform, UniformContext, UniformLink,
     WebGlContextError,
 };
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    ops::Deref,
+};
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{
     window, HtmlAnchorElement, HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram,
@@ -264,7 +267,17 @@ impl<
     }
 
     pub fn render(&self) -> &Self {
-        (self.render_callback)(self);
+        match &*self.render_callback {
+            Either::Left(rust_callback) => {
+                (rust_callback)(self);
+            }
+            Either::Right(js_callback) => {
+                let this = JsValue::NULL;
+                js_callback
+                    .call0(&this)
+                    .expect("Should be able to call JavaScript render callback");
+            }
+        }
 
         self
     }
