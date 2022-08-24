@@ -37,6 +37,10 @@ pub struct RenderCallback<
                 >,
             ),
         >,
+        // It's not crucial that the JavaScript function have access to the Renderer as
+        // as an argument to the function itself (like the Rust callback),
+        // since in JavaScript, it's very easy for the renderer function to hold the Renderer 
+        // in the `render` callback closure
         CallbackWithContext<Function>,
     >,
 );

@@ -1,8 +1,8 @@
+use crate::{JsRenderer, JsTexture, RendererBuilder};
+use js_sys::{Function, Object};
 use std::ops::{Deref, DerefMut};
-use js_sys::Object;
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::HtmlCanvasElement;
-use crate::{JsRenderer, JsTexture, RendererBuilder};
 
 /// Wrapper around `Renderer` to make it callable from JavaScript.
 ///
@@ -47,7 +47,8 @@ impl JsRendererBuilder {
 
     /// Saves a vertex shader source and its corresponding id
     pub fn add_vertex_shader_src(mut self, id: String, vertex_shader_src: String) -> Self {
-        self.deref_mut().add_vertex_shader_src(id, vertex_shader_src);
+        self.deref_mut()
+            .add_vertex_shader_src(id, vertex_shader_src);
         self
     }
 
@@ -81,28 +82,11 @@ impl JsRendererBuilder {
     // }
 
     /// Save a callback that will be called each time it is time to render a new frame
-    // pub fn set_render_callback(
-    //     &mut self,
-    //     render_callback: impl Into<
-    //         RenderCallback<
-    //             String,
-    //             String,
-    //             String,
-    //             UniformId,
-    //             BufferId,
-    //             AttributeId,
-    //             String,
-    //             FramebufferId,
-    //             TransformFeedbackId,
-    //             VertexArrayObjectId,
-    //             UserCtx,
-    //         >,
-    //     >,
-    // ) -> Self {
-    //     self.render_callback = Some(render_callback.into());
+    pub fn set_render_callback(mut self, render_callback: Function) -> Self {
+        self.deref_mut().set_render_callback(render_callback);
 
-    //     self
-    // }
+        self
+    }
 
     /// Save as arbitrary user context that can be accessed from within the render callback
     ///
