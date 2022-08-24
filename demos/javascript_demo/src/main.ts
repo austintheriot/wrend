@@ -9,7 +9,6 @@ const main = () => {
   }).build();
 
   console.log({ renderer })
-
   renderer.render();
 };
 

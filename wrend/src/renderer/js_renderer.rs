@@ -1,5 +1,7 @@
-use crate::{JsAttribute, JsBuffer, JsFramebuffer, JsTexture, JsUniform, Renderer, JsRendererBuilder};
-use js_sys::Object;
+use crate::{
+    JsAttribute, JsBuffer, JsFramebuffer, JsRendererBuilder, JsTexture, JsUniform, Renderer,
+};
+use js_sys::{Array, Map, Object};
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 use web_sys::{
@@ -47,9 +49,15 @@ impl JsRenderer {
             .map(Clone::clone)
     }
 
-    // pub fn fragment_shaders(&self) -> &HashMap<String, WebGlShader> {
-    //     self.0.fragment_shaders()
-    // }
+    pub fn fragment_shaders(&self) -> Map {
+        let map = Map::new();
+
+        for (key, value) in self.deref().fragment_shaders().iter() {
+            map.set(&JsValue::from_str(key), value.as_ref());
+        }
+
+        map
+    }
 
     pub fn vertex_shader(&self, vertex_shader_id: String) -> Option<WebGlShader> {
         self.deref()
@@ -57,62 +65,121 @@ impl JsRenderer {
             .map(Clone::clone)
     }
 
-    // pub fn vertex_shaders(&self) -> &HashMap<VertexShaderId, WebGlShader> {
-    //     &self.vertex_shaders
-    // }
+    pub fn vertex_shaders(&self) -> Map {
+        let map = Map::new();
+
+        for (key, value) in self.deref().vertex_shaders().iter() {
+            map.set(&JsValue::from_str(key), value.as_ref());
+        }
+
+        map
+    }
 
     pub fn program(&self, program_id: String) -> Option<WebGlProgram> {
         self.deref().program(&program_id).map(Clone::clone)
     }
 
-    // pub fn programs(&self) -> &HashMap<ProgramId, WebGlProgram> {
-    //     &self.programs
-    // }
+    pub fn programs(&self) -> Map {
+        let map = Map::new();
+
+        for (key, value) in self.deref().programs().iter() {
+            map.set(&JsValue::from_str(key), value.as_ref());
+        }
+
+        map
+    }
 
     pub fn uniform(&self, uniform_id: String) -> Option<JsUniform> {
         self.deref().uniform(&uniform_id).map(Into::into)
     }
 
-    // pub fn uniforms(&self) -> &HashMap<UniformId, Uniform<ProgramId, UniformId, UserCtx>> {
-    //     &self.uniforms
-    // }
+    pub fn uniforms(&self) -> Map {
+        let map = Map::new();
+
+        for (key, value) in self.deref().uniforms().iter() {
+            map.set(
+                &JsValue::from_str(key),
+                todo!("Uniform functionality must be implemented for JsUniform"),
+            );
+        }
+
+        map
+    }
 
     pub fn buffer(&self, buffer_id: String) -> Option<JsBuffer> {
         self.deref().buffer(&buffer_id).map(Into::into)
     }
 
-    // pub fn buffers(&self) -> &HashMap<String, Buffer<String>> {
-    //     &self.buffers
-    // }
+    pub fn buffers(&self) -> Map {
+        let map = Map::new();
+
+        for (key, value) in self.deref().buffers().iter() {
+            map.set(
+                &JsValue::from_str(key),
+                todo!("Buffer functionality must be implemented for JsBuffer"),
+            );
+        }
+
+        map
+    }
 
     pub fn attribute(&self, attribute_id: String) -> Option<JsAttribute> {
         self.deref().attribute(&attribute_id).map(Into::into)
     }
 
-    // pub fn attributes(
-    //     &self,
-    // ) -> &HashMap<AttributeId, Attribute<VertexArrayObjectId, BufferId, AttributeId>> {
-    //     &self.attributes
-    // }
+    pub fn attributes(&self) -> Map {
+        let map = Map::new();
+
+        for (key, value) in self.deref().attributes().iter() {
+            map.set(
+                &JsValue::from_str(key),
+                todo!("Attribute functionality must be implemented for JsAttribute"),
+            );
+        }
+
+        map
+    }
 
     pub fn texture(&self, texture_id: String) -> Option<JsTexture> {
         self.deref().texture(&texture_id).map(Into::into)
     }
 
-    // pub fn textures(&self) -> &HashMap<String, Texture<String>> {
-    //     &self.textures
-    // }
+    pub fn textures(&self) -> Map {
+        let map = Map::new();
 
-    // pub fn textures_by_id(&self, texture_ids: Vec<String>) -> Vec<JsTexture> {
-    //     let mut textures = Vec::with_capacity(texture_ids.len());
-    //     for texture_id in texture_ids {
-    //         let texture = self.texture(&texture_id);
-    //         if let Some(texture) = texture {
-    //             textures.push(texture);
-    //         }
-    //     }
-    //     textures
-    // }
+        for (key, value) in self.deref().textures().iter() {
+            map.set(
+                &JsValue::from_str(key),
+                todo!("Texture functionality must be implemented for JsTexture"),
+            );
+        }
+
+        map
+    }
+
+    /// Only returns the WebGlTexture for now
+    pub fn textures_by_id(&self, texture_ids: Array) -> Array {
+        let string_vec: Vec<String> = js_sys::try_iter(texture_ids.as_ref())
+            .unwrap()
+            .expect("textures_by_id should be passed an array of strings")
+            .into_iter()
+            .map(|el| {
+                JsValue::as_string(&el.expect(
+                    "Each element in the array passed to textures_by_id should be a string",
+                ))
+                .unwrap()
+            })
+            .collect();
+
+        let textures = self.deref().textures_by_id(string_vec);
+
+        let array = Array::new();
+        for texture in textures {
+            array.push(texture.webgl_texture().as_ref());
+        }
+
+        array
+    }
 
     pub fn framebuffer(&self, framebuffer_id: String) -> Option<JsFramebuffer> {
         self.deref().framebuffer(&framebuffer_id).map(Into::into)
@@ -131,12 +198,10 @@ impl JsRenderer {
         self.deref().vao(&vao_id).map(Clone::clone)
     }
 
-    // @todo - enable ctx to be returned unconditionally (depending on if it's set or not)
     pub fn user_ctx(&self) -> Option<Object> {
         self.deref().user_ctx().map(Clone::clone)
     }
 
-    /// Switches to using new program and its associated VAO
     pub fn use_program(&self, program_id: String) {
         self.deref().use_program(&program_id);
     }
@@ -145,16 +210,10 @@ impl JsRenderer {
         self.deref().use_vao(&vao_id);
     }
 
-    /// Updates a single uniform using the previously given update function. If no function was supplied,
-    /// then this is a no-op.
-    ///
-    /// Calls "use_program" on the appropriate program before each uniform's update function (so this is not
-    /// necessary to do within the callback itself, unless you need to change programs, for whatever reason).
     pub fn update_uniform(&self, uniform_id: String) {
         self.deref().update_uniform(&uniform_id);
     }
 
-    /// Iterates through all saved uniforms and updates them using their associated update callbacks.
     pub fn update_uniforms(&self) {
         self.deref().update_uniforms();
     }
