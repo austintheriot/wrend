@@ -4,10 +4,10 @@ use std::ops::{Deref, DerefMut};
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 pub type JsUniformInner = Uniform<String, String, Object>;
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = Uniform)]
 pub struct JsUniform(JsUniformInner);
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_class = Uniform)]
 impl JsUniform {
     pub fn program_ids(&self) -> Array {
         let program_ids: Vec<JsValue> = self

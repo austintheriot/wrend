@@ -3,7 +3,7 @@ use wasm_bindgen::prelude::wasm_bindgen;
 
 pub type JsFramebufferInner = Framebuffer<String>;
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = Framebuffer)]
 pub struct JsFramebuffer(JsFramebufferInner);
 
 impl From<JsFramebufferInner> for JsFramebuffer {

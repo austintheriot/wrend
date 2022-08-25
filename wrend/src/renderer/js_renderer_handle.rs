@@ -17,10 +17,10 @@ pub type JsRendererHandleInner = RendererHandle<
     Object,
 >;
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = RendererHandle)]
 pub struct JsRendererHandle(JsRendererHandleInner);
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_class = RendererHandle)]
 impl JsRendererHandle {
     pub fn initialize_recorder(&mut self) {
         self.deref_mut().initialize_recorder();

@@ -21,10 +21,10 @@ type JsRendererBuilderInner = RendererBuilder<
     Object,
 >;
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = RendererBuilder)]
 pub struct JsRendererBuilder(JsRendererBuilderInner);
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_class = RendererBuilder)]
 impl JsRendererBuilder {
     /// This is the only internal storage available publicly from the builder,
     /// because it is necessary to use it during the build process for framebuffers.

@@ -27,10 +27,10 @@ pub type JsRendererInner = Renderer<
     Object,
 >;
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = Renderer)]
 pub struct JsRenderer(JsRendererInner);
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_class = Renderer)]
 impl JsRenderer {
     pub fn builder() -> JsRendererBuilder {
         JsRendererBuilder::default()

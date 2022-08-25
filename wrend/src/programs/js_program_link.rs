@@ -6,10 +6,10 @@ use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
 pub type JsProgramLinkInner = ProgramLink<String, String, String>;
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = ProgramLink)]
 pub struct JsProgramLink(JsProgramLinkInner);
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_class = ProgramLink)]
 impl JsProgramLink {
     pub fn new(program_id: String, vertex_shader_id: String, fragment_shader_id: String) -> Self {
         Self(JsProgramLinkInner::new(

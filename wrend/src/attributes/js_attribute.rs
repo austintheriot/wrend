@@ -7,10 +7,10 @@ use web_sys::WebGlBuffer;
 
 pub type JsAttributeInner = Attribute<String, String, String>;
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = Attribute)]
 pub struct JsAttribute(JsAttributeInner);
 
-#[wasm_bindgen] 
+#[wasm_bindgen(js_class = Attribute)] 
 impl JsAttribute {
     pub fn vao_ids(&self) -> Array {
         let vao_ids: Vec<JsValue> = self.deref().vao_ids().iter().map(|s| JsValue::from_str(s)).collect();

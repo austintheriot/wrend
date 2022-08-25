@@ -5,10 +5,10 @@ use web_sys::WebGlBuffer;
 
 pub type JsBufferInner = Buffer<String>;
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = Buffer)]
 pub struct JsBuffer(JsBufferInner);
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_class = Buffer)]
 impl JsBuffer {
     pub fn buffer_id(&self) -> String {
         self.deref().buffer_id().to_owned()

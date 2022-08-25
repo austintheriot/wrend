@@ -5,10 +5,10 @@ use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
 pub type JsProgramLinkBuilderInner = ProgramLinkBuilder<String, String, String>;
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_name = ProgramLinkBuilder)]
 pub struct JsProgramLinkBuilder(JsProgramLinkBuilderInner);
 
-#[wasm_bindgen]
+#[wasm_bindgen(js_class = ProgramLinkBuilder)]
 impl JsProgramLinkBuilder {
     pub fn default() -> Self {
         Self(JsProgramLinkBuilderInner::default())

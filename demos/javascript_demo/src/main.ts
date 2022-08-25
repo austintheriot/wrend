@@ -1,10 +1,10 @@
 import './style.css'
-import { JsRenderer } from 'wrend';
+import { Renderer } from 'wrend';
 
 const main = () => {
   const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 
-  const renderer = JsRenderer.builder().set_canvas(canvas).set_render_callback(() => {
+  const renderer = Renderer.builder().set_canvas(canvas).set_render_callback(() => {
     console.log('Render callback being called with the renderer itself', { renderer });
   }).build();
 
