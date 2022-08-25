@@ -1,5 +1,6 @@
 use crate::{
-    JsAttribute, JsBuffer, JsFramebuffer, JsRendererBuilder, JsTexture, JsUniform, Renderer, JsRendererHandle
+    JsAttribute, JsBuffer, JsFramebuffer, JsRendererBuilder, JsRendererHandle, JsTexture,
+    JsUniform, Renderer,
 };
 use js_sys::{Array, Map, Object};
 use std::ops::{Deref, DerefMut};
@@ -96,11 +97,9 @@ impl JsRenderer {
     pub fn uniforms(&self) -> Map {
         let map = Map::new();
 
-        for (key, value) in self.deref().uniforms().iter() {
-            map.set(
-                &JsValue::from_str(key),
-                todo!("Uniform functionality must be implemented for JsUniform"),
-            );
+        for (key, uniform) in self.deref().uniforms().iter() {
+            let js_uniform: JsUniform = uniform.into();
+            map.set(&JsValue::from_str(key), &js_uniform.into());
         }
 
         map
@@ -113,11 +112,9 @@ impl JsRenderer {
     pub fn buffers(&self) -> Map {
         let map = Map::new();
 
-        for (key, value) in self.deref().buffers().iter() {
-            map.set(
-                &JsValue::from_str(key),
-                todo!("Buffer functionality must be implemented for JsBuffer"),
-            );
+        for (key, buffer) in self.deref().buffers().iter() {
+            let js_buffer: JsBuffer = buffer.into();
+            map.set(&JsValue::from_str(key), &js_buffer.into());
         }
 
         map
@@ -131,10 +128,8 @@ impl JsRenderer {
         let map = Map::new();
 
         for (key, value) in self.deref().attributes().iter() {
-            map.set(
-                &JsValue::from_str(key),
-                todo!("Attribute functionality must be implemented for JsAttribute"),
-            );
+            let attribute: JsAttribute = value.into();
+            map.set(&JsValue::from_str(key), &attribute.into());
         }
 
         map
@@ -147,17 +142,14 @@ impl JsRenderer {
     pub fn textures(&self) -> Map {
         let map = Map::new();
 
-        for (key, value) in self.deref().textures().iter() {
-            map.set(
-                &JsValue::from_str(key),
-                todo!("Texture functionality must be implemented for JsTexture"),
-            );
+        for (key, texture) in self.deref().textures().iter() {
+            let js_texture: JsTexture = texture.into();
+            map.set(&JsValue::from_str(key), &js_texture.into());
         }
 
         map
     }
 
-    /// Only returns the WebGlTexture for now
     pub fn textures_by_id(&self, texture_ids: Array) -> Array {
         let string_vec: Vec<String> = js_sys::try_iter(texture_ids.as_ref())
             .unwrap()
@@ -175,7 +167,9 @@ impl JsRenderer {
 
         let array = Array::new();
         for texture in textures {
-            array.push(texture.webgl_texture().as_ref());
+            let js_texture: JsTexture = texture.into();
+            let js_value: JsValue = js_texture.into();
+            array.push(&js_value);
         }
 
         array

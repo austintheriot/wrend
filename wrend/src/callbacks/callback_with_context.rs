@@ -19,7 +19,7 @@ pub struct CallbackWithContext<F: ?Sized> {
 }
 
 impl CallbackWithContext<Function> {
-    pub fn call(&self, arg: impl Deref<Target=JsValue>) -> Result<JsValue, JsValue> {
+    pub fn call(&self, arg: impl Deref<Target = JsValue>) -> Result<JsValue, JsValue> {
         let this = JsValue::NULL;
         self.deref().call1(&this, arg.deref())
     }

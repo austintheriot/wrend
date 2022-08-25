@@ -1,14 +1,13 @@
 #[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub enum Either<L: ?Sized, R: ?Sized>{ 
+pub enum Either<L: ?Sized, R: ?Sized> {
     Left(Box<L>),
-    Right(Box<R>)
+    Right(Box<R>),
 }
 
-impl<L: ?Sized, R: ?Sized> Either<L, R>{
+impl<L: ?Sized, R: ?Sized> Either<L, R> {
     pub fn new_left(left: Box<L>) -> Self {
         Either::Left(left)
     }
-
 
     pub fn new_right(right: Box<R>) -> Self {
         Either::Right(right)
@@ -48,7 +47,6 @@ impl<L: ?Sized, R: ?Sized> Either<L, R>{
             Either::Right(_) => panic!("called `Either::unwrap_left()` on a `Right` value"),
         }
     }
-
 
     pub fn unwrap_right(self) -> Box<R> {
         match self {

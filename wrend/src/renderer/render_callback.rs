@@ -39,7 +39,7 @@ pub struct RenderCallback<
         >,
         // It's not crucial that the JavaScript function have access to the Renderer as
         // as an argument to the function itself (like the Rust callback),
-        // since in JavaScript, it's very easy for the renderer function to hold the Renderer 
+        // since in JavaScript, it's very easy for the renderer function to hold the Renderer
         // in the `render` callback closure
         CallbackWithContext<Function>,
     >,
@@ -173,24 +173,26 @@ impl<
     >
 {
     fn from(callback: F) -> Self {
-        Self(Either::new_left(Box::new(CallbackWithContext::from(Rc::new(callback)
-        as Rc<
-            dyn Fn(
-                &Renderer<
-                    VertexShaderId,
-                    FragmentShaderId,
-                    ProgramId,
-                    UniformId,
-                    BufferId,
-                    AttributeId,
-                    TextureId,
-                    FramebufferId,
-                    TransformFeedbackId,
-                    VertexArrayObjectId,
-                    UserCtx,
+        Self(Either::new_left(Box::new(CallbackWithContext::from(
+            Rc::new(callback)
+                as Rc<
+                    dyn Fn(
+                        &Renderer<
+                            VertexShaderId,
+                            FragmentShaderId,
+                            ProgramId,
+                            UniformId,
+                            BufferId,
+                            AttributeId,
+                            TextureId,
+                            FramebufferId,
+                            TransformFeedbackId,
+                            VertexArrayObjectId,
+                            UserCtx,
+                        >,
+                    ),
                 >,
-            ),
-        >))))
+        ))))
     }
 }
 
@@ -222,7 +224,9 @@ impl<
     >
 {
     fn from(callback: Function) -> Self {
-        Self(Either::new_right(Box::new(CallbackWithContext::from(callback))))
+        Self(Either::new_right(Box::new(CallbackWithContext::from(
+            callback,
+        ))))
     }
 }
 

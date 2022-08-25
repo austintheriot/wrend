@@ -1,7 +1,7 @@
 mod bridge;
-mod listener;
 mod either;
+mod listener;
 
 pub use bridge::*;
-pub use listener::*;
 pub use either::*;
+pub use listener::*;
