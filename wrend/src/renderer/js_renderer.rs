@@ -1,5 +1,5 @@
 use crate::{
-    JsAttribute, JsBuffer, JsFramebuffer, JsRendererBuilder, JsTexture, JsUniform, Renderer,
+    JsAttribute, JsBuffer, JsFramebuffer, JsRendererBuilder, JsTexture, JsUniform, Renderer, JsRendererHandle
 };
 use js_sys::{Array, Map, Object};
 use std::ops::{Deref, DerefMut};
@@ -226,12 +226,15 @@ impl JsRenderer {
         self.deref().save_image();
     }
 
-    // Begins the animation process.
-    //
-    // If no animation callback has been provided, then the empty animation callback is run.
-    // pub fn into_renderer_handle(self) -> JsRendererHandle {
-    //     self.into()
-    // }
+    pub fn into_renderer_handle(self) -> JsRendererHandle {
+        self.into()
+    }
+}
+
+impl JsRenderer {
+    pub fn inner(self) -> JsRendererInner {
+        self.0
+    }
 }
 
 impl Deref for JsRenderer {
