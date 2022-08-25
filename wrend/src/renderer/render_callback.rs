@@ -173,7 +173,7 @@ impl<
     >
 {
     fn from(callback: F) -> Self {
-        Self(Either::new_left(Box::new(CallbackWithContext::from(
+        Self(Either::new_a(CallbackWithContext::from(
             Rc::new(callback)
                 as Rc<
                     dyn Fn(
@@ -192,7 +192,7 @@ impl<
                         >,
                     ),
                 >,
-        ))))
+        )))
     }
 }
 
@@ -224,9 +224,7 @@ impl<
     >
 {
     fn from(callback: Function) -> Self {
-        Self(Either::new_right(Box::new(CallbackWithContext::from(
-            callback,
-        ))))
+        Self(Either::new_b(CallbackWithContext::from(callback)))
     }
 }
 
@@ -273,7 +271,7 @@ impl<
     >
 {
     fn from(callback: Rc<F>) -> Self {
-        Self(Either::new_left(Box::new(CallbackWithContext::from(
+        Self(Either::new_a(CallbackWithContext::from(
             callback
                 as Rc<
                     dyn Fn(
@@ -292,6 +290,6 @@ impl<
                         >,
                     ),
                 >,
-        ))))
+        )))
     }
 }

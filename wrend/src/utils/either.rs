@@ -1,57 +1,57 @@
 #[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub enum Either<L: ?Sized, R: ?Sized> {
-    Left(Box<L>),
-    Right(Box<R>),
+pub enum Either<L, R> {
+    A(L),
+    B(R),
 }
 
-impl<L: ?Sized, R: ?Sized> Either<L, R> {
-    pub fn new_left(left: Box<L>) -> Self {
-        Either::Left(left)
+impl<L, R> Either<L, R> {
+    pub fn new_a(a: L) -> Self {
+        Either::A(a)
     }
 
-    pub fn new_right(right: Box<R>) -> Self {
-        Either::Right(right)
+    pub fn new_b(b: R) -> Self {
+        Either::B(b)
     }
 
-    pub fn is_left(&self) -> bool {
+    pub fn is_a(&self) -> bool {
         match self {
-            Either::Left(_) => true,
-            Either::Right(_) => false,
+            Either::A(_) => true,
+            Either::B(_) => false,
         }
     }
 
-    pub fn is_right(&self) -> bool {
+    pub fn is_b(&self) -> bool {
         match self {
-            Either::Left(_) => false,
-            Either::Right(_) => true,
+            Either::A(_) => false,
+            Either::B(_) => true,
         }
     }
 
-    pub fn left(self) -> Option<Box<L>> {
+    pub fn a(self) -> Option<L> {
         match self {
-            Either::Left(left) => Some(left),
-            Either::Right(_) => None,
+            Either::A(a) => Some(a),
+            Either::B(_) => None,
         }
     }
 
-    pub fn right(self) -> Option<Box<R>> {
+    pub fn b(self) -> Option<R> {
         match self {
-            Either::Left(_) => None,
-            Either::Right(right) => Some(right),
+            Either::A(_) => None,
+            Either::B(b) => Some(b),
         }
     }
 
-    pub fn unwrap_left(self) -> Box<L> {
+    pub fn unwrap_a(self) -> L {
         match self {
-            Either::Left(left) => left,
-            Either::Right(_) => panic!("called `Either::unwrap_left()` on a `Right` value"),
+            Either::A(a) => a,
+            Either::B(_) => panic!("called `Either::unwrap_a()` on a `B` value"),
         }
     }
 
-    pub fn unwrap_right(self) -> Box<R> {
+    pub fn unwrap_b(self) -> R {
         match self {
-            Either::Left(_) => panic!("called `Either::unwrap_left()` on a `Left` value"),
-            Either::Right(right) => right,
+            Either::A(_) => panic!("called `Either::unwrap_b()` on an `A` value"),
+            Either::B(b) => b,
         }
     }
 }

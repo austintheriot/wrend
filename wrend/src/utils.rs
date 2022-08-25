@@ -3,5 +3,5 @@ mod either;
 mod listener;
 
 pub use bridge::*;
-pub use either::*;
+pub use either::{Either::A, Either::B, *};
 pub use listener::*;

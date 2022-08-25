@@ -265,10 +265,10 @@ impl<
 
     pub fn render(&self) -> &Self {
         match &*self.render_callback {
-            Either::Left(rust_callback) => {
+            Either::A(rust_callback) => {
                 (rust_callback)(self);
             }
-            Either::Right(js_callback) => {
+            Either::B(js_callback) => {
                 let this = JsValue::NULL;
                 js_callback
                     .call0(&this)

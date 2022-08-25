@@ -117,8 +117,8 @@ impl<
     ) {
         if let Some(animation_callback) = &self.animation_callback {
             match animation_callback.deref() {
-                Either::Left(rust_callback) => (rust_callback)(renderer),
-                Either::Right(js_callback) => {
+                Either::A(rust_callback) => (rust_callback)(renderer),
+                Either::B(js_callback) => {
                     let this = JsValue::NULL;
                     js_callback
                         .call0(&this)
