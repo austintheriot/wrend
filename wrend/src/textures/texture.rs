@@ -1,6 +1,7 @@
-use crate::Id;
+use crate::{Id, JsTexture, JsTextureInner};
 use std::fmt::Debug;
 use std::hash::Hash;
+use wasm_bindgen::JsValue;
 use web_sys::WebGlTexture;
 
 #[derive(Clone)]
@@ -48,3 +49,10 @@ impl<TextureId: Id> PartialEq for Texture<TextureId> {
 }
 
 impl<TextureId: Id> Eq for Texture<TextureId> {}
+
+impl From<JsTextureInner> for JsValue {
+    fn from(texture: JsTextureInner) -> Self {
+        let js_texture: JsTexture = texture.into();
+        js_texture.into()
+    }
+}

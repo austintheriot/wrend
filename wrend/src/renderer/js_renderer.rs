@@ -163,14 +163,17 @@ impl JsRenderer {
             })
             .collect();
 
-        let textures = self.deref().textures_by_id(string_vec);
+        let textures: Vec<JsValue> = self
+            .deref()
+            .textures_by_id(string_vec)
+            .iter()
+            .map(|texture| {
+                let js_texture: JsTexture = (*texture).into();
+                js_texture.into()
+            })
+            .collect();
 
-        let array = Array::new();
-        for texture in textures {
-            let js_texture: JsTexture = texture.into();
-            let js_value: JsValue = js_texture.into();
-            array.push(&js_value);
-        }
+        let array = Array::from_iter(textures);
 
         array
     }

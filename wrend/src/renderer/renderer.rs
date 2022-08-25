@@ -2,10 +2,10 @@ use crate::{
     Attribute, AttributeCreateContext, AttributeLink, Bridge, Buffer, BufferLink,
     BuildRendererError, CompileShaderError, CreateAttributeError, CreateBufferError,
     CreateTextureError, CreateTransformFeedbackError, CreateUniformError, CreateVAOError, Either,
-    Framebuffer, FramebufferLink, GetContextCallback, Id, IdDefault, IdName, LinkProgramError,
-    ProgramLink, RenderCallback, RendererBuilderError, RendererHandle, SaveContextError,
-    ShaderType, Texture, TextureLink, TransformFeedbackLink, Uniform, UniformContext, UniformLink,
-    WebGlContextError,
+    Framebuffer, FramebufferLink, GetContextCallback, Id, IdDefault, IdName, JsRenderer,
+    JsRendererInner, LinkProgramError, ProgramLink, RenderCallback, RendererBuilderError,
+    RendererHandle, SaveContextError, ShaderType, Texture, TextureLink, TransformFeedbackLink,
+    Uniform, UniformContext, UniformLink, WebGlContextError,
 };
 use std::collections::{HashMap, HashSet};
 use wasm_bindgen::{JsCast, JsValue};
@@ -357,6 +357,13 @@ impl<
 {
     fn as_ref(&self) -> &HtmlCanvasElement {
         self.canvas()
+    }
+}
+
+impl From<JsRendererInner> for JsValue {
+    fn from(renderer: JsRendererInner) -> Self {
+        let js_renderer: JsRenderer = renderer.into();
+        js_renderer.into()
     }
 }
 

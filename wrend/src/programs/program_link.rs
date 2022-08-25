@@ -1,7 +1,8 @@
-use crate::Id;
+use crate::{Id, JsProgramLink, JsProgramLinkBuilder, JsProgramLinkBuilderInner};
 use std::fmt::Debug;
 use std::hash::Hash;
 use thiserror::Error;
+use wasm_bindgen::JsValue;
 
 /// This contains an id for a pair of shaders: one vertex shader and one fragment
 /// shader. These can be combined to link together a program.
@@ -74,6 +75,14 @@ impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id> Eq
     for ProgramLink<ProgramId, VertexShaderId, FragmentShaderId>
 {
 }
+
+impl From<ProgramLink<String, String, String>> for JsValue {
+    fn from(program_link: ProgramLink<String, String, String>) -> Self {
+        let js_program_link: JsProgramLink = program_link.into();
+        js_program_link.into()
+    }
+}
+
 
 #[derive(Error, Debug)]
 pub enum ProgramLinkBuildError {
@@ -170,5 +179,12 @@ impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id> PartialEq
         self.program_id == other.program_id
             && self.vertex_shader_id == other.vertex_shader_id
             && self.fragment_shader_id == other.fragment_shader_id
+    }
+}
+
+impl From<JsProgramLinkBuilderInner> for JsValue {
+    fn from(program_link_builder: JsProgramLinkBuilderInner) -> Self {
+        let js_program_link_builder: JsProgramLinkBuilder = program_link_builder.into();
+        js_program_link_builder.into()
     }
 }

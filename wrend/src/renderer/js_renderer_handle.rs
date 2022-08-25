@@ -22,10 +22,6 @@ pub struct JsRendererHandle(JsRendererHandleInner);
 
 #[wasm_bindgen]
 impl JsRendererHandle {
-    /// Must be called before starting to record.
-    ///
-    /// This prevents unexpected initialization of a MediaRecorder, when the
-    /// user wasn't expecting to need one from the handle.
     pub fn initialize_recorder(&mut self) {
         self.deref_mut().initialize_recorder();
     }

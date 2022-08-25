@@ -1,7 +1,6 @@
-use std::ops::{Deref, DerefMut};
-
 use crate::{JsProgramLink, ProgramLinkBuilder};
 use js_sys::Array;
+use std::ops::{Deref, DerefMut};
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
 pub type JsProgramLinkBuilderInner = ProgramLinkBuilder<String, String, String>;
@@ -69,5 +68,11 @@ impl Deref for JsProgramLinkBuilder {
 impl DerefMut for JsProgramLinkBuilder {
     fn deref_mut(&mut self) -> &mut JsProgramLinkBuilderInner {
         &mut self.0
+    }
+}
+
+impl From<ProgramLinkBuilder<String, String, String>> for JsProgramLinkBuilder {
+    fn from(program_link: ProgramLinkBuilder<String, String, String>) -> Self {
+        Self(program_link)
     }
 }

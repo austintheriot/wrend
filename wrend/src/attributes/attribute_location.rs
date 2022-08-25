@@ -1,7 +1,11 @@
+use wasm_bindgen::prelude::wasm_bindgen;
+
 /// Wrapper around the raw number returned from WebGL to represent an attribute location
+#[wasm_bindgen]
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct AttributeLocation(u32);
 
+#[wasm_bindgen]
 impl AttributeLocation {
     pub fn get(&self) -> u32 {
         self.0

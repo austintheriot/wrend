@@ -1,6 +1,7 @@
-use crate::Id;
+use crate::{Id, JsBuffer, JsBufferInner};
 use std::fmt::Debug;
 use std::hash::Hash;
+use wasm_bindgen::JsValue;
 use web_sys::WebGlBuffer;
 
 #[derive(Clone)]
@@ -48,3 +49,11 @@ impl<BufferId: Id> PartialEq for Buffer<BufferId> {
 }
 
 impl<BufferId: Id> Eq for Buffer<BufferId> {}
+
+
+impl From<JsBufferInner> for JsValue {
+    fn from(buffer: JsBufferInner) -> Self {
+        let js_buffer: JsBuffer = buffer.into();
+        js_buffer.into()
+    }
+}

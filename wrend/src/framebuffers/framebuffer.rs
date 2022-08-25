@@ -1,6 +1,7 @@
-use crate::Id;
+use crate::{Id, JsFramebuffer, JsFramebufferInner};
 use std::fmt::Debug;
 use std::hash::Hash;
+use wasm_bindgen::JsValue;
 use web_sys::WebGlFramebuffer;
 
 #[derive(Clone)]
@@ -49,3 +50,10 @@ impl<FramebufferId: Id> PartialEq for Framebuffer<FramebufferId> {
 }
 
 impl<FramebufferId: Id> Eq for Framebuffer<FramebufferId> {}
+
+impl From<JsFramebufferInner> for JsValue {
+    fn from(framebuffer: JsFramebufferInner) -> Self {
+        let js_framebuffer: JsFramebuffer = framebuffer.into();
+        js_framebuffer.into()
+    }
+}

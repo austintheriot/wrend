@@ -35,12 +35,10 @@ impl JsProgramLink {
         let string_vec: Vec<JsValue> = self
             .deref()
             .transform_feedback_varyings()
-            .to_owned()
-            .into_iter()
-            .map(JsValue::from)
+            .iter()
+            .map(|s| JsValue::from_str(s))
             .collect();
-        let mut array = Array::new();
-        array.extend(string_vec);
+        let array = Array::from_iter(string_vec);
         array
     }
 

@@ -1,6 +1,7 @@
-use crate::{AttributeLocation, Bridge, Id, IdName};
+use crate::{AttributeLocation, Bridge, Id, IdName, JsAttribute, JsAttributeInner};
 use std::fmt::Debug;
 use std::hash::Hash;
+use wasm_bindgen::JsValue;
 use web_sys::WebGlBuffer;
 
 #[derive(Clone)]
@@ -88,4 +89,11 @@ impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName> PartialEq
 impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName> Eq
     for Attribute<VertexArrayObjectId, BufferId, AttributeId>
 {
+}
+
+impl From<JsAttributeInner> for JsValue {
+    fn from(attribute: JsAttributeInner) -> Self {
+        let js_attribute: JsAttribute = attribute.into();
+        js_attribute.into()
+    }
 }

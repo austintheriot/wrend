@@ -1,12 +1,13 @@
 use crate::{
-    recording_handlers, AnimationCallback, AnimationData, Id, IdName, RecordingData, Renderer,
+    recording_handlers, AnimationCallback, AnimationData, Id, IdName, JsRendererHandle,
+    JsRendererHandleInner, RecordingData, Renderer,
 };
 
 use log::{error, info};
 use std::cell::RefCell;
 use std::rc::Rc;
 use wasm_bindgen::prelude::Closure;
-use wasm_bindgen::JsCast;
+use wasm_bindgen::{JsCast, JsValue};
 
 use web_sys::window;
 
@@ -383,5 +384,12 @@ impl<
         >,
     ) -> Self {
         RendererHandle::new(renderer)
+    }
+}
+
+impl From<JsRendererHandleInner> for JsValue {
+    fn from(js_renderer_handle_inner: JsRendererHandleInner) -> Self {
+        let js_renderer_handle: JsRendererHandle = js_renderer_handle_inner.into();
+        js_renderer_handle.into()
     }
 }
