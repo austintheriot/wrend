@@ -47,6 +47,12 @@ impl JsProgramLink {
     }
 }
 
+impl JsProgramLink {
+    pub fn inner(self) -> JsProgramLinkInner {
+        self.0
+    }
+}
+
 impl From<JsProgramLinkInner> for JsProgramLink {
     fn from(js_program_link_inner: JsProgramLinkInner) -> Self {
         Self(js_program_link_inner)

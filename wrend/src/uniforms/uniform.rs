@@ -1,12 +1,12 @@
 use crate::Id;
 use crate::JsUniform;
+use crate::JsUniformInner;
 use crate::UniformCallback;
 use crate::UniformContext;
 use crate::UniformShouldUpdateCallback;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::hash::Hash;
-use js_sys::Object;
 use wasm_bindgen::JsValue;
 use web_sys::{WebGl2RenderingContext, WebGlProgram, WebGlUniformLocation};
 
@@ -128,9 +128,15 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> PartialEq
 
 impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Eq for Uniform<ProgramId, UniformId, UserCtx> {}
 
-impl From<Uniform<String, String, Object>> for JsValue {
-    fn from(uniform: Uniform<String, String, Object>) -> Self {
+impl From<JsUniformInner> for JsValue {
+    fn from(uniform: JsUniformInner) -> Self {
         let js_uniform: JsUniform = uniform.into();
         js_uniform.into()
+    }
+}
+
+impl From<JsUniform> for JsUniformInner {
+    fn from(js_uniform: JsUniform) -> Self {
+        js_uniform.inner()
     }
 }

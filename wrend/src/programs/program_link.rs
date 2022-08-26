@@ -1,4 +1,4 @@
-use crate::{Id, JsProgramLink, JsProgramLinkBuilder, JsProgramLinkBuilderInner};
+use crate::{Id, JsProgramLink, JsProgramLinkBuilder, JsProgramLinkBuilderInner, JsProgramLinkInner};
 use std::fmt::Debug;
 use std::hash::Hash;
 use thiserror::Error;
@@ -186,5 +186,11 @@ impl From<JsProgramLinkBuilderInner> for JsValue {
     fn from(program_link_builder: JsProgramLinkBuilderInner) -> Self {
         let js_program_link_builder: JsProgramLinkBuilder = program_link_builder.into();
         js_program_link_builder.into()
+    }
+}
+
+impl From<JsProgramLink> for JsProgramLinkInner {
+    fn from(js_program_link: JsProgramLink) -> Self {
+        js_program_link.inner()
     }
 }

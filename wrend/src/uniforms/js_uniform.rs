@@ -36,6 +36,12 @@ impl JsUniform {
     }
 }
 
+impl JsUniform {
+    pub fn inner(self) -> JsUniformInner {
+        self.0
+    }
+}
+
 impl From<JsUniformInner> for JsUniform {
     fn from(js_uniform_inner: JsUniformInner) -> Self {
         Self(js_uniform_inner)

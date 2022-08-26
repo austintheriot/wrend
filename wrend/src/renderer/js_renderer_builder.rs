@@ -1,4 +1,4 @@
-use crate::{JsRenderer, JsTexture, RendererBuilder};
+use crate::{JsAttributeLink, JsProgramLink, JsRenderer, JsTexture, RendererBuilder};
 use js_sys::{Function, Object};
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -26,45 +26,31 @@ pub struct JsRendererBuilder(JsRendererBuilderInner);
 
 #[wasm_bindgen(js_class = RendererBuilder)]
 impl JsRendererBuilder {
-    /// This is the only internal storage available publicly from the builder,
-    /// because it is necessary to use it during the build process for framebuffers.
     pub fn texture(&self, texture_id: String) -> Option<JsTexture> {
         self.deref().texture(&texture_id).map(Into::into)
     }
 
-    /// Save the canvas that will be rendered to and get its associated WebGL2 rendering context
     pub fn set_canvas(mut self, canvas: HtmlCanvasElement) -> Self {
         self.deref_mut().set_canvas(canvas);
         self
     }
 
-    /// Saves a fragment shader source and its corresponding id
     pub fn add_fragment_shader_src(mut self, id: String, fragment_shader_src: String) -> Self {
         self.deref_mut()
             .add_fragment_shader_src(id, fragment_shader_src);
         self
     }
 
-    /// Saves a vertex shader source and its corresponding id
     pub fn add_vertex_shader_src(mut self, id: String, vertex_shader_src: String) -> Self {
         self.deref_mut()
             .add_vertex_shader_src(id, vertex_shader_src);
         self
     }
 
-    /// Saves a link between a vertex shader id and a fragment shader id.
-    ///
-    /// During the Renderer build process, this `program_link` is used to link a new WebGL2 program
-    /// together by associating the vertex shader id and the fragment shader id with their corresponding compiled shaders.
-    // pub fn add_program_link(
-    //     &mut self,
-    //     program_link: impl Into<ProgramLink<String, String, String>>,
-    // ) -> Self {
-    //     let program_link = program_link.into();
-    //     self.program_links.insert(program_link);
-
-    //     self
-    // }
+    pub fn add_program_link(mut self, program_link: JsProgramLink) -> Self {
+        self.deref_mut().add_program_link(program_link);
+        self
+    }
 
     // pub fn add_program_links(
     //     &mut self,
@@ -97,16 +83,11 @@ impl JsRendererBuilder {
         self
     }
 
-    /// Saves a link that will be used to build a uniform at build time.
-    ///
-    /// I.e. once all WebGL shaders are compiled and all programs are linked,
-    /// all uniforms will be found within their associated programs, and will be
-    /// saved with their associated update functions.
     // pub fn add_uniform_link(
     //     &mut self,
-    //     uniform_link: impl Into<UniformLink<String, UniformId, UserCtx>>,
+    //     uniform_link: JsUniformLink,
     // ) -> Self {
-    //     self.uniform_links.insert(uniform_link.into());
+    //     self.deref_mut().add_uniform_link(uniform_link);
 
     //     self
     // }
@@ -149,29 +130,22 @@ impl JsRendererBuilder {
     //     self
     // }
 
-    /// Saves a link that will be used to build a a WebGL attribute at build time.
-    // pub fn add_attribute_link(
-    //     &mut self,
-    //     attribute_link: impl Into<AttributeLink<VertexArrayObjectId, BufferId, AttributeId, UserCtx>>,
-    // ) -> Self {
-    //     let attribute_link = attribute_link.into();
-    //     let attribute_id = attribute_link.attribute_id().to_owned();
-    //     let new_attribute_location = self.attribute_links.len() as u32;
-    //     self.attribute_links.insert(attribute_link);
-    //     self.attribute_locations
-    //         .insert(attribute_id, new_attribute_location);
+    pub fn add_attribute_link(mut self, attribute_link: JsAttributeLink) -> Self {
+        self.deref_mut().add_attribute_link(attribute_link);
+        self
+    }
 
-    //     self
-    // }
-
-    // pub fn add_attribute_links(
-    //     &mut self,
-    //     attribute_links: impl Into<
-    //         Bridge<AttributeLink<VertexArrayObjectId, BufferId, AttributeId, UserCtx>>,
-    //     >,
-    // ) -> Self {
-    //     let attribute_link_bridge: Bridge<_> = attribute_links.into();
-    //     let attribute_links: Vec<_> = attribute_link_bridge.into();
+    // pub fn add_attribute_links(&mut self, attribute_links: Array) -> Self {
+    //     let attribute_links: Vec<JsAttributeLink> = js_sys::try_iter(attribute_links.as_ref())
+    //     .unwrap()
+    //     .expect("add_attribute_links should be passed an array of AttributeLinks")
+    //     .into_iter()
+    //     .map(|el| {
+    //         let js_value = el.unwrap();
+    //         let attribute_link: JsAttributeLink = js_value.unchecked_into();
+    //         attribute_link
+    //     })
+    //     .collect();
 
     //     for attribute_link in attribute_links {
     //         self.add_attribute_link(attribute_link);
