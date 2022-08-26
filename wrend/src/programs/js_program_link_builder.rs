@@ -14,6 +14,7 @@ impl JsProgramLinkBuilder {
         Self(JsProgramLinkBuilderInner::default())
     }
 
+    #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
         Self::default()
     }

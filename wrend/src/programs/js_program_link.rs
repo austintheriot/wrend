@@ -11,6 +11,7 @@ pub struct JsProgramLink(JsProgramLinkInner);
 
 #[wasm_bindgen(js_class = ProgramLink)]
 impl JsProgramLink {
+    #[wasm_bindgen(constructor)]
     pub fn new(program_id: String, vertex_shader_id: String, fragment_shader_id: String) -> Self {
         Self(JsProgramLinkInner::new(
             program_id,

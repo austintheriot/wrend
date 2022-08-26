@@ -13,6 +13,7 @@ pub struct JsBufferLink(JsBufferLinkInner);
 
 #[wasm_bindgen(js_class = BufferLink)]
 impl JsBufferLink {
+    #[wasm_bindgen(constructor)]
     pub fn new(buffer_id: String, buffer_create_callback: Function) -> Self {
         Self(JsBufferLinkInner::new(buffer_id, buffer_create_callback))
     }
