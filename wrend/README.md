@@ -16,6 +16,11 @@ The following use cases should guide the development of this library:
 
 ## Todo
 
+- Implementing JavaScript API
+  - Check that all structs implement `pub fn new()` where appropriate
+  - Check that all structs have `#[wasm_bindgen(constructor)]` where needed
+  - Make sure all public JavaScript API struct docs point / link to their respective Rust counterparts for documentation
+
 - Bug: WebGL2 rendering contexts are not getting discarded when handle is dropped: enable this manually through browser extension (see MDN WebGL best practices article)
 
 - Only set up RecordingData when requested
