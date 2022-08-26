@@ -1,4 +1,4 @@
-use crate::{Id, JsTexture, JsTextureInner};
+use crate::{Id, TextureJs, TextureJsInner};
 use std::fmt::Debug;
 use std::hash::Hash;
 use wasm_bindgen::JsValue;
@@ -50,9 +50,9 @@ impl<TextureId: Id> PartialEq for Texture<TextureId> {
 
 impl<TextureId: Id> Eq for Texture<TextureId> {}
 
-impl From<JsTextureInner> for JsValue {
-    fn from(texture: JsTextureInner) -> Self {
-        let js_texture: JsTexture = texture.into();
+impl From<TextureJsInner> for JsValue {
+    fn from(texture: TextureJsInner) -> Self {
+        let js_texture: TextureJs = texture.into();
         js_texture.into()
     }
 }

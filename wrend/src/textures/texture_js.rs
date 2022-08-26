@@ -4,13 +4,13 @@ use crate::Texture;
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::WebGlTexture;
 
-pub type JsTextureInner = Texture<String>;
+pub type TextureJsInner = Texture<String>;
 
 #[wasm_bindgen(js_name = Texture)]
-pub struct JsTexture(JsTextureInner);
+pub struct TextureJs(TextureJsInner);
 
 #[wasm_bindgen(js_class = Texture)]
-impl JsTexture {
+impl TextureJs {
     pub fn texture_id(&self) -> String {
         self.deref().texture_id().to_owned()
     }
@@ -20,28 +20,28 @@ impl JsTexture {
     }
 }
 
-impl Deref for JsTexture {
-    type Target = JsTextureInner;
+impl Deref for TextureJs {
+    type Target = TextureJsInner;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl DerefMut for JsTexture {
-    fn deref_mut(&mut self) -> &mut JsTextureInner {
+impl DerefMut for TextureJs {
+    fn deref_mut(&mut self) -> &mut TextureJsInner {
         &mut self.0
     }
 }
 
-impl From<JsTextureInner> for JsTexture {
-    fn from(js_texture_inner: JsTextureInner) -> Self {
+impl From<TextureJsInner> for TextureJs {
+    fn from(js_texture_inner: TextureJsInner) -> Self {
         Self(js_texture_inner)
     }
 }
 
-impl From<&JsTextureInner> for JsTexture {
-    fn from(js_texture_inner: &JsTextureInner) -> Self {
+impl From<&TextureJsInner> for TextureJs {
+    fn from(js_texture_inner: &TextureJsInner) -> Self {
         Self(js_texture_inner.to_owned())
     }
 }

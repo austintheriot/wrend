@@ -1,5 +1,5 @@
 use crate::{
-    AttributeCreateCallback, AttributeCreateContext, AttributeLocation, Bridge, Id, IdName, JsAttributeLinkInner, JsAttributeLink,
+    AttributeCreateCallback, AttributeCreateContext, AttributeLocation, Bridge, Id, IdName, AttributeLinkJsInner, AttributeLinkJs,
 };
 use std::fmt::Debug;
 use std::hash::Hash;
@@ -106,8 +106,8 @@ impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: C
 {
 }
 
-impl From<JsAttributeLink> for JsAttributeLinkInner {
-    fn from(js_attribute_link: JsAttributeLink) -> Self {
+impl From<AttributeLinkJs> for AttributeLinkJsInner {
+    fn from(js_attribute_link: AttributeLinkJs) -> Self {
         js_attribute_link.inner()
     }
 }

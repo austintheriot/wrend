@@ -1,4 +1,4 @@
-use crate::{JsAttributeLink, JsProgramLink, JsRenderer, JsTexture, RendererBuilder};
+use crate::{AttributeLinkJs, ProgramLinkJs, RendererJs, TextureJs, RendererBuilder};
 use js_sys::{Function, Object};
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -7,7 +7,7 @@ use web_sys::HtmlCanvasElement;
 /// Wrapper around `Renderer` to make it callable from JavaScript.
 ///
 /// Types are adjusted to only use JavaScript-compatible types and no generics.
-type JsRendererBuilderInner = RendererBuilder<
+type RendererJsBuilderInner = RendererBuilder<
     String,
     String,
     String,
@@ -23,11 +23,11 @@ type JsRendererBuilderInner = RendererBuilder<
 
 /// See [RendererBuilder](crate::RendererBuilder)
 #[wasm_bindgen(js_name = RendererBuilder)]
-pub struct JsRendererBuilder(JsRendererBuilderInner);
+pub struct RendererJsBuilder(RendererJsBuilderInner);
 
 #[wasm_bindgen(js_class = RendererBuilder)]
-impl JsRendererBuilder {
-    pub fn texture(&self, texture_id: String) -> Option<JsTexture> {
+impl RendererJsBuilder {
+    pub fn texture(&self, texture_id: String) -> Option<TextureJs> {
         self.deref().texture(&texture_id).map(Into::into)
     }
 
@@ -48,7 +48,7 @@ impl JsRendererBuilder {
         self
     }
 
-    pub fn add_program_link(mut self, program_link: JsProgramLink) -> Self {
+    pub fn add_program_link(mut self, program_link: ProgramLinkJs) -> Self {
         self.deref_mut().add_program_link(program_link);
         self
     }
@@ -86,7 +86,7 @@ impl JsRendererBuilder {
 
     // pub fn add_uniform_link(
     //     &mut self,
-    //     uniform_link: JsUniformLink,
+    //     uniform_link: UniformJsLink,
     // ) -> Self {
     //     self.deref_mut().add_uniform_link(uniform_link);
 
@@ -131,19 +131,19 @@ impl JsRendererBuilder {
     //     self
     // }
 
-    pub fn add_attribute_link(mut self, attribute_link: JsAttributeLink) -> Self {
+    pub fn add_attribute_link(mut self, attribute_link: AttributeLinkJs) -> Self {
         self.deref_mut().add_attribute_link(attribute_link);
         self
     }
 
     // pub fn add_attribute_links(&mut self, attribute_links: Array) -> Self {
-    //     let attribute_links: Vec<JsAttributeLink> = js_sys::try_iter(attribute_links.as_ref())
+    //     let attribute_links: Vec<AttributeLinkJs> = js_sys::try_iter(attribute_links.as_ref())
     //     .unwrap()
     //     .expect("add_attribute_links should be passed an array of AttributeLinks")
     //     .into_iter()
     //     .map(|el| {
     //         let js_value = el.unwrap();
-    //         let attribute_link: JsAttributeLink = js_value.unchecked_into();
+    //         let attribute_link: AttributeLinkJs = js_value.unchecked_into();
     //         attribute_link
     //     })
     //     .collect();
@@ -265,7 +265,7 @@ impl JsRendererBuilder {
     /// Compiles all vertex shaders and fragment shaders.
     /// Links together any programs that have been specified.
     /// Outputs the final Renderer.
-    pub fn build(self) -> Result<JsRenderer, String> {
+    pub fn build(self) -> Result<RendererJs, String> {
         self.0
             .build()
             .map(Into::into)
@@ -277,16 +277,16 @@ impl JsRendererBuilder {
     }
 }
 
-impl Deref for JsRendererBuilder {
-    type Target = JsRendererBuilderInner;
+impl Deref for RendererJsBuilder {
+    type Target = RendererJsBuilderInner;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl DerefMut for JsRendererBuilder {
-    fn deref_mut(&mut self) -> &mut JsRendererBuilderInner {
+impl DerefMut for RendererJsBuilder {
+    fn deref_mut(&mut self) -> &mut RendererJsBuilderInner {
         &mut self.0
     }
 }

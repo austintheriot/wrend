@@ -3,13 +3,13 @@ use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::WebGlBuffer;
 
-pub type JsBufferInner = Buffer<String>;
+pub type BufferJsInner = Buffer<String>;
 
 #[wasm_bindgen(js_name = Buffer)]
-pub struct JsBuffer(JsBufferInner);
+pub struct BufferJs(BufferJsInner);
 
 #[wasm_bindgen(js_class = Buffer)]
-impl JsBuffer {
+impl BufferJs {
     pub fn buffer_id(&self) -> String {
         self.deref().buffer_id().to_owned()
     }
@@ -19,28 +19,28 @@ impl JsBuffer {
     }
 }
 
-impl Deref for JsBuffer {
-    type Target = JsBufferInner;
+impl Deref for BufferJs {
+    type Target = BufferJsInner;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl DerefMut for JsBuffer {
-    fn deref_mut(&mut self) -> &mut JsBufferInner {
+impl DerefMut for BufferJs {
+    fn deref_mut(&mut self) -> &mut BufferJsInner {
         &mut self.0
     }
 }
 
-impl From<JsBufferInner> for JsBuffer {
-    fn from(js_buffer_inner: JsBufferInner) -> Self {
+impl From<BufferJsInner> for BufferJs {
+    fn from(js_buffer_inner: BufferJsInner) -> Self {
         Self(js_buffer_inner)
     }
 }
 
-impl From<&JsBufferInner> for JsBuffer {
-    fn from(js_buffer_inner: &JsBufferInner) -> Self {
+impl From<&BufferJsInner> for BufferJs {
+    fn from(js_buffer_inner: &BufferJsInner) -> Self {
         Self(js_buffer_inner.to_owned())
     }
 }

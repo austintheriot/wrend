@@ -1,6 +1,6 @@
 use crate::{
-    JsAttribute, JsBuffer, JsFramebuffer, JsRendererBuilder, JsRendererHandle, JsTexture,
-    JsUniform, Renderer,
+    AttributeJs, BufferJs, FramebufferJs, RendererJsBuilder, RendererHandleJs, TextureJs,
+    UniformJs, Renderer,
 };
 use js_sys::{Array, Map, Object};
 use std::ops::{Deref, DerefMut};
@@ -13,7 +13,7 @@ use web_sys::{
 /// Wrapper around `Renderer` to make it callable from JavaScript.
 ///
 /// Types are adjusted to only use JavaScript-compatible types and no generics.
-pub type JsRendererInner = Renderer<
+pub type RendererJsInner = Renderer<
     String,
     String,
     String,
@@ -28,12 +28,12 @@ pub type JsRendererInner = Renderer<
 >;
 
 #[wasm_bindgen(js_name = Renderer)]
-pub struct JsRenderer(JsRendererInner);
+pub struct RendererJs(RendererJsInner);
 
 #[wasm_bindgen(js_class = Renderer)]
-impl JsRenderer {
-    pub fn builder() -> JsRendererBuilder {
-        JsRendererBuilder::default()
+impl RendererJs {
+    pub fn builder() -> RendererJsBuilder {
+        RendererJsBuilder::default()
     }
 
     pub fn canvas(&self) -> HtmlCanvasElement {
@@ -90,7 +90,7 @@ impl JsRenderer {
         map
     }
 
-    pub fn uniform(&self, uniform_id: String) -> Option<JsUniform> {
+    pub fn uniform(&self, uniform_id: String) -> Option<UniformJs> {
         self.deref().uniform(&uniform_id).map(Into::into)
     }
 
@@ -98,14 +98,14 @@ impl JsRenderer {
         let map = Map::new();
 
         for (key, uniform) in self.deref().uniforms().iter() {
-            let js_uniform: JsUniform = uniform.into();
+            let js_uniform: UniformJs = uniform.into();
             map.set(&JsValue::from_str(key), &js_uniform.into());
         }
 
         map
     }
 
-    pub fn buffer(&self, buffer_id: String) -> Option<JsBuffer> {
+    pub fn buffer(&self, buffer_id: String) -> Option<BufferJs> {
         self.deref().buffer(&buffer_id).map(Into::into)
     }
 
@@ -113,14 +113,14 @@ impl JsRenderer {
         let map = Map::new();
 
         for (key, buffer) in self.deref().buffers().iter() {
-            let js_buffer: JsBuffer = buffer.into();
+            let js_buffer: BufferJs = buffer.into();
             map.set(&JsValue::from_str(key), &js_buffer.into());
         }
 
         map
     }
 
-    pub fn attribute(&self, attribute_id: String) -> Option<JsAttribute> {
+    pub fn attribute(&self, attribute_id: String) -> Option<AttributeJs> {
         self.deref().attribute(&attribute_id).map(Into::into)
     }
 
@@ -128,14 +128,14 @@ impl JsRenderer {
         let map = Map::new();
 
         for (key, value) in self.deref().attributes().iter() {
-            let attribute: JsAttribute = value.into();
+            let attribute: AttributeJs = value.into();
             map.set(&JsValue::from_str(key), &attribute.into());
         }
 
         map
     }
 
-    pub fn texture(&self, texture_id: String) -> Option<JsTexture> {
+    pub fn texture(&self, texture_id: String) -> Option<TextureJs> {
         self.deref().texture(&texture_id).map(Into::into)
     }
 
@@ -143,7 +143,7 @@ impl JsRenderer {
         let map = Map::new();
 
         for (key, texture) in self.deref().textures().iter() {
-            let js_texture: JsTexture = texture.into();
+            let js_texture: TextureJs = texture.into();
             map.set(&JsValue::from_str(key), &js_texture.into());
         }
 
@@ -168,7 +168,7 @@ impl JsRenderer {
             .textures_by_id(string_vec)
             .iter()
             .map(|texture| {
-                let js_texture: JsTexture = (*texture).into();
+                let js_texture: TextureJs = (*texture).into();
                 js_texture.into()
             })
             .collect();
@@ -178,7 +178,7 @@ impl JsRenderer {
         array
     }
 
-    pub fn framebuffer(&self, framebuffer_id: String) -> Option<JsFramebuffer> {
+    pub fn framebuffer(&self, framebuffer_id: String) -> Option<FramebufferJs> {
         self.deref().framebuffer(&framebuffer_id).map(Into::into)
     }
 
@@ -223,33 +223,33 @@ impl JsRenderer {
         self.deref().save_image();
     }
 
-    pub fn into_renderer_handle(self) -> JsRendererHandle {
+    pub fn into_renderer_handle(self) -> RendererHandleJs {
         self.into()
     }
 }
 
-impl JsRenderer {
-    pub fn inner(self) -> JsRendererInner {
+impl RendererJs {
+    pub fn inner(self) -> RendererJsInner {
         self.0
     }
 }
 
-impl Deref for JsRenderer {
-    type Target = JsRendererInner;
+impl Deref for RendererJs {
+    type Target = RendererJsInner;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl DerefMut for JsRenderer {
-    fn deref_mut(&mut self) -> &mut JsRendererInner {
+impl DerefMut for RendererJs {
+    fn deref_mut(&mut self) -> &mut RendererJsInner {
         &mut self.0
     }
 }
 
-impl From<JsRendererInner> for JsRenderer {
-    fn from(js_renderer_inner: JsRendererInner) -> Self {
+impl From<RendererJsInner> for RendererJs {
+    fn from(js_renderer_inner: RendererJsInner) -> Self {
         Self(js_renderer_inner)
     }
 }

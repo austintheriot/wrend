@@ -3,13 +3,13 @@ use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::WebGlFramebuffer;
 
-pub type JsFramebufferInner = Framebuffer<String>;
+pub type FramebufferJsInner = Framebuffer<String>;
 
 #[wasm_bindgen(js_name = Framebuffer)]
-pub struct JsFramebuffer(JsFramebufferInner);
+pub struct FramebufferJs(FramebufferJsInner);
 
 #[wasm_bindgen(js_name = Framebuffer)]
-impl JsFramebuffer {
+impl FramebufferJs {
     pub fn framebuffer_id(&self) -> String {
         self.deref().framebuffer_id().to_owned()
     }
@@ -19,28 +19,28 @@ impl JsFramebuffer {
     }
 }
 
-impl From<JsFramebufferInner> for JsFramebuffer {
-    fn from(js_framebuffer_inner: JsFramebufferInner) -> Self {
+impl From<FramebufferJsInner> for FramebufferJs {
+    fn from(js_framebuffer_inner: FramebufferJsInner) -> Self {
         Self(js_framebuffer_inner)
     }
 }
 
-impl From<&JsFramebufferInner> for JsFramebuffer {
-    fn from(js_framebuffer_inner: &JsFramebufferInner) -> Self {
+impl From<&FramebufferJsInner> for FramebufferJs {
+    fn from(js_framebuffer_inner: &FramebufferJsInner) -> Self {
         Self(js_framebuffer_inner.to_owned())
     }
 }
 
-impl Deref for JsFramebuffer {
-    type Target = JsFramebufferInner;
+impl Deref for FramebufferJs {
+    type Target = FramebufferJsInner;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl DerefMut for JsFramebuffer {
-    fn deref_mut(&mut self) -> &mut JsFramebufferInner {
+impl DerefMut for FramebufferJs {
+    fn deref_mut(&mut self) -> &mut FramebufferJsInner {
         &mut self.0
     }
 }

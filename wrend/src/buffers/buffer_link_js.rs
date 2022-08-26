@@ -6,16 +6,16 @@ use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
 use crate::BufferLink;
 
-pub type JsBufferLinkInner = BufferLink<String, Object>;
+pub type BufferLinkJsInner = BufferLink<String, Object>;
 
 #[wasm_bindgen(js_name = BufferLink)]
-pub struct JsBufferLink(JsBufferLinkInner);
+pub struct BufferLinkJs(BufferLinkJsInner);
 
 #[wasm_bindgen(js_class = BufferLink)]
-impl JsBufferLink {
+impl BufferLinkJs {
     #[wasm_bindgen(constructor)]
     pub fn new(buffer_id: String, buffer_create_callback: Function) -> Self {
-        Self(JsBufferLinkInner::new(buffer_id, buffer_create_callback))
+        Self(BufferLinkJsInner::new(buffer_id, buffer_create_callback))
     }
 
     pub fn buffer_id(&self) -> String {
@@ -32,22 +32,22 @@ impl JsBufferLink {
     }
 }
 
-impl JsBufferLink {
-    pub fn inner(self) -> JsBufferLinkInner {
+impl BufferLinkJs {
+    pub fn inner(self) -> BufferLinkJsInner {
         self.0
     }
 }
 
-impl Deref for JsBufferLink {
-    type Target = JsBufferLinkInner;
+impl Deref for BufferLinkJs {
+    type Target = BufferLinkJsInner;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl DerefMut for JsBufferLink {
-    fn deref_mut(&mut self) -> &mut JsBufferLinkInner {
+impl DerefMut for BufferLinkJs {
+    fn deref_mut(&mut self) -> &mut BufferLinkJsInner {
         &mut self.0
     }
 }

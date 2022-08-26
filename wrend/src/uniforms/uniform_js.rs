@@ -2,13 +2,14 @@ use crate::Uniform;
 use js_sys::{Array, Map, Object};
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
-pub type JsUniformInner = Uniform<String, String, Object>;
+
+pub type UniformJsInner = Uniform<String, String, Object>;
 
 #[wasm_bindgen(js_name = Uniform)]
-pub struct JsUniform(JsUniformInner);
+pub struct UniformJs(UniformJsInner);
 
 #[wasm_bindgen(js_class = Uniform)]
-impl JsUniform {
+impl UniformJs {
     pub fn program_ids(&self) -> Array {
         let program_ids: Vec<JsValue> = self
             .deref()
@@ -36,34 +37,34 @@ impl JsUniform {
     }
 }
 
-impl JsUniform {
-    pub fn inner(self) -> JsUniformInner {
+impl UniformJs {
+    pub fn inner(self) -> UniformJsInner {
         self.0
     }
 }
 
-impl From<JsUniformInner> for JsUniform {
-    fn from(js_uniform_inner: JsUniformInner) -> Self {
+impl From<UniformJsInner> for UniformJs {
+    fn from(js_uniform_inner: UniformJsInner) -> Self {
         Self(js_uniform_inner)
     }
 }
 
-impl From<&JsUniformInner> for JsUniform {
-    fn from(js_uniform_inner: &JsUniformInner) -> Self {
+impl From<&UniformJsInner> for UniformJs {
+    fn from(js_uniform_inner: &UniformJsInner) -> Self {
         Self(js_uniform_inner.to_owned())
     }
 }
 
-impl Deref for JsUniform {
-    type Target = JsUniformInner;
+impl Deref for UniformJs {
+    type Target = UniformJsInner;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl DerefMut for JsUniform {
-    fn deref_mut(&mut self) -> &mut JsUniformInner {
+impl DerefMut for UniformJs {
+    fn deref_mut(&mut self) -> &mut UniformJsInner {
         &mut self.0
     }
 }

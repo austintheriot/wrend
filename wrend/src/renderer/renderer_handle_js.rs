@@ -1,9 +1,9 @@
-use crate::{JsRenderer, RendererHandle};
+use crate::{RendererJs, RendererHandle};
 use js_sys::{Function, Object};
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;
 
-pub type JsRendererHandleInner = RendererHandle<
+pub type RendererHandleJsInner = RendererHandle<
     String,
     String,
     String,
@@ -18,10 +18,10 @@ pub type JsRendererHandleInner = RendererHandle<
 >;
 
 #[wasm_bindgen(js_name = RendererHandle)]
-pub struct JsRendererHandle(JsRendererHandleInner);
+pub struct RendererHandleJs(RendererHandleJsInner);
 
 #[wasm_bindgen(js_class = RendererHandle)]
-impl JsRendererHandle {
+impl RendererHandleJs {
     pub fn initialize_recorder(&mut self) {
         self.deref_mut().initialize_recorder();
     }
@@ -59,34 +59,34 @@ impl JsRendererHandle {
     }
 }
 
-impl From<JsRendererHandleInner> for JsRendererHandle {
-    fn from(js_renderer_handle_inner: JsRendererHandleInner) -> Self {
+impl From<RendererHandleJsInner> for RendererHandleJs {
+    fn from(js_renderer_handle_inner: RendererHandleJsInner) -> Self {
         Self(js_renderer_handle_inner)
     }
 }
 
-impl From<&JsRendererHandleInner> for JsRendererHandle {
-    fn from(js_renderer_handle_inner: &JsRendererHandleInner) -> Self {
+impl From<&RendererHandleJsInner> for RendererHandleJs {
+    fn from(js_renderer_handle_inner: &RendererHandleJsInner) -> Self {
         Self(js_renderer_handle_inner.to_owned())
     }
 }
 
-impl From<JsRenderer> for JsRendererHandle {
-    fn from(js_renderer: JsRenderer) -> Self {
+impl From<RendererJs> for RendererHandleJs {
+    fn from(js_renderer: RendererJs) -> Self {
         Self(js_renderer.inner().into())
     }
 }
 
-impl Deref for JsRendererHandle {
-    type Target = JsRendererHandleInner;
+impl Deref for RendererHandleJs {
+    type Target = RendererHandleJsInner;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl DerefMut for JsRendererHandle {
-    fn deref_mut(&mut self) -> &mut JsRendererHandleInner {
+impl DerefMut for RendererHandleJs {
+    fn deref_mut(&mut self) -> &mut RendererHandleJsInner {
         &mut self.0
     }
 }

@@ -2,8 +2,8 @@ use crate::{
     Attribute, AttributeCreateContext, AttributeLink, Bridge, Buffer, BufferLink,
     BuildRendererError, CompileShaderError, CreateAttributeError, CreateBufferError,
     CreateTextureError, CreateTransformFeedbackError, CreateUniformError, CreateVAOError, Either,
-    Framebuffer, FramebufferLink, GetContextCallback, Id, IdDefault, IdName, JsRenderer,
-    JsRendererInner, LinkProgramError, ProgramLink, RenderCallback, RendererBuilderError,
+    Framebuffer, FramebufferLink, GetContextCallback, Id, IdDefault, IdName, RendererJs,
+    RendererJsInner, LinkProgramError, ProgramLink, RenderCallback, RendererBuilderError,
     RendererHandle, SaveContextError, ShaderType, Texture, TextureLink, TransformFeedbackLink,
     Uniform, UniformContext, UniformLink, WebGlContextError,
 };
@@ -360,9 +360,9 @@ impl<
     }
 }
 
-impl From<JsRendererInner> for JsValue {
-    fn from(renderer: JsRendererInner) -> Self {
-        let js_renderer: JsRenderer = renderer.into();
+impl From<RendererJsInner> for JsValue {
+    fn from(renderer: RendererJsInner) -> Self {
+        let js_renderer: RendererJs = renderer.into();
         js_renderer.into()
     }
 }

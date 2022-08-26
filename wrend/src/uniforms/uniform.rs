@@ -1,6 +1,6 @@
 use crate::Id;
-use crate::JsUniform;
-use crate::JsUniformInner;
+use crate::UniformJs;
+use crate::UniformJsInner;
 use crate::UniformCallback;
 use crate::UniformContext;
 use crate::UniformShouldUpdateCallback;
@@ -128,15 +128,15 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> PartialEq
 
 impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Eq for Uniform<ProgramId, UniformId, UserCtx> {}
 
-impl From<JsUniformInner> for JsValue {
-    fn from(uniform: JsUniformInner) -> Self {
-        let js_uniform: JsUniform = uniform.into();
+impl From<UniformJsInner> for JsValue {
+    fn from(uniform: UniformJsInner) -> Self {
+        let js_uniform: UniformJs = uniform.into();
         js_uniform.into()
     }
 }
 
-impl From<JsUniform> for JsUniformInner {
-    fn from(js_uniform: JsUniform) -> Self {
+impl From<UniformJs> for UniformJsInner {
+    fn from(js_uniform: UniformJs) -> Self {
         js_uniform.inner()
     }
 }

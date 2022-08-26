@@ -1,17 +1,17 @@
-use crate::{JsProgramLink, ProgramLinkBuilder};
+use crate::{ProgramLinkJs, ProgramLinkBuilder};
 use js_sys::Array;
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
-pub type JsProgramLinkBuilderInner = ProgramLinkBuilder<String, String, String>;
+pub type ProgramLinkBuilderJsInner = ProgramLinkBuilder<String, String, String>;
 
 #[wasm_bindgen(js_name = ProgramLinkBuilder)]
-pub struct JsProgramLinkBuilder(JsProgramLinkBuilderInner);
+pub struct ProgramLinkJsBuilder(ProgramLinkBuilderJsInner);
 
 #[wasm_bindgen(js_class = ProgramLinkBuilder)]
-impl JsProgramLinkBuilder {
+impl ProgramLinkJsBuilder {
     pub fn default() -> Self {
-        Self(JsProgramLinkBuilderInner::default())
+        Self(ProgramLinkBuilderJsInner::default())
     }
 
     #[wasm_bindgen(constructor)]
@@ -50,7 +50,7 @@ impl JsProgramLinkBuilder {
         self
     }
 
-    pub fn build(self) -> Result<JsProgramLink, String> {
+    pub fn build(self) -> Result<ProgramLinkJs, String> {
         self.0
             .build()
             .map(Into::into)
@@ -58,21 +58,21 @@ impl JsProgramLinkBuilder {
     }
 }
 
-impl Deref for JsProgramLinkBuilder {
-    type Target = JsProgramLinkBuilderInner;
+impl Deref for ProgramLinkJsBuilder {
+    type Target = ProgramLinkBuilderJsInner;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl DerefMut for JsProgramLinkBuilder {
-    fn deref_mut(&mut self) -> &mut JsProgramLinkBuilderInner {
+impl DerefMut for ProgramLinkJsBuilder {
+    fn deref_mut(&mut self) -> &mut ProgramLinkBuilderJsInner {
         &mut self.0
     }
 }
 
-impl From<ProgramLinkBuilder<String, String, String>> for JsProgramLinkBuilder {
+impl From<ProgramLinkBuilder<String, String, String>> for ProgramLinkJsBuilder {
     fn from(program_link: ProgramLinkBuilder<String, String, String>) -> Self {
         Self(program_link)
     }

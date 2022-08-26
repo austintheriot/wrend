@@ -5,13 +5,13 @@ use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
 use crate::AttributeLink;
 
-pub type JsAttributeLinkInner = AttributeLink<String, String, String, Object>;
+pub type AttributeLinkJsInner = AttributeLink<String, String, String, Object>;
 
 #[wasm_bindgen(js_name = AttributeLink)]
-pub struct JsAttributeLink(JsAttributeLinkInner);
+pub struct AttributeLinkJs(AttributeLinkJsInner);
 
 #[wasm_bindgen(js_class = AttributeLink)]
-impl JsAttributeLink {
+impl AttributeLinkJs {
     pub fn vao_ids(&self) -> Array {
         let string_vec: Vec<JsValue> = self
             .deref()
@@ -34,22 +34,22 @@ impl JsAttributeLink {
     }
 }
 
-impl JsAttributeLink {
-    pub fn inner(self) -> JsAttributeLinkInner {
+impl AttributeLinkJs {
+    pub fn inner(self) -> AttributeLinkJsInner {
         self.0
     }
 }
 
-impl Deref for JsAttributeLink {
-    type Target = JsAttributeLinkInner;
+impl Deref for AttributeLinkJs {
+    type Target = AttributeLinkJsInner;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl DerefMut for JsAttributeLink {
-    fn deref_mut(&mut self) -> &mut JsAttributeLinkInner {
+impl DerefMut for AttributeLinkJs {
+    fn deref_mut(&mut self) -> &mut AttributeLinkJsInner {
         &mut self.0
     }
 }

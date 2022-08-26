@@ -1,6 +1,6 @@
 use crate::{
-    recording_handlers, AnimationCallback, AnimationData, Id, IdName, JsRendererHandle,
-    JsRendererHandleInner, RecordingData, Renderer,
+    recording_handlers, AnimationCallback, AnimationData, Id, IdName, RendererHandleJs,
+    RendererHandleJsInner, RecordingData, Renderer,
 };
 
 use log::{error, info};
@@ -387,9 +387,9 @@ impl<
     }
 }
 
-impl From<JsRendererHandleInner> for JsValue {
-    fn from(js_renderer_handle_inner: JsRendererHandleInner) -> Self {
-        let js_renderer_handle: JsRendererHandle = js_renderer_handle_inner.into();
+impl From<RendererHandleJsInner> for JsValue {
+    fn from(js_renderer_handle_inner: RendererHandleJsInner) -> Self {
+        let js_renderer_handle: RendererHandleJs = js_renderer_handle_inner.into();
         js_renderer_handle.into()
     }
 }

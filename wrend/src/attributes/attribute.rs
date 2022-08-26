@@ -1,4 +1,4 @@
-use crate::{AttributeLocation, Bridge, Id, IdName, JsAttribute, JsAttributeInner};
+use crate::{AttributeLocation, Bridge, Id, IdName, AttributeJs, AttributeJsInner};
 use std::fmt::Debug;
 use std::hash::Hash;
 use wasm_bindgen::JsValue;
@@ -91,9 +91,9 @@ impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName> Eq
 {
 }
 
-impl From<JsAttributeInner> for JsValue {
-    fn from(attribute: JsAttributeInner) -> Self {
-        let js_attribute: JsAttribute = attribute.into();
+impl From<AttributeJsInner> for JsValue {
+    fn from(attribute: AttributeJsInner) -> Self {
+        let js_attribute: AttributeJs = attribute.into();
         js_attribute.into()
     }
 }

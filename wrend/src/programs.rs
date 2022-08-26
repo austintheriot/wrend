@@ -1,7 +1,7 @@
-mod js_program_link;
-mod js_program_link_builder;
+mod program_link_js;
+mod program_link_builder_js;
 mod program_link;
 
-pub use js_program_link::*;
-pub use js_program_link_builder::*;
+pub use program_link_js::*;
+pub use program_link_builder_js::*;
 pub use program_link::*;

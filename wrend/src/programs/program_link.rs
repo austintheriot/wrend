@@ -1,4 +1,4 @@
-use crate::{Id, JsProgramLink, JsProgramLinkBuilder, JsProgramLinkBuilderInner, JsProgramLinkInner};
+use crate::{Id, ProgramLinkJs, ProgramLinkJsBuilder, ProgramLinkBuilderJsInner, ProgramLinkJsInner};
 use std::fmt::Debug;
 use std::hash::Hash;
 use thiserror::Error;
@@ -78,7 +78,7 @@ impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id> Eq
 
 impl From<ProgramLink<String, String, String>> for JsValue {
     fn from(program_link: ProgramLink<String, String, String>) -> Self {
-        let js_program_link: JsProgramLink = program_link.into();
+        let js_program_link: ProgramLinkJs = program_link.into();
         js_program_link.into()
     }
 }
@@ -182,15 +182,15 @@ impl<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id> PartialEq
     }
 }
 
-impl From<JsProgramLinkBuilderInner> for JsValue {
-    fn from(program_link_builder: JsProgramLinkBuilderInner) -> Self {
-        let js_program_link_builder: JsProgramLinkBuilder = program_link_builder.into();
+impl From<ProgramLinkBuilderJsInner> for JsValue {
+    fn from(program_link_builder: ProgramLinkBuilderJsInner) -> Self {
+        let js_program_link_builder: ProgramLinkJsBuilder = program_link_builder.into();
         js_program_link_builder.into()
     }
 }
 
-impl From<JsProgramLink> for JsProgramLinkInner {
-    fn from(js_program_link: JsProgramLink) -> Self {
+impl From<ProgramLinkJs> for ProgramLinkJsInner {
+    fn from(js_program_link: ProgramLinkJs) -> Self {
         js_program_link.inner()
     }
 }
