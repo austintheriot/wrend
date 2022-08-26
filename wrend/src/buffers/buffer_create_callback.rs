@@ -1,14 +1,21 @@
-use crate::{BufferCreateContext, CallbackWithContext};
+use crate::{BufferCreateContext, CallbackWithContext, Either};
+use js_sys::{Function, Object};
 use std::{ops::Deref, rc::Rc};
 use web_sys::WebGlBuffer;
 
 #[derive(Clone, Hash, PartialEq, Eq, PartialOrd, Ord, Debug)]
 pub struct BufferCreateCallback<UserCtx>(
-    CallbackWithContext<dyn Fn(&BufferCreateContext<UserCtx>) -> WebGlBuffer>,
+    Either<
+        CallbackWithContext<dyn Fn(&BufferCreateContext<UserCtx>) -> WebGlBuffer>,
+        CallbackWithContext<Function>,
+    >,
 );
 
 impl<UserCtx> Deref for BufferCreateCallback<UserCtx> {
-    type Target = CallbackWithContext<dyn Fn(&BufferCreateContext<UserCtx>) -> WebGlBuffer>;
+    type Target = Either<
+        CallbackWithContext<dyn Fn(&BufferCreateContext<UserCtx>) -> WebGlBuffer>,
+        CallbackWithContext<Function>,
+    >;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -20,9 +27,9 @@ impl<UserCtx, F: Fn(&BufferCreateContext<UserCtx>) -> WebGlBuffer + 'static> Fro
     for BufferCreateCallback<UserCtx>
 {
     fn from(callback: F) -> Self {
-        Self(CallbackWithContext::from(
+        Self(Either::new_a(CallbackWithContext::from(
             Rc::new(callback) as Rc<dyn Fn(&BufferCreateContext<UserCtx>) -> WebGlBuffer>
-        ))
+        )))
     }
 }
 
@@ -30,8 +37,14 @@ impl<UserCtx, F: Fn(&BufferCreateContext<UserCtx>) -> WebGlBuffer + 'static> Fro
     for BufferCreateCallback<UserCtx>
 {
     fn from(callback: Rc<F>) -> Self {
-        Self(CallbackWithContext::from(
+        Self(Either::new_a(CallbackWithContext::from(
             callback as Rc<dyn Fn(&BufferCreateContext<UserCtx>) -> WebGlBuffer>,
-        ))
+        )))
+    }
+}
+
+impl From<Function> for BufferCreateCallback<Object> {
+    fn from(callback: Function) -> Self {
+        Self(Either::new_b(CallbackWithContext::new(callback)))
     }
 }

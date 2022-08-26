@@ -3,6 +3,7 @@ use crate::{BufferCreateCallback, Id};
 use super::buffer_create_context::BufferCreateContext;
 use std::fmt::Debug;
 use std::hash::Hash;
+use wasm_bindgen::{JsValue, JsCast};
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
 #[derive(Clone)]
@@ -33,7 +34,17 @@ impl<BufferId: Id, UserCtx: Clone> BufferLink<BufferId, UserCtx> {
         user_ctx: Option<UserCtx>,
     ) -> WebGlBuffer {
         let framebuffer_create_context = BufferCreateContext::new(gl, now, user_ctx);
-        (self.buffer_create_callback)(&framebuffer_create_context)
+        match &*self.buffer_create_callback {
+            crate::Either::A(rust_callback) => {
+                (rust_callback)(&framebuffer_create_context)
+            },
+            crate::Either::B(js_callback) => {
+                let this = JsValue::NULL;
+                let result = js_callback.call0(&this).expect("Should be able to call buffer create callback");
+                let webgl_buffer: WebGlBuffer = result.dyn_into().expect("Type returned from buffer create callback should be a WebGlBuffer");
+                webgl_buffer
+            }
+        }
     }
 }
 

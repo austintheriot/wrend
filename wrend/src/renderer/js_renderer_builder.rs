@@ -21,6 +21,7 @@ type JsRendererBuilderInner = RendererBuilder<
     Object,
 >;
 
+/// See [RendererBuilder](crate::RendererBuilder)
 #[wasm_bindgen(js_name = RendererBuilder)]
 pub struct JsRendererBuilder(JsRendererBuilderInner);
 
