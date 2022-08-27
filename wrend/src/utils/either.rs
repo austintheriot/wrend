@@ -1,3 +1,10 @@
+use std::marker::PhantomData;
+
+use js_sys::Function;
+use wasm_bindgen::{JsCast, JsValue};
+
+use crate::CallbackWithContext;
+
 #[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Either<L, R> {
     A(L),
@@ -52,6 +59,50 @@ impl<L, R> Either<L, R> {
         match self {
             Either::A(_) => panic!("called `Either::unwrap_b()` on an `A` value"),
             Either::B(b) => b,
+        }
+    }
+}
+
+
+impl<A, R: JsCast> Either<CallbackWithContext<dyn Fn(A) -> R>, CallbackWithContext<Function>> {
+    /// See implementation of `call` for [Either](crate::Either)
+    /// 
+    /// This is the same function, except with the ability to return a particular value from the callback
+    pub fn call_with_return(&self, a: A) -> R {
+        match &*self {
+            Either::A(rust_callback) => (rust_callback)(a),
+            Either::B(js_callback) => {
+                let result = js_callback
+                    .call(&JsValue::NULL)
+                    .expect("JavaScript callback produced an error when called");
+                let return_value: R = result.dyn_into().expect(&format!(
+                    "JsValue could not be converted to the expected type"
+                ));
+                return_value
+            }
+        }
+    }
+}
+
+
+impl<A> Either<CallbackWithContext<dyn Fn(A)>, CallbackWithContext<Function>> {
+    /// Makes an `Either` that is holding a Rust callback or a JavaScript callback callable as a single unit,
+    /// rather than having to match on `Either` every single time to call it.
+    ///
+    /// It is expected by convention that the Rust callback will take the `A` variant and the JavaScript
+    /// callback with take the `B` variant.
+    ///
+    /// @todo: If I'm feeling clever some time: find a way to make this straightforward function call
+    /// for the callee, potentially by implementing Deref, by implementing Fn() (experimentally), or by
+    /// returning dyn Fn closure that returns the unified return type
+    pub fn call(&self, a: A) {
+        match &*self {
+            Either::A(rust_callback) => (rust_callback)(a),
+            Either::B(js_callback) => {
+                js_callback
+                    .call(&JsValue::NULL)
+                    .expect("JavaScript callback produced an error when called");
+            }
         }
     }
 }

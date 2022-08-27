@@ -1,6 +1,7 @@
 use crate::{FramebufferCreateCallback, FramebufferCreateContext, Id, IdDefault};
 use std::fmt::Debug;
 use std::hash::Hash;
+use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{WebGl2RenderingContext, WebGlFramebuffer, WebGlTexture};
 
 #[derive(Clone)]
@@ -41,7 +42,7 @@ impl<FramebufferId: Id, UserCtx: Clone, TextureId: Id>
         user_ctx: Option<UserCtx>,
     ) -> WebGlFramebuffer {
         let framebuffer_create_context = FramebufferCreateContext::new(gl, now, texture, user_ctx);
-        (self.framebuffer_create_callback)(&framebuffer_create_context)
+        (self.framebuffer_create_callback).call_with_return(&framebuffer_create_context)
     }
 }
 

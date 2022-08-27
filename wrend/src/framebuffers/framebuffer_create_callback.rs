@@ -1,10 +1,14 @@
-use crate::{CallbackWithContext, FramebufferCreateContext};
+use crate::{CallbackWithContext, Either, FramebufferCreateContext};
+use js_sys::{Function, Object};
 use std::{ops::Deref, rc::Rc};
 use web_sys::WebGlFramebuffer;
 
 #[derive(Clone, Hash, Eq, PartialOrd, Ord, Debug)]
 pub struct FramebufferCreateCallback<UserCtx: Clone + 'static>(
-    CallbackWithContext<dyn Fn(&FramebufferCreateContext<UserCtx>) -> WebGlFramebuffer>,
+    Either<
+        CallbackWithContext<dyn Fn(&FramebufferCreateContext<UserCtx>) -> WebGlFramebuffer>,
+        CallbackWithContext<Function>,
+    >,
 );
 
 impl<UserCtx: Clone> PartialEq for FramebufferCreateCallback<UserCtx> {
@@ -14,8 +18,10 @@ impl<UserCtx: Clone> PartialEq for FramebufferCreateCallback<UserCtx> {
 }
 
 impl<UserCtx: Clone + 'static> Deref for FramebufferCreateCallback<UserCtx> {
-    type Target =
-        CallbackWithContext<dyn Fn(&FramebufferCreateContext<UserCtx>) -> WebGlFramebuffer>;
+    type Target = Either<
+        CallbackWithContext<dyn Fn(&FramebufferCreateContext<UserCtx>) -> WebGlFramebuffer>,
+        CallbackWithContext<Function>,
+    >;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -26,10 +32,10 @@ impl<UserCtx: Clone, F: Fn(&FramebufferCreateContext<UserCtx>) -> WebGlFramebuff
     From<F> for FramebufferCreateCallback<UserCtx>
 {
     fn from(callback: F) -> Self {
-        Self(CallbackWithContext::from(Rc::new(callback)
+        Self(Either::new_a(CallbackWithContext::from(Rc::new(callback)
             as Rc<
                 dyn Fn(&FramebufferCreateContext<UserCtx>) -> WebGlFramebuffer,
-            >))
+            >)))
     }
 }
 
@@ -37,8 +43,14 @@ impl<UserCtx: Clone, F: Fn(&FramebufferCreateContext<UserCtx>) -> WebGlFramebuff
     From<Rc<F>> for FramebufferCreateCallback<UserCtx>
 {
     fn from(callback: Rc<F>) -> Self {
-        Self(CallbackWithContext::from(
+        Self(Either::new_a(CallbackWithContext::from(
             callback as Rc<dyn Fn(&FramebufferCreateContext<UserCtx>) -> WebGlFramebuffer>,
-        ))
+        )))
+    }
+}
+
+impl From<Function> for FramebufferCreateCallback<Object> {
+    fn from(callback: Function) -> Self {
+        Self(Either::new_b(CallbackWithContext::from(callback)))
     }
 }

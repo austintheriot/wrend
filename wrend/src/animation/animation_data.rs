@@ -1,8 +1,4 @@
-use std::ops::Deref;
-
-use wasm_bindgen::JsValue;
-
-use crate::{AnimationCallback, Either, Id, IdDefault, IdName, Renderer};
+use crate::{AnimationCallback, Id, IdDefault, IdName, Renderer};
 
 #[derive(Clone, Debug)]
 pub struct AnimationData<
@@ -116,15 +112,7 @@ impl<
         >,
     ) {
         if let Some(animation_callback) = &self.animation_callback {
-            match animation_callback.deref() {
-                Either::A(rust_callback) => (rust_callback)(renderer),
-                Either::B(js_callback) => {
-                    let this = JsValue::NULL;
-                    js_callback
-                        .call0(&this)
-                        .expect("Should be able to call animation callback");
-                }
-            }
+            animation_callback.call(renderer);
         }
     }
 
