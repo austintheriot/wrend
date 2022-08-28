@@ -1,12 +1,16 @@
-use crate::{CallbackWithContext, TextureCreateContext};
+use crate::{CallbackWithContext, Either, TextureCreateContext};
+use js_sys::Function;
 use std::fmt::Debug;
 use std::{ops::Deref, rc::Rc};
 use web_sys::WebGlTexture;
 
-#[derive(Clone, Hash, Eq, PartialOrd, Ord)]
-pub struct TextureCreateCallback<UserCtx>(
+type TextureCreateCallbackInner<UserCtx> = Either<
     CallbackWithContext<dyn Fn(&TextureCreateContext<UserCtx>) -> WebGlTexture>,
-);
+    CallbackWithContext<Function>,
+>;
+
+#[derive(Clone, Hash, Eq, PartialOrd, Ord)]
+pub struct TextureCreateCallback<UserCtx>(TextureCreateCallbackInner<UserCtx>);
 
 impl<UserCtx> PartialEq for TextureCreateCallback<UserCtx> {
     fn eq(&self, other: &Self) -> bool {
@@ -15,7 +19,7 @@ impl<UserCtx> PartialEq for TextureCreateCallback<UserCtx> {
 }
 
 impl<UserCtx> Deref for TextureCreateCallback<UserCtx> {
-    type Target = CallbackWithContext<dyn Fn(&TextureCreateContext<UserCtx>) -> WebGlTexture>;
+    type Target = TextureCreateCallbackInner<UserCtx>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -34,10 +38,10 @@ impl<UserCtx, F: Fn(&TextureCreateContext<UserCtx>) -> WebGlTexture + 'static> F
     for TextureCreateCallback<UserCtx>
 {
     fn from(callback: F) -> Self {
-        Self(CallbackWithContext::from(Rc::new(callback)
+        Self(Either::new_a(CallbackWithContext::from(Rc::new(callback)
             as Rc<
                 dyn Fn(&TextureCreateContext<UserCtx>) -> WebGlTexture,
-            >))
+            >)))
     }
 }
 
@@ -45,8 +49,14 @@ impl<UserCtx, F: Fn(&TextureCreateContext<UserCtx>) -> WebGlTexture + 'static> F
     for TextureCreateCallback<UserCtx>
 {
     fn from(callback: Rc<F>) -> Self {
-        Self(CallbackWithContext::from(
+        Self(Either::new_a(CallbackWithContext::from(
             callback as Rc<dyn Fn(&TextureCreateContext<UserCtx>) -> WebGlTexture>,
-        ))
+        )))
+    }
+}
+
+impl<UserCtx> From<Function> for TextureCreateCallback<UserCtx> {
+    fn from(callback: Function) -> Self {
+        Self(Either::new_b(CallbackWithContext::from(callback)))
     }
 }

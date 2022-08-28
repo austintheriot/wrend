@@ -1,7 +1,8 @@
 use crate::{
-    utils, AttributeLinkJs, ProgramLink, ProgramLinkJs, RendererBuilder, RendererJs, TextureJs,
+    AttributeLinkJs, BufferLinkJs, FramebufferLinkJs, ProgramLinkJs, RendererBuilder, RendererJs,
+    TextureJs, TextureLinkJs, TransformFeedbackLinkJs, UniformLinkJs,
 };
-use js_sys::{Array, Function, Object};
+use js_sys::{Function, Object};
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::HtmlCanvasElement;
@@ -55,213 +56,62 @@ impl RendererJsBuilder {
         self
     }
 
-    pub fn add_program_links(mut self, program_links: Array) -> Self {
-        let program_links: Vec<ProgramLink<String, String, String>> =
-            utils::js_array_to_vec::<ProgramLinkJs>(program_links)
-                .into_iter()
-                .map(From::from)
-                .collect();
-        self.deref_mut().add_program_links(program_links);
-        self
-    }
-
-    /// Save a callback that will be called each time it is time to render a new frame
     pub fn set_render_callback(mut self, render_callback: Function) -> Self {
         self.deref_mut().set_render_callback(render_callback);
-
         self
     }
 
-    /// Save as arbitrary user context that can be accessed from within the render callback
-    ///
-    /// This can include stateful data and anything else that might be necessary to access
-    /// while performing a render.
     pub fn set_user_ctx(mut self, ctx: Object) -> Self {
         self.deref_mut().set_user_ctx(ctx);
         self
     }
 
-    // pub fn add_uniform_link(
-    //     &mut self,
-    //     uniform_link: UniformJsLink,
-    // ) -> Self {
-    //     self.deref_mut().add_uniform_link(uniform_link);
+    pub fn add_uniform_link(mut self, uniform_link: UniformLinkJs) -> Self {
+        self.deref_mut().add_uniform_link(uniform_link);
 
-    //     self
-    // }
+        self
+    }
 
-    // pub fn add_uniform_links(
-    //     &mut self,
-    //     uniform_links: impl Into<Bridge<UniformLink<String, UniformId, UserCtx>>>,
-    // ) -> Self {
-    //     let uniform_link_bridge: Bridge<_> = uniform_links.into();
-    //     let uniform_links: Vec<_> = uniform_link_bridge.into();
-
-    //     for uniform_link in uniform_links {
-    //         self.add_uniform_link(uniform_link);
-    //     }
-
-    //     self
-    // }
-
-    /// Saves a link that will be used to build a WebGL buffer at build time.
-    // pub fn add_buffer_link(
-    //     &mut self,
-    //     buffer_link: impl Into<BufferLink<BufferId, UserCtx>>,
-    // ) -> Self {
-    //     self.buffer_links.insert(buffer_link.into());
-
-    //     self
-    // }
-
-    // pub fn add_buffer_links(
-    //     &mut self,
-    //     buffer_links: impl Into<Bridge<BufferLink<BufferId, UserCtx>>>,
-    // ) -> Self {
-    //     let buffer_link_bridge: Bridge<_> = buffer_links.into();
-    //     let buffer_links: Vec<_> = buffer_link_bridge.into();
-
-    //     for buffer_link in buffer_links {
-    //         self.add_buffer_link(buffer_link);
-    //     }
-
-    //     self
-    // }
+    pub fn add_buffer_link(mut self, buffer_link: BufferLinkJs) -> Self {
+        self.deref_mut().add_buffer_link(buffer_link);
+        self
+    }
 
     pub fn add_attribute_link(mut self, attribute_link: AttributeLinkJs) -> Self {
         self.deref_mut().add_attribute_link(attribute_link);
         self
     }
 
-    // pub fn add_attribute_links(&mut self, attribute_links: Array) -> Self {
-    //     let attribute_links: Vec<AttributeLinkJs> = js_sys::try_iter(attribute_links.as_ref())
-    //     .unwrap()
-    //     .expect("add_attribute_links should be passed an array of AttributeLinks")
-    //     .into_iter()
-    //     .map(|el| {
-    //         let js_value = el.unwrap();
-    //         let attribute_link: AttributeLinkJs = js_value.unchecked_into();
-    //         attribute_link
-    //     })
-    //     .collect();
+    pub fn add_texture_link(mut self, texture_link: TextureLinkJs) -> Self {
+        self.deref_mut().add_texture_link(texture_link);
+        self
+    }
 
-    //     for attribute_link in attribute_links {
-    //         self.add_attribute_link(attribute_link);
-    //     }
+    pub fn add_framebuffer_link(mut self, framebuffer_link: FramebufferLinkJs) -> Self {
+        self.deref_mut().add_framebuffer_link(framebuffer_link);
+        self
+    }
 
-    //     self
-    // }
+    pub fn add_transform_feedback_link(
+        mut self,
+        transform_feedback_link: TransformFeedbackLinkJs,
+    ) -> Self {
+        self.deref_mut()
+            .add_transform_feedback_link(transform_feedback_link);
+        self
+    }
 
-    /// Saves a link that will be used to build a buffer/attribute pair at build time.
-    // pub fn add_texture_link(
-    //     &mut self,
-    //     texture_link: impl Into<TextureLink<String, UserCtx>>,
-    // ) -> Self {
-    //     self.texture_links.insert(texture_link.into());
+    pub fn add_vao_link(mut self, vertex_array_object_id: String) -> Self {
+        self.deref_mut().add_vao_link(vertex_array_object_id);
+        self
+    }
 
-    //     self
-    // }
+    pub fn set_get_context_callback(mut self, get_context_callback: Function) -> Self {
+        self.deref_mut()
+            .set_get_context_callback(get_context_callback);
+        self
+    }
 
-    // pub fn add_texture_links(
-    //     &mut self,
-    //     texture_links: impl Into<Bridge<TextureLink<String, UserCtx>>>,
-    // ) -> Self {
-    //     let texture_link_bridge: Bridge<_> = texture_links.into();
-    //     let texture_links: Vec<_> = texture_link_bridge.into();
-
-    //     for texture_link in texture_links {
-    //         self.add_texture_link(texture_link);
-    //     }
-
-    //     self
-    // }
-
-    /// Saves a link that will be used to build a framebuffer at build time
-    // pub fn add_framebuffer_link(
-    //     &mut self,
-    //     framebuffer_link: impl Into<FramebufferLink<FramebufferId, UserCtx, String>>,
-    // ) -> Self {
-    //     self.framebuffer_links.insert(framebuffer_link.into());
-
-    //     self
-    // }
-
-    // pub fn add_framebuffer_links(
-    //     &mut self,
-    //     framebuffer_links: impl Into<Bridge<FramebufferLink<FramebufferId, UserCtx, String>>>,
-    // ) -> Self {
-    //     let framebuffer_link_bridge: Bridge<_> = framebuffer_links.into();
-    //     let framebuffer_links: Vec<_> = framebuffer_link_bridge.into();
-
-    //     for framebuffer_link in framebuffer_links {
-    //         self.add_framebuffer_link(framebuffer_link);
-    //     }
-
-    //     self
-    // }
-
-    /// Saves a link that will be used to build a transformFeedback at build time
-    // pub fn add_transform_feedback_link(
-    //     &mut self,
-    //     transform_feedback_link: impl Into<TransformFeedbackLink<TransformFeedbackId>>,
-    // ) -> Self {
-    //     self.transform_feedback_links
-    //         .insert(transform_feedback_link.into());
-
-    //     self
-    // }
-
-    // pub fn add_transform_feedback_links(
-    //     &mut self,
-    //     transform_feedback_links: impl Into<Bridge<TransformFeedbackLink<TransformFeedbackId>>>,
-    // ) -> Self {
-    //     let transform_feedback_link_bridge: Bridge<_> = transform_feedback_links.into();
-    //     let transform_feedback_links: Vec<_> = transform_feedback_link_bridge.into();
-
-    //     for transform_feedback_link in transform_feedback_links {
-    //         self.add_transform_feedback_link(transform_feedback_link);
-    //     }
-
-    //     self
-    // }
-
-    /// Saves a link that will be used to build a VAO at build time
-    // pub fn add_vao_link(
-    //     &mut self,
-    //     vertex_array_object_id: impl Into<VertexArrayObjectId>,
-    // ) -> Self {
-    //     self.vertex_array_object_links
-    //         .insert(vertex_array_object_id.into());
-
-    //     self
-    // }
-
-    // pub fn add_vao_links(
-    //     &mut self,
-    //     vao_links: impl Into<Bridge<VertexArrayObjectId>>,
-    // ) -> Self {
-    //     let vao_link_bridge: Bridge<_> = vao_links.into();
-    //     let vao_links: Vec<_> = vao_link_bridge.into();
-    //     let vao_links: Vec<VertexArrayObjectId> = vao_links.into_iter().collect();
-
-    //     for vao_link in vao_links {
-    //         self.add_vao_link(vao_link);
-    //     }
-
-    //     self
-    // }
-
-    // pub fn set_get_context_callback(
-    //     &mut self,
-    //     get_context_callback: impl Into<GetContextCallback>,
-    // ) -> Self {
-    //     self.get_context_callback = get_context_callback.into();
-    //     self
-    // }
-
-    /// Compiles all vertex shaders and fragment shaders.
-    /// Links together any programs that have been specified.
-    /// Outputs the final Renderer.
     pub fn build(self) -> Result<RendererJs, String> {
         self.0
             .build()

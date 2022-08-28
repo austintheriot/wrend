@@ -32,7 +32,8 @@ impl<TextureId: Id, UserCtx> TextureLink<TextureId, UserCtx> {
         user_ctx: Option<UserCtx>,
     ) -> WebGlTexture {
         let texture_create_context = TextureCreateContext::new(gl, now, user_ctx);
-        (self.create_texture_callback)(&texture_create_context)
+        self.create_texture_callback
+            .call_with_return(&texture_create_context)
     }
 }
 

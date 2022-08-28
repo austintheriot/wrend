@@ -2,12 +2,10 @@ use std::ops::{Deref, DerefMut};
 
 use crate::{utils, ProgramLink, ProgramLinkJsBuilder};
 use js_sys::Array;
-use serde::Deserialize;
-use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
+use wasm_bindgen::prelude::wasm_bindgen;
 
 pub type ProgramLinkJsInner = ProgramLink<String, String, String>;
 
-#[derive(Deserialize)]
 #[wasm_bindgen(js_name = ProgramLink)]
 pub struct ProgramLinkJs(ProgramLinkJsInner);
 
@@ -66,13 +64,5 @@ impl Deref for ProgramLinkJs {
 impl DerefMut for ProgramLinkJs {
     fn deref_mut(&mut self) -> &mut ProgramLinkJsInner {
         &mut self.0
-    }
-}
-
-impl From<JsValue> for ProgramLinkJs {
-    fn from(js_value: JsValue) -> Self {
-        js_value
-            .into_serde()
-            .expect("Could not convert `JsValue` into `ProgramLinkJs`")
     }
 }

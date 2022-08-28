@@ -65,3 +65,9 @@ impl DerefMut for FramebufferLinkJs {
         &mut self.0
     }
 }
+
+impl From<FramebufferLinkJs> for FramebufferLinkJsInner {
+    fn from(framebuffer_link_js: FramebufferLinkJs) -> Self {
+        framebuffer_link_js.inner()
+    }
+}

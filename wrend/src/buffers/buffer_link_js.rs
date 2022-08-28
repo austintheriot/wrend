@@ -51,3 +51,9 @@ impl DerefMut for BufferLinkJs {
         &mut self.0
     }
 }
+
+impl From<BufferLinkJs> for BufferLinkJsInner {
+    fn from(buffer_link_js: BufferLinkJs) -> Self {
+        buffer_link_js.inner()
+    }
+}

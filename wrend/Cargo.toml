@@ -19,7 +19,6 @@ js-sys = "0.3.55"
 thiserror = "1.0.31"
 uuid = { version = "1.1.2", features = ["v4", "js"] }
 wasm-bindgen-futures = "0.4.32"
-serde = "1.0.144"
 
 [dependencies.web-sys]
 version = "0.3.4"

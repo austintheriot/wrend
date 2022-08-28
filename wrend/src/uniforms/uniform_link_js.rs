@@ -71,6 +71,12 @@ impl UniformLinkJs {
     }
 }
 
+impl From<UniformLinkJs> for UniformLinkJsInner {
+    fn from(uniform_link_js: UniformLinkJs) -> Self {
+        uniform_link_js.inner()
+    }
+}
+
 impl UniformLinkJs {
     pub fn inner(self) -> UniformLinkJsInner {
         self.0

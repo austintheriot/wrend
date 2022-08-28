@@ -1625,7 +1625,6 @@ version = "0.1.0"
 dependencies = [
  "js-sys",
  "log",
- "serde",
  "thiserror",
  "uuid",
  "wasm-bindgen",
