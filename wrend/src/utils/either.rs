@@ -1,9 +1,10 @@
 use std::ops::Deref;
 
 use js_sys::Function;
+use log::error;
 use wasm_bindgen::{JsCast, JsValue};
 
-use crate::CallbackWithContext;
+use crate::{CallbackWithContext, IntoJsWrapper};
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Either<L, R> {
@@ -117,7 +118,7 @@ impl<A, R: JsCast> Either<CallbackWithContext<dyn Fn(A) -> R>, CallbackWithConte
     }
 }
 
-impl<A: JsCast> Either<CallbackWithContext<dyn Fn(A)>, CallbackWithContext<Function>> {
+impl<A: Into<JsValue>> Either<CallbackWithContext<dyn Fn(A)>, CallbackWithContext<Function>> {
     /// See implementation of `call` for [Either](crate::Either)
     ///
     /// This is the same function, except the JavaScript callback is also called with the the same value
@@ -134,7 +135,30 @@ impl<A: JsCast> Either<CallbackWithContext<dyn Fn(A)>, CallbackWithContext<Funct
     }
 }
 
-impl<A: JsCast, R: JsCast>
+impl<JsWrapper: Into<JsValue>, A: IntoJsWrapper<Result = JsWrapper>>
+    Either<CallbackWithContext<dyn Fn(A)>, CallbackWithContext<Function>>
+{
+    /// See implementation of `call` for [Either](crate::Either)
+    ///
+    /// This is the same function, except the JavaScript callback is also with the Rust value, 
+    /// after converting the Rust value into a JavaScript-compatible type.
+    pub fn call_with_arg_into_js_value(&self, a: A) {
+        match &*self {
+            crate::Either::A(rust_callback) => (rust_callback)(a),
+            crate::Either::B(js_callback) => {
+                let js_wrapper: JsWrapper = a.into_js_wrapper();
+                match js_callback.call1(&JsValue::NULL, &js_wrapper.into()) {
+                    Ok(_) => todo!(),
+                    Err(err) => {
+                        error!("JavaScript function threw an error: {err:?}")
+                    }
+                }
+            }
+        }
+    }
+}
+
+impl<A: Into<JsValue>, R: JsCast>
     Either<CallbackWithContext<dyn Fn(A) -> R>, CallbackWithContext<Function>>
 {
     /// See implementation of `call` for [Either](crate::Either)

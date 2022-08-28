@@ -7,26 +7,21 @@ use std::hash::Hash;
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
 #[derive(Clone)]
-pub struct AttributeLink<
-    VertexArrayObjectId: Id,
-    BufferId: Id,
-    AttributeId: Id + IdName,
-    UserCtx: Clone,
-> {
+pub struct AttributeLink<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName> {
     vao_ids: Vec<VertexArrayObjectId>,
     buffer_id: BufferId,
     attribute_id: AttributeId,
-    attribute_create_callback: AttributeCreateCallback<UserCtx>,
+    attribute_create_callback: AttributeCreateCallback,
 }
 
-impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone>
-    AttributeLink<VertexArrayObjectId, BufferId, AttributeId, UserCtx>
+impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName>
+    AttributeLink<VertexArrayObjectId, BufferId, AttributeId>
 {
     pub fn new(
         vao_ids: impl Into<Bridge<VertexArrayObjectId>>,
         buffer_id: BufferId,
         attribute_id: AttributeId,
-        attribute_create_callback: impl Into<AttributeCreateCallback<UserCtx>>,
+        attribute_create_callback: impl Into<AttributeCreateCallback>,
     ) -> Self {
         let vao_ids_bridge = vao_ids.into();
         Self {
@@ -49,7 +44,7 @@ impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: C
         &self.attribute_id
     }
 
-    pub fn create_callback(&self) -> AttributeCreateCallback<UserCtx> {
+    pub fn create_callback(&self) -> AttributeCreateCallback {
         self.attribute_create_callback.clone()
     }
 
@@ -60,17 +55,16 @@ impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: C
         now: f64,
         webgl_buffer: WebGlBuffer,
         attribute_location: AttributeLocation,
-        user_ctx: Option<UserCtx>,
     ) {
         let attribute_create_context =
-            AttributeCreateContext::new(gl, now, webgl_buffer, attribute_location, user_ctx);
+            AttributeCreateContext::new(gl, now, webgl_buffer, attribute_location);
         self.attribute_create_callback
-            .call(&attribute_create_context);
+            .call_with_arg_into_js_value(attribute_create_context);
     }
 }
 
-impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> Debug
-    for AttributeLink<VertexArrayObjectId, BufferId, AttributeId, UserCtx>
+impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName> Debug
+    for AttributeLink<VertexArrayObjectId, BufferId, AttributeId>
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("AttributeLink")
@@ -83,8 +77,8 @@ impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: C
     }
 }
 
-impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> Hash
-    for AttributeLink<VertexArrayObjectId, BufferId, AttributeId, UserCtx>
+impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName> Hash
+    for AttributeLink<VertexArrayObjectId, BufferId, AttributeId>
 {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.vao_ids.hash(state);
@@ -93,8 +87,8 @@ impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: C
     }
 }
 
-impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> PartialEq
-    for AttributeLink<VertexArrayObjectId, BufferId, AttributeId, UserCtx>
+impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName> PartialEq
+    for AttributeLink<VertexArrayObjectId, BufferId, AttributeId>
 {
     fn eq(&self, other: &Self) -> bool {
         self.vao_ids == other.vao_ids
@@ -104,8 +98,8 @@ impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: C
     }
 }
 
-impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: Clone> Eq
-    for AttributeLink<VertexArrayObjectId, BufferId, AttributeId, UserCtx>
+impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName> Eq
+    for AttributeLink<VertexArrayObjectId, BufferId, AttributeId>
 {
 }
 

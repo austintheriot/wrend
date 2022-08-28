@@ -1,12 +1,12 @@
 use std::ops::{Deref, DerefMut};
 
-use js_sys::{Array, Function, Object};
+use js_sys::{Array, Function};
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
 use crate::{utils, AttributeLink, AttributeLocation};
 
-pub type AttributeLinkJsInner = AttributeLink<String, String, String, Object>;
+pub type AttributeLinkJsInner = AttributeLink<String, String, String>;
 
 #[wasm_bindgen(js_name = AttributeLink)]
 pub struct AttributeLinkJs(AttributeLinkJsInner);
@@ -51,10 +51,9 @@ impl AttributeLinkJs {
         now: f64,
         webgl_buffer: WebGlBuffer,
         attribute_location: AttributeLocation,
-        user_ctx: Option<Object>,
     ) {
         self.deref()
-            .create_attribute(gl, now, webgl_buffer, attribute_location, user_ctx)
+            .create_attribute(gl, now, webgl_buffer, attribute_location)
     }
 }
 

@@ -381,7 +381,7 @@ pub struct RendererBuilder<
     uniforms: HashMap<UniformId, Uniform<ProgramId, UniformId, UserCtx>>,
     buffer_links: HashSet<BufferLink<BufferId, UserCtx>>,
     buffers: HashMap<BufferId, Buffer<BufferId>>,
-    attribute_links: HashSet<AttributeLink<VertexArrayObjectId, BufferId, AttributeId, UserCtx>>,
+    attribute_links: HashSet<AttributeLink<VertexArrayObjectId, BufferId, AttributeId>>,
     attribute_locations: HashMap<AttributeId, u32>,
     attributes: HashMap<AttributeId, Attribute<VertexArrayObjectId, BufferId, AttributeId>>,
     texture_links: HashSet<TextureLink<TextureId, UserCtx>>,
@@ -594,7 +594,7 @@ impl<
     /// Saves a link that will be used to build a a WebGL attribute at build time.
     pub fn add_attribute_link(
         &mut self,
-        attribute_link: impl Into<AttributeLink<VertexArrayObjectId, BufferId, AttributeId, UserCtx>>,
+        attribute_link: impl Into<AttributeLink<VertexArrayObjectId, BufferId, AttributeId>>,
     ) -> &mut Self {
         let attribute_link = attribute_link.into();
         let attribute_id = attribute_link.attribute_id().to_owned();
@@ -609,7 +609,7 @@ impl<
     pub fn add_attribute_links(
         &mut self,
         attribute_links: impl Into<
-            Bridge<AttributeLink<VertexArrayObjectId, BufferId, AttributeId, UserCtx>>,
+            Bridge<AttributeLink<VertexArrayObjectId, BufferId, AttributeId>>,
         >,
     ) -> &mut Self {
         let attribute_link_bridge: Bridge<_> = attribute_links.into();
@@ -1010,7 +1010,6 @@ impl<
                     now,
                     webgl_buffer.clone(),
                     attribute_location.into(),
-                    user_ctx.clone(),
                 );
                 gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, None);
             } else {
@@ -1032,7 +1031,6 @@ impl<
                         now,
                         webgl_buffer.clone(),
                         attribute_location.into(),
-                        user_ctx.clone(),
                     );
                     gl.bind_vertex_array(None);
                     gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, None);

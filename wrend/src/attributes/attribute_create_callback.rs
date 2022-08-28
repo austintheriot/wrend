@@ -3,49 +3,49 @@ use js_sys::Function;
 use crate::{AttributeCreateContext, CallbackWithContext, Either};
 use std::{ops::Deref, rc::Rc};
 
-pub type AttributeCreateCallbackInner<UserCtx> = Either<
-    CallbackWithContext<dyn Fn(&AttributeCreateContext<UserCtx>)>,
+pub type AttributeCreateCallbackInner = Either<
+    CallbackWithContext<dyn Fn(AttributeCreateContext)>,
     CallbackWithContext<Function>,
 >;
 
 #[derive(Clone, Hash, Eq, PartialOrd, Ord, Debug)]
-pub struct AttributeCreateCallback<UserCtx: Clone>(AttributeCreateCallbackInner<UserCtx>);
+pub struct AttributeCreateCallback(AttributeCreateCallbackInner);
 
-impl<UserCtx: Clone> PartialEq for AttributeCreateCallback<UserCtx> {
+impl PartialEq for AttributeCreateCallback {
     fn eq(&self, other: &Self) -> bool {
         self.0 == other.0
     }
 }
 
-impl<UserCtx: Clone> Deref for AttributeCreateCallback<UserCtx> {
-    type Target = AttributeCreateCallbackInner<UserCtx>;
+impl Deref for AttributeCreateCallback {
+    type Target = AttributeCreateCallbackInner;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl<UserCtx: Clone, F: Fn(&AttributeCreateContext<UserCtx>) + 'static> From<F>
-    for AttributeCreateCallback<UserCtx>
+impl<F: Fn(AttributeCreateContext) + 'static> From<F>
+    for AttributeCreateCallback
 {
     fn from(callback: F) -> Self {
         Self(Either::new_a(CallbackWithContext::from(
-            Rc::new(callback) as Rc<dyn Fn(&AttributeCreateContext<UserCtx>)>
+            Rc::new(callback) as Rc<dyn Fn(AttributeCreateContext)>
         )))
     }
 }
 
-impl<UserCtx: Clone, F: Fn(&AttributeCreateContext<UserCtx>) + 'static> From<Rc<F>>
-    for AttributeCreateCallback<UserCtx>
+impl<F: Fn(AttributeCreateContext) + 'static> From<Rc<F>>
+    for AttributeCreateCallback
 {
     fn from(callback: Rc<F>) -> Self {
         Self(Either::new_a(CallbackWithContext::from(
-            callback as Rc<dyn Fn(&AttributeCreateContext<UserCtx>)>,
+            callback as Rc<dyn Fn(AttributeCreateContext)>,
         )))
     }
 }
 
-impl<UserCtx: Clone> From<Function> for AttributeCreateCallback<UserCtx> {
+impl From<Function> for AttributeCreateCallback {
     fn from(callback: Function) -> Self {
         Self(Either::new_b(CallbackWithContext::from(callback)))
     }
