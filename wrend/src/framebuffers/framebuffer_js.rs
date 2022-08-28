@@ -8,7 +8,7 @@ pub type FramebufferJsInner = Framebuffer<String>;
 #[wasm_bindgen(js_name = Framebuffer)]
 pub struct FramebufferJs(FramebufferJsInner);
 
-#[wasm_bindgen(js_name = Framebuffer)]
+#[wasm_bindgen(js_class = Framebuffer)]
 impl FramebufferJs {
     pub fn framebuffer_id(&self) -> String {
         self.deref().framebuffer_id().to_owned()
