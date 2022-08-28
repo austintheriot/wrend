@@ -1,10 +1,15 @@
-use crate::{AttributeCreateContext, CallbackWithContext};
+use js_sys::Function;
+
+use crate::{AttributeCreateContext, CallbackWithContext, Either};
 use std::{ops::Deref, rc::Rc};
 
-#[derive(Clone, Hash, Eq, PartialOrd, Ord, Debug)]
-pub struct AttributeCreateCallback<UserCtx: Clone>(
+pub type AttributeCreateCallbackInner<UserCtx> = Either<
     CallbackWithContext<dyn Fn(&AttributeCreateContext<UserCtx>)>,
-);
+    CallbackWithContext<Function>,
+>;
+
+#[derive(Clone, Hash, Eq, PartialOrd, Ord, Debug)]
+pub struct AttributeCreateCallback<UserCtx: Clone>(AttributeCreateCallbackInner<UserCtx>);
 
 impl<UserCtx: Clone> PartialEq for AttributeCreateCallback<UserCtx> {
     fn eq(&self, other: &Self) -> bool {
@@ -13,7 +18,7 @@ impl<UserCtx: Clone> PartialEq for AttributeCreateCallback<UserCtx> {
 }
 
 impl<UserCtx: Clone> Deref for AttributeCreateCallback<UserCtx> {
-    type Target = CallbackWithContext<dyn Fn(&AttributeCreateContext<UserCtx>)>;
+    type Target = AttributeCreateCallbackInner<UserCtx>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -24,9 +29,9 @@ impl<UserCtx: Clone, F: Fn(&AttributeCreateContext<UserCtx>) + 'static> From<F>
     for AttributeCreateCallback<UserCtx>
 {
     fn from(callback: F) -> Self {
-        Self(CallbackWithContext::from(
+        Self(Either::new_a(CallbackWithContext::from(
             Rc::new(callback) as Rc<dyn Fn(&AttributeCreateContext<UserCtx>)>
-        ))
+        )))
     }
 }
 
@@ -34,8 +39,14 @@ impl<UserCtx: Clone, F: Fn(&AttributeCreateContext<UserCtx>) + 'static> From<Rc<
     for AttributeCreateCallback<UserCtx>
 {
     fn from(callback: Rc<F>) -> Self {
-        Self(CallbackWithContext::from(
+        Self(Either::new_a(CallbackWithContext::from(
             callback as Rc<dyn Fn(&AttributeCreateContext<UserCtx>)>,
-        ))
+        )))
+    }
+}
+
+impl<UserCtx: Clone> From<Function> for AttributeCreateCallback<UserCtx> {
+    fn from(callback: Function) -> Self {
+        Self(Either::new_b(CallbackWithContext::from(callback)))
     }
 }

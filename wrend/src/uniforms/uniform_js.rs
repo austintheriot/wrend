@@ -1,7 +1,7 @@
-use crate::Uniform;
+use crate::{utils, Uniform};
 use js_sys::{Array, Map, Object};
 use std::ops::{Deref, DerefMut};
-use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
+use wasm_bindgen::prelude::wasm_bindgen;
 
 pub type UniformJsInner = Uniform<String, String, Object>;
 
@@ -11,15 +11,7 @@ pub struct UniformJs(UniformJsInner);
 #[wasm_bindgen(js_class = Uniform)]
 impl UniformJs {
     pub fn program_ids(&self) -> Array {
-        let program_ids: Vec<JsValue> = self
-            .deref()
-            .program_ids()
-            .iter()
-            .map(|s| JsValue::from_str(s))
-            .collect();
-        let mut array = Array::new();
-        array.extend(program_ids);
-        array
+        utils::strings_to_js_array(self.deref().program_ids())
     }
 
     pub fn uniform_id(&self) -> String {
@@ -27,13 +19,7 @@ impl UniformJs {
     }
 
     pub fn uniform_locations(&self) -> Map {
-        let map = Map::new();
-
-        for (key, value) in self.deref().uniform_locations().iter() {
-            map.set(&JsValue::from_str(key), value.as_ref());
-        }
-
-        map
+        utils::hash_map_to_js_map(self.deref().uniform_locations())
     }
 }
 

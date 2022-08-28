@@ -6,7 +6,7 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{BlobEvent, Event, MediaRecorder, MediaRecorderErrorEvent};
 
-pub fn make_handle_start(
+pub(crate) fn make_handle_start(
     media_recorder: MediaRecorder,
     recording_data: Rc<RefCell<RecordingData>>,
 ) -> Listener<MediaRecorder, Event> {
@@ -16,7 +16,7 @@ pub fn make_handle_start(
     })
 }
 
-pub fn make_handle_stop(
+pub(crate) fn make_handle_stop(
     media_recorder: MediaRecorder,
     recording_data: Rc<RefCell<RecordingData>>,
 ) -> Listener<MediaRecorder, Event> {
@@ -26,7 +26,7 @@ pub fn make_handle_stop(
     })
 }
 
-pub fn make_handle_dataavailable(
+pub(crate) fn make_handle_dataavailable(
     media_recorder: MediaRecorder,
     recording_data: Rc<RefCell<RecordingData>>,
 ) -> Listener<MediaRecorder, BlobEvent> {
@@ -60,7 +60,7 @@ pub fn make_handle_dataavailable(
     })
 }
 
-pub fn make_handle_error(
+pub(crate) fn make_handle_error(
     media_recorder: MediaRecorder,
     recording_data: Rc<RefCell<RecordingData>>,
 ) -> Listener<MediaRecorder, MediaRecorderErrorEvent> {
@@ -74,7 +74,7 @@ pub fn make_handle_error(
     )
 }
 
-pub fn make_handle_pause(
+pub(crate) fn make_handle_pause(
     media_recorder: MediaRecorder,
     recording_data: Rc<RefCell<RecordingData>>,
 ) -> Listener<MediaRecorder, Event> {
@@ -84,7 +84,7 @@ pub fn make_handle_pause(
     })
 }
 
-pub fn make_handle_resume(
+pub(crate) fn make_handle_resume(
     media_recorder: MediaRecorder,
     recording_data: Rc<RefCell<RecordingData>>,
 ) -> Listener<MediaRecorder, Event> {

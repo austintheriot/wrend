@@ -1,7 +1,7 @@
 use crate::{AnimationCallback, Id, IdDefault, IdName, Renderer};
 
 #[derive(Clone, Debug)]
-pub struct AnimationData<
+pub(crate) struct AnimationData<
     VertexShaderId: Id = IdDefault,
     FragmentShaderId: Id = IdDefault,
     ProgramId: Id = IdDefault,
@@ -62,26 +62,6 @@ impl<
 {
     pub fn new() -> Self {
         Self::default()
-    }
-
-    pub fn new_with_animation_callback(
-        animation_callback: AnimationCallback<
-            VertexShaderId,
-            FragmentShaderId,
-            ProgramId,
-            UniformId,
-            BufferId,
-            AttributeId,
-            TextureId,
-            FramebufferId,
-            TransformFeedbackId,
-            VertexArrayObjectId,
-            UserCtx,
-        >,
-    ) -> Self {
-        let mut animation_data = Self::default();
-        animation_data.set_animation_callback(Some(animation_callback));
-        animation_data
     }
 
     pub fn set_request_id(&mut self, id: i32) {

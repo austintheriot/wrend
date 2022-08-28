@@ -1,6 +1,7 @@
 use crate::{
     Id, ProgramLinkBuilderJsInner, ProgramLinkJs, ProgramLinkJsBuilder, ProgramLinkJsInner,
 };
+use serde::Deserialize;
 use std::fmt::Debug;
 use std::hash::Hash;
 use thiserror::Error;
@@ -8,7 +9,7 @@ use wasm_bindgen::JsValue;
 
 /// This contains an id for a pair of shaders: one vertex shader and one fragment
 /// shader. These can be combined to link together a program.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct ProgramLink<ProgramId: Id, VertexShaderId: Id, FragmentShaderId: Id> {
     program_id: ProgramId,
     vertex_shader_id: VertexShaderId,

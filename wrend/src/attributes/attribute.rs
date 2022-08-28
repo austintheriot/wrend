@@ -17,7 +17,7 @@ impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName>
     Attribute<VertexArrayObjectId, BufferId, AttributeId>
 {
     // @todo move into builder pattern
-    pub fn new(
+    pub(crate) fn new(
         vao_ids: impl Into<Bridge<VertexArrayObjectId>>,
         buffer_id: BufferId,
         attribute_id: AttributeId,

@@ -156,6 +156,10 @@ impl<
                     Rc::clone(&recording_data),
                 ))
                 .add_event_listener(recording_handlers::make_handle_pause(
+                    media_recorder.clone(),
+                    Rc::clone(&recording_data),
+                ))
+                .add_event_listener(recording_handlers::make_handle_resume(
                     media_recorder,
                     Rc::clone(&recording_data),
                 ));

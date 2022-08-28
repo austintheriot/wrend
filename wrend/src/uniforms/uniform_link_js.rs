@@ -13,7 +13,7 @@ pub struct UniformLinkJs(UniformLinkJsInner);
 impl UniformLinkJs {
     #[wasm_bindgen(constructor)]
     pub fn new(program_ids: Array, uniform_id: String, initialize_callback: Function) -> Self {
-        let program_ids = utils::js_array_to_strings(program_ids);
+        let program_ids = utils::js_array_to_vec_strings(program_ids);
         Self(UniformLinkJsInner::new(
             program_ids,
             uniform_id,

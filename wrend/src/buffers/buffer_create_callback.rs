@@ -1,5 +1,5 @@
 use crate::{BufferCreateContext, CallbackWithContext, Either};
-use js_sys::{Function, Object};
+use js_sys::Function;
 use std::{ops::Deref, rc::Rc};
 use web_sys::WebGlBuffer;
 
@@ -43,7 +43,7 @@ impl<UserCtx, F: Fn(&BufferCreateContext<UserCtx>) -> WebGlBuffer + 'static> Fro
     }
 }
 
-impl From<Function> for BufferCreateCallback<Object> {
+impl<UserCtx> From<Function> for BufferCreateCallback<UserCtx> {
     fn from(callback: Function) -> Self {
         Self(Either::new_b(CallbackWithContext::new(callback)))
     }

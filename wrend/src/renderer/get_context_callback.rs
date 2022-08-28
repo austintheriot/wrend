@@ -1,11 +1,15 @@
-use crate::{CallbackWithContext, WebGlContextError};
+use crate::{CallbackWithContext, Either, WebGlContextError};
+use js_sys::Function;
 use std::fmt::Debug;
 use std::{ops::Deref, rc::Rc};
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 
-pub type GetContextCallbackInner = CallbackWithContext<
-    dyn Fn(&HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError>,
+pub type GetContextCallbackInner = Either<
+    CallbackWithContext<
+        dyn Fn(&HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError>,
+    >,
+    CallbackWithContext<Function>,
 >;
 
 /// Wrapper around CallbackWithContext to provide a default implementation
@@ -22,10 +26,10 @@ impl<F: Fn(&HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextErr
     From<F> for GetContextCallback
 {
     fn from(callback: F) -> Self {
-        Self(CallbackWithContext::from(Rc::new(callback)
+        Self(Either::new_a(CallbackWithContext::from(Rc::new(callback)
             as Rc<
                 dyn Fn(&HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError>,
-            >))
+            >)))
     }
 }
 
@@ -33,12 +37,18 @@ impl<F: Fn(&HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextErr
     From<Rc<F>> for GetContextCallback
 {
     fn from(callback: Rc<F>) -> Self {
-        Self(CallbackWithContext::from(
+        Self(Either::new_a(CallbackWithContext::from(
             callback
                 as Rc<
                     dyn Fn(&HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError>,
                 >,
-        ))
+        )))
+    }
+}
+
+impl From<Function> for GetContextCallback {
+    fn from(callback: Function) -> Self {
+        Self(Either::new_b(CallbackWithContext::from(callback)))
     }
 }
 

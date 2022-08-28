@@ -49,7 +49,12 @@ impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: C
         &self.attribute_id
     }
 
-    pub fn configure_attribute(
+    pub fn create_callback(&self) -> AttributeCreateCallback<UserCtx> {
+        self.attribute_create_callback.clone()
+    }
+
+    /// Runs the associated `attribute_create_callback` to initialize the attribute
+    pub fn create_attribute(
         &self,
         gl: WebGl2RenderingContext,
         now: f64,
@@ -59,11 +64,8 @@ impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName, UserCtx: C
     ) {
         let attribute_create_context =
             AttributeCreateContext::new(gl, now, webgl_buffer, attribute_location, user_ctx);
-        (self.attribute_create_callback)(&attribute_create_context)
-    }
-
-    pub fn create_callback(&self) -> AttributeCreateCallback<UserCtx> {
-        self.attribute_create_callback.clone()
+        self.attribute_create_callback
+            .call(&attribute_create_context);
     }
 }
 

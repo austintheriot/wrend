@@ -1,4 +1,4 @@
-use crate::{Listener, RecordingUrl};
+use crate::Listener;
 use js_sys::{Array, Uint8Array};
 use log::info;
 use std::{any::Any, ops::Deref};
@@ -14,14 +14,12 @@ extern "C" {
 }
 
 #[derive(Debug)]
-pub struct RecordingData {
+pub(crate) struct RecordingData {
     recorded_chunks: Vec<u8>,
-    media_stream: MediaStream,
     media_recorder: MediaRecorder,
     /// It is not necessary to interact with this data after it is stored.
     /// It is only necessary to store the Listener, which removes event listeners when it is dropped
     listeners: Vec<Box<dyn Any>>,
-    recording_url: Option<RecordingUrl>,
     is_recording: bool,
 }
 
@@ -57,9 +55,7 @@ impl RecordingData {
         info!("Using mimeType: {:?}", media_recorder.mime_type());
 
         Self {
-            media_stream,
             media_recorder,
-            recording_url: None,
             recorded_chunks: Vec::new(),
             listeners: Vec::new(),
             is_recording: false,
@@ -127,28 +123,12 @@ impl RecordingData {
         &mut self.media_recorder
     }
 
-    pub fn media_stream(&self) -> &MediaStream {
-        &self.media_stream
-    }
-
-    pub fn media_stream_mut(&mut self) -> &mut MediaStream {
-        &mut self.media_stream
-    }
-
     pub fn recorded_chunks(&self) -> &Vec<u8> {
         &self.recorded_chunks
     }
 
     pub fn recorded_chunks_mut(&mut self) -> &mut Vec<u8> {
         &mut self.recorded_chunks
-    }
-
-    pub fn recording_url(&self) -> &Option<RecordingUrl> {
-        &self.recording_url
-    }
-
-    pub fn set_recording_url(&mut self, recording_url: impl Into<RecordingUrl>) {
-        self.recording_url = Some(recording_url.into());
     }
 
     pub fn is_recording(&self) -> bool {

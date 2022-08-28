@@ -1,11 +1,13 @@
 use std::ops::{Deref, DerefMut};
 
-use crate::{ProgramLink, ProgramLinkJsBuilder};
+use crate::{utils, ProgramLink, ProgramLinkJsBuilder};
 use js_sys::Array;
+use serde::Deserialize;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
 pub type ProgramLinkJsInner = ProgramLink<String, String, String>;
 
+#[derive(Deserialize)]
 #[wasm_bindgen(js_name = ProgramLink)]
 pub struct ProgramLinkJs(ProgramLinkJsInner);
 
@@ -33,14 +35,7 @@ impl ProgramLinkJs {
     }
 
     pub fn transform_feedback_varyings(&self) -> Array {
-        let string_vec: Vec<JsValue> = self
-            .deref()
-            .transform_feedback_varyings()
-            .iter()
-            .map(|s| JsValue::from_str(s))
-            .collect();
-
-        Array::from_iter(string_vec)
+        utils::strings_to_js_array(self.deref().transform_feedback_varyings())
     }
 
     pub fn builder() -> ProgramLinkJsBuilder {
@@ -71,5 +66,13 @@ impl Deref for ProgramLinkJs {
 impl DerefMut for ProgramLinkJs {
     fn deref_mut(&mut self) -> &mut ProgramLinkJsInner {
         &mut self.0
+    }
+}
+
+impl From<JsValue> for ProgramLinkJs {
+    fn from(js_value: JsValue) -> Self {
+        js_value
+            .into_serde()
+            .expect("Could not convert `JsValue` into `ProgramLinkJs`")
     }
 }

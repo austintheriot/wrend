@@ -8,7 +8,7 @@ use web_sys::Url;
 /// since manually created Urls do not get released automatically, unlike
 /// most of web memory.
 #[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct RecordingUrl(String);
+pub(crate) struct RecordingUrl(String);
 
 impl RecordingUrl {
     pub fn new() -> Self {

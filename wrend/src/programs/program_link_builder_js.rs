@@ -1,7 +1,7 @@
-use crate::{ProgramLinkBuilder, ProgramLinkJs};
+use crate::{utils, ProgramLinkBuilder, ProgramLinkJs};
 use js_sys::Array;
 use std::ops::{Deref, DerefMut};
-use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
+use wasm_bindgen::prelude::wasm_bindgen;
 
 pub type ProgramLinkBuilderJsInner = ProgramLinkBuilder<String, String, String>;
 
@@ -35,18 +35,10 @@ impl ProgramLinkJsBuilder {
     }
 
     pub fn set_transform_feedback_varyings(mut self, transform_feedback_varyings: Array) -> Self {
-        let string_vec: Vec<String> = js_sys::try_iter(transform_feedback_varyings.as_ref())
-            .unwrap()
-            .expect("set_transform_feedback_varyings should be passed an array of strings")
-            .into_iter()
-            .map(|el| {
-                JsValue::as_string(&el
-                    .expect("Each element in the array passed to set_transform_feedback_varyings should be a string")).unwrap()
-            })
-            .collect();
-
-        self.deref_mut().set_transform_feedback_varyings(string_vec);
-
+        let transform_feedback_varyings =
+            utils::js_array_to_vec_strings(transform_feedback_varyings);
+        self.deref_mut()
+            .set_transform_feedback_varyings(transform_feedback_varyings);
         self
     }
 

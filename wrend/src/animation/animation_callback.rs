@@ -1,6 +1,5 @@
-use std::{ops::Deref, rc::Rc};
-
 use js_sys::Function;
+use std::{ops::Deref, rc::Rc};
 
 use crate::{CallbackWithContext, Either, Id, IdDefault, IdName, Renderer};
 

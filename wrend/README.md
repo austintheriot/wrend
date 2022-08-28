@@ -21,6 +21,14 @@ The following use cases should guide the development of this library:
   - Check that all structs have `#[wasm_bindgen(constructor)]` where needed
   - Make sure all public JavaScript API struct docs point / link to their respective Rust counterparts for documentation
   - Derive all traits for Js structs
+  - Update pretty much all Js functions to receive and return `self`
+
+- Make a procedural macro and/or a custom derive macro for `Id`, and possible `IdName`
+
+- Make some impl that do not need to be called from outside pub(crate)
+  - Especially the `new` functions (or the structs themselves?) of Buffer, Uniform, etc. (internal types not built directly)
+
+- Move `js_conversion` utils into a generic trait impl on a new type around Vec
 
 - Bug: WebGL2 rendering contexts are not getting discarded when handle is dropped: enable this manually through browser extension (see MDN WebGL best practices article)
 

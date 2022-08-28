@@ -1,11 +1,10 @@
 use crate::{
-    Attribute, AttributeCreateContext, AttributeLink, Bridge, Buffer, BufferLink,
-    BuildRendererError, CompileShaderError, CreateAttributeError, CreateBufferError,
-    CreateTextureError, CreateTransformFeedbackError, CreateUniformError, CreateVAOError,
-    Framebuffer, FramebufferLink, GetContextCallback, Id, IdDefault, IdName, LinkProgramError,
-    ProgramLink, RenderCallback, RendererBuilderError, RendererHandle, RendererJs, RendererJsInner,
-    SaveContextError, ShaderType, Texture, TextureLink, TransformFeedbackLink, Uniform,
-    UniformContext, UniformLink, WebGlContextError,
+    Attribute, AttributeLink, Bridge, Buffer, BufferLink, BuildRendererError, CompileShaderError,
+    CreateAttributeError, CreateBufferError, CreateTextureError, CreateTransformFeedbackError,
+    CreateUniformError, CreateVAOError, Framebuffer, FramebufferLink, GetContextCallback, Id,
+    IdDefault, IdName, LinkProgramError, ProgramLink, RenderCallback, RendererBuilderError,
+    RendererHandle, RendererJs, RendererJsInner, SaveContextError, ShaderType, Texture,
+    TextureLink, TransformFeedbackLink, Uniform, UniformContext, UniformLink, WebGlContextError,
 };
 use std::collections::{HashMap, HashSet};
 use wasm_bindgen::{JsCast, JsValue};
@@ -832,7 +831,15 @@ impl<
         &self,
         canvas: &HtmlCanvasElement,
     ) -> Result<WebGl2RenderingContext, WebGlContextError> {
-        let gl = (self.get_context_callback)(canvas)?;
+        let gl = match &*self.get_context_callback {
+            crate::Either::A(rust_callback) => (rust_callback)(canvas)?,
+            crate::Either::B(js_callback) => {
+                let result = js_callback.call1(&JsValue::NULL, canvas.as_ref());
+                result.expect("Received error when trying call JavaScript `get_context_callback`")
+                    .dyn_into()
+                    .expect("Did not receive expected type `HtmlCanvasElement` from JavaScript function `get_context_callback`")
+            }
+        };
         Ok(gl)
     }
 
@@ -995,17 +1002,16 @@ impl<
                 gl.bind_vertex_array(None);
                 gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&webgl_buffer));
                 gl.enable_vertex_attrib_array(*attribute_location);
-                let attribute_create_context = AttributeCreateContext::new(
+                // create callback is expected to initialize its associated attribute
+                // with a call to vertexAttribPointer,
+                // which is saved in the associated VAO
+                attribute_link.create_attribute(
                     gl.clone(),
                     now,
                     webgl_buffer.clone(),
                     attribute_location.into(),
                     user_ctx.clone(),
                 );
-                // create callback is expected to initialize its associated attribute
-                // with a call to vertexAttribPointer,
-                // which is saved in the associated VAO
-                (attribute_link.create_callback())(&attribute_create_context);
                 gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, None);
             } else {
                 // initialize attribute for each VAO that it is linked to
@@ -1018,17 +1024,16 @@ impl<
                     gl.bind_vertex_array(Some(vao));
                     gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&webgl_buffer));
                     gl.enable_vertex_attrib_array(*attribute_location);
-                    let attribute_create_context = AttributeCreateContext::new(
+                    // create callback is expected to initialize its associated attribute
+                    // with a call to vertexAttribPointer,
+                    // which is saved in the associated VAO
+                    attribute_link.create_attribute(
                         gl.clone(),
                         now,
                         webgl_buffer.clone(),
                         attribute_location.into(),
                         user_ctx.clone(),
                     );
-                    // create callback is expected to initialize its associated attribute
-                    // with a call to vertexAttribPointer,
-                    // which is saved in the associated VAO
-                    (attribute_link.create_callback())(&attribute_create_context);
                     gl.bind_vertex_array(None);
                     gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, None);
                 }

@@ -1,5 +1,5 @@
 use crate::{CallbackWithContext, Either, FramebufferCreateContext};
-use js_sys::{Function, Object};
+use js_sys::Function;
 use std::{ops::Deref, rc::Rc};
 use web_sys::WebGlFramebuffer;
 
@@ -49,7 +49,7 @@ impl<UserCtx: Clone, F: Fn(&FramebufferCreateContext<UserCtx>) -> WebGlFramebuff
     }
 }
 
-impl From<Function> for FramebufferCreateCallback<Object> {
+impl<UserCtx: Clone> From<Function> for FramebufferCreateCallback<UserCtx> {
     fn from(callback: Function) -> Self {
         Self(Either::new_b(CallbackWithContext::from(callback)))
     }

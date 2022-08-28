@@ -23,7 +23,7 @@ pub struct Uniform<ProgramId: Id, UniformId: Id, UserCtx: Clone> {
 
 impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Uniform<ProgramId, UniformId, UserCtx> {
     // @todo move into builder pattern
-    pub fn new(
+    pub(crate) fn new(
         program_ids: Vec<ProgramId>,
         uniform_id: UniformId,
         // a single "conceptual" uniform can be shared across multiple programs and updated in tandem

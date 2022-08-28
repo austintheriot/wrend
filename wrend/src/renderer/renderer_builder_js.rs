@@ -1,5 +1,7 @@
-use crate::{AttributeLinkJs, ProgramLinkJs, RendererBuilder, RendererJs, TextureJs};
-use js_sys::{Function, Object};
+use crate::{
+    utils, AttributeLinkJs, ProgramLink, ProgramLinkJs, RendererBuilder, RendererJs, TextureJs,
+};
+use js_sys::{Array, Function, Object};
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::HtmlCanvasElement;
@@ -53,20 +55,15 @@ impl RendererJsBuilder {
         self
     }
 
-    // pub fn add_program_links(
-    //     &mut self,
-    //     program_links: impl Into<Bridge<ProgramLink<String, String, String>>>,
-    // ) -> Self {
-    //     let program_link_bridge: Bridge<ProgramLink<String, String, String>> =
-    //         program_links.into();
-    //     let program_links: Vec<_> = program_link_bridge.into();
-
-    //     for program_link in program_links {
-    //         self.add_program_link(program_link);
-    //     }
-
-    //     self
-    // }
+    pub fn add_program_links(mut self, program_links: Array) -> Self {
+        let program_links: Vec<ProgramLink<String, String, String>> =
+            utils::js_array_to_vec::<ProgramLinkJs>(program_links)
+                .into_iter()
+                .map(From::from)
+                .collect();
+        self.deref_mut().add_program_links(program_links);
+        self
+    }
 
     /// Save a callback that will be called each time it is time to render a new frame
     pub fn set_render_callback(mut self, render_callback: Function) -> Self {

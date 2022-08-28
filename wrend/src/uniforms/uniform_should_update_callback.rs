@@ -1,6 +1,6 @@
 use std::{fmt::Debug, ops::Deref, rc::Rc};
 
-use js_sys::{Function, Object};
+use js_sys::Function;
 
 use crate::{CallbackWithContext, Either, UniformContext};
 
@@ -59,7 +59,7 @@ impl<UserCtx: Clone, F: Fn(&UniformContext<UserCtx>) -> bool + 'static> From<Rc<
     }
 }
 
-impl From<Function> for UniformShouldUpdateCallback<Object> {
+impl<UserCtx: Clone> From<Function> for UniformShouldUpdateCallback<UserCtx> {
     fn from(callback: Function) -> Self {
         Self(Either::new_b(CallbackWithContext::from(callback)))
     }
