@@ -2,13 +2,14 @@ use std::ops::{Deref, DerefMut};
 
 use js_sys::{Function, Object};
 use wasm_bindgen::prelude::wasm_bindgen;
-use web_sys::{WebGl2RenderingContext, WebGlBuffer, WebGlFramebuffer, WebGlTexture};
+use web_sys::{WebGl2RenderingContext, WebGlFramebuffer, WebGlTexture};
 
-use crate::{FramebufferCreateContext, FramebufferLink};
+use crate::FramebufferLink;
 
 pub type FramebufferLinkJsInner = FramebufferLink<String, Object, String>;
 
 #[wasm_bindgen(js_name = FramebufferLink)]
+#[derive(Clone)]
 pub struct FramebufferLinkJs(FramebufferLinkJsInner);
 
 #[wasm_bindgen(js_class = FramebufferLink)]

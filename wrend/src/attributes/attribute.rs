@@ -1,4 +1,4 @@
-use crate::{AttributeLocation, Bridge, Id, IdName, AttributeJs, AttributeJsInner};
+use crate::{AttributeJs, AttributeJsInner, AttributeLocation, Bridge, Id, IdName};
 use std::fmt::Debug;
 use std::hash::Hash;
 use wasm_bindgen::JsValue;

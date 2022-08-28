@@ -1,6 +1,6 @@
 use crate::{
-    AttributeJs, BufferJs, FramebufferJs, RendererJsBuilder, RendererHandleJs, TextureJs,
-    UniformJs, Renderer,
+    AttributeJs, BufferJs, FramebufferJs, Renderer, RendererHandleJs, RendererJsBuilder, TextureJs,
+    UniformJs,
 };
 use js_sys::{Array, Map, Object};
 use std::ops::{Deref, DerefMut};
@@ -173,9 +173,7 @@ impl RendererJs {
             })
             .collect();
 
-        let array = Array::from_iter(textures);
-
-        array
+        Array::from_iter(textures)
     }
 
     pub fn framebuffer(&self, framebuffer_id: String) -> Option<FramebufferJs> {

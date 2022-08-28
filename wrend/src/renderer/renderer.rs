@@ -1,11 +1,11 @@
 use crate::{
     Attribute, AttributeCreateContext, AttributeLink, Bridge, Buffer, BufferLink,
     BuildRendererError, CompileShaderError, CreateAttributeError, CreateBufferError,
-    CreateTextureError, CreateTransformFeedbackError, CreateUniformError, CreateVAOError, Either,
-    Framebuffer, FramebufferLink, GetContextCallback, Id, IdDefault, IdName, RendererJs,
-    RendererJsInner, LinkProgramError, ProgramLink, RenderCallback, RendererBuilderError,
-    RendererHandle, SaveContextError, ShaderType, Texture, TextureLink, TransformFeedbackLink,
-    Uniform, UniformContext, UniformLink, WebGlContextError,
+    CreateTextureError, CreateTransformFeedbackError, CreateUniformError, CreateVAOError,
+    Framebuffer, FramebufferLink, GetContextCallback, Id, IdDefault, IdName, LinkProgramError,
+    ProgramLink, RenderCallback, RendererBuilderError, RendererHandle, RendererJs, RendererJsInner,
+    SaveContextError, ShaderType, Texture, TextureLink, TransformFeedbackLink, Uniform,
+    UniformContext, UniformLink, WebGlContextError,
 };
 use std::collections::{HashMap, HashSet};
 use wasm_bindgen::{JsCast, JsValue};
@@ -921,7 +921,7 @@ impl<
             )?;
             let uniform_context =
                 UniformContext::new(gl.clone(), now, uniform_location.clone(), user_ctx.clone());
-            (initialize_callback)(&uniform_context);
+            initialize_callback.call(&uniform_context);
             uniform_locations.insert(program_id.to_owned(), uniform_location.clone());
 
             gl.use_program(None);

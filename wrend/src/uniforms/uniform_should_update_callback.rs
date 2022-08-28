@@ -1,9 +1,13 @@
 use std::{fmt::Debug, ops::Deref, rc::Rc};
 
-use crate::{CallbackWithContext, UniformContext};
+use js_sys::{Function, Object};
 
-pub type UniformShouldUpdateCallbackInner<UserCtx> =
-    CallbackWithContext<dyn Fn(&UniformContext<UserCtx>) -> bool>;
+use crate::{CallbackWithContext, Either, UniformContext};
+
+pub type UniformShouldUpdateCallbackInner<UserCtx> = Either<
+    CallbackWithContext<dyn Fn(&UniformContext<UserCtx>) -> bool>,
+    CallbackWithContext<Function>,
+>;
 
 /// Wrapper around CallbackWithContext -- allows for Default implementation to return `true` instead of false,
 /// since, by default, uniforms should be updated if no custom optimization callback is provided.
@@ -20,10 +24,10 @@ impl<UserCtx: Clone> Deref for UniformShouldUpdateCallback<UserCtx> {
 
 impl<UserCtx: Clone> Default for UniformShouldUpdateCallback<UserCtx> {
     fn default() -> Self {
-        Self(CallbackWithContext::new(
+        Self(Either::new_a(CallbackWithContext::new(
             Rc::new(|_: &UniformContext<UserCtx>| true)
                 as Rc<dyn Fn(&UniformContext<UserCtx>) -> bool>,
-        ))
+        )))
     }
 }
 
@@ -32,5 +36,31 @@ impl<UserCtx: Clone> Debug for UniformShouldUpdateCallback<UserCtx> {
         f.debug_tuple("UniformShouldUpdateCallback")
             .field(&self.0)
             .finish()
+    }
+}
+
+impl<UserCtx: Clone, F: Fn(&UniformContext<UserCtx>) -> bool + 'static> From<F>
+    for UniformShouldUpdateCallback<UserCtx>
+{
+    fn from(callback: F) -> Self {
+        Self(Either::new_a(CallbackWithContext::from(
+            Rc::new(callback) as Rc<dyn Fn(&UniformContext<UserCtx>) -> bool>
+        )))
+    }
+}
+
+impl<UserCtx: Clone, F: Fn(&UniformContext<UserCtx>) -> bool + 'static> From<Rc<F>>
+    for UniformShouldUpdateCallback<UserCtx>
+{
+    fn from(callback: Rc<F>) -> Self {
+        Self(Either::new_a(CallbackWithContext::from(
+            callback as Rc<dyn Fn(&UniformContext<UserCtx>) -> bool>,
+        )))
+    }
+}
+
+impl From<Function> for UniformShouldUpdateCallback<Object> {
+    fn from(callback: Function) -> Self {
+        Self(Either::new_b(CallbackWithContext::from(callback)))
     }
 }

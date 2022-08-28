@@ -1,4 +1,4 @@
-use crate::{AttributeLinkJs, ProgramLinkJs, RendererJs, TextureJs, RendererBuilder};
+use crate::{AttributeLinkJs, ProgramLinkJs, RendererBuilder, RendererJs, TextureJs};
 use js_sys::{Function, Object};
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;

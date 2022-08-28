@@ -1,4 +1,4 @@
-use crate::{Id, FramebufferJs, FramebufferJsInner};
+use crate::{FramebufferJs, FramebufferJsInner, Id};
 use std::fmt::Debug;
 use std::hash::Hash;
 use wasm_bindgen::JsValue;

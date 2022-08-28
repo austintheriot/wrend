@@ -1,4 +1,4 @@
-use crate::{ProgramLinkJs, ProgramLinkBuilder};
+use crate::{ProgramLinkBuilder, ProgramLinkJs};
 use js_sys::Array;
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};

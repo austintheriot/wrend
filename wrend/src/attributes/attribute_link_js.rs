@@ -1,9 +1,9 @@
 use std::ops::{Deref, DerefMut};
 
 use js_sys::{Array, Object};
-use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
+use wasm_bindgen::prelude::wasm_bindgen;
 
-use crate::AttributeLink;
+use crate::{utils, AttributeLink};
 
 pub type AttributeLinkJsInner = AttributeLink<String, String, String, Object>;
 
@@ -13,16 +13,8 @@ pub struct AttributeLinkJs(AttributeLinkJsInner);
 #[wasm_bindgen(js_class = AttributeLink)]
 impl AttributeLinkJs {
     pub fn vao_ids(&self) -> Array {
-        let string_vec: Vec<JsValue> = self
-            .deref()
-            .vao_ids()
-            .iter()
-            .map(|el| JsValue::from_str(el))
-            .collect();
-
-        let array = Array::from_iter(string_vec);
-
-        array
+        let ids = self.deref().vao_ids();
+        utils::strings_to_js_array(ids)
     }
 
     pub fn buffer_id(&self) -> String {

@@ -1,8 +1,8 @@
 use crate::Id;
+use crate::UniformContext;
+use crate::UniformCreateUpdateCallback;
 use crate::UniformJs;
 use crate::UniformJsInner;
-use crate::UniformCallback;
-use crate::UniformContext;
 use crate::UniformShouldUpdateCallback;
 use std::collections::HashMap;
 use std::fmt::Debug;
@@ -15,8 +15,8 @@ pub struct Uniform<ProgramId: Id, UniformId: Id, UserCtx: Clone> {
     program_ids: Vec<ProgramId>,
     uniform_id: UniformId,
     uniform_locations: HashMap<ProgramId, WebGlUniformLocation>,
-    initialize_callback: UniformCallback<UserCtx>,
-    update_callback: Option<UniformCallback<UserCtx>>,
+    uniform_create_callback: UniformCreateUpdateCallback<UserCtx>,
+    update_callback: Option<UniformCreateUpdateCallback<UserCtx>>,
     should_update_callback: Option<UniformShouldUpdateCallback<UserCtx>>,
     use_init_callback_for_update: bool,
 }
@@ -28,8 +28,8 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Uniform<ProgramId, UniformId,
         uniform_id: UniformId,
         // a single "conceptual" uniform can be shared across multiple programs and updated in tandem
         uniform_locations: HashMap<ProgramId, WebGlUniformLocation>,
-        initialize_callback: UniformCallback<UserCtx>,
-        update_callback: Option<UniformCallback<UserCtx>>,
+        initialize_callback: UniformCreateUpdateCallback<UserCtx>,
+        update_callback: Option<UniformCreateUpdateCallback<UserCtx>>,
         should_update_callback: Option<UniformShouldUpdateCallback<UserCtx>>,
         use_init_callback_for_update: bool,
     ) -> Self {
@@ -37,7 +37,7 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Uniform<ProgramId, UniformId,
             program_ids,
             uniform_id,
             uniform_locations,
-            initialize_callback,
+            uniform_create_callback: initialize_callback,
             update_callback,
             should_update_callback,
             use_init_callback_for_update,
@@ -56,15 +56,15 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Uniform<ProgramId, UniformId,
         &self.uniform_locations
     }
 
-    pub fn initialize_callback(&self) -> UniformCallback<UserCtx> {
-        self.initialize_callback.clone()
+    pub fn initialize_callback(&self) -> UniformCreateUpdateCallback<UserCtx> {
+        self.uniform_create_callback.clone()
     }
 
     pub fn should_update_callback(&self) -> Option<UniformShouldUpdateCallback<UserCtx>> {
         self.should_update_callback.as_ref().map(Clone::clone)
     }
 
-    pub fn update_callback(&self) -> Option<UniformCallback<UserCtx>> {
+    pub fn update_callback(&self) -> Option<UniformCreateUpdateCallback<UserCtx>> {
         self.update_callback.as_ref().map(Clone::clone)
     }
 
@@ -89,11 +89,22 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Uniform<ProgramId, UniformId,
 
             let ctx = UniformContext::new(gl.clone(), now, uniform_location.clone(), user_ctx);
             let should_update_callback = self.should_update_callback().unwrap_or_default();
-            if (should_update_callback)(&ctx) {
+
+            let should_call = match &*should_update_callback {
+                crate::Either::A(rust_callback) => (rust_callback)(&ctx),
+                crate::Either::B(js_callback) => {
+                    JsValue::as_bool(&js_callback.call0(&JsValue::NULL).expect(
+                        "Should be able to call `should_update_callback` JavaScript callback",
+                    ))
+                    .unwrap_or(false)
+                }
+            };
+
+            if should_call {
                 if self.use_init_callback_for_update {
-                    (self.initialize_callback)(&ctx);
+                    self.uniform_create_callback.call(&ctx);
                 } else if let Some(update_callback) = &self.update_callback {
-                    (update_callback)(&ctx)
+                    update_callback.call(&ctx)
                 }
             }
 

@@ -1,4 +1,6 @@
-use crate::{Id, ProgramLinkJs, ProgramLinkJsBuilder, ProgramLinkBuilderJsInner, ProgramLinkJsInner};
+use crate::{
+    Id, ProgramLinkBuilderJsInner, ProgramLinkJs, ProgramLinkJsBuilder, ProgramLinkJsInner,
+};
 use std::fmt::Debug;
 use std::hash::Hash;
 use thiserror::Error;
@@ -82,7 +84,6 @@ impl From<ProgramLink<String, String, String>> for JsValue {
         js_program_link.into()
     }
 }
-
 
 #[derive(Error, Debug)]
 pub enum ProgramLinkBuildError {

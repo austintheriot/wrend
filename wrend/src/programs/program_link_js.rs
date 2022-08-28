@@ -1,6 +1,6 @@
 use std::ops::{Deref, DerefMut};
 
-use crate::{ProgramLinkJsBuilder, ProgramLink};
+use crate::{ProgramLink, ProgramLinkJsBuilder};
 use js_sys::Array;
 use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
 
@@ -39,8 +39,8 @@ impl ProgramLinkJs {
             .iter()
             .map(|s| JsValue::from_str(s))
             .collect();
-        let array = Array::from_iter(string_vec);
-        array
+
+        Array::from_iter(string_vec)
     }
 
     pub fn builder() -> ProgramLinkJsBuilder {

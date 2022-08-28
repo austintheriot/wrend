@@ -109,3 +109,15 @@ impl<F: ?Sized> From<Rc<F>> for CallbackWithContext<F> {
         }
     }
 }
+
+impl From<CallbackWithContext<Function>> for Function {
+    fn from(callback_with_context: CallbackWithContext<Function>) -> Self {
+        (*callback_with_context).clone()
+    }
+}
+
+impl From<&CallbackWithContext<Function>> for Function {
+    fn from(callback_with_context: &CallbackWithContext<Function>) -> Self {
+        (**callback_with_context).clone()
+    }
+}

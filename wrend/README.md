@@ -20,6 +20,7 @@ The following use cases should guide the development of this library:
   - Check that all structs implement `pub fn new()` where appropriate
   - Check that all structs have `#[wasm_bindgen(constructor)]` where needed
   - Make sure all public JavaScript API struct docs point / link to their respective Rust counterparts for documentation
+  - Derive all traits for Js structs
 
 - Bug: WebGL2 rendering contexts are not getting discarded when handle is dropped: enable this manually through browser extension (see MDN WebGL best practices article)
 

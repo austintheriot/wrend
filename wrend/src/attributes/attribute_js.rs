@@ -10,12 +10,17 @@ pub type AttributeJsInner = Attribute<String, String, String>;
 #[wasm_bindgen(js_name = Attribute)]
 pub struct AttributeJs(AttributeJsInner);
 
-#[wasm_bindgen(js_class = Attribute)] 
+#[wasm_bindgen(js_class = Attribute)]
 impl AttributeJs {
     pub fn vao_ids(&self) -> Array {
-        let vao_ids: Vec<JsValue> = self.deref().vao_ids().iter().map(|s| JsValue::from_str(s)).collect();
-        let array = Array::from_iter(vao_ids);
-        array
+        let vao_ids: Vec<JsValue> = self
+            .deref()
+            .vao_ids()
+            .iter()
+            .map(|s| JsValue::from_str(s))
+            .collect();
+
+        Array::from_iter(vao_ids)
     }
 
     pub fn buffer_id(&self) -> String {

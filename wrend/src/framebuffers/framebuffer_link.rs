@@ -1,7 +1,6 @@
 use crate::{FramebufferCreateCallback, FramebufferCreateContext, Id, IdDefault};
 use std::fmt::Debug;
 use std::hash::Hash;
-use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{WebGl2RenderingContext, WebGlFramebuffer, WebGlTexture};
 
 #[derive(Clone)]

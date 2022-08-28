@@ -1,4 +1,4 @@
-use crate::{Id, BufferJs, BufferJsInner};
+use crate::{BufferJs, BufferJsInner, Id};
 use std::fmt::Debug;
 use std::hash::Hash;
 use wasm_bindgen::JsValue;
@@ -49,7 +49,6 @@ impl<BufferId: Id> PartialEq for Buffer<BufferId> {
 }
 
 impl<BufferId: Id> Eq for Buffer<BufferId> {}
-
 
 impl From<BufferJsInner> for JsValue {
     fn from(buffer: BufferJsInner) -> Self {

@@ -1,4 +1,4 @@
-use crate::{RendererJs, RendererHandle};
+use crate::{RendererHandle, RendererJs};
 use js_sys::{Function, Object};
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;

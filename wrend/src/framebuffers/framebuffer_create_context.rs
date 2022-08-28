@@ -16,13 +16,13 @@ impl<UserCtx: Clone> FramebufferCreateContext<UserCtx> {
     pub fn new(
         gl: WebGl2RenderingContext,
         now: f64,
-        texture: Option<WebGlTexture>,
+        webgl_texture: Option<WebGlTexture>,
         user_ctx: Option<UserCtx>,
     ) -> Self {
         Self {
             gl,
             now,
-            webgl_texture: texture,
+            webgl_texture,
             user_ctx,
         }
     }

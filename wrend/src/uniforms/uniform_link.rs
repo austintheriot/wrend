@@ -1,6 +1,6 @@
 use crate::Bridge;
 use crate::Id;
-use crate::UniformCallback;
+use crate::UniformCreateUpdateCallback;
 use crate::UniformShouldUpdateCallback;
 use std::fmt::Debug;
 use std::hash::Hash;
@@ -11,8 +11,8 @@ use std::hash::Hash;
 pub struct UniformLink<ProgramId: Id, UniformId: Id, UserCtx: Clone> {
     program_ids: Vec<ProgramId>,
     uniform_id: UniformId,
-    initialize_callback: UniformCallback<UserCtx>,
-    update_callback: Option<UniformCallback<UserCtx>>,
+    initialize_callback: UniformCreateUpdateCallback<UserCtx>,
+    update_callback: Option<UniformCreateUpdateCallback<UserCtx>>,
     should_update_callback: Option<UniformShouldUpdateCallback<UserCtx>>,
     use_init_callback_for_update: bool,
 }
@@ -21,7 +21,7 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> UniformLink<ProgramId, Unifor
     pub fn new(
         program_ids: impl Into<Bridge<ProgramId>>,
         uniform_id: UniformId,
-        initialize_callback: impl Into<UniformCallback<UserCtx>>,
+        initialize_callback: impl Into<UniformCreateUpdateCallback<UserCtx>>,
     ) -> Self {
         let program_id_bridge: Bridge<ProgramId> = program_ids.into();
         let program_ids = program_id_bridge.into();
@@ -43,13 +43,13 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> UniformLink<ProgramId, Unifor
         &self.uniform_id
     }
 
-    pub fn initialize_callback(&self) -> UniformCallback<UserCtx> {
+    pub fn initialize_callback(&self) -> UniformCreateUpdateCallback<UserCtx> {
         self.initialize_callback.clone()
     }
 
     pub fn set_initialize_callback(
         &mut self,
-        callback: impl Into<UniformCallback<UserCtx>>,
+        callback: impl Into<UniformCreateUpdateCallback<UserCtx>>,
     ) -> &mut Self {
         self.initialize_callback = callback.into();
         self
@@ -67,13 +67,13 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> UniformLink<ProgramId, Unifor
         self
     }
 
-    pub fn update_callback(&self) -> Option<UniformCallback<UserCtx>> {
+    pub fn update_callback(&self) -> Option<UniformCreateUpdateCallback<UserCtx>> {
         self.update_callback.as_ref().map(Clone::clone)
     }
 
     pub fn set_update_callback(
         &mut self,
-        callback: impl Into<UniformCallback<UserCtx>>,
+        callback: impl Into<UniformCreateUpdateCallback<UserCtx>>,
     ) -> &mut Self {
         self.update_callback.replace(callback.into());
         self

@@ -1,4 +1,4 @@
-use std::marker::PhantomData;
+use std::ops::Deref;
 
 use js_sys::Function;
 use wasm_bindgen::{JsCast, JsValue};
@@ -34,14 +34,14 @@ impl<L, R> Either<L, R> {
         }
     }
 
-    pub fn a(self) -> Option<L> {
+    pub fn a(&self) -> Option<&L> {
         match self {
             Either::A(a) => Some(a),
             Either::B(_) => None,
         }
     }
 
-    pub fn b(self) -> Option<R> {
+    pub fn b(&self) -> Option<&R> {
         match self {
             Either::A(_) => None,
             Either::B(b) => Some(b),
@@ -63,27 +63,17 @@ impl<L, R> Either<L, R> {
     }
 }
 
+impl<F: ?Sized> Either<CallbackWithContext<F>, CallbackWithContext<Function>> {
+    /// Extract the JavaScript function out of a Rust / JavaScript `Either` callback, if it exists
+    pub fn js_function(&self) -> Option<Function> {
+        self.b().map(Deref::deref).map(Clone::clone)
+    }
 
-impl<A, R: JsCast> Either<CallbackWithContext<dyn Fn(A) -> R>, CallbackWithContext<Function>> {
-    /// See implementation of `call` for [Either](crate::Either)
-    /// 
-    /// This is the same function, except with the ability to return a particular value from the callback
-    pub fn call_with_return(&self, a: A) -> R {
-        match &*self {
-            Either::A(rust_callback) => (rust_callback)(a),
-            Either::B(js_callback) => {
-                let result = js_callback
-                    .call(&JsValue::NULL)
-                    .expect("JavaScript callback produced an error when called");
-                let return_value: R = result.dyn_into().expect(&format!(
-                    "JsValue could not be converted to the expected type"
-                ));
-                return_value
-            }
-        }
+    /// Extract the Rust function out of a Rust / JavaScript `Either` callback, if it exists
+    pub fn rust_function(&self) -> Option<&F> {
+        self.a().map(Deref::deref)
     }
 }
-
 
 impl<A> Either<CallbackWithContext<dyn Fn(A)>, CallbackWithContext<Function>> {
     /// Makes an `Either` that is holding a Rust callback or a JavaScript callback callable as a single unit,
@@ -102,6 +92,68 @@ impl<A> Either<CallbackWithContext<dyn Fn(A)>, CallbackWithContext<Function>> {
                 js_callback
                     .call(&JsValue::NULL)
                     .expect("JavaScript callback produced an error when called");
+            }
+        }
+    }
+}
+
+impl<A, R: JsCast> Either<CallbackWithContext<dyn Fn(A) -> R>, CallbackWithContext<Function>> {
+    /// See implementation of `call` for [Either](crate::Either)
+    ///
+    /// This is the same function, except with the ability to return a particular value from the callback
+    pub fn call_with_return(&self, a: A) -> R {
+        match &*self {
+            Either::A(rust_callback) => (rust_callback)(a),
+            Either::B(js_callback) => {
+                let result = js_callback
+                    .call(&JsValue::NULL)
+                    .expect("JavaScript callback produced an error when called");
+                let return_value: R = result
+                    .dyn_into()
+                    .expect("JsValue could not be converted to the expected type");
+                return_value
+            }
+        }
+    }
+}
+
+impl<A: JsCast> Either<CallbackWithContext<dyn Fn(A)>, CallbackWithContext<Function>> {
+    /// See implementation of `call` for [Either](crate::Either)
+    ///
+    /// This is the same function, except the JavaScript callback is also called with the the same value
+    /// as the Rust callback, which requires converting it into a JsValue
+    pub fn call_with_arg(&self, a: A) {
+        match &*self {
+            Either::A(rust_callback) => (rust_callback)(a),
+            Either::B(js_callback) => {
+                js_callback
+                    .call1(&JsValue::NULL, &a.into())
+                    .expect("JavaScript callback produced an error when called");
+            }
+        }
+    }
+}
+
+impl<A: JsCast, R: JsCast>
+    Either<CallbackWithContext<dyn Fn(A) -> R>, CallbackWithContext<Function>>
+{
+    /// See implementation of `call` for [Either](crate::Either)
+    ///
+    /// This is the same function, except the JavaScript callback is also called with the the same value
+    /// as the Rust callback, which requires converting it into a JsValue.
+    ///
+    /// It also returns whatever value was produced from either callback.
+    pub fn call_with_arg_and_return(&self, a: A) -> R {
+        match &*self {
+            Either::A(rust_callback) => (rust_callback)(a),
+            Either::B(js_callback) => {
+                let result = js_callback
+                    .call1(&JsValue::NULL, &a.into())
+                    .expect("JavaScript callback produced an error when called");
+                let return_value: R = result
+                    .dyn_into()
+                    .expect("JsValue could not be converted to the expected type");
+                return_value
             }
         }
     }

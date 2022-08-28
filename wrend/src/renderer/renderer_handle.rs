@@ -1,6 +1,6 @@
 use crate::{
-    recording_handlers, AnimationCallback, AnimationData, Id, IdName, RendererHandleJs,
-    RendererHandleJsInner, RecordingData, Renderer,
+    recording_handlers, AnimationCallback, AnimationData, Id, IdName, RecordingData, Renderer,
+    RendererHandleJs, RendererHandleJsInner,
 };
 
 use log::{error, info};

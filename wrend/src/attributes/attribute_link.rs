@@ -1,5 +1,6 @@
 use crate::{
-    AttributeCreateCallback, AttributeCreateContext, AttributeLocation, Bridge, Id, IdName, AttributeLinkJsInner, AttributeLinkJs,
+    AttributeCreateCallback, AttributeCreateContext, AttributeLinkJs, AttributeLinkJsInner,
+    AttributeLocation, Bridge, Id, IdName,
 };
 use std::fmt::Debug;
 use std::hash::Hash;

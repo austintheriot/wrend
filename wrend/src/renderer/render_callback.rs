@@ -173,26 +173,24 @@ impl<
     >
 {
     fn from(callback: F) -> Self {
-        Self(Either::new_a(CallbackWithContext::from(
-            Rc::new(callback)
-                as Rc<
-                    dyn Fn(
-                        &Renderer<
-                            VertexShaderId,
-                            FragmentShaderId,
-                            ProgramId,
-                            UniformId,
-                            BufferId,
-                            AttributeId,
-                            TextureId,
-                            FramebufferId,
-                            TransformFeedbackId,
-                            VertexArrayObjectId,
-                            UserCtx,
-                        >,
-                    ),
-                >,
-        )))
+        Self(Either::new_a(CallbackWithContext::from(Rc::new(callback)
+            as Rc<
+                dyn Fn(
+                    &Renderer<
+                        VertexShaderId,
+                        FragmentShaderId,
+                        ProgramId,
+                        UniformId,
+                        BufferId,
+                        AttributeId,
+                        TextureId,
+                        FramebufferId,
+                        TransformFeedbackId,
+                        VertexArrayObjectId,
+                        UserCtx,
+                    >,
+                ),
+            >)))
     }
 }
 
