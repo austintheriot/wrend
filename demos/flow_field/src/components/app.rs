@@ -3,7 +3,7 @@ use crate::{
         attribute_id::AttributeId,
         buffer_id::BufferId,
         create_buffer::{
-            create_particle_buffer_a, create_particle_buffer_b, create_quad_vertex_buffer,
+            create_quad_vertex_buffer, make_create_particle_buffer_a, make_create_particle_buffer_b,
         },
         create_framebuffer::create_perlin_noise_framebuffer,
         create_position_attribute::{
@@ -95,14 +95,20 @@ pub fn app() -> Html {
                     .build()
                     .expect("Should build DrawParticles ProgramLink successfully");
 
+                let render_state_handle: RenderStateHandle = render_state.into();
+
                 let vertex_buffer_link =
                     BufferLink::new(BufferId::QuadVertexBuffer, create_quad_vertex_buffer);
 
-                let particle_buffer_a_link =
-                    BufferLink::new(BufferId::ParticleBufferA, create_particle_buffer_a);
+                let particle_buffer_a_link = BufferLink::new(
+                    BufferId::ParticleBufferA,
+                    make_create_particle_buffer_a(render_state_handle.clone()),
+                );
 
-                let particle_buffer_b_link =
-                    BufferLink::new(BufferId::ParticleBufferB, create_particle_buffer_b);
+                let particle_buffer_b_link = BufferLink::new(
+                    BufferId::ParticleBufferB,
+                    make_create_particle_buffer_b(render_state_handle.clone()),
+                );
 
                 let a_particle_position_link_a = AttributeLink::new(
                     (VAOId::DrawParticles, VAOId::UpdateParticlesA),
@@ -187,8 +193,6 @@ pub fn app() -> Html {
 
                     Ok(gl)
                 };
-
-                let render_state_handle: RenderStateHandle = render_state.into();
 
                 let mut renderer_builder = Renderer::builder();
                 renderer_builder

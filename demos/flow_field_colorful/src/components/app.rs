@@ -7,7 +7,7 @@ use crate::{
             create_quad_vertex_attribute,
         },
         create_buffer::{
-            create_particle_buffer_a, create_particle_buffer_b, create_particle_color_buffer,
+            make_create_particle_buffer_a, make_create_particle_buffer_b, make_create_particle_color_buffer,
             create_quad_vertex_buffer,
         },
         create_framebuffer::create_perlin_noise_framebuffer,
@@ -98,17 +98,19 @@ pub fn app() -> Html {
                     .build()
                     .expect("Should build DrawParticles ProgramLink successfully");
 
+                    let render_state_handle: RenderStateHandle = render_state.into();
+
                 let vertex_buffer_link =
                     BufferLink::new(BufferId::QuadVertexBuffer, create_quad_vertex_buffer);
 
                 let particle_buffer_a_link =
-                    BufferLink::new(BufferId::ParticleBufferA, create_particle_buffer_a);
+                    BufferLink::new(BufferId::ParticleBufferA, make_create_particle_buffer_a(render_state_handle.clone()));
 
                 let particle_buffer_b_link =
-                    BufferLink::new(BufferId::ParticleBufferB, create_particle_buffer_b);
+                    BufferLink::new(BufferId::ParticleBufferB, make_create_particle_buffer_b(render_state_handle.clone()));
 
                 let particle_color_buffer_link =
-                    BufferLink::new(BufferId::ParticleColorBuffer, create_particle_color_buffer);
+                    BufferLink::new(BufferId::ParticleColorBuffer, make_create_particle_color_buffer(render_state_handle.clone()));
 
                 let a_particle_color_link = AttributeLink::new(
                     VAOId::DrawParticles,
@@ -187,7 +189,6 @@ pub fn app() -> Html {
                 let transform_feedback_link =
                     TransformFeedbackLink::new(TransformFeedbackId::Particle);
 
-                let render_state_handle: RenderStateHandle = render_state.into();
 
                 // provide custom attributes when getting WebGL context
                 let get_context_callback = |canvas: &HtmlCanvasElement| {

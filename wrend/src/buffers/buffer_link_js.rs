@@ -1,12 +1,12 @@
 use std::ops::{Deref, DerefMut};
 
-use js_sys::{Function, Object};
+use js_sys::{Function};
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
 use crate::BufferLink;
 
-pub type BufferLinkJsInner = BufferLink<String, Object>;
+pub type BufferLinkJsInner = BufferLink<String>;
 
 #[wasm_bindgen(js_name = BufferLink)]
 pub struct BufferLinkJs(BufferLinkJsInner);
@@ -26,9 +26,8 @@ impl BufferLinkJs {
         &self,
         gl: WebGl2RenderingContext,
         now: f64,
-        user_ctx: Option<Object>,
     ) -> WebGlBuffer {
-        self.deref().create_buffer(gl, now, user_ctx)
+        self.deref().create_buffer(gl, now)
     }
 }
 

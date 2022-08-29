@@ -1,7 +1,7 @@
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 use wrend::{BufferCreateContext, QUAD};
 
-pub fn create_vertex_buffer<UserCtx>(ctx: &BufferCreateContext<UserCtx>) -> WebGlBuffer {
+pub fn create_vertex_buffer(ctx: &BufferCreateContext) -> WebGlBuffer {
     let gl = ctx.gl();
     let buffer = gl.create_buffer().unwrap();
     gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&buffer));

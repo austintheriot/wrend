@@ -5,15 +5,15 @@ use std::hash::Hash;
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
 #[derive(Clone)]
-pub struct BufferLink<BufferId: Id, UserCtx: Clone + 'static> {
+pub struct BufferLink<BufferId: Id> {
     buffer_id: BufferId,
-    buffer_create_callback: BufferCreateCallback<UserCtx>,
+    buffer_create_callback: BufferCreateCallback,
 }
 
-impl<BufferId: Id, UserCtx: Clone> BufferLink<BufferId, UserCtx> {
+impl<BufferId: Id> BufferLink<BufferId> {
     pub fn new(
         buffer_id: impl Into<BufferId>,
-        buffer_create_callback: impl Into<BufferCreateCallback<UserCtx>>,
+        buffer_create_callback: impl Into<BufferCreateCallback>,
     ) -> Self {
         Self {
             buffer_id: buffer_id.into(),
@@ -29,15 +29,14 @@ impl<BufferId: Id, UserCtx: Clone> BufferLink<BufferId, UserCtx> {
         &self,
         gl: WebGl2RenderingContext,
         now: f64,
-        user_ctx: Option<UserCtx>,
     ) -> WebGlBuffer {
-        let framebuffer_create_context = BufferCreateContext::new(gl, now, user_ctx);
+        let framebuffer_create_context = BufferCreateContext::new(gl, now);
         self.buffer_create_callback
             .call_with_return(&framebuffer_create_context)
     }
 }
 
-impl<BufferId: Id, UserCtx: Clone> Debug for BufferLink<BufferId, UserCtx> {
+impl<BufferId: Id> Debug for BufferLink<BufferId> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("BufferLink")
             .field("buffer_id", &self.buffer_id)
@@ -45,16 +44,16 @@ impl<BufferId: Id, UserCtx: Clone> Debug for BufferLink<BufferId, UserCtx> {
     }
 }
 
-impl<BufferId: Id, UserCtx: Clone> Hash for BufferLink<BufferId, UserCtx> {
+impl<BufferId: Id> Hash for BufferLink<BufferId> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.buffer_id.hash(state);
     }
 }
 
-impl<BufferId: Id, UserCtx: Clone> PartialEq for BufferLink<BufferId, UserCtx> {
+impl<BufferId: Id> PartialEq for BufferLink<BufferId> {
     fn eq(&self, other: &Self) -> bool {
         self.buffer_id == other.buffer_id
     }
 }
 
-impl<BufferId: Id, UserCtx: Clone> Eq for BufferLink<BufferId, UserCtx> {}
+impl<BufferId: Id> Eq for BufferLink<BufferId> {}

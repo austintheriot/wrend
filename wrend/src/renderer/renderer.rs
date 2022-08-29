@@ -376,7 +376,7 @@ pub struct RendererBuilder<
     programs: HashMap<ProgramId, WebGlProgram>,
     uniform_links: HashSet<UniformLink<ProgramId, UniformId>>,
     uniforms: HashMap<UniformId, Uniform<ProgramId, UniformId>>,
-    buffer_links: HashSet<BufferLink<BufferId, UserCtx>>,
+    buffer_links: HashSet<BufferLink<BufferId>>,
     buffers: HashMap<BufferId, Buffer<BufferId>>,
     attribute_links: HashSet<AttributeLink<VertexArrayObjectId, BufferId, AttributeId>>,
     attribute_locations: HashMap<AttributeId, u32>,
@@ -565,10 +565,7 @@ impl<
     }
 
     /// Saves a link that will be used to build a WebGL buffer at build time.
-    pub fn add_buffer_link(
-        &mut self,
-        buffer_link: impl Into<BufferLink<BufferId, UserCtx>>,
-    ) -> &mut Self {
+    pub fn add_buffer_link(&mut self, buffer_link: impl Into<BufferLink<BufferId>>) -> &mut Self {
         self.buffer_links.insert(buffer_link.into());
 
         self
@@ -576,7 +573,7 @@ impl<
 
     pub fn add_buffer_links(
         &mut self,
-        buffer_links: impl Into<Bridge<BufferLink<BufferId, UserCtx>>>,
+        buffer_links: impl Into<Bridge<BufferLink<BufferId>>>,
     ) -> &mut Self {
         let buffer_link_bridge: Bridge<_> = buffer_links.into();
         let buffer_links: Vec<_> = buffer_link_bridge.into();
@@ -945,11 +942,10 @@ impl<
     fn create_buffers(&mut self) -> Result<&mut Self, CreateBufferError> {
         let gl = self.gl.as_ref().ok_or(CreateBufferError::NoContext)?;
         let now = Self::now();
-        let user_ctx = &self.user_ctx;
 
         for buffer_link in &self.buffer_links {
             let buffer_id = buffer_link.buffer_id().clone();
-            let webgl_buffer = buffer_link.create_buffer(gl.clone(), now, user_ctx.clone());
+            let webgl_buffer = buffer_link.create_buffer(gl.clone(), now);
             let buffer = Buffer::new(buffer_id.clone(), webgl_buffer);
             self.buffers.insert(buffer_id, buffer);
         }

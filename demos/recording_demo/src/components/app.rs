@@ -103,7 +103,7 @@ pub fn app() -> Html {
 
                 let vertex_buffer_link = BufferLink::new(
                     BufferId::VertexBuffer,
-                    |ctx: &BufferCreateContext<UseStateHandle<i32>>| {
+                    |ctx: &BufferCreateContext| {
                         let gl = ctx.gl();
                         let buffer = gl.create_buffer().unwrap();
                         gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&buffer));
