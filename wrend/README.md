@@ -16,6 +16,8 @@ The following use cases should guide the development of this library:
 
 ## Todo
 
+- In progress: Remove all `user_ctx` references to link contexts, and allow their associated callbacks to supply contexts as the argument for their JavaScript functions
+
 - Implementing JavaScript API
   - Check that all structs implement `pub fn new()` where appropriate
   - Check that all structs have `#[wasm_bindgen(constructor)]` where needed
