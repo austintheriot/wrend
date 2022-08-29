@@ -1,10 +1,7 @@
+use crate::{AttributeCreateContext, AttributeLocation, IntoJsWrapper};
 use std::ops::{Deref, DerefMut};
-
-use js_sys::{Array, Function, Object};
-use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
+use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
-
-use crate::{utils, AttributeCreateContext, AttributeLocation, IntoJsWrapper};
 
 pub type AttributeCreateContextJsInner = AttributeCreateContext;
 
@@ -72,6 +69,20 @@ impl From<AttributeCreateContext> for AttributeCreateContextJs {
 }
 
 impl IntoJsWrapper for AttributeCreateContext {
+    type Result = AttributeCreateContextJs;
+
+    fn into_js_wrapper(self) -> Self::Result {
+        self.into()
+    }
+}
+
+impl From<&AttributeCreateContext> for AttributeCreateContextJs {
+    fn from(attribute_create_context: &AttributeCreateContext) -> Self {
+        AttributeCreateContextJs(attribute_create_context.to_owned())
+    }
+}
+
+impl IntoJsWrapper for &AttributeCreateContext {
     type Result = AttributeCreateContextJs;
 
     fn into_js_wrapper(self) -> Self::Result {

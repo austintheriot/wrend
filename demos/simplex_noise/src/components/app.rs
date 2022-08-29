@@ -73,7 +73,7 @@ pub fn app() -> Html {
                 let u_simplex_noise_texture = UniformLink::new(
                     ProgramId::PassThrough,
                     UniformId::USimplexNoiseTexture,
-                    |ctx: &UniformContext<_>| {
+                    |ctx: &UniformContext| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
                         gl.uniform1i(Some(uniform_location), 1);
@@ -89,7 +89,7 @@ pub fn app() -> Html {
                 let mut u_now = UniformLink::new(
                     ProgramId::SimplexNoise,
                     UniformId::UNow,
-                    |ctx: &UniformContext<RenderStateHandle>| {
+                    |ctx: &UniformContext| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
                         gl.uniform1f(Some(uniform_location), (ctx.now() / 2000.) as f32);

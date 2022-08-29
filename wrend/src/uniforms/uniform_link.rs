@@ -8,20 +8,20 @@ use std::hash::Hash;
 /// This contains one or more ids for a program and and id for a uniform that is associated with it
 /// At build time, these get linked together to find the uniform's associated location in the program
 #[derive(Clone)]
-pub struct UniformLink<ProgramId: Id, UniformId: Id, UserCtx: Clone> {
+pub struct UniformLink<ProgramId: Id, UniformId: Id> {
     program_ids: Vec<ProgramId>,
     uniform_id: UniformId,
-    initialize_callback: UniformCreateUpdateCallback<UserCtx>,
-    update_callback: Option<UniformCreateUpdateCallback<UserCtx>>,
-    should_update_callback: Option<UniformShouldUpdateCallback<UserCtx>>,
+    initialize_callback: UniformCreateUpdateCallback,
+    update_callback: Option<UniformCreateUpdateCallback>,
+    should_update_callback: Option<UniformShouldUpdateCallback>,
     use_init_callback_for_update: bool,
 }
 
-impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> UniformLink<ProgramId, UniformId, UserCtx> {
+impl<ProgramId: Id, UniformId: Id> UniformLink<ProgramId, UniformId> {
     pub fn new(
         program_ids: impl Into<Bridge<ProgramId>>,
         uniform_id: UniformId,
-        initialize_callback: impl Into<UniformCreateUpdateCallback<UserCtx>>,
+        initialize_callback: impl Into<UniformCreateUpdateCallback>,
     ) -> Self {
         let program_id_bridge: Bridge<ProgramId> = program_ids.into();
         let program_ids = program_id_bridge.into();
@@ -43,37 +43,37 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> UniformLink<ProgramId, Unifor
         &self.uniform_id
     }
 
-    pub fn initialize_callback(&self) -> UniformCreateUpdateCallback<UserCtx> {
+    pub fn initialize_callback(&self) -> UniformCreateUpdateCallback {
         self.initialize_callback.clone()
     }
 
     pub fn set_initialize_callback(
         &mut self,
-        callback: impl Into<UniformCreateUpdateCallback<UserCtx>>,
+        callback: impl Into<UniformCreateUpdateCallback>,
     ) -> &mut Self {
         self.initialize_callback = callback.into();
         self
     }
 
-    pub fn should_update_callback(&self) -> Option<UniformShouldUpdateCallback<UserCtx>> {
+    pub fn should_update_callback(&self) -> Option<UniformShouldUpdateCallback> {
         self.should_update_callback.as_ref().map(Clone::clone)
     }
 
     pub fn set_should_update_callback(
         &mut self,
-        callback: impl Into<UniformShouldUpdateCallback<UserCtx>>,
+        callback: impl Into<UniformShouldUpdateCallback>,
     ) -> &mut Self {
         self.should_update_callback.replace(callback.into());
         self
     }
 
-    pub fn update_callback(&self) -> Option<UniformCreateUpdateCallback<UserCtx>> {
+    pub fn update_callback(&self) -> Option<UniformCreateUpdateCallback> {
         self.update_callback.as_ref().map(Clone::clone)
     }
 
     pub fn set_update_callback(
         &mut self,
-        callback: impl Into<UniformCreateUpdateCallback<UserCtx>>,
+        callback: impl Into<UniformCreateUpdateCallback>,
     ) -> &mut Self {
         self.update_callback.replace(callback.into());
         self
@@ -92,9 +92,7 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> UniformLink<ProgramId, Unifor
     }
 }
 
-impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Debug
-    for UniformLink<ProgramId, UniformId, UserCtx>
-{
+impl<ProgramId: Id, UniformId: Id> Debug for UniformLink<ProgramId, UniformId> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("UniformLink")
             .field("program_ids", &self.program_ids)
@@ -110,24 +108,17 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Debug
     }
 }
 
-impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Hash
-    for UniformLink<ProgramId, UniformId, UserCtx>
-{
+impl<ProgramId: Id, UniformId: Id> Hash for UniformLink<ProgramId, UniformId> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.program_ids.hash(state);
         self.uniform_id.hash(state);
     }
 }
 
-impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> PartialEq
-    for UniformLink<ProgramId, UniformId, UserCtx>
-{
+impl<ProgramId: Id, UniformId: Id> PartialEq for UniformLink<ProgramId, UniformId> {
     fn eq(&self, other: &Self) -> bool {
         self.program_ids == other.program_ids && self.uniform_id == other.uniform_id
     }
 }
 
-impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Eq
-    for UniformLink<ProgramId, UniformId, UserCtx>
-{
-}
+impl<ProgramId: Id, UniformId: Id> Eq for UniformLink<ProgramId, UniformId> {}

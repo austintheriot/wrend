@@ -124,7 +124,7 @@ pub fn build_renderer(
 
     renderer_builder
         .set_canvas(canvas)
-        .set_user_ctx(app_context)
+        .set_user_ctx(app_context.clone())
         .set_render_callback(render)
         .add_vertex_shader_src(VertexShaderId::Quad, QUAD_VERTEX_SHADER.to_string())
         .add_fragment_shader_src(
@@ -156,9 +156,9 @@ pub fn build_renderer(
             averaged_render_a_framebuffer_link,
             averaged_render_b_framebuffer_link,
         ])
-        .add_uniform_links(create_general_ray_tracer_uniform_links())
-        .add_uniform_links(create_sphere_uniform_links())
-        .add_uniform_links(create_shared_uniform_links())
+        .add_uniform_links(create_general_ray_tracer_uniform_links(app_context.clone()))
+        .add_uniform_links(create_sphere_uniform_links(app_context.clone()))
+        .add_uniform_links(create_shared_uniform_links(app_context))
         .add_vao_link(VAOId::Quad);
 
     let renderer = renderer_builder

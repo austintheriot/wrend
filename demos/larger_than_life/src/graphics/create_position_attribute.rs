@@ -1,7 +1,7 @@
 use web_sys::WebGl2RenderingContext;
 use wrend::AttributeCreateContext;
 
-pub fn create_position_attribute<UserCtx: Clone>(ctx: &AttributeCreateContext<UserCtx>) {
+pub fn create_position_attribute(ctx: &AttributeCreateContext) {
     let gl = ctx.gl();
     let webgl_buffer = ctx.webgl_buffer();
     let attribute_location = ctx.attribute_location();

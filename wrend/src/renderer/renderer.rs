@@ -45,7 +45,7 @@ pub struct Renderer<
         VertexArrayObjectId,
         UserCtx,
     >,
-    uniforms: HashMap<UniformId, Uniform<ProgramId, UniformId, UserCtx>>,
+    uniforms: HashMap<UniformId, Uniform<ProgramId, UniformId>>,
     user_ctx: Option<UserCtx>,
     attributes: HashMap<AttributeId, Attribute<VertexArrayObjectId, BufferId, AttributeId>>,
     buffers: HashMap<BufferId, Buffer<BufferId>>,
@@ -131,14 +131,11 @@ impl<
         &self.programs
     }
 
-    pub fn uniform(
-        &self,
-        uniform_id: &UniformId,
-    ) -> Option<&Uniform<ProgramId, UniformId, UserCtx>> {
+    pub fn uniform(&self, uniform_id: &UniformId) -> Option<&Uniform<ProgramId, UniformId>> {
         self.uniforms.get(uniform_id)
     }
 
-    pub fn uniforms(&self) -> &HashMap<UniformId, Uniform<ProgramId, UniformId, UserCtx>> {
+    pub fn uniforms(&self) -> &HashMap<UniformId, Uniform<ProgramId, UniformId>> {
         &self.uniforms
     }
 
@@ -240,7 +237,7 @@ impl<
     /// necessary to do within the callback itself, unless you need to change programs, for whatever reason).
     pub fn update_uniform(&self, uniform_id: &UniformId) -> &Self {
         let now = Self::now();
-        let user_ctx = self.user_ctx();
+        let _user_ctx = self.user_ctx();
         let gl = self.gl();
         let programs = &self.programs;
         let uniform = self
@@ -248,7 +245,7 @@ impl<
             .get(uniform_id)
             .expect("UniformId should exist in registered uniforms");
 
-        uniform.update(gl, now, user_ctx.map(Clone::clone), programs);
+        uniform.update(gl, now, programs);
 
         self
     }
@@ -377,8 +374,8 @@ pub struct RendererBuilder<
     fragment_shaders: HashMap<FragmentShaderId, WebGlShader>,
     program_links: HashSet<ProgramLink<ProgramId, VertexShaderId, FragmentShaderId>>,
     programs: HashMap<ProgramId, WebGlProgram>,
-    uniform_links: HashSet<UniformLink<ProgramId, UniformId, UserCtx>>,
-    uniforms: HashMap<UniformId, Uniform<ProgramId, UniformId, UserCtx>>,
+    uniform_links: HashSet<UniformLink<ProgramId, UniformId>>,
+    uniforms: HashMap<UniformId, Uniform<ProgramId, UniformId>>,
     buffer_links: HashSet<BufferLink<BufferId, UserCtx>>,
     buffers: HashMap<BufferId, Buffer<BufferId>>,
     attribute_links: HashSet<AttributeLink<VertexArrayObjectId, BufferId, AttributeId>>,
@@ -546,7 +543,7 @@ impl<
     /// saved with their associated update functions.
     pub fn add_uniform_link(
         &mut self,
-        uniform_link: impl Into<UniformLink<ProgramId, UniformId, UserCtx>>,
+        uniform_link: impl Into<UniformLink<ProgramId, UniformId>>,
     ) -> &mut Self {
         self.uniform_links.insert(uniform_link.into());
 
@@ -555,7 +552,7 @@ impl<
 
     pub fn add_uniform_links(
         &mut self,
-        uniform_links: impl Into<Bridge<UniformLink<ProgramId, UniformId, UserCtx>>>,
+        uniform_links: impl Into<Bridge<UniformLink<ProgramId, UniformId>>>,
     ) -> &mut Self {
         let uniform_link_bridge: Bridge<_> = uniform_links.into();
         let uniform_links: Vec<_> = uniform_link_bridge.into();
@@ -608,9 +605,7 @@ impl<
 
     pub fn add_attribute_links(
         &mut self,
-        attribute_links: impl Into<
-            Bridge<AttributeLink<VertexArrayObjectId, BufferId, AttributeId>>,
-        >,
+        attribute_links: impl Into<Bridge<AttributeLink<VertexArrayObjectId, BufferId, AttributeId>>>,
     ) -> &mut Self {
         let attribute_link_bridge: Bridge<_> = attribute_links.into();
         let attribute_links: Vec<_> = attribute_link_bridge.into();
@@ -900,14 +895,14 @@ impl<
     /// Find the uniform's position in a shader and constructs necessary data for each uniform.
     fn create_uniform(
         &self,
-        uniform_link: &UniformLink<ProgramId, UniformId, UserCtx>,
-    ) -> Result<Uniform<ProgramId, UniformId, UserCtx>, CreateUniformError> {
+        uniform_link: &UniformLink<ProgramId, UniformId>,
+    ) -> Result<Uniform<ProgramId, UniformId>, CreateUniformError> {
         let uniform_id = uniform_link.uniform_id().clone();
         let program_ids = uniform_link.program_ids().clone();
         let use_init_callback_for_update = uniform_link.use_init_callback_for_update();
         let gl = self.gl.as_ref().ok_or(CreateUniformError::NoContext)?;
         let now = Self::now();
-        let user_ctx = self.user_ctx.as_ref().map(Clone::clone);
+        let _user_ctx = self.user_ctx.as_ref().map(Clone::clone);
         let initialize_callback = uniform_link.initialize_callback();
         let should_update_callback = uniform_link.should_update_callback();
         let update_callback = uniform_link.update_callback();
@@ -926,8 +921,7 @@ impl<
                     uniform_id: uniform_id.name(),
                 },
             )?;
-            let uniform_context =
-                UniformContext::new(gl.clone(), now, uniform_location.clone(), user_ctx.clone());
+            let uniform_context = UniformContext::new(gl.clone(), now, uniform_location.clone());
             initialize_callback.call(&uniform_context);
             uniform_locations.insert(program_id.to_owned(), uniform_location.clone());
 
@@ -980,7 +974,7 @@ impl<
     fn create_attributes(&mut self) -> Result<&mut Self, CreateAttributeError> {
         let gl = self.gl.as_ref().ok_or(CreateAttributeError::NoContext)?;
         let now = Self::now();
-        let user_ctx = self.user_ctx.clone();
+        let _user_ctx = self.user_ctx.clone();
 
         for attribute_link in &self.attribute_links {
             let vao_ids = attribute_link.vao_ids();

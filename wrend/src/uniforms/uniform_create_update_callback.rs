@@ -5,22 +5,20 @@ use std::fmt::Debug;
 use std::{ops::Deref, rc::Rc};
 
 #[derive(Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
-pub struct UniformCreateUpdateCallback<UserCtx>(
-    Either<CallbackWithContext<dyn Fn(&UniformContext<UserCtx>)>, CallbackWithContext<Function>>,
+pub struct UniformCreateUpdateCallback(
+    Either<CallbackWithContext<dyn Fn(&UniformContext)>, CallbackWithContext<Function>>,
 );
 
-impl<UserCtx> Deref for UniformCreateUpdateCallback<UserCtx> {
-    type Target = Either<
-        CallbackWithContext<dyn Fn(&UniformContext<UserCtx>)>,
-        CallbackWithContext<Function>,
-    >;
+impl Deref for UniformCreateUpdateCallback {
+    type Target =
+        Either<CallbackWithContext<dyn Fn(&UniformContext)>, CallbackWithContext<Function>>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl<UserCtx> Debug for UniformCreateUpdateCallback<UserCtx> {
+impl Debug for UniformCreateUpdateCallback {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_tuple("UniformCreateUpdateCallback")
             .field(&self.0)
@@ -28,27 +26,23 @@ impl<UserCtx> Debug for UniformCreateUpdateCallback<UserCtx> {
     }
 }
 
-impl<UserCtx, F: Fn(&UniformContext<UserCtx>) + 'static> From<F>
-    for UniformCreateUpdateCallback<UserCtx>
-{
+impl<F: Fn(&UniformContext) + 'static> From<F> for UniformCreateUpdateCallback {
     fn from(callback: F) -> Self {
         Self(Either::new_a(CallbackWithContext::from(
-            Rc::new(callback) as Rc<dyn Fn(&UniformContext<UserCtx>)>
+            Rc::new(callback) as Rc<dyn Fn(&UniformContext)>
         )))
     }
 }
 
-impl<UserCtx, F: Fn(&UniformContext<UserCtx>) + 'static> From<Rc<F>>
-    for UniformCreateUpdateCallback<UserCtx>
-{
+impl<F: Fn(&UniformContext) + 'static> From<Rc<F>> for UniformCreateUpdateCallback {
     fn from(callback: Rc<F>) -> Self {
         Self(Either::new_a(CallbackWithContext::from(
-            callback as Rc<dyn Fn(&UniformContext<UserCtx>)>,
+            callback as Rc<dyn Fn(&UniformContext)>,
         )))
     }
 }
 
-impl<UserCtx> From<Function> for UniformCreateUpdateCallback<UserCtx> {
+impl From<Function> for UniformCreateUpdateCallback {
     fn from(callback: Function) -> Self {
         Self(Either::new_b(CallbackWithContext::from(callback)))
     }

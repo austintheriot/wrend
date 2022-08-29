@@ -11,26 +11,26 @@ use wasm_bindgen::JsValue;
 use web_sys::{WebGl2RenderingContext, WebGlProgram, WebGlUniformLocation};
 
 #[derive(Clone)]
-pub struct Uniform<ProgramId: Id, UniformId: Id, UserCtx: Clone> {
+pub struct Uniform<ProgramId: Id, UniformId: Id> {
     program_ids: Vec<ProgramId>,
     uniform_id: UniformId,
     uniform_locations: HashMap<ProgramId, WebGlUniformLocation>,
-    uniform_create_callback: UniformCreateUpdateCallback<UserCtx>,
-    update_callback: Option<UniformCreateUpdateCallback<UserCtx>>,
-    should_update_callback: Option<UniformShouldUpdateCallback<UserCtx>>,
+    uniform_create_callback: UniformCreateUpdateCallback,
+    update_callback: Option<UniformCreateUpdateCallback>,
+    should_update_callback: Option<UniformShouldUpdateCallback>,
     use_init_callback_for_update: bool,
 }
 
-impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Uniform<ProgramId, UniformId, UserCtx> {
+impl<ProgramId: Id, UniformId: Id> Uniform<ProgramId, UniformId> {
     // @todo move into builder pattern
     pub(crate) fn new(
         program_ids: Vec<ProgramId>,
         uniform_id: UniformId,
         // a single "conceptual" uniform can be shared across multiple programs and updated in tandem
         uniform_locations: HashMap<ProgramId, WebGlUniformLocation>,
-        initialize_callback: UniformCreateUpdateCallback<UserCtx>,
-        update_callback: Option<UniformCreateUpdateCallback<UserCtx>>,
-        should_update_callback: Option<UniformShouldUpdateCallback<UserCtx>>,
+        initialize_callback: UniformCreateUpdateCallback,
+        update_callback: Option<UniformCreateUpdateCallback>,
+        should_update_callback: Option<UniformShouldUpdateCallback>,
         use_init_callback_for_update: bool,
     ) -> Self {
         Self {
@@ -56,15 +56,15 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Uniform<ProgramId, UniformId,
         &self.uniform_locations
     }
 
-    pub fn initialize_callback(&self) -> UniformCreateUpdateCallback<UserCtx> {
+    pub fn initialize_callback(&self) -> UniformCreateUpdateCallback {
         self.uniform_create_callback.clone()
     }
 
-    pub fn should_update_callback(&self) -> Option<UniformShouldUpdateCallback<UserCtx>> {
+    pub fn should_update_callback(&self) -> Option<UniformShouldUpdateCallback> {
         self.should_update_callback.as_ref().map(Clone::clone)
     }
 
-    pub fn update_callback(&self) -> Option<UniformCreateUpdateCallback<UserCtx>> {
+    pub fn update_callback(&self) -> Option<UniformCreateUpdateCallback> {
         self.update_callback.as_ref().map(Clone::clone)
     }
 
@@ -74,20 +74,18 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Uniform<ProgramId, UniformId,
         &self,
         gl: &WebGl2RenderingContext,
         now: f64,
-        user_ctx: Option<UserCtx>,
         programs: &HashMap<ProgramId, WebGlProgram>,
     ) {
         let uniform_locations = self.uniform_locations();
 
         for (program_id, uniform_location) in uniform_locations.iter() {
-            let user_ctx = user_ctx.clone();
             let program = programs
                 .get(program_id)
                 .expect("Program id should correspond to a saved WebGlProgram");
 
             gl.use_program(Some(program));
 
-            let ctx = UniformContext::new(gl.clone(), now, uniform_location.clone(), user_ctx);
+            let ctx = UniformContext::new(gl.clone(), now, uniform_location.clone());
             let should_update_callback = self.should_update_callback().unwrap_or_default();
 
             let should_call = match &*should_update_callback {
@@ -113,9 +111,7 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Uniform<ProgramId, UniformId,
     }
 }
 
-impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Debug
-    for Uniform<ProgramId, UniformId, UserCtx>
-{
+impl<ProgramId: Id, UniformId: Id> Debug for Uniform<ProgramId, UniformId> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Uniform")
             .field("id", &self.uniform_id)
@@ -123,21 +119,19 @@ impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Debug
             .finish()
     }
 }
-impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Hash for Uniform<ProgramId, UniformId, UserCtx> {
+impl<ProgramId: Id, UniformId: Id> Hash for Uniform<ProgramId, UniformId> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.uniform_id.hash(state);
     }
 }
 
-impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> PartialEq
-    for Uniform<ProgramId, UniformId, UserCtx>
-{
+impl<ProgramId: Id, UniformId: Id> PartialEq for Uniform<ProgramId, UniformId> {
     fn eq(&self, other: &Self) -> bool {
         self.uniform_id == other.uniform_id && self.uniform_locations == other.uniform_locations
     }
 }
 
-impl<ProgramId: Id, UniformId: Id, UserCtx: Clone> Eq for Uniform<ProgramId, UniformId, UserCtx> {}
+impl<ProgramId: Id, UniformId: Id> Eq for Uniform<ProgramId, UniformId> {}
 
 impl From<UniformJsInner> for JsValue {
     fn from(uniform: UniformJsInner) -> Self {

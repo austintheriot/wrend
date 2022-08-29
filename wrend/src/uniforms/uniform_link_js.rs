@@ -1,10 +1,9 @@
-use std::ops::{Deref, DerefMut};
-
 use crate::{utils, UniformLink};
-use js_sys::{Array, Function, Object};
+use js_sys::{Array, Function};
+use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;
 
-pub type UniformLinkJsInner = UniformLink<String, String, Object>;
+pub type UniformLinkJsInner = UniformLink<String, String>;
 
 #[wasm_bindgen(js_name = UniformLink)]
 pub struct UniformLinkJs(UniformLinkJsInner);

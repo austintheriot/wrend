@@ -1,5 +1,4 @@
 use super::attribute_location::AttributeLocation;
-use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
 /// Context that is used when a new attribute is created

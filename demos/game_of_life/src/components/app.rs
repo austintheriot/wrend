@@ -63,7 +63,7 @@ pub fn app() -> Html {
                 let u_texture = UniformLink::new(
                     (ProgramId::GameOfLife, ProgramId::PassThrough),
                     UniformId::UTexture,
-                    |ctx: &UniformContext<_>| {
+                    |ctx: &UniformContext| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
                         gl.uniform1i(Some(uniform_location), 0);

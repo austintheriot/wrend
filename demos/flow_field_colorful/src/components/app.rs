@@ -144,7 +144,7 @@ pub fn app() -> Html {
                 let u_white_noise_texture = UniformLink::new(
                     ProgramId::PerlinNoise,
                     UniformId::UWhiteNoiseTexture,
-                    |ctx: &UniformContext<_>| {
+                    |ctx: &UniformContext| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
                         gl.uniform1i(Some(uniform_location), 0);
@@ -157,7 +157,7 @@ pub fn app() -> Html {
                 let u_perlin_noise_texture = UniformLink::new(
                     (ProgramId::PassThrough, ProgramId::UpdateParticles),
                     UniformId::UPerlinNoiseTexture,
-                    |ctx: &UniformContext<_>| {
+                    |ctx: &UniformContext| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
                         gl.uniform1i(Some(uniform_location), 1);
@@ -173,7 +173,7 @@ pub fn app() -> Html {
                 let u_now_link = UniformLink::new(
                     ProgramId::PerlinNoise,
                     UniformId::UNow,
-                    |ctx: &UniformContext<RenderStateHandle>| {
+                    |ctx: &UniformContext| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
                         const TIME_CONSTANT: f64 = 50_000.0;

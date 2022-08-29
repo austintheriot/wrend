@@ -125,7 +125,7 @@ pub fn app() -> Html {
                     ProgramId,
                     BufferId::VertexBuffer,
                     PositionAttributeId,
-                    |ctx: &AttributeCreateContext<_>| {
+                    |ctx: &AttributeCreateContext| {
                         let gl = ctx.gl();
                         let attribute_location = ctx.attribute_location();
                         let webgl_buffer = ctx.webgl_buffer();
@@ -177,15 +177,12 @@ pub fn app() -> Html {
 
                 let mut renderer_builder = Renderer::builder();
 
-                let mut u_now_link = UniformLink::new(
-                    ProgramId,
-                    UniformId::UNow,
-                    |ctx: &UniformContext<UseStateHandle<i32>>| {
+                let mut u_now_link =
+                    UniformLink::new(ProgramId, UniformId::UNow, |ctx: &UniformContext| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
                         gl.uniform1f(Some(uniform_location), ctx.now() as f32);
-                    },
-                );
+                    });
                 u_now_link.set_use_init_callback_for_update(true);
 
                 renderer_builder

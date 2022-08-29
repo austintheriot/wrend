@@ -3,10 +3,8 @@ use js_sys::Function;
 use crate::{AttributeCreateContext, CallbackWithContext, Either};
 use std::{ops::Deref, rc::Rc};
 
-pub type AttributeCreateCallbackInner = Either<
-    CallbackWithContext<dyn Fn(AttributeCreateContext)>,
-    CallbackWithContext<Function>,
->;
+pub type AttributeCreateCallbackInner =
+    Either<CallbackWithContext<dyn Fn(&AttributeCreateContext)>, CallbackWithContext<Function>>;
 
 #[derive(Clone, Hash, Eq, PartialOrd, Ord, Debug)]
 pub struct AttributeCreateCallback(AttributeCreateCallbackInner);
@@ -25,22 +23,18 @@ impl Deref for AttributeCreateCallback {
     }
 }
 
-impl<F: Fn(AttributeCreateContext) + 'static> From<F>
-    for AttributeCreateCallback
-{
+impl<F: Fn(&AttributeCreateContext) + 'static> From<F> for AttributeCreateCallback {
     fn from(callback: F) -> Self {
         Self(Either::new_a(CallbackWithContext::from(
-            Rc::new(callback) as Rc<dyn Fn(AttributeCreateContext)>
+            Rc::new(callback) as Rc<dyn Fn(&AttributeCreateContext)>
         )))
     }
 }
 
-impl<F: Fn(AttributeCreateContext) + 'static> From<Rc<F>>
-    for AttributeCreateCallback
-{
+impl<F: Fn(&AttributeCreateContext) + 'static> From<Rc<F>> for AttributeCreateCallback {
     fn from(callback: Rc<F>) -> Self {
         Self(Either::new_a(CallbackWithContext::from(
-            callback as Rc<dyn Fn(AttributeCreateContext)>,
+            callback as Rc<dyn Fn(&AttributeCreateContext)>,
         )))
     }
 }

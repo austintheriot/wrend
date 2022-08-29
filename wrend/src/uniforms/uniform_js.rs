@@ -1,9 +1,9 @@
 use crate::{utils, Uniform};
-use js_sys::{Array, Map, Object};
+use js_sys::{Array, Map};
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;
 
-pub type UniformJsInner = Uniform<String, String, Object>;
+pub type UniformJsInner = Uniform<String, String>;
 
 #[wasm_bindgen(js_name = Uniform)]
 pub struct UniformJs(UniformJsInner);

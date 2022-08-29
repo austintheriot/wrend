@@ -140,7 +140,7 @@ impl<JsWrapper: Into<JsValue>, A: IntoJsWrapper<Result = JsWrapper>>
 {
     /// See implementation of `call` for [Either](crate::Either)
     ///
-    /// This is the same function, except the JavaScript callback is also with the Rust value, 
+    /// This is the same function, except the JavaScript callback is also with the Rust value,
     /// after converting the Rust value into a JavaScript-compatible type.
     pub fn call_with_arg_into_js_value(&self, a: A) {
         match &*self {

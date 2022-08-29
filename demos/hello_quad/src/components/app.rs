@@ -99,7 +99,7 @@ pub fn app() -> Html {
                     ProgramId,
                     BufferId::VertexBuffer,
                     PositionAttributeId,
-                    |ctx: &AttributeCreateContext<_>| {
+                    |ctx: &AttributeCreateContext| {
                         let gl = ctx.gl();
                         let attribute_location = ctx.attribute_location();
                         let webgl_buffer = ctx.webgl_buffer();
