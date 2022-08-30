@@ -6,15 +6,16 @@ use wrend::TextureCreateContext;
 
 /// Creates a texture that will eventually hold a complete render from WebGL
 pub fn make_create_render_texture(
+    app_context: AppContext,
     texture_id: TextureId,
-) -> impl Fn(&TextureCreateContext<AppContext>) -> WebGlTexture {
-    move |ctx: &TextureCreateContext<AppContext>| {
+) -> impl Fn(&TextureCreateContext) -> WebGlTexture {
+    move |ctx: &TextureCreateContext| {
         let gl = ctx.gl();
         let webgl_texture = gl
             .create_texture()
             .expect("Should be able to create textures from WebGL context");
 
-        let render_state = ctx.user_ctx().as_ref().unwrap().render_state.borrow();
+        let render_state = app_context.render_state.borrow();
         let pipeline = render_state.camera();
         let width = pipeline.width();
         let height = pipeline.height();

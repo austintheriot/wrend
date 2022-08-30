@@ -381,7 +381,7 @@ pub struct RendererBuilder<
     attribute_links: HashSet<AttributeLink<VertexArrayObjectId, BufferId, AttributeId>>,
     attribute_locations: HashMap<AttributeId, u32>,
     attributes: HashMap<AttributeId, Attribute<VertexArrayObjectId, BufferId, AttributeId>>,
-    texture_links: HashSet<TextureLink<TextureId, UserCtx>>,
+    texture_links: HashSet<TextureLink<TextureId>>,
     textures: HashMap<TextureId, Texture<TextureId>>,
     framebuffer_links: HashSet<FramebufferLink<FramebufferId, TextureId>>,
     framebuffers: HashMap<FramebufferId, Framebuffer<FramebufferId>>,
@@ -617,7 +617,7 @@ impl<
     /// Saves a link that will be used to build a buffer/attribute pair at build time.
     pub fn add_texture_link(
         &mut self,
-        texture_link: impl Into<TextureLink<TextureId, UserCtx>>,
+        texture_link: impl Into<TextureLink<TextureId>>,
     ) -> &mut Self {
         self.texture_links.insert(texture_link.into());
 
@@ -626,7 +626,7 @@ impl<
 
     pub fn add_texture_links(
         &mut self,
-        texture_links: impl Into<Bridge<TextureLink<TextureId, UserCtx>>>,
+        texture_links: impl Into<Bridge<TextureLink<TextureId>>>,
     ) -> &mut Self {
         let texture_link_bridge: Bridge<_> = texture_links.into();
         let texture_links: Vec<_> = texture_link_bridge.into();
@@ -1045,11 +1045,10 @@ impl<
     fn create_textures(&mut self) -> Result<&mut Self, CreateTextureError> {
         let gl = self.gl.as_ref().ok_or(CreateTextureError::NoContext)?;
         let now = Self::now();
-        let user_ctx = self.user_ctx.clone();
 
         for texture_link in &self.texture_links {
             let texture_id = texture_link.texture_id().clone();
-            let webgl_texture = texture_link.create_texture(gl.clone(), now, user_ctx.clone());
+            let webgl_texture = texture_link.create_texture(gl.clone(), now);
             let texture = Texture::new(texture_id.clone(), webgl_texture);
 
             self.textures.insert(texture_id, texture);

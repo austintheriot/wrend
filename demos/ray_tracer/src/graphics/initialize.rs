@@ -89,17 +89,17 @@ pub fn build_renderer(
 
     let prev_render_texture_link = TextureLink::new(
         TextureId::PrevRender,
-        make_create_render_texture(TextureId::PrevRender),
+        make_create_render_texture(app_context.clone(), TextureId::PrevRender),
     );
 
     let averaged_render_a_texture_link = TextureLink::new(
         TextureId::AveragedRenderA,
-        make_create_render_texture(TextureId::AveragedRenderA),
+        make_create_render_texture(app_context.clone(), TextureId::AveragedRenderA),
     );
 
     let averaged_render_b_texture_link = TextureLink::new(
         TextureId::AveragedRenderB,
-        make_create_render_texture(TextureId::AveragedRenderB),
+        make_create_render_texture(app_context.clone(), TextureId::AveragedRenderB),
     );
 
     let prev_render_framebuffer_link = FramebufferLink::new(

@@ -1,12 +1,12 @@
 use std::ops::{Deref, DerefMut};
 
-use js_sys::{Function, Object};
+use js_sys::Function;
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::{WebGl2RenderingContext, WebGlTexture};
 
 use crate::TextureLink;
 
-pub type TextureLinkJsInner = TextureLink<String, Object>;
+pub type TextureLinkJsInner = TextureLink<String>;
 
 #[wasm_bindgen(js_name = TextureLink)]
 pub struct TextureLinkJs(TextureLinkJsInner);
@@ -22,13 +22,8 @@ impl TextureLinkJs {
         self.deref().texture_id().to_owned()
     }
 
-    pub fn create_texture(
-        &self,
-        gl: WebGl2RenderingContext,
-        now: f64,
-        user_ctx: Option<Object>,
-    ) -> WebGlTexture {
-        self.deref().create_texture(gl, now, user_ctx)
+    pub fn create_texture(&self, gl: WebGl2RenderingContext, now: f64) -> WebGlTexture {
+        self.deref().create_texture(gl, now)
     }
 }
 

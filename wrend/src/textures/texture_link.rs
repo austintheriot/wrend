@@ -5,15 +5,15 @@ use std::hash::Hash;
 use web_sys::{WebGl2RenderingContext, WebGlTexture};
 
 #[derive(Clone)]
-pub struct TextureLink<TextureId: Id, UserCtx> {
+pub struct TextureLink<TextureId: Id> {
     texture_id: TextureId,
-    create_texture_callback: TextureCreateCallback<UserCtx>,
+    create_texture_callback: TextureCreateCallback,
 }
 
-impl<TextureId: Id, UserCtx> TextureLink<TextureId, UserCtx> {
+impl<TextureId: Id> TextureLink<TextureId> {
     pub fn new(
         texture_id: TextureId,
-        create_texture_callback: impl Into<TextureCreateCallback<UserCtx>>,
+        create_texture_callback: impl Into<TextureCreateCallback>,
     ) -> Self {
         Self {
             texture_id,
@@ -25,19 +25,14 @@ impl<TextureId: Id, UserCtx> TextureLink<TextureId, UserCtx> {
         &self.texture_id
     }
 
-    pub fn create_texture(
-        &self,
-        gl: WebGl2RenderingContext,
-        now: f64,
-        user_ctx: Option<UserCtx>,
-    ) -> WebGlTexture {
-        let texture_create_context = TextureCreateContext::new(gl, now, user_ctx);
+    pub fn create_texture(&self, gl: WebGl2RenderingContext, now: f64) -> WebGlTexture {
+        let texture_create_context = TextureCreateContext::new(gl, now);
         self.create_texture_callback
             .call_with_return(&texture_create_context)
     }
 }
 
-impl<TextureId: Id, UserCtx> Debug for TextureLink<TextureId, UserCtx> {
+impl<TextureId: Id> Debug for TextureLink<TextureId> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("TextureLink")
             .field("texture_id", &self.texture_id)
@@ -46,18 +41,18 @@ impl<TextureId: Id, UserCtx> Debug for TextureLink<TextureId, UserCtx> {
     }
 }
 
-impl<TextureId: Id, UserCtx> Hash for TextureLink<TextureId, UserCtx> {
+impl<TextureId: Id> Hash for TextureLink<TextureId> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.texture_id.hash(state);
         self.create_texture_callback.hash(state);
     }
 }
 
-impl<TextureId: Id, UserCtx> PartialEq for TextureLink<TextureId, UserCtx> {
+impl<TextureId: Id> PartialEq for TextureLink<TextureId> {
     fn eq(&self, other: &Self) -> bool {
         self.texture_id == other.texture_id
             && self.create_texture_callback == other.create_texture_callback
     }
 }
 
-impl<TextureId: Id, UserCtx> Eq for TextureLink<TextureId, UserCtx> {}
+impl<TextureId: Id> Eq for TextureLink<TextureId> {}

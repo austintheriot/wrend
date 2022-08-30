@@ -3,7 +3,7 @@ use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlTexture};
 use wrend::TextureCreateContext;
 
-pub fn create_white_noise_texture<UserCtx>(ctx: &TextureCreateContext<UserCtx>) -> WebGlTexture {
+pub fn create_white_noise_texture(ctx: &TextureCreateContext) -> WebGlTexture {
     let gl = ctx.gl();
     let webgl_texture = gl
         .create_texture()
@@ -52,7 +52,7 @@ pub fn create_white_noise_texture<UserCtx>(ctx: &TextureCreateContext<UserCtx>) 
     webgl_texture
 }
 
-pub fn create_perlin_noise_texture<UserCtx>(ctx: &TextureCreateContext<UserCtx>) -> WebGlTexture {
+pub fn create_perlin_noise_texture(ctx: &TextureCreateContext) -> WebGlTexture {
     let gl = ctx.gl();
     let webgl_texture = gl
         .create_texture()

@@ -2,16 +2,14 @@ use web_sys::WebGl2RenderingContext;
 
 /// This is the context object that is passed to the create_texture callback function
 #[derive(Debug, Clone)]
-pub struct TextureCreateContext<UserCtx> {
+pub struct TextureCreateContext {
     gl: WebGl2RenderingContext,
     now: f64,
-    user_ctx: Option<UserCtx>,
 }
 
-impl<UserCtx> TextureCreateContext<UserCtx> {
-    /// @todo: make this into a builder pattern
-    pub fn new(gl: WebGl2RenderingContext, now: f64, user_ctx: Option<UserCtx>) -> Self {
-        Self { gl, now, user_ctx }
+impl TextureCreateContext {
+    pub fn new(gl: WebGl2RenderingContext, now: f64) -> Self {
+        Self { gl, now }
     }
 
     pub fn gl(&self) -> &WebGl2RenderingContext {
@@ -20,9 +18,5 @@ impl<UserCtx> TextureCreateContext<UserCtx> {
 
     pub fn now(&self) -> f64 {
         self.now
-    }
-
-    pub fn user_ctx(&self) -> &Option<UserCtx> {
-        &self.user_ctx
     }
 }
