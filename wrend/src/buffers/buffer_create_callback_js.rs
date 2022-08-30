@@ -1,4 +1,4 @@
-use js_sys::Object;
+use js_sys::Function;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 #[wasm_bindgen(typescript_custom_section)]
@@ -8,7 +8,7 @@ type BufferCreateCallbackJs = (buffer_create_context: BufferCreateContext) => We
 
 #[wasm_bindgen]
 extern "C" {
-    #[wasm_bindgen(extends = Object, is_type_of = JsValue::is_function, typescript_type = "BufferCreateCallbackJs")]
+    #[wasm_bindgen(extends = Function, is_type_of = JsValue::is_function, typescript_type = "BufferCreateCallbackJs")]
     #[derive(Clone, Debug, PartialEq, Eq)]
     pub type BufferCreateCallbackJs;
 }

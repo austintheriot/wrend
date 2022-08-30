@@ -64,9 +64,11 @@ impl<L, R> Either<L, R> {
     }
 }
 
-impl<F: ?Sized> Either<CallbackWithContext<F>, CallbackWithContext<Function>> {
+impl<JsFunction: Clone + Into<JsValue>, F: ?Sized>
+    Either<CallbackWithContext<F>, CallbackWithContext<JsFunction>>
+{
     /// Extract the JavaScript function out of a Rust / JavaScript `Either` callback, if it exists
-    pub fn js_function(&self) -> Option<Function> {
+    pub fn js_function(&self) -> Option<JsFunction> {
         self.b().map(Deref::deref).map(Clone::clone)
     }
 
@@ -76,7 +78,9 @@ impl<F: ?Sized> Either<CallbackWithContext<F>, CallbackWithContext<Function>> {
     }
 }
 
-impl<A> Either<CallbackWithContext<dyn Fn(A)>, CallbackWithContext<Function>> {
+impl<JsFunction: AsRef<Function>, A>
+    Either<CallbackWithContext<dyn Fn(A)>, CallbackWithContext<JsFunction>>
+{
     /// Makes an `Either` that is holding a Rust callback or a JavaScript callback callable as a single unit,
     /// rather than having to match on `Either` every single time to call it.
     ///
@@ -91,14 +95,17 @@ impl<A> Either<CallbackWithContext<dyn Fn(A)>, CallbackWithContext<Function>> {
             Either::A(rust_callback) => (rust_callback)(a),
             Either::B(js_callback) => {
                 js_callback
-                    .call(&JsValue::NULL)
+                    .as_ref()
+                    .call0(&JsValue::NULL)
                     .expect("JavaScript callback produced an error when called");
             }
         }
     }
 }
 
-impl<A, R: JsCast> Either<CallbackWithContext<dyn Fn(A) -> R>, CallbackWithContext<Function>> {
+impl<JsFunction: AsRef<Function>, A, R: JsCast>
+    Either<CallbackWithContext<dyn Fn(A) -> R>, CallbackWithContext<JsFunction>>
+{
     /// See implementation of `call` for [Either](crate::Either)
     ///
     /// This is the same function, except with the ability to return a particular value from the callback
@@ -107,7 +114,8 @@ impl<A, R: JsCast> Either<CallbackWithContext<dyn Fn(A) -> R>, CallbackWithConte
             Either::A(rust_callback) => (rust_callback)(a),
             Either::B(js_callback) => {
                 let result = js_callback
-                    .call(&JsValue::NULL)
+                    .as_ref()
+                    .call0(&JsValue::NULL)
                     .expect("JavaScript callback produced an error when called");
                 let return_value: R = result
                     .dyn_into()
@@ -118,7 +126,9 @@ impl<A, R: JsCast> Either<CallbackWithContext<dyn Fn(A) -> R>, CallbackWithConte
     }
 }
 
-impl<A: Into<JsValue>> Either<CallbackWithContext<dyn Fn(A)>, CallbackWithContext<Function>> {
+impl<JsFunction: AsRef<Function>, A: Into<JsValue>>
+    Either<CallbackWithContext<dyn Fn(A)>, CallbackWithContext<JsFunction>>
+{
     /// See implementation of `call` for [Either](crate::Either)
     ///
     /// This is the same function, except the JavaScript callback is also called with the the same value
@@ -128,6 +138,7 @@ impl<A: Into<JsValue>> Either<CallbackWithContext<dyn Fn(A)>, CallbackWithContex
             Either::A(rust_callback) => (rust_callback)(a),
             Either::B(js_callback) => {
                 js_callback
+                    .as_ref()
                     .call1(&JsValue::NULL, &a.into())
                     .expect("JavaScript callback produced an error when called");
             }
@@ -135,8 +146,11 @@ impl<A: Into<JsValue>> Either<CallbackWithContext<dyn Fn(A)>, CallbackWithContex
     }
 }
 
-impl<JsWrapper: Into<JsValue>, A: IntoJsWrapper<Result = JsWrapper>>
-    Either<CallbackWithContext<dyn Fn(A)>, CallbackWithContext<Function>>
+impl<
+        JsFunction: AsRef<Function>,
+        JsWrapper: Into<JsValue>,
+        A: IntoJsWrapper<Result = JsWrapper>,
+    > Either<CallbackWithContext<dyn Fn(A)>, CallbackWithContext<JsFunction>>
 {
     /// See implementation of `call` for [Either](crate::Either)
     ///
@@ -147,7 +161,10 @@ impl<JsWrapper: Into<JsValue>, A: IntoJsWrapper<Result = JsWrapper>>
             crate::Either::A(rust_callback) => (rust_callback)(a),
             crate::Either::B(js_callback) => {
                 let js_wrapper: JsWrapper = a.into_js_wrapper();
-                match js_callback.call1(&JsValue::NULL, &js_wrapper.into()) {
+                match js_callback
+                    .as_ref()
+                    .call1(&JsValue::NULL, &js_wrapper.into())
+                {
                     Ok(_) => todo!(),
                     Err(err) => {
                         error!("JavaScript function threw an error: {err:?}")
@@ -158,8 +175,12 @@ impl<JsWrapper: Into<JsValue>, A: IntoJsWrapper<Result = JsWrapper>>
     }
 }
 
-impl<JsWrapper: Into<JsValue>, A: IntoJsWrapper<Result = JsWrapper>, R: JsCast>
-    Either<CallbackWithContext<dyn Fn(A) -> R>, CallbackWithContext<Function>>
+impl<
+        JsFunction: AsRef<Function>,
+        JsWrapper: Into<JsValue>,
+        A: IntoJsWrapper<Result = JsWrapper>,
+        R: JsCast,
+    > Either<CallbackWithContext<dyn Fn(A) -> R>, CallbackWithContext<JsFunction>>
 {
     /// See implementation of `call` for [Either](crate::Either)
     ///
@@ -173,6 +194,7 @@ impl<JsWrapper: Into<JsValue>, A: IntoJsWrapper<Result = JsWrapper>, R: JsCast>
             crate::Either::B(js_callback) => {
                 let js_wrapper: JsWrapper = a.into_js_wrapper();
                 let result = js_callback
+                    .as_ref()
                     .call1(&JsValue::NULL, &js_wrapper.into())
                     .expect("JavaScript callback produced an error when called");
                 let return_value: R = result
@@ -184,8 +206,8 @@ impl<JsWrapper: Into<JsValue>, A: IntoJsWrapper<Result = JsWrapper>, R: JsCast>
     }
 }
 
-impl<A: Into<JsValue>, R: JsCast>
-    Either<CallbackWithContext<dyn Fn(A) -> R>, CallbackWithContext<Function>>
+impl<JsFunction: AsRef<Function>, A: Into<JsValue>, R: JsCast>
+    Either<CallbackWithContext<dyn Fn(A) -> R>, CallbackWithContext<JsFunction>>
 {
     /// See implementation of `call` for [Either](crate::Either)
     ///
@@ -198,6 +220,7 @@ impl<A: Into<JsValue>, R: JsCast>
             Either::A(rust_callback) => (rust_callback)(a),
             Either::B(js_callback) => {
                 let result = js_callback
+                    .as_ref()
                     .call1(&JsValue::NULL, &a.into())
                     .expect("JavaScript callback produced an error when called");
                 let return_value: R = result

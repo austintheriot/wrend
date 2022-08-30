@@ -1,10 +1,10 @@
 use std::ops::{Deref, DerefMut};
 
-use js_sys::{Array, Function};
+use js_sys::Array;
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
-use crate::{utils, AttributeLink, AttributeLocation};
+use crate::{utils, AttributeCreateCallbackJs, AttributeLink, AttributeLocation};
 
 pub type AttributeLinkJsInner = AttributeLink<String, String, String>;
 
@@ -17,7 +17,7 @@ impl AttributeLinkJs {
         vao_ids: Array,
         buffer_id: String,
         attribute_id: String,
-        attribute_create_callback: Function,
+        attribute_create_callback: AttributeCreateCallbackJs,
     ) -> Self {
         let vao_ids = utils::js_array_to_vec_strings(vao_ids);
         Self(AttributeLinkJsInner::new(
@@ -41,7 +41,7 @@ impl AttributeLinkJs {
         self.deref().attribute_id().to_owned()
     }
 
-    pub fn create_callback(&self) -> Option<Function> {
+    pub fn create_callback(&self) -> Option<AttributeCreateCallbackJs> {
         self.deref().create_callback().js_function()
     }
 

@@ -1,10 +1,10 @@
-use js_sys::Function;
-
-use crate::{AttributeCreateContext, CallbackWithContext, Either};
+use crate::{AttributeCreateCallbackJs, AttributeCreateContext, CallbackWithContext, Either};
 use std::{ops::Deref, rc::Rc};
 
-pub type AttributeCreateCallbackInner =
-    Either<CallbackWithContext<dyn Fn(&AttributeCreateContext)>, CallbackWithContext<Function>>;
+pub type AttributeCreateCallbackInner = Either<
+    CallbackWithContext<dyn Fn(&AttributeCreateContext)>,
+    CallbackWithContext<AttributeCreateCallbackJs>,
+>;
 
 #[derive(Clone, Hash, Eq, PartialOrd, Ord, Debug)]
 pub struct AttributeCreateCallback(AttributeCreateCallbackInner);
@@ -39,8 +39,8 @@ impl<F: Fn(&AttributeCreateContext) + 'static> From<Rc<F>> for AttributeCreateCa
     }
 }
 
-impl From<Function> for AttributeCreateCallback {
-    fn from(callback: Function) -> Self {
+impl From<AttributeCreateCallbackJs> for AttributeCreateCallback {
+    fn from(callback: AttributeCreateCallbackJs) -> Self {
         Self(Either::new_b(CallbackWithContext::from(callback)))
     }
 }

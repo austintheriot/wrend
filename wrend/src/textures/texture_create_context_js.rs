@@ -1,4 +1,4 @@
-use crate::{TextureCreateContext, IntoJsWrapper};
+use crate::{IntoJsWrapper, TextureCreateContext};
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::WebGl2RenderingContext;

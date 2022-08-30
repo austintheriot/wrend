@@ -1,6 +1,4 @@
-use crate::{BufferCreateContext, CallbackWithContext, Either, BufferCreateCallbackJs};
-use js_sys::Function;
-use wasm_bindgen::JsCast;
+use crate::{BufferCreateCallbackJs, BufferCreateContext, CallbackWithContext, Either};
 use std::{ops::Deref, rc::Rc};
 use web_sys::WebGlBuffer;
 
@@ -8,14 +6,14 @@ use web_sys::WebGlBuffer;
 pub struct BufferCreateCallback(
     Either<
         CallbackWithContext<dyn Fn(&BufferCreateContext) -> WebGlBuffer>,
-        CallbackWithContext<Function>,
+        CallbackWithContext<BufferCreateCallbackJs>,
     >,
 );
 
 impl Deref for BufferCreateCallback {
     type Target = Either<
         CallbackWithContext<dyn Fn(&BufferCreateContext) -> WebGlBuffer>,
-        CallbackWithContext<Function>,
+        CallbackWithContext<BufferCreateCallbackJs>,
     >;
 
     fn deref(&self) -> &Self::Target {
@@ -23,7 +21,6 @@ impl Deref for BufferCreateCallback {
     }
 }
 
-// allows this specific closure type to be received for `BufferLink`s
 impl<F: Fn(&BufferCreateContext) -> WebGlBuffer + 'static> From<F> for BufferCreateCallback {
     fn from(callback: F) -> Self {
         Self(Either::new_a(CallbackWithContext::from(
@@ -40,16 +37,8 @@ impl<F: Fn(&BufferCreateContext) -> WebGlBuffer + 'static> From<Rc<F>> for Buffe
     }
 }
 
-impl From<Function> for BufferCreateCallback {
-    fn from(callback: Function) -> Self {
-        Self(Either::new_b(CallbackWithContext::new(callback)))
-    }
-}
-
-// this allows specifying TypeScript types for JavaScript callbacks
 impl From<BufferCreateCallbackJs> for BufferCreateCallback {
     fn from(callback: BufferCreateCallbackJs) -> Self {
-        let callback: Function = callback.dyn_into().unwrap();
         Self(Either::new_b(CallbackWithContext::new(callback)))
     }
 }

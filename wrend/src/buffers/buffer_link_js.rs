@@ -1,10 +1,9 @@
 use std::ops::{Deref, DerefMut};
 
-use js_sys::Function;
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
-use crate::{BufferLink, BufferCreateCallbackJs};
+use crate::{BufferCreateCallbackJs, BufferLink};
 
 pub type BufferLinkJsInner = BufferLink<String>;
 
