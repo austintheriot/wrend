@@ -10,11 +10,6 @@ pub struct BufferCreateContextJs(BufferCreateContextJsInner);
 
 #[wasm_bindgen(js_class = BufferCreateContext)]
 impl BufferCreateContextJs {
-    #[wasm_bindgen(constructor)]
-    pub fn new(gl: WebGl2RenderingContext, now: f64) -> Self {
-        Self(BufferCreateContext::new(gl, now))
-    }
-
     pub fn gl(&self) -> WebGl2RenderingContext {
         self.deref().gl().to_owned()
     }

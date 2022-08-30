@@ -10,21 +10,6 @@ pub struct AttributeCreateContextJs(AttributeCreateContextJsInner);
 
 #[wasm_bindgen(js_class = AttributeCreateContext)]
 impl AttributeCreateContextJs {
-    #[wasm_bindgen(constructor)]
-    pub fn new(
-        gl: WebGl2RenderingContext,
-        now: f64,
-        webgl_buffer: WebGlBuffer,
-        attribute_location: AttributeLocation,
-    ) -> Self {
-        Self(AttributeCreateContextJsInner::new(
-            gl,
-            now,
-            webgl_buffer,
-            attribute_location,
-        ))
-    }
-
     pub fn gl(&self) -> WebGl2RenderingContext {
         self.deref().gl().to_owned()
     }
