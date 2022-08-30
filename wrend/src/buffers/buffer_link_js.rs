@@ -4,7 +4,7 @@ use js_sys::Function;
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
-use crate::BufferLink;
+use crate::{BufferLink, BufferCreateCallbackJs};
 
 pub type BufferLinkJsInner = BufferLink<String>;
 
@@ -14,7 +14,7 @@ pub struct BufferLinkJs(BufferLinkJsInner);
 #[wasm_bindgen(js_class = BufferLink)]
 impl BufferLinkJs {
     #[wasm_bindgen(constructor)]
-    pub fn new(buffer_id: String, buffer_create_callback: Function) -> Self {
+    pub fn new(buffer_id: String, buffer_create_callback: BufferCreateCallbackJs) -> Self {
         Self(BufferLinkJsInner::new(buffer_id, buffer_create_callback))
     }
 

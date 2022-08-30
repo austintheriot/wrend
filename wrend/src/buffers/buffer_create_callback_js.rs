@@ -1,0 +1,14 @@
+use js_sys::Object;
+use wasm_bindgen::prelude::wasm_bindgen;
+
+#[wasm_bindgen(typescript_custom_section)]
+const BUFFER_LINK_JS_CALLBACK: &'static str = r#"
+type BufferCreateCallbackJs = (buffer_create_context: BufferCreateContext) => WebGLBuffer;
+"#;
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(extends = Object, is_type_of = JsValue::is_function, typescript_type = "BufferCreateCallbackJs")]
+    #[derive(Clone, Debug, PartialEq, Eq)]
+    pub type BufferCreateCallbackJs;
+}
