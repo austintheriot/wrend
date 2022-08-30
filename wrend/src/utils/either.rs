@@ -165,7 +165,7 @@ impl<
                     .as_ref()
                     .call1(&JsValue::NULL, &js_wrapper.into())
                 {
-                    Ok(_) => todo!(),
+                    Ok(_) => {},
                     Err(err) => {
                         error!("JavaScript function threw an error: {err:?}")
                     }

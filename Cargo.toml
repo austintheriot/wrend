@@ -18,6 +18,6 @@ members = [
 # so it's only enabled in release mode.
 lto = true
 # less code to include into binary
-panic = 'abort'
+# panic = 'abort'
 # optimization over all codebase ( better optimization, slower build )
 codegen-units = 1

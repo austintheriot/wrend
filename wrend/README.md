@@ -16,7 +16,9 @@ The following use cases should guide the development of this library:
 
 ## Todo
 
-- In progress: Remove all `user_ctx` references to link contexts, and allow their associated callbacks to supply contexts as the argument for their JavaScript functions
+- Add custom TypeScript types for *_create_context.rs callbacks
+
+- Export methods with JavaScript-style names instead of Rust-styled names
 
 - Implementing JavaScript API
   - Check that all structs implement `pub fn new()` where appropriate

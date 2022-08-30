@@ -687,7 +687,9 @@ impl<
         self
     }
 
-    /// Saves a link that will be used to build a VAO at build time
+    /// Saves an id that will be used to create a VAO at build time
+    /// 
+    /// This VAO can then be referenced by `AttributeLink`s
     pub fn add_vao_link(
         &mut self,
         vertex_array_object_id: impl Into<VertexArrayObjectId>,

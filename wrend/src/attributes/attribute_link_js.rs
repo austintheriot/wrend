@@ -13,6 +13,7 @@ pub struct AttributeLinkJs(AttributeLinkJsInner);
 
 #[wasm_bindgen(js_class = AttributeLink)]
 impl AttributeLinkJs {
+    #[wasm_bindgen(constructor)]
     pub fn new(
         vao_ids: Array,
         buffer_id: String,
