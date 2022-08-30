@@ -18,6 +18,8 @@ The following use cases should guide the development of this library:
 
 - Add custom TypeScript types for *_create_context.rs callbacks
 
+- Make it possible access `Renderer` from the render callback in JavaScript
+
 - Export methods with JavaScript-style names instead of Rust-styled names
 
 - Implementing JavaScript API

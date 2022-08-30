@@ -36,20 +36,22 @@ const aPositionLink = new AttributeLink([VAO_ID], VERTEX_BUFFER_ID, POSITION_ATT
   gl.vertexAttribPointer(attributeLocation.get(), 2, gl.FLOAT, false, 0, 0);
 });
 
+const render = (renderer: Renderer) => {
+  const gl = renderer.gl();
+  const canvas = renderer.canvas();
+
+  renderer.use_program(PROGRAM_ID);
+  renderer.use_vao(VAO_ID);
+
+  gl.viewport(0, 0, canvas.width, canvas.height);
+  gl.clearColor(0, 0, 0, 0);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.drawArrays(gl.TRIANGLES, 0, 6);
+};
+
 const renderer = Renderer.builder()
   .set_canvas(canvas)
-  .set_render_callback(() => {
-    const gl = renderer.gl();
-    const canvas = renderer.canvas();
-
-    renderer.use_program(PROGRAM_ID);
-    renderer.use_vao(VAO_ID);
-
-    gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.clearColor(0, 0, 0, 0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
-  })
+  .set_render_callback(() => render(renderer))
   .add_program_link(programLink)
   .add_vertex_shader_src(VERTEX_SHADER_ID, vertexShader)
   .add_fragment_shader_src(FRAGMENT_SHADER_ID, fragmentShader)
