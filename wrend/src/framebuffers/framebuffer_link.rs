@@ -38,7 +38,8 @@ impl<FramebufferId: Id, TextureId: Id> FramebufferLink<FramebufferId, TextureId>
         texture: Option<WebGlTexture>,
     ) -> WebGlFramebuffer {
         let framebuffer_create_context = FramebufferCreateContext::new(gl, now, texture);
-        (self.framebuffer_create_callback).call_with_return(&framebuffer_create_context)
+        self.framebuffer_create_callback
+            .call_with_arg_into_js_value_and_return(&framebuffer_create_context)
     }
 }
 
