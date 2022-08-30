@@ -158,6 +158,32 @@ impl<JsWrapper: Into<JsValue>, A: IntoJsWrapper<Result = JsWrapper>>
     }
 }
 
+impl<JsWrapper: Into<JsValue>, A: IntoJsWrapper<Result = JsWrapper>, R: JsCast>
+    Either<CallbackWithContext<dyn Fn(A) -> R>, CallbackWithContext<Function>>
+{
+    /// See implementation of `call` for [Either](crate::Either)
+    ///
+    /// This is the same function, except the JavaScript callback is also with the Rust value,
+    /// after converting the Rust value into a JavaScript-compatible type.
+    ///
+    /// Returns the resulting value from the function call.
+    pub fn call_with_arg_into_js_value_and_return(&self, a: A) -> R {
+        match &*self {
+            crate::Either::A(rust_callback) => (rust_callback)(a),
+            crate::Either::B(js_callback) => {
+                let js_wrapper: JsWrapper = a.into_js_wrapper();
+                let result = js_callback
+                    .call1(&JsValue::NULL, &js_wrapper.into())
+                    .expect("JavaScript callback produced an error when called");
+                let return_value: R = result
+                    .dyn_into()
+                    .expect("JsValue could not be converted to the expected type");
+                return_value
+            }
+        }
+    }
+}
+
 impl<A: Into<JsValue>, R: JsCast>
     Either<CallbackWithContext<dyn Fn(A) -> R>, CallbackWithContext<Function>>
 {
