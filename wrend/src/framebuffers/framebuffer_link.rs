@@ -4,18 +4,16 @@ use std::hash::Hash;
 use web_sys::{WebGl2RenderingContext, WebGlFramebuffer, WebGlTexture};
 
 #[derive(Clone)]
-pub struct FramebufferLink<FramebufferId: Id, UserCtx: Clone + 'static, TextureId: Id = IdDefault> {
+pub struct FramebufferLink<FramebufferId: Id, TextureId: Id = IdDefault> {
     framebuffer_id: FramebufferId,
     texture_id: Option<TextureId>,
-    framebuffer_create_callback: FramebufferCreateCallback<UserCtx>,
+    framebuffer_create_callback: FramebufferCreateCallback,
 }
 
-impl<FramebufferId: Id, UserCtx: Clone, TextureId: Id>
-    FramebufferLink<FramebufferId, UserCtx, TextureId>
-{
+impl<FramebufferId: Id, TextureId: Id> FramebufferLink<FramebufferId, TextureId> {
     pub fn new(
         framebuffer_id: FramebufferId,
-        framebuffer_create_callback: impl Into<FramebufferCreateCallback<UserCtx>>,
+        framebuffer_create_callback: impl Into<FramebufferCreateCallback>,
         texture_id: Option<TextureId>,
     ) -> Self {
         Self {
@@ -38,16 +36,13 @@ impl<FramebufferId: Id, UserCtx: Clone, TextureId: Id>
         gl: WebGl2RenderingContext,
         now: f64,
         texture: Option<WebGlTexture>,
-        user_ctx: Option<UserCtx>,
     ) -> WebGlFramebuffer {
-        let framebuffer_create_context = FramebufferCreateContext::new(gl, now, texture, user_ctx);
+        let framebuffer_create_context = FramebufferCreateContext::new(gl, now, texture);
         (self.framebuffer_create_callback).call_with_return(&framebuffer_create_context)
     }
 }
 
-impl<FramebufferId: Id, UserCtx: Clone, TextureId: Id> Debug
-    for FramebufferLink<FramebufferId, UserCtx, TextureId>
-{
+impl<FramebufferId: Id, TextureId: Id> Debug for FramebufferLink<FramebufferId, TextureId> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("FramebufferLink")
             .field("framebuffer_id", &self.framebuffer_id)
@@ -55,23 +50,16 @@ impl<FramebufferId: Id, UserCtx: Clone, TextureId: Id> Debug
     }
 }
 
-impl<FramebufferId: Id, UserCtx: Clone, TextureId: Id> Hash
-    for FramebufferLink<FramebufferId, UserCtx, TextureId>
-{
+impl<FramebufferId: Id, TextureId: Id> Hash for FramebufferLink<FramebufferId, TextureId> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.framebuffer_id.hash(state);
     }
 }
 
-impl<FramebufferId: Id, UserCtx: Clone, TextureId: Id> PartialEq
-    for FramebufferLink<FramebufferId, UserCtx, TextureId>
-{
+impl<FramebufferId: Id, TextureId: Id> PartialEq for FramebufferLink<FramebufferId, TextureId> {
     fn eq(&self, other: &Self) -> bool {
         self.framebuffer_id == other.framebuffer_id
     }
 }
 
-impl<FramebufferId: Id, UserCtx: Clone, TextureId: Id> Eq
-    for FramebufferLink<FramebufferId, UserCtx, TextureId>
-{
-}
+impl<FramebufferId: Id, TextureId: Id> Eq for FramebufferLink<FramebufferId, TextureId> {}

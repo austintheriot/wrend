@@ -23,9 +23,7 @@ impl Deref for BufferCreateCallback {
 }
 
 // allows this specific closure type to be received for `BufferLink`s
-impl<F: Fn(&BufferCreateContext) -> WebGlBuffer + 'static> From<F>
-    for BufferCreateCallback
-{
+impl<F: Fn(&BufferCreateContext) -> WebGlBuffer + 'static> From<F> for BufferCreateCallback {
     fn from(callback: F) -> Self {
         Self(Either::new_a(CallbackWithContext::from(
             Rc::new(callback) as Rc<dyn Fn(&BufferCreateContext) -> WebGlBuffer>
@@ -33,9 +31,7 @@ impl<F: Fn(&BufferCreateContext) -> WebGlBuffer + 'static> From<F>
     }
 }
 
-impl<F: Fn(&BufferCreateContext) -> WebGlBuffer + 'static> From<Rc<F>>
-    for BufferCreateCallback
-{
+impl<F: Fn(&BufferCreateContext) -> WebGlBuffer + 'static> From<Rc<F>> for BufferCreateCallback {
     fn from(callback: Rc<F>) -> Self {
         Self(Either::new_a(CallbackWithContext::from(
             callback as Rc<dyn Fn(&BufferCreateContext) -> WebGlBuffer>,

@@ -99,9 +99,8 @@ pub fn app() -> Html {
 
                 let program_link = ProgramLink::new(ProgramId, VertexShaderId, FragmentShaderId);
 
-                let vertex_buffer_link = BufferLink::new(
-                    BufferId::VertexBuffer,
-                    |ctx: &BufferCreateContext| {
+                let vertex_buffer_link =
+                    BufferLink::new(BufferId::VertexBuffer, |ctx: &BufferCreateContext| {
                         let gl = ctx.gl();
                         let buffer = gl.create_buffer().unwrap();
                         gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&buffer));
@@ -116,8 +115,7 @@ pub fn app() -> Html {
                         );
 
                         buffer
-                    },
-                );
+                    });
 
                 let a_position_link = AttributeLink::new(
                     ProgramId,

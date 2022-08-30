@@ -383,7 +383,7 @@ pub struct RendererBuilder<
     attributes: HashMap<AttributeId, Attribute<VertexArrayObjectId, BufferId, AttributeId>>,
     texture_links: HashSet<TextureLink<TextureId, UserCtx>>,
     textures: HashMap<TextureId, Texture<TextureId>>,
-    framebuffer_links: HashSet<FramebufferLink<FramebufferId, UserCtx, TextureId>>,
+    framebuffer_links: HashSet<FramebufferLink<FramebufferId, TextureId>>,
     framebuffers: HashMap<FramebufferId, Framebuffer<FramebufferId>>,
     render_callback: Option<
         RenderCallback<
@@ -641,7 +641,7 @@ impl<
     /// Saves a link that will be used to build a framebuffer at build time
     pub fn add_framebuffer_link(
         &mut self,
-        framebuffer_link: impl Into<FramebufferLink<FramebufferId, UserCtx, TextureId>>,
+        framebuffer_link: impl Into<FramebufferLink<FramebufferId, TextureId>>,
     ) -> &mut Self {
         self.framebuffer_links.insert(framebuffer_link.into());
 
@@ -650,7 +650,7 @@ impl<
 
     pub fn add_framebuffer_links(
         &mut self,
-        framebuffer_links: impl Into<Bridge<FramebufferLink<FramebufferId, UserCtx, TextureId>>>,
+        framebuffer_links: impl Into<Bridge<FramebufferLink<FramebufferId, TextureId>>>,
     ) -> &mut Self {
         let framebuffer_link_bridge: Bridge<_> = framebuffer_links.into();
         let framebuffer_links: Vec<_> = framebuffer_link_bridge.into();
@@ -1062,7 +1062,7 @@ impl<
     fn create_framebuffers(&mut self) -> Result<&mut Self, CreateBufferError> {
         let gl = self.gl.as_ref().ok_or(CreateBufferError::NoContext)?;
         let now = Self::now();
-        let user_ctx = self.user_ctx.clone();
+        let _user_ctx = self.user_ctx.clone();
 
         for framebuffer_link in &self.framebuffer_links {
             let framebuffer_id = framebuffer_link.framebuffer_id().clone();
@@ -1072,12 +1072,8 @@ impl<
                 .map(|texture| texture.webgl_texture())
                 .map(Clone::clone);
 
-            let webgl_framebuffer = framebuffer_link.create_framebuffer(
-                gl.clone(),
-                now,
-                webgl_texture,
-                user_ctx.clone(),
-            );
+            let webgl_framebuffer =
+                framebuffer_link.create_framebuffer(gl.clone(), now, webgl_texture);
             let framebuffer = Framebuffer::new(framebuffer_id.clone(), webgl_framebuffer);
 
             self.framebuffers.insert(framebuffer_id, framebuffer);

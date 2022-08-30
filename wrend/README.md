@@ -2,7 +2,7 @@
 
 The intent for this crate is to serve as a reusable, generic utility crate for doing WebGl rendering.
 
-## Use Cases
+## Use Cashes
 
 The following use cases should guide the development of this library:
 

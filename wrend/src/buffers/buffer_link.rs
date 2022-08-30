@@ -25,11 +25,7 @@ impl<BufferId: Id> BufferLink<BufferId> {
         &self.buffer_id
     }
 
-    pub fn create_buffer(
-        &self,
-        gl: WebGl2RenderingContext,
-        now: f64,
-    ) -> WebGlBuffer {
+    pub fn create_buffer(&self, gl: WebGl2RenderingContext, now: f64) -> WebGlBuffer {
         let framebuffer_create_context = BufferCreateContext::new(gl, now);
         self.buffer_create_callback
             .call_with_return(&framebuffer_create_context)

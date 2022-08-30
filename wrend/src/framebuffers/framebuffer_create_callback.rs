@@ -4,22 +4,22 @@ use std::{ops::Deref, rc::Rc};
 use web_sys::WebGlFramebuffer;
 
 #[derive(Clone, Hash, Eq, PartialOrd, Ord, Debug)]
-pub struct FramebufferCreateCallback<UserCtx: Clone + 'static>(
+pub struct FramebufferCreateCallback(
     Either<
-        CallbackWithContext<dyn Fn(&FramebufferCreateContext<UserCtx>) -> WebGlFramebuffer>,
+        CallbackWithContext<dyn Fn(&FramebufferCreateContext) -> WebGlFramebuffer>,
         CallbackWithContext<Function>,
     >,
 );
 
-impl<UserCtx: Clone> PartialEq for FramebufferCreateCallback<UserCtx> {
+impl PartialEq for FramebufferCreateCallback {
     fn eq(&self, other: &Self) -> bool {
         self.0 == other.0
     }
 }
 
-impl<UserCtx: Clone + 'static> Deref for FramebufferCreateCallback<UserCtx> {
+impl Deref for FramebufferCreateCallback {
     type Target = Either<
-        CallbackWithContext<dyn Fn(&FramebufferCreateContext<UserCtx>) -> WebGlFramebuffer>,
+        CallbackWithContext<dyn Fn(&FramebufferCreateContext) -> WebGlFramebuffer>,
         CallbackWithContext<Function>,
     >;
 
@@ -28,28 +28,28 @@ impl<UserCtx: Clone + 'static> Deref for FramebufferCreateCallback<UserCtx> {
     }
 }
 
-impl<UserCtx: Clone, F: Fn(&FramebufferCreateContext<UserCtx>) -> WebGlFramebuffer + 'static>
-    From<F> for FramebufferCreateCallback<UserCtx>
+impl<F: Fn(&FramebufferCreateContext) -> WebGlFramebuffer + 'static> From<F>
+    for FramebufferCreateCallback
 {
     fn from(callback: F) -> Self {
         Self(Either::new_a(CallbackWithContext::from(Rc::new(callback)
             as Rc<
-                dyn Fn(&FramebufferCreateContext<UserCtx>) -> WebGlFramebuffer,
+                dyn Fn(&FramebufferCreateContext) -> WebGlFramebuffer,
             >)))
     }
 }
 
-impl<UserCtx: Clone, F: Fn(&FramebufferCreateContext<UserCtx>) -> WebGlFramebuffer + 'static>
-    From<Rc<F>> for FramebufferCreateCallback<UserCtx>
+impl<F: Fn(&FramebufferCreateContext) -> WebGlFramebuffer + 'static> From<Rc<F>>
+    for FramebufferCreateCallback
 {
     fn from(callback: Rc<F>) -> Self {
         Self(Either::new_a(CallbackWithContext::from(
-            callback as Rc<dyn Fn(&FramebufferCreateContext<UserCtx>) -> WebGlFramebuffer>,
+            callback as Rc<dyn Fn(&FramebufferCreateContext) -> WebGlFramebuffer>,
         )))
     }
 }
 
-impl<UserCtx: Clone> From<Function> for FramebufferCreateCallback<UserCtx> {
+impl From<Function> for FramebufferCreateCallback {
     fn from(callback: Function) -> Self {
         Self(Either::new_b(CallbackWithContext::from(callback)))
     }
