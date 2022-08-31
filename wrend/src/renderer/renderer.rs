@@ -2,11 +2,16 @@ use crate::{
     Attribute, AttributeLink, Bridge, Buffer, BufferLink, BuildRendererError, CompileShaderError,
     CreateAttributeError, CreateBufferError, CreateTextureError, CreateTransformFeedbackError,
     CreateUniformError, CreateVAOError, Framebuffer, FramebufferLink, GetContextCallback, Id,
-    IdDefault, IdName, LinkProgramError, ProgramLink, RenderCallback, RendererBuilderError,
-    RendererHandle, RendererJs, RendererJsInner, SaveContextError, ShaderType, Texture,
-    TextureLink, TransformFeedbackLink, Uniform, UniformContext, UniformLink, WebGlContextError,
+    IdDefault, IdName, IntoJsWrapper, LinkProgramError, ProgramLink, RenderCallback,
+    RendererBuilderError, RendererHandle, RendererJs, RendererJsInner, SaveContextError,
+    ShaderType, Texture, TextureLink, TransformFeedbackLink, Uniform, UniformContext, UniformLink,
+    WebGlContextError,
 };
-use std::collections::{HashMap, HashSet};
+use log::error;
+use std::{
+    any::Any,
+    collections::{HashMap, HashSet},
+};
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{
     window, HtmlAnchorElement, HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram,
@@ -260,7 +265,36 @@ impl<
     }
 
     pub fn render(&self) -> &Self {
-        self.render_callback.call(self);
+        let any_renderer = self as &dyn Any;
+
+        // If `Renderer` has been instantiated through JavaScript, we have to treat this as a special case
+        // in order to be able to provide the Renderer as an argument
+        if let Some(renderer) = any_renderer.downcast_ref::<RendererJsInner>() {
+            if let Err(err) = self
+                .render_callback
+                .b()
+                .as_ref()
+                .unwrap()
+                .call1(&JsValue::NULL, &renderer.into_js_wrapper().into())
+            {
+                error!("Error occurred while calling JavaScript `render` callback: {err:?}");
+            }
+        } else if let Some(renderer) = any_renderer.downcast_ref::<Renderer<
+            VertexShaderId,
+            FragmentShaderId,
+            ProgramId,
+            UniformId,
+            BufferId,
+            AttributeId,
+            TextureId,
+            FramebufferId,
+            TransformFeedbackId,
+            VertexArrayObjectId,
+            UserCtx,
+        >>() {
+            self.render_callback.call(&*renderer);
+        }
+
         self
     }
 
@@ -688,7 +722,7 @@ impl<
     }
 
     /// Saves an id that will be used to create a VAO at build time
-    /// 
+    ///
     /// This VAO can then be referenced by `AttributeLink`s
     pub fn add_vao_link(
         &mut self,
@@ -813,7 +847,8 @@ impl<
         let canvas = self
             .canvas
             .as_ref()
-            .ok_or(SaveContextError::CanvasReturnedNoContext)?.to_owned();
+            .ok_or(SaveContextError::CanvasReturnedNoContext)?
+            .to_owned();
         let gl = self.context_from_canvas(canvas)?;
         self.gl = Some(gl);
 

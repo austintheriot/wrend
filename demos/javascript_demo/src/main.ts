@@ -37,6 +37,7 @@ const aPositionLink = new AttributeLink([VAO_ID], VERTEX_BUFFER_ID, POSITION_ATT
 })
 
 const render = (renderer: Renderer) => {
+  console.log('rendering with Renderer: ', { renderer });
   const gl = renderer.gl();
   const canvas = renderer.canvas();
 
@@ -51,7 +52,7 @@ const render = (renderer: Renderer) => {
 
 const renderer: Renderer = Renderer.builder()
   .setCanvas(canvas)
-  .setRenderCallback(() => render(renderer))
+  .setRenderCallback(render)
   .addProgramLink(programLink)
   .addVertexShaderSrc(VERTEX_SHADER_ID, vertexShader)
   .addFragmentShaderSrc(FRAGMENT_SHADER_ID, fragmentShader)
@@ -61,3 +62,9 @@ const renderer: Renderer = Renderer.builder()
   .build();
 
 renderer.render();
+
+// const rendererHandle = renderer.intoRendererHandle();
+// rendererHandle.setAnimationCallback(() => renderer.render());
+// rendererHandle.startAnimating();
+
+// setTimeout(() => rendererHandle.intoRenderer(), 5000)

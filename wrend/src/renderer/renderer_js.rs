@@ -1,6 +1,6 @@
 use crate::{
-    AttributeJs, BufferJs, FramebufferJs, Renderer, RendererHandleJs, RendererJsBuilder, TextureJs,
-    UniformJs, utils,
+    utils, AttributeJs, BufferJs, FramebufferJs, Id, IdName, IntoJsWrapper, Renderer,
+    RendererHandleJs, RendererJsBuilder, TextureJs, UniformJs,
 };
 use js_sys::{Array, Map, Object};
 use std::ops::{Deref, DerefMut};
@@ -250,8 +250,31 @@ impl DerefMut for RendererJs {
     }
 }
 
+
 impl From<RendererJsInner> for RendererJs {
     fn from(js_renderer_inner: RendererJsInner) -> Self {
         Self(js_renderer_inner)
+    }
+}
+
+impl IntoJsWrapper for RendererJsInner {
+    type Result = RendererJs;
+
+    fn into_js_wrapper(self) -> Self::Result {
+        self.into()
+    }
+}
+
+impl From<&RendererJsInner> for RendererJs {
+    fn from(js_renderer_inner: &RendererJsInner) -> Self {
+        Self(js_renderer_inner.to_owned())
+    }
+}
+
+impl IntoJsWrapper for &RendererJsInner {
+    type Result = RendererJs;
+
+    fn into_js_wrapper(self) -> Self::Result {
+        self.into()
     }
 }
