@@ -16,6 +16,16 @@ The following use cases should guide the development of this library:
 
 ## Todo
 
+- Use static methods to render in JavaScript, rather than downcasting from an `Any`
+
+- Make it more explicit when structs get cloned to convert them into a `JsValue`
+
+- use `dyn_ref` for Renderer ?
+
+- Call `initialize recorder` automatically if it has not been initialized before `start_recording` is called
+
+- Make a clean wrapper around `Either` that functions as a callback abstraction (instead of implementing function utilities on `Either` itself)
+
 - Add custom TypeScript types for *_create_context.rs callbacks
 
 - Make it possible access `Renderer` from the render callback in JavaScript

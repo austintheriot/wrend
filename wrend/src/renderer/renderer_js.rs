@@ -1,5 +1,5 @@
 use crate::{
-    utils, AttributeJs, BufferJs, FramebufferJs, Id, IdName, IntoJsWrapper, Renderer,
+    utils, AttributeJs, BufferJs, FramebufferJs, IntoJsWrapper, Renderer,
     RendererHandleJs, RendererJsBuilder, TextureJs, UniformJs,
 };
 use js_sys::{Array, Map, Object};
@@ -215,8 +215,9 @@ impl RendererJs {
         self.deref().update_uniforms();
     }
 
-    pub fn render(&self) {
+    pub fn render(self) -> Self {
         self.deref().render();
+        self
     }
 
     #[wasm_bindgen(js_name = saveImage)]
@@ -257,21 +258,13 @@ impl From<RendererJsInner> for RendererJs {
     }
 }
 
+impl From<RendererJs> for RendererJsInner {
+    fn from(renderer_js: RendererJs) -> Self {
+        renderer_js.inner()
+    }
+}
+
 impl IntoJsWrapper for RendererJsInner {
-    type Result = RendererJs;
-
-    fn into_js_wrapper(self) -> Self::Result {
-        self.into()
-    }
-}
-
-impl From<&RendererJsInner> for RendererJs {
-    fn from(js_renderer_inner: &RendererJsInner) -> Self {
-        Self(js_renderer_inner.to_owned())
-    }
-}
-
-impl IntoJsWrapper for &RendererJsInner {
     type Result = RendererJs;
 
     fn into_js_wrapper(self) -> Self::Result {

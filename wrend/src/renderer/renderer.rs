@@ -265,34 +265,31 @@ impl<
     }
 
     pub fn render(&self) -> &Self {
-        let any_renderer = self as &dyn Any;
-
-        // If `Renderer` has been instantiated through JavaScript, we have to treat this as a special case
-        // in order to be able to provide the Renderer as an argument
-        if let Some(renderer) = any_renderer.downcast_ref::<RendererJsInner>() {
-            if let Err(err) = self
-                .render_callback
-                .b()
-                .as_ref()
-                .unwrap()
-                .call1(&JsValue::NULL, &renderer.into_js_wrapper().into())
-            {
-                error!("Error occurred while calling JavaScript `render` callback: {err:?}");
+        // If `Renderer` has been instantiated through JavaScript, we have to treat this as a special case.
+        // In order to convert `Renderer` into a `JsValue`, it must meet specific requirements for its generic arguments.
+        // We can check this at runtime using `Any` and downcasting
+        let rendered_as_js = (|| {
+            if let Some(renderer) = (self as &dyn Any).downcast_ref::<RendererJsInner>() {
+                if let Some(js_callback) = self.render_callback.b().as_ref() {
+                    if let Err(err) = js_callback
+                        // must clone the Renderer here, which could be potentially expensive
+                        // @todo: find a way to not have to clone the entire Renderer struct
+                        .call1(&JsValue::NULL, &renderer.clone().into_js_wrapper().into())
+                    {
+                        error!(
+                            "Error occurred while calling JavaScript `render` callback: {err:?}"
+                        );
+                    }
+                    return true;
+                }
             }
-        } else if let Some(renderer) = any_renderer.downcast_ref::<Renderer<
-            VertexShaderId,
-            FragmentShaderId,
-            ProgramId,
-            UniformId,
-            BufferId,
-            AttributeId,
-            TextureId,
-            FramebufferId,
-            TransformFeedbackId,
-            VertexArrayObjectId,
-            UserCtx,
-        >>() {
-            self.render_callback.call(&*renderer);
+            false
+        })();
+
+        // If not already renderer as a JavaScript callback, should now be rendered
+        // as a Rust callback (or as a JavaScript called, without the `Renderer` argument supplied)
+        if !rendered_as_js {
+            self.render_callback.call(&self);
         }
 
         self

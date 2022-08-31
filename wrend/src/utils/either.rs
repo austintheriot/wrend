@@ -165,7 +165,32 @@ impl<
                     .as_ref()
                     .call1(&JsValue::NULL, &js_wrapper.into())
                 {
-                    Ok(_) => {},
+                    Ok(_) => {}
+                    Err(err) => {
+                        error!("JavaScript function threw an error: {err:?}")
+                    }
+                }
+            }
+        }
+    }
+}
+
+impl<JsFunction: AsRef<Function>, A: AsRef<JsValue>>
+    Either<CallbackWithContext<dyn Fn(A)>, CallbackWithContext<JsFunction>>
+{
+    /// See implementation of `call` for [Either](crate::Either)
+    ///
+    /// This is the same function, except the JavaScript callback is also with the Rust value,
+    /// after converting the Rust value into a JavaScript-compatible type.
+    pub fn call_with_arg_as_js_value(&self, a: A) {
+        match &*self {
+            crate::Either::A(rust_callback) => (rust_callback)(a),
+            crate::Either::B(js_callback) => {
+                match js_callback
+                    .as_ref()
+                    .call1(&JsValue::NULL, a.as_ref())
+                {
+                    Ok(_) => {}
                     Err(err) => {
                         error!("JavaScript function threw an error: {err:?}")
                     }
