@@ -16,6 +16,10 @@ The following use cases should guide the development of this library:
 
 ## Todo
 
+- If `Renderer` MUST get cloned on each iteration: consider wrapping internal data in Rc<RefCell>
+- OR make a note that the operation could be expensive
+- -----------------> Wrap RendererJs data in an Rc<RefCell<_>> so that clones to the data are inexpensive?
+
 - Use static methods to render in JavaScript, rather than downcasting from an `Any`
 
 - Make it more explicit when structs get cloned to convert them into a `JsValue`
