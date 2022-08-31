@@ -1,4 +1,4 @@
-use crate::{CallbackWithContext, Either, TextureCreateContext};
+use crate::{CallbackWithContext, Either, TextureCreateContext, TextureCreateCallbackJs};
 use js_sys::Function;
 use std::fmt::Debug;
 use std::{ops::Deref, rc::Rc};
@@ -6,7 +6,7 @@ use web_sys::WebGlTexture;
 
 type TextureCreateCallbackInner = Either<
     CallbackWithContext<dyn Fn(&TextureCreateContext) -> WebGlTexture>,
-    CallbackWithContext<Function>,
+    CallbackWithContext<TextureCreateCallbackJs>,
 >;
 
 #[derive(Clone, Hash, Eq, PartialOrd, Ord)]
@@ -50,8 +50,8 @@ impl<F: Fn(&TextureCreateContext) -> WebGlTexture + 'static> From<Rc<F>> for Tex
     }
 }
 
-impl From<Function> for TextureCreateCallback {
-    fn from(callback: Function) -> Self {
+impl From<TextureCreateCallbackJs> for TextureCreateCallback {
+    fn from(callback: TextureCreateCallbackJs) -> Self {
         Self(Either::new_b(CallbackWithContext::from(callback)))
     }
 }

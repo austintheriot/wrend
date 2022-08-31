@@ -1,5 +1,5 @@
-use crate::{utils, UniformLink};
-use js_sys::{Array, Function};
+use crate::{utils, UniformCreateUpdateCallbackJs, UniformLink, UniformShouldUpdateCallbackJs};
+use js_sys::Array;
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;
 
@@ -11,7 +11,11 @@ pub struct UniformLinkJs(UniformLinkJsInner);
 #[wasm_bindgen(js_class = UniformLink)]
 impl UniformLinkJs {
     #[wasm_bindgen(constructor)]
-    pub fn new(program_ids: Array, uniform_id: String, initialize_callback: Function) -> Self {
+    pub fn new(
+        program_ids: Array,
+        uniform_id: String,
+        initialize_callback: UniformCreateUpdateCallbackJs,
+    ) -> Self {
         let program_ids = utils::js_array_to_vec_strings(program_ids);
         Self(UniformLinkJsInner::new(
             program_ids,
@@ -31,37 +35,41 @@ impl UniformLinkJs {
     }
 
     #[wasm_bindgen(js_name = initializeCallback)]
-    pub fn initialize_callback(&self) -> Option<Function> {
-        self.deref().initialize_callback().b().map(Function::from)
+    pub fn initialize_callback(&self) -> Option<UniformCreateUpdateCallbackJs> {
+        self.deref()
+            .initialize_callback()
+            .b()
+            .map(Deref::deref)
+            .map(Clone::clone)
     }
 
     #[wasm_bindgen(js_name = setInitializeCallback)]
-    pub fn set_initialize_callback(mut self, callback: Function) -> Self {
+    pub fn set_initialize_callback(mut self, callback: UniformCreateUpdateCallbackJs) -> Self {
         self.deref_mut().set_initialize_callback(callback);
         self
     }
 
     #[wasm_bindgen(js_name = shouldUpdateCallback)]
-    pub fn should_update_callback(&self) -> Option<Function> {
+    pub fn should_update_callback(&self) -> Option<UniformShouldUpdateCallbackJs> {
         self.deref()
             .should_update_callback()
             .and_then(|callback| callback.js_function())
     }
 
     #[wasm_bindgen(js_name = setShouldUpdateCallback)]
-    pub fn set_should_update_callback(mut self, callback: Function) -> Self {
+    pub fn set_should_update_callback(mut self, callback: UniformShouldUpdateCallbackJs) -> Self {
         self.deref_mut().set_should_update_callback(callback);
         self
     }
 
     #[wasm_bindgen(js_name = setUpdateCallback)]
-    pub fn set_update_callback(mut self, callback: Function) -> Self {
+    pub fn set_update_callback(mut self, callback: UniformCreateUpdateCallbackJs) -> Self {
         self.deref_mut().set_update_callback(callback);
         self
     }
 
     #[wasm_bindgen(js_name = updateCallback)]
-    pub fn update_callback(&self) -> Option<Function> {
+    pub fn update_callback(&self) -> Option<UniformCreateUpdateCallbackJs> {
         self.deref()
             .update_callback()
             .and_then(|callback| callback.js_function())

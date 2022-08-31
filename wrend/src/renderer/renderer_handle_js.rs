@@ -1,5 +1,5 @@
-use crate::{RendererHandle, RendererJs};
-use js_sys::{Function, Object};
+use crate::{RendererHandle, RendererJs, AnimationCallbackJs};
+use js_sys::{Object};
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;
 
@@ -38,7 +38,7 @@ impl RendererHandleJs {
     }
 
     #[wasm_bindgen(js_name = setAnimationCallback)]
-    pub fn set_animation_callback(&mut self, animation_callback: Option<Function>) {
+    pub fn set_animation_callback(&mut self, animation_callback: Option<AnimationCallbackJs>) {
         self.deref_mut().set_animation_callback(animation_callback);
     }
 

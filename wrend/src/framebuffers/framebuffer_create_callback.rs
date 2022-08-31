@@ -1,4 +1,4 @@
-use crate::{CallbackWithContext, Either, FramebufferCreateContext};
+use crate::{CallbackWithContext, Either, FramebufferCreateContext, FramebufferCreateCallbackJs};
 use js_sys::Function;
 use std::{ops::Deref, rc::Rc};
 use web_sys::WebGlFramebuffer;
@@ -7,7 +7,7 @@ use web_sys::WebGlFramebuffer;
 pub struct FramebufferCreateCallback(
     Either<
         CallbackWithContext<dyn Fn(&FramebufferCreateContext) -> WebGlFramebuffer>,
-        CallbackWithContext<Function>,
+        CallbackWithContext<FramebufferCreateCallbackJs>,
     >,
 );
 
@@ -20,7 +20,7 @@ impl PartialEq for FramebufferCreateCallback {
 impl Deref for FramebufferCreateCallback {
     type Target = Either<
         CallbackWithContext<dyn Fn(&FramebufferCreateContext) -> WebGlFramebuffer>,
-        CallbackWithContext<Function>,
+        CallbackWithContext<FramebufferCreateCallbackJs>,
     >;
 
     fn deref(&self) -> &Self::Target {
@@ -49,8 +49,8 @@ impl<F: Fn(&FramebufferCreateContext) -> WebGlFramebuffer + 'static> From<Rc<F>>
     }
 }
 
-impl From<Function> for FramebufferCreateCallback {
-    fn from(callback: Function) -> Self {
+impl From<FramebufferCreateCallbackJs> for FramebufferCreateCallback {
+    fn from(callback: FramebufferCreateCallbackJs) -> Self {
         Self(Either::new_b(CallbackWithContext::from(callback)))
     }
 }

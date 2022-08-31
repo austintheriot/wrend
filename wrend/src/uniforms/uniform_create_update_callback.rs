@@ -1,17 +1,15 @@
-use js_sys::Function;
-
-use crate::{CallbackWithContext, Either, UniformContext};
+use crate::{CallbackWithContext, Either, UniformContext, UniformCreateUpdateCallbackJs};
 use std::fmt::Debug;
 use std::{ops::Deref, rc::Rc};
 
 #[derive(Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct UniformCreateUpdateCallback(
-    Either<CallbackWithContext<dyn Fn(&UniformContext)>, CallbackWithContext<Function>>,
+    Either<CallbackWithContext<dyn Fn(&UniformContext)>, CallbackWithContext<UniformCreateUpdateCallbackJs>>,
 );
 
 impl Deref for UniformCreateUpdateCallback {
     type Target =
-        Either<CallbackWithContext<dyn Fn(&UniformContext)>, CallbackWithContext<Function>>;
+        Either<CallbackWithContext<dyn Fn(&UniformContext)>, CallbackWithContext<UniformCreateUpdateCallbackJs>>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -42,8 +40,8 @@ impl<F: Fn(&UniformContext) + 'static> From<Rc<F>> for UniformCreateUpdateCallba
     }
 }
 
-impl From<Function> for UniformCreateUpdateCallback {
-    fn from(callback: Function) -> Self {
+impl From<UniformCreateUpdateCallbackJs> for UniformCreateUpdateCallback {
+    fn from(callback: UniformCreateUpdateCallbackJs) -> Self {
         Self(Either::new_b(CallbackWithContext::from(callback)))
     }
 }

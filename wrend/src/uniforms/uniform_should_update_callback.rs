@@ -1,11 +1,11 @@
 use std::{fmt::Debug, ops::Deref, rc::Rc};
 
-use js_sys::Function;
+use crate::{CallbackWithContext, Either, UniformContext, UniformShouldUpdateCallbackJs};
 
-use crate::{CallbackWithContext, Either, UniformContext};
-
-pub type UniformShouldUpdateCallbackInner =
-    Either<CallbackWithContext<dyn Fn(&UniformContext) -> bool>, CallbackWithContext<Function>>;
+pub type UniformShouldUpdateCallbackInner = Either<
+    CallbackWithContext<dyn Fn(&UniformContext) -> bool>,
+    CallbackWithContext<UniformShouldUpdateCallbackJs>,
+>;
 
 /// Wrapper around CallbackWithContext -- allows for Default implementation to return `true` instead of false,
 /// since, by default, uniforms should be updated if no custom optimization callback is provided.
@@ -52,8 +52,8 @@ impl<F: Fn(&UniformContext) -> bool + 'static> From<Rc<F>> for UniformShouldUpda
     }
 }
 
-impl From<Function> for UniformShouldUpdateCallback {
-    fn from(callback: Function) -> Self {
+impl From<UniformShouldUpdateCallbackJs> for UniformShouldUpdateCallback {
+    fn from(callback: UniformShouldUpdateCallbackJs) -> Self {
         Self(Either::new_b(CallbackWithContext::from(callback)))
     }
 }

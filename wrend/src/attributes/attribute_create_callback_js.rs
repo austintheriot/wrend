@@ -2,7 +2,7 @@ use js_sys::Function;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 #[wasm_bindgen(typescript_custom_section)]
-const BUFFER_LINK_JS_CALLBACK: &'static str = r#"
+const ATTRIBUTE_CREATE_CALLBACK_JS: &'static str = r#"
 type AttributeCreateCallbackJs = (attribute_create_context: AttributeCreateContext) => void;
 "#;
 

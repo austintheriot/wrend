@@ -1,6 +1,6 @@
 use crate::{
     AttributeLinkJs, BufferLinkJs, FramebufferLinkJs, ProgramLinkJs, RendererBuilder, RendererJs,
-    TextureJs, TextureLinkJs, TransformFeedbackLinkJs, UniformLinkJs,
+    TextureJs, TextureLinkJs, TransformFeedbackLinkJs, UniformLinkJs, RenderCallbackJs,
 };
 use js_sys::{Function, Object};
 use std::ops::{Deref, DerefMut};
@@ -61,7 +61,7 @@ impl RendererJsBuilder {
     }
 
     #[wasm_bindgen(js_name = setRenderCallback)]
-    pub fn set_render_callback(mut self, render_callback: Function) -> Self {
+    pub fn set_render_callback(mut self, render_callback: RenderCallbackJs) -> Self {
         self.deref_mut().set_render_callback(render_callback);
         self
     }

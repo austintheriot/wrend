@@ -2,7 +2,7 @@ use js_sys::Function;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 #[wasm_bindgen(typescript_custom_section)]
-const BUFFER_LINK_JS_CALLBACK: &'static str = r#"
+const BUFFER_CREATE_CALLBACK_JS: &'static str = r#"
 type BufferCreateCallbackJs = (buffer_create_context: BufferCreateContext) => WebGLBuffer;
 "#;
 

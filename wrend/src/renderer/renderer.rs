@@ -813,7 +813,7 @@ impl<
         let canvas = self
             .canvas
             .as_ref()
-            .ok_or(SaveContextError::CanvasReturnedNoContext)?;
+            .ok_or(SaveContextError::CanvasReturnedNoContext)?.to_owned();
         let gl = self.context_from_canvas(canvas)?;
         self.gl = Some(gl);
 
@@ -823,7 +823,7 @@ impl<
     /// Get the WebGL2 rendering context from a canvas
     fn context_from_canvas(
         &self,
-        canvas: &HtmlCanvasElement,
+        canvas: HtmlCanvasElement,
     ) -> Result<WebGl2RenderingContext, WebGlContextError> {
         let gl = match &*self.get_context_callback {
             crate::Either::A(rust_callback) => (rust_callback)(canvas)?,
@@ -921,7 +921,7 @@ impl<
                 },
             )?;
             let uniform_context = UniformContext::new(gl.clone(), now, uniform_location.clone());
-            initialize_callback.call(&uniform_context);
+            initialize_callback.call_with_arg_into_js_value(&uniform_context);
             uniform_locations.insert(program_id.to_owned(), uniform_location.clone());
 
             gl.use_program(None);

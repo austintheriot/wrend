@@ -49,7 +49,7 @@ const render = (renderer: Renderer) => {
   gl.drawArrays(gl.TRIANGLES, 0, 6);
 };
 
-const renderer = Renderer.builder()
+const renderer: Renderer = Renderer.builder()
   .setCanvas(canvas)
   .setRenderCallback(() => render(renderer))
   .addProgramLink(programLink)

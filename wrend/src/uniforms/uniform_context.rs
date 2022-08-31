@@ -1,5 +1,7 @@
 use web_sys::{WebGl2RenderingContext, WebGlUniformLocation};
 
+use crate::{IntoJsWrapper, UniformContextJs};
+
 #[derive(Debug, Clone)]
 /// This is the context object that is passed to each uniform's update callback
 pub struct UniformContext {
@@ -9,7 +11,7 @@ pub struct UniformContext {
 }
 
 impl UniformContext {
-    /// @todo: make this into a builder pattern
+    /// @todo: make this into a builder pattern ?
     pub fn new(
         gl: WebGl2RenderingContext,
         now: f64,

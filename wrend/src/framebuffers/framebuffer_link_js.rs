@@ -4,7 +4,7 @@ use js_sys::Function;
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::{WebGl2RenderingContext, WebGlFramebuffer, WebGlTexture};
 
-use crate::FramebufferLink;
+use crate::{FramebufferLink, FramebufferCreateCallbackJs};
 
 pub type FramebufferLinkJsInner = FramebufferLink<String, String>;
 
@@ -17,7 +17,7 @@ impl FramebufferLinkJs {
     #[wasm_bindgen(constructor)]
     pub fn new(
         framebuffer_id: String,
-        framebuffer_create_callback: Function,
+        framebuffer_create_callback: FramebufferCreateCallbackJs,
         texture_id: Option<String>,
     ) -> Self {
         Self(FramebufferLinkJsInner::new(

@@ -196,7 +196,7 @@ pub fn app() -> Html {
                     TransformFeedbackLink::new(TransformFeedbackId::Particle);
 
                 // provide custom attributes when getting WebGL context
-                let get_context_callback = |canvas: &HtmlCanvasElement| {
+                let get_context_callback = |canvas: HtmlCanvasElement| {
                     let mut webgl_context_attributes = WebGlContextAttributes::new();
                     webgl_context_attributes.preserve_drawing_buffer(true);
 

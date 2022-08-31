@@ -4,7 +4,7 @@ use js_sys::Function;
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::{WebGl2RenderingContext, WebGlTexture};
 
-use crate::TextureLink;
+use crate::{TextureLink, TextureCreateCallbackJs};
 
 pub type TextureLinkJsInner = TextureLink<String>;
 
@@ -14,7 +14,7 @@ pub struct TextureLinkJs(TextureLinkJsInner);
 #[wasm_bindgen(js_class = TextureLink)]
 impl TextureLinkJs {
     #[wasm_bindgen(constructor)]
-    pub fn new(texture_id: String, create_texture_callback: Function) -> Self {
+    pub fn new(texture_id: String, create_texture_callback: TextureCreateCallbackJs) -> Self {
         Self(TextureLinkJsInner::new(texture_id, create_texture_callback))
     }
 

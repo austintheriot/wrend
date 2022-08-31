@@ -1,7 +1,5 @@
-use js_sys::Function;
-
 use crate::renderer::renderer::Renderer;
-use crate::{CallbackWithContext, Either, Id, IdDefault, IdName};
+use crate::{CallbackWithContext, Either, Id, IdDefault, IdName, RenderCallbackJs};
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -41,7 +39,7 @@ pub struct RenderCallback<
         // as an argument to the function itself (like the Rust callback),
         // since in JavaScript, it's very easy for the renderer function to hold the Renderer
         // in the `render` callback closure
-        CallbackWithContext<Function>,
+        CallbackWithContext<RenderCallbackJs>,
     >,
 );
 
@@ -122,7 +120,7 @@ impl<
                 >,
             ),
         >,
-        CallbackWithContext<Function>,
+        CallbackWithContext<RenderCallbackJs>,
     >;
 
     fn deref(&self) -> &Self::Target {
@@ -206,7 +204,7 @@ impl<
         TransformFeedbackId: Id,
         VertexArrayObjectId: Id,
         UserCtx: Clone,
-    > From<Function>
+    > From<RenderCallbackJs>
     for RenderCallback<
         VertexShaderId,
         FragmentShaderId,
@@ -221,7 +219,7 @@ impl<
         UserCtx,
     >
 {
-    fn from(callback: Function) -> Self {
+    fn from(callback: RenderCallbackJs) -> Self {
         Self(Either::new_b(CallbackWithContext::from(callback)))
     }
 }

@@ -7,7 +7,7 @@ use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 
 pub type GetContextCallbackInner = Either<
     CallbackWithContext<
-        dyn Fn(&HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError>,
+        dyn Fn(HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError>,
     >,
     CallbackWithContext<Function>,
 >;
@@ -22,25 +22,25 @@ impl GetContextCallback {
     }
 }
 
-impl<F: Fn(&HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError> + 'static>
+impl<F: Fn(HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError> + 'static>
     From<F> for GetContextCallback
 {
     fn from(callback: F) -> Self {
         Self(Either::new_a(CallbackWithContext::from(Rc::new(callback)
             as Rc<
-                dyn Fn(&HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError>,
+                dyn Fn(HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError>,
             >)))
     }
 }
 
-impl<F: Fn(&HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError> + 'static>
+impl<F: Fn(HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError> + 'static>
     From<Rc<F>> for GetContextCallback
 {
     fn from(callback: Rc<F>) -> Self {
         Self(Either::new_a(CallbackWithContext::from(
             callback
                 as Rc<
-                    dyn Fn(&HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError>,
+                    dyn Fn(HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError>,
                 >,
         )))
     }
@@ -54,7 +54,7 @@ impl From<Function> for GetContextCallback {
 
 impl Default for GetContextCallback {
     fn default() -> Self {
-        Self::new(|canvas: &HtmlCanvasElement| {
+        Self::new(|canvas: HtmlCanvasElement| {
             let gl = canvas
                 .get_context("webgl2")
                 .map_err(|_| WebGlContextError::RetrievalError)?;

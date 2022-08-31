@@ -100,9 +100,9 @@ impl<ProgramId: Id, UniformId: Id> Uniform<ProgramId, UniformId> {
 
             if should_call {
                 if self.use_init_callback_for_update {
-                    self.uniform_create_callback.call(&ctx);
+                    self.uniform_create_callback.call_with_arg_into_js_value(&ctx);
                 } else if let Some(update_callback) = &self.update_callback {
-                    update_callback.call(&ctx)
+                    update_callback.call_with_arg_into_js_value(&ctx)
                 }
             }
 

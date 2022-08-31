@@ -1,7 +1,6 @@
-use js_sys::Function;
 use std::{ops::Deref, rc::Rc};
 
-use crate::{CallbackWithContext, Either, Id, IdDefault, IdName, Renderer};
+use crate::{CallbackWithContext, Either, Id, IdDefault, IdName, Renderer, AnimationCallbackJs};
 
 #[derive(Clone, Hash, Eq, PartialOrd, Ord, Debug)]
 pub struct AnimationCallback<
@@ -35,7 +34,7 @@ pub struct AnimationCallback<
                 >,
             ),
         >,
-        CallbackWithContext<Function>,
+        CallbackWithContext<AnimationCallbackJs>,
     >,
 );
 
@@ -116,7 +115,7 @@ impl<
                 >,
             ),
         >,
-        CallbackWithContext<Function>,
+        CallbackWithContext<AnimationCallbackJs>,
     >;
 
     fn deref(&self) -> &Self::Target {
@@ -266,7 +265,7 @@ impl<
         TransformFeedbackId: Id,
         VertexArrayObjectId: Id,
         UserCtx: Clone,
-    > From<Function>
+    > From<AnimationCallbackJs>
     for AnimationCallback<
         VertexShaderId,
         FragmentShaderId,
@@ -281,7 +280,7 @@ impl<
         UserCtx,
     >
 {
-    fn from(callback: Function) -> Self {
+    fn from(callback: AnimationCallbackJs) -> Self {
         Self(Either::new_b(callback.into()))
     }
 }
