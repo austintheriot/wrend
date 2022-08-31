@@ -30,18 +30,18 @@ const vertexBufferLink = new BufferLink(VERTEX_BUFFER_ID, (ctx) => {
 
 const aPositionLink = new AttributeLink([VAO_ID], VERTEX_BUFFER_ID, POSITION_ATTRIBUTE_ID, (ctx) => {
   const gl = ctx.gl();
-  const attributeLocation = ctx.attribute_location();
-  const webglBuffer = ctx.webgl_buffer();
+  const attributeLocation = ctx.attributeLocation();
+  const webglBuffer = ctx.webglBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, webglBuffer);
   gl.vertexAttribPointer(attributeLocation.get(), 2, gl.FLOAT, false, 0, 0);
-});
+})
 
 const render = (renderer: Renderer) => {
   const gl = renderer.gl();
   const canvas = renderer.canvas();
 
-  renderer.use_program(PROGRAM_ID);
-  renderer.use_vao(VAO_ID);
+  renderer.useProgram(PROGRAM_ID);
+  renderer.useVAO(VAO_ID);
 
   gl.viewport(0, 0, canvas.width, canvas.height);
   gl.clearColor(0, 0, 0, 0);
@@ -50,14 +50,14 @@ const render = (renderer: Renderer) => {
 };
 
 const renderer = Renderer.builder()
-  .set_canvas(canvas)
-  .set_render_callback(() => render(renderer))
-  .add_program_link(programLink)
-  .add_vertex_shader_src(VERTEX_SHADER_ID, vertexShader)
-  .add_fragment_shader_src(FRAGMENT_SHADER_ID, fragmentShader)
-  .add_buffer_link(vertexBufferLink)
-  .add_attribute_link(aPositionLink)
-  .add_vao_link(VAO_ID)
+  .setCanvas(canvas)
+  .setRenderCallback(() => render(renderer))
+  .addProgramLink(programLink)
+  .addVertexShaderSrc(VERTEX_SHADER_ID, vertexShader)
+  .addFragmentShaderSrc(FRAGMENT_SHADER_ID, fragmentShader)
+  .addBufferLink(vertexBufferLink)
+  .addAttributeLink(aPositionLink)
+  .addVAOLink(VAO_ID)
   .build();
 
 renderer.render();

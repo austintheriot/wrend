@@ -15,6 +15,8 @@ impl TransformFeedbackLinkJs {
     pub fn new(transform_feedback_id: String) -> Self {
         Self(TransformFeedbackLinkJsInner::new(transform_feedback_id))
     }
+
+    #[wasm_bindgen(js_name = transformFeedbackId)]
     pub fn transform_feedback_id(&self) -> String {
         self.deref().transform_feedback_id().to_owned()
     }

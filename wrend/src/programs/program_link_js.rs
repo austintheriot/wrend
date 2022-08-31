@@ -20,18 +20,22 @@ impl ProgramLinkJs {
         ))
     }
 
+    #[wasm_bindgen(js_name = programId)]
     pub fn program_id(&self) -> String {
         self.deref().program_id().to_string()
     }
 
+    #[wasm_bindgen(js_name = vertexShaderId)]
     pub fn vertex_shader_id(&self) -> String {
         self.deref().vertex_shader_id().to_string()
     }
 
+    #[wasm_bindgen(js_name = fragmentShaderId)]
     pub fn fragment_shader_id(&self) -> String {
         self.deref().fragment_shader_id().to_string()
     }
 
+    #[wasm_bindgen(js_name = transformFeedbackVaryings)]
     pub fn transform_feedback_varyings(&self) -> Array {
         utils::strings_to_js_array(self.deref().transform_feedback_varyings())
     }

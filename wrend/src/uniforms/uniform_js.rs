@@ -10,14 +10,17 @@ pub struct UniformJs(UniformJsInner);
 
 #[wasm_bindgen(js_class = Uniform)]
 impl UniformJs {
+    #[wasm_bindgen(js_name = programIds)]
     pub fn program_ids(&self) -> Array {
         utils::strings_to_js_array(self.deref().program_ids())
     }
 
+    #[wasm_bindgen(js_name = uniformId)]
     pub fn uniform_id(&self) -> String {
         self.deref().uniform_id().to_owned()
     }
 
+    #[wasm_bindgen(js_name = uniformLocations)]
     pub fn uniform_locations(&self) -> Map {
         utils::hash_map_to_js_map(self.deref().uniform_locations())
     }

@@ -11,10 +11,12 @@ pub struct TextureJs(TextureJsInner);
 
 #[wasm_bindgen(js_class = Texture)]
 impl TextureJs {
+    #[wasm_bindgen(js_name = textureId)]
     pub fn texture_id(&self) -> String {
         self.deref().texture_id().to_owned()
     }
 
+    #[wasm_bindgen(js_name = webglTexture)]
     pub fn webgl_texture(&self) -> WebGlTexture {
         self.deref().webgl_texture().to_owned()
     }

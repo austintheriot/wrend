@@ -18,10 +18,12 @@ impl TextureLinkJs {
         Self(TextureLinkJsInner::new(texture_id, create_texture_callback))
     }
 
+    #[wasm_bindgen(js_name = textureId)]
     pub fn texture_id(&self) -> String {
         self.deref().texture_id().to_owned()
     }
 
+    #[wasm_bindgen(js_name = createTexture)]
     pub fn create_texture(&self, gl: WebGl2RenderingContext, now: f64) -> WebGlTexture {
         self.deref().create_texture(gl, now)
     }

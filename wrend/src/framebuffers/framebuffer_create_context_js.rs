@@ -23,6 +23,7 @@ impl FramebufferCreateContextJs {
         self.deref().now()
     }
 
+    #[wasm_bindgen(js_name = webglTexture)]
     pub fn webgl_texture(&self) -> Option<WebGlTexture> {
         self.deref().webgl_texture().to_owned()
     }

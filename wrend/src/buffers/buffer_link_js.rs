@@ -17,10 +17,12 @@ impl BufferLinkJs {
         Self(BufferLinkJsInner::new(buffer_id, buffer_create_callback))
     }
 
+    #[wasm_bindgen(js_name = bufferId)]
     pub fn buffer_id(&self) -> String {
         self.deref().buffer_id().to_owned()
     }
 
+    #[wasm_bindgen(js_name = createBuffer)]
     pub fn create_buffer(&self, gl: WebGl2RenderingContext, now: f64) -> WebGlBuffer {
         self.deref().create_buffer(gl, now)
     }

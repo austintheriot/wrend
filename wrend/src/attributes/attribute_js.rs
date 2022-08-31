@@ -12,6 +12,7 @@ pub struct AttributeJs(AttributeJsInner);
 
 #[wasm_bindgen(js_class = Attribute)]
 impl AttributeJs {
+    #[wasm_bindgen(js_name = VAOIds)]
     pub fn vao_ids(&self) -> Array {
         let vao_ids: Vec<JsValue> = self
             .deref()
@@ -23,14 +24,17 @@ impl AttributeJs {
         Array::from_iter(vao_ids)
     }
 
+    #[wasm_bindgen(js_name = bufferId)]
     pub fn buffer_id(&self) -> String {
         self.deref().buffer_id().clone()
     }
 
+    #[wasm_bindgen(js_name = webglBuffer)]
     pub fn webgl_buffer(&self) -> WebGlBuffer {
         self.deref().webgl_buffer().clone()
     }
 
+    #[wasm_bindgen(js_name = attributeLocation)]
     pub fn attribute_location(&self) -> AttributeLocation {
         *self.deref().attribute_location()
     }

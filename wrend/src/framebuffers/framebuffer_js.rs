@@ -10,10 +10,12 @@ pub struct FramebufferJs(FramebufferJsInner);
 
 #[wasm_bindgen(js_class = Framebuffer)]
 impl FramebufferJs {
+    #[wasm_bindgen(js_name = framebufferId)]
     pub fn framebuffer_id(&self) -> String {
         self.deref().framebuffer_id().to_owned()
     }
 
+    #[wasm_bindgen(js_name = webglFramebuffer)]
     pub fn webgl_framebuffer(&self) -> WebGlFramebuffer {
         self.deref().webgl_framebuffer().to_owned()
     }

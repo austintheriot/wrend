@@ -1,6 +1,6 @@
 use crate::{
     AttributeJs, BufferJs, FramebufferJs, Renderer, RendererHandleJs, RendererJsBuilder, TextureJs,
-    UniformJs,
+    UniformJs, utils,
 };
 use js_sys::{Array, Map, Object};
 use std::ops::{Deref, DerefMut};
@@ -44,12 +44,14 @@ impl RendererJs {
         self.deref().gl().clone()
     }
 
+    #[wasm_bindgen(js_name = fragmentShader)]
     pub fn fragment_shader(&self, fragment_shader_id: String) -> Option<WebGlShader> {
         self.deref()
             .fragment_shader(&fragment_shader_id)
             .map(Clone::clone)
     }
 
+    #[wasm_bindgen(js_name = fragmentShaders)]
     pub fn fragment_shaders(&self) -> Map {
         let map = Map::new();
 
@@ -60,12 +62,14 @@ impl RendererJs {
         map
     }
 
+    #[wasm_bindgen(js_name = vertexShader)]
     pub fn vertex_shader(&self, vertex_shader_id: String) -> Option<WebGlShader> {
         self.deref()
             .vertex_shader(&vertex_shader_id)
             .map(Clone::clone)
     }
 
+    #[wasm_bindgen(js_name = vertexShaders)]
     pub fn vertex_shaders(&self) -> Map {
         let map = Map::new();
 
@@ -150,18 +154,9 @@ impl RendererJs {
         map
     }
 
+    #[wasm_bindgen(js_name = textureById)]
     pub fn textures_by_id(&self, texture_ids: Array) -> Array {
-        let string_vec: Vec<String> = js_sys::try_iter(texture_ids.as_ref())
-            .unwrap()
-            .expect("textures_by_id should be passed an array of strings")
-            .into_iter()
-            .map(|el| {
-                JsValue::as_string(&el.expect(
-                    "Each element in the array passed to textures_by_id should be a string",
-                ))
-                .unwrap()
-            })
-            .collect();
+        let string_vec: Vec<String> = utils::js_array_to_vec_strings(texture_ids);
 
         let textures: Vec<JsValue> = self
             .deref()
@@ -180,6 +175,7 @@ impl RendererJs {
         self.deref().framebuffer(&framebuffer_id).map(Into::into)
     }
 
+    #[wasm_bindgen(js_name = transformFeedback)]
     pub fn transform_feedback(
         &self,
         transform_feedback_id: String,
@@ -189,26 +185,32 @@ impl RendererJs {
             .map(Clone::clone)
     }
 
+    #[wasm_bindgen(js_name = VAO)]
     pub fn vao(&self, vao_id: String) -> Option<WebGlVertexArrayObject> {
         self.deref().vao(&vao_id).map(Clone::clone)
     }
 
+    #[wasm_bindgen(js_name = userCtx)]
     pub fn user_ctx(&self) -> Option<Object> {
         self.deref().user_ctx().map(Clone::clone)
     }
 
+    #[wasm_bindgen(js_name = useProgram)]
     pub fn use_program(&self, program_id: String) {
         self.deref().use_program(&program_id);
     }
 
+    #[wasm_bindgen(js_name = useVAO)]
     pub fn use_vao(&self, vao_id: String) {
         self.deref().use_vao(&vao_id);
     }
 
+    #[wasm_bindgen(js_name = updateUniform)]
     pub fn update_uniform(&self, uniform_id: String) {
         self.deref().update_uniform(&uniform_id);
     }
 
+    #[wasm_bindgen(js_name = updateUniforms)]
     pub fn update_uniforms(&self) {
         self.deref().update_uniforms();
     }
@@ -217,10 +219,12 @@ impl RendererJs {
         self.deref().render();
     }
 
+    #[wasm_bindgen(js_name = saveImage)]
     pub fn save_image(&self) {
         self.deref().save_image();
     }
 
+    #[wasm_bindgen(js_name = intoRendererHandle)]
     pub fn into_renderer_handle(self) -> RendererHandleJs {
         self.into()
     }

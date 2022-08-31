@@ -11,6 +11,7 @@ impl<TransformFeedbackId: Id> TransformFeedbackLink<TransformFeedbackId> {
             transform_feedback_id,
         }
     }
+
     pub fn transform_feedback_id(&self) -> &TransformFeedbackId {
         &self.transform_feedback_id
     }

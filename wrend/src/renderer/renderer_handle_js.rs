@@ -22,38 +22,47 @@ pub struct RendererHandleJs(RendererHandleJsInner);
 
 #[wasm_bindgen(js_class = RendererHandle)]
 impl RendererHandleJs {
+    #[wasm_bindgen(js_name = initializeRecorder)]
     pub fn initialize_recorder(&mut self) {
         self.deref_mut().initialize_recorder();
     }
 
+    #[wasm_bindgen(js_name = startAnimating)]
     pub fn start_animating(&self) {
         self.deref().start_animating();
     }
 
+    #[wasm_bindgen(js_name = stopAnimating)]
     pub fn stop_animating(&self) {
         self.deref().stop_animating();
     }
 
+    #[wasm_bindgen(js_name = setAnimationCallback)]
     pub fn set_animation_callback(&mut self, animation_callback: Option<Function>) {
         self.deref_mut().set_animation_callback(animation_callback);
     }
 
+    #[wasm_bindgen(js_name = startRecording)]
     pub fn start_recording(&self) {
         self.deref().start_recording();
     }
 
+    #[wasm_bindgen(js_name = stopRecording)]
     pub fn stop_recording(&self) {
         self.deref().stop_recording();
     }
 
+    #[wasm_bindgen(js_name = recorderInitialized)]
     pub fn recorder_initialized(&self) -> bool {
         self.deref().recorder_initialized()
     }
 
+    #[wasm_bindgen(js_name = isAnimating)]
     pub fn is_animating(&self) -> bool {
         self.deref().is_animating()
     }
 
+    #[wasm_bindgen(js_name = isRecording)]
     pub fn is_recording(&self) -> bool {
         self.deref().is_recording()
     }

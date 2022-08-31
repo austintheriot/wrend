@@ -18,10 +18,12 @@ impl AttributeCreateContextJs {
         self.deref().now()
     }
 
+    #[wasm_bindgen(js_name = webglBuffer)]
     pub fn webgl_buffer(&self) -> WebGlBuffer {
         self.deref().webgl_buffer().to_owned()
     }
 
+    #[wasm_bindgen(js_name = attributeLocation)]
     pub fn attribute_location(&self) -> AttributeLocation {
         self.deref().attribute_location().to_owned()
     }

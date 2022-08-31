@@ -27,14 +27,17 @@ impl FramebufferLinkJs {
         ))
     }
 
+    #[wasm_bindgen(js_name = framebufferId)]
     pub fn framebuffer_id(&self) -> String {
         self.deref().framebuffer_id().to_owned()
     }
 
+    #[wasm_bindgen(js_name = textureId)]
     pub fn texture_id(&self) -> Option<String> {
         self.deref().texture_id()
     }
 
+    #[wasm_bindgen(js_name = createFramebuffer)]
     pub fn create_framebuffer(
         &self,
         gl: WebGl2RenderingContext,

@@ -20,49 +20,59 @@ impl UniformLinkJs {
         ))
     }
 
+    #[wasm_bindgen(js_name = programIds)]
     pub fn program_ids(&self) -> Array {
         utils::strings_to_js_array(self.deref().program_ids())
     }
 
+    #[wasm_bindgen(js_name = uniformId)]
     pub fn uniform_id(&self) -> String {
         self.deref().uniform_id().to_owned()
     }
 
+    #[wasm_bindgen(js_name = initializeCallback)]
     pub fn initialize_callback(&self) -> Option<Function> {
         self.deref().initialize_callback().b().map(Function::from)
     }
 
+    #[wasm_bindgen(js_name = setInitializeCallback)]
     pub fn set_initialize_callback(mut self, callback: Function) -> Self {
         self.deref_mut().set_initialize_callback(callback);
         self
     }
 
+    #[wasm_bindgen(js_name = shouldUpdateCallback)]
     pub fn should_update_callback(&self) -> Option<Function> {
         self.deref()
             .should_update_callback()
             .and_then(|callback| callback.js_function())
     }
 
+    #[wasm_bindgen(js_name = setShouldUpdateCallback)]
     pub fn set_should_update_callback(mut self, callback: Function) -> Self {
         self.deref_mut().set_should_update_callback(callback);
         self
     }
 
+    #[wasm_bindgen(js_name = setUpdateCallback)]
     pub fn set_update_callback(mut self, callback: Function) -> Self {
         self.deref_mut().set_update_callback(callback);
         self
     }
 
+    #[wasm_bindgen(js_name = updateCallback)]
     pub fn update_callback(&self) -> Option<Function> {
         self.deref()
             .update_callback()
             .and_then(|callback| callback.js_function())
     }
 
+    #[wasm_bindgen(js_name = useInitCallbackForUpdate)]
     pub fn use_init_callback_for_update(&self) -> bool {
         self.deref().use_init_callback_for_update()
     }
 
+    #[wasm_bindgen(js_name = setUseInitCallbackForUpdate)]
     pub fn set_use_init_callback_for_update(mut self, use_init_callback_for_update: bool) -> Self {
         self.deref_mut()
             .set_use_init_callback_for_update(use_init_callback_for_update);

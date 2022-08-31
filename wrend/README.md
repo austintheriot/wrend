@@ -20,8 +20,6 @@ The following use cases should guide the development of this library:
 
 - Make it possible access `Renderer` from the render callback in JavaScript
 
-- Export methods with JavaScript-style names instead of Rust-styled names
-
 - Implementing JavaScript API
   - Check that all structs implement `pub fn new()` where appropriate
   - Check that all structs have `#[wasm_bindgen(constructor)]` where needed

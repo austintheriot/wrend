@@ -29,23 +29,28 @@ impl AttributeLinkJs {
         ))
     }
 
+    #[wasm_bindgen(js_name = VAOIds)]
     pub fn vao_ids(&self) -> Array {
         let ids = self.deref().vao_ids();
         utils::strings_to_js_array(ids)
     }
 
+    #[wasm_bindgen(js_name = bufferId)]
     pub fn buffer_id(&self) -> String {
         self.deref().buffer_id().to_owned()
     }
 
+    #[wasm_bindgen(js_name = attributeId)]
     pub fn attribute_id(&self) -> String {
         self.deref().attribute_id().to_owned()
     }
 
+    #[wasm_bindgen(js_name = createCallback)]
     pub fn create_callback(&self) -> Option<AttributeCreateCallbackJs> {
         self.deref().create_callback().js_function()
     }
 
+    #[wasm_bindgen(js_name = createAttribute)]
     pub fn create_attribute(
         &self,
         gl: WebGl2RenderingContext,

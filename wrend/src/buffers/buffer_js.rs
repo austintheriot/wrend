@@ -10,10 +10,12 @@ pub struct BufferJs(BufferJsInner);
 
 #[wasm_bindgen(js_class = Buffer)]
 impl BufferJs {
+    #[wasm_bindgen(js_name = bufferId)]
     pub fn buffer_id(&self) -> String {
         self.deref().buffer_id().to_owned()
     }
 
+    #[wasm_bindgen(js_name = webglBuffer)]
     pub fn webgl_buffer(&self) -> WebGlBuffer {
         self.deref().webgl_buffer().to_owned()
     }
