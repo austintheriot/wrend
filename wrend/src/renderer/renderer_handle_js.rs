@@ -1,5 +1,5 @@
-use crate::{RendererHandle, RendererJs, AnimationCallbackJs};
-use js_sys::{Object};
+use crate::{AnimationCallbackJs, RendererHandle, RendererJs};
+use js_sys::Object;
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;
 
@@ -65,6 +65,11 @@ impl RendererHandleJs {
     #[wasm_bindgen(js_name = isRecording)]
     pub fn is_recording(&self) -> bool {
         self.deref().is_recording()
+    }
+
+    #[wasm_bindgen(js_name = intoRenderer)]
+    pub fn into_renderer(self) -> RendererJs {
+        self.0.into_renderer().into()
     }
 }
 

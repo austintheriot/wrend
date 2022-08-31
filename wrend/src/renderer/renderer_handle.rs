@@ -277,6 +277,24 @@ impl<
             })
     }
 
+    pub fn into_renderer(
+        self,
+    ) -> Renderer<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        AttributeId,
+        TextureId,
+        FramebufferId,
+        TransformFeedbackId,
+        VertexArrayObjectId,
+        UserCtx,
+    > {
+        (*self.renderer).borrow().to_owned()
+    }
+
     fn request_animation_frame(f: &Closure<dyn Fn()>) -> i32 {
         window()
             .unwrap()
