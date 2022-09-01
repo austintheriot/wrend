@@ -43,8 +43,8 @@ impl RendererHandleJs {
     }
 
     #[wasm_bindgen(js_name = startRecording)]
-    pub fn start_recording(&self) {
-        self.deref().start_recording();
+    pub fn start_recording(&mut self) {
+        self.deref_mut().start_recording();
     }
 
     #[wasm_bindgen(js_name = stopRecording)]

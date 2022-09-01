@@ -230,7 +230,7 @@ pub fn app() -> Html {
     let handle_start_recording = {
         let recording_handle = Rc::clone(&recording_handle);
         Callback::from(move |_: MouseEvent| {
-            if let Some(recording_handle) = &*recording_handle.borrow() {
+            if let Some(recording_handle) = &mut *recording_handle.borrow_mut() {
                 recording_handle.start_recording();
             }
         })

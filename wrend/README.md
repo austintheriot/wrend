@@ -16,17 +16,11 @@ The following use cases should guide the development of this library:
 
 ## Todo
 
-- If `Renderer` MUST get cloned on each iteration: consider wrapping internal data in Rc<RefCell>
-- OR make a note that the operation could be expensive
-- -----------------> Wrap RendererJs data in an Rc<RefCell<_>> so that clones to the data are inexpensive?
-
-- Use static methods to render in JavaScript, rather than downcasting from an `Any`
+- Add custom TypeScript types:
+  - Arrays
+  - Maps
 
 - Make it more explicit when structs get cloned to convert them into a `JsValue`
-
-- use `dyn_ref` for Renderer ?
-
-- Call `initialize recorder` automatically if it has not been initialized before `start_recording` is called
 
 - Make a clean wrapper around `Either` that functions as a callback abstraction (instead of implementing function utilities on `Either` itself)
 

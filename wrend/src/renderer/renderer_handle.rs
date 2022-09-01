@@ -195,7 +195,10 @@ impl<
 
     pub fn start_animating(&self) {
         // cancel previous animation before starting a new one
-        self.stop_animating();
+        if self.is_animating() {
+            error!("`start_animating` was called, but `RendererHandle` is already animating. Cancelling the previous animation and staring a new one");
+            self.stop_animating();
+        }
 
         self.animation_data.borrow_mut().set_is_animating(true);
         let f = Rc::new(RefCell::new(None));
@@ -226,6 +229,11 @@ impl<
     }
 
     pub fn stop_animating(&self) {
+        if !self.is_animating() {
+            error!("`stop_animating` was called, but `RendererHandle` is not currently animating");
+            return;
+        }
+
         self.animation_data.borrow_mut().set_is_animating(false);
         window()
             .unwrap()
@@ -258,8 +266,13 @@ impl<
             .set_animation_callback(animation_callback.map(|cb| cb.into()));
     }
 
-    pub fn start_recording(&self) {
+    pub fn start_recording(&mut self) {
         const ERROR_START: &str = "Error trying to start video recording";
+
+        if !self.recorder_initialized() {
+            self.initialize_recorder();
+        }
+
         if let Some(recording_data) = &self.recording_data {
             if let Err(err) = recording_data
                 .borrow_mut()
@@ -269,18 +282,24 @@ impl<
                 error!("{ERROR_START}: {err:?}");
             }
         } else {
-            error!("{ERROR_START}: recorder has not been initialized. Please call `initialize_recorder` before calling `start_recording`");
+            error!("{ERROR_START}: there was an error initializing the recorder");
         }
     }
 
     pub fn stop_recording(&self) {
         const ERROR_START: &str = "Error trying to stop video recording";
+
+        if !self.is_recording() {
+            error!("{ERROR_START}: recorder is not currently recording");
+            return;
+        }
+
         if let Some(recording_data) = &self.recording_data {
             if let Err(err) = recording_data.borrow_mut().media_recorder().stop() {
                 error!("{ERROR_START}: {err:?}");
             }
         } else {
-            error!("{ERROR_START}: recorder has not been initialized. Please call `initialize_recorder` before calling `stop_recording`");
+            error!("{ERROR_START}: recorder was not properly initialized");
         }
     }
 
