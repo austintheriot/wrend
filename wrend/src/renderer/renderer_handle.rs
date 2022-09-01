@@ -202,7 +202,7 @@ impl<
 
         self.animation_data.borrow_mut().set_is_animating(true);
         let f = Rc::new(RefCell::new(None));
-        let g = f.clone();
+        let g = Rc::clone(&f);
         let animation_data = Rc::clone(&self.animation_data);
         let renderer = Rc::clone(&self.renderer);
         {

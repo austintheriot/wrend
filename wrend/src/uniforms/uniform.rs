@@ -1,3 +1,4 @@
+use crate::Either;
 use crate::Id;
 use crate::UniformContext;
 use crate::UniformCreateUpdateCallback;
@@ -86,16 +87,22 @@ impl<ProgramId: Id, UniformId: Id> Uniform<ProgramId, UniformId> {
             gl.use_program(Some(program));
 
             let ctx = UniformContext::new(gl.clone(), now, uniform_location.clone());
-            let should_update_callback = self.should_update_callback().unwrap_or_default();
+            let should_update_callback = self.should_update_callback();
 
-            let should_call = match &*should_update_callback {
-                crate::Either::A(rust_callback) => (rust_callback)(&ctx),
-                crate::Either::B(js_callback) => {
-                    JsValue::as_bool(&js_callback.call0(&JsValue::NULL).expect(
-                        "Should be able to call `should_update_callback` JavaScript callback",
-                    ))
-                    .unwrap_or(false)
+            let should_call = if let Some(should_update_callback) = should_update_callback {
+                match &*should_update_callback {
+                    Either::A(rust_callback) => (rust_callback)(&ctx),
+                    Either::B(js_callback) => {
+                        JsValue::as_bool(&js_callback.call0(&JsValue::NULL).expect(
+                            "Should be able to call `should_update_callback` JavaScript callback",
+                        ))
+                        .unwrap_or(false)
+                    }
                 }
+            } else {
+                // by default, assume that all uniforms should be updated, since uniforms should 
+                // only be updated if no custom optimization callback is provided
+                true
             };
 
             if should_call {

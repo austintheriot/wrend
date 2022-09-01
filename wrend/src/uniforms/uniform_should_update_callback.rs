@@ -20,14 +20,6 @@ impl Deref for UniformShouldUpdateCallback {
     }
 }
 
-impl Default for UniformShouldUpdateCallback {
-    fn default() -> Self {
-        Self(Either::new_a(CallbackWithContext::new(
-            Rc::new(|_: &UniformContext| true) as Rc<dyn Fn(&UniformContext) -> bool>,
-        )))
-    }
-}
-
 impl Debug for UniformShouldUpdateCallback {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_tuple("UniformShouldUpdateCallback")
