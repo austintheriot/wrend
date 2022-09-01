@@ -7,6 +7,7 @@ use crate::{
     ShaderType, Texture, TextureLink, TransformFeedbackLink, Uniform, UniformContext, UniformLink,
     WebGlContextError,
 };
+
 use log::error;
 use std::{
     any::Any,
@@ -289,7 +290,7 @@ impl<
         // If not already renderer as a JavaScript callback, should now be rendered
         // as a Rust callback (or as a JavaScript called, without the `Renderer` argument supplied)
         if !rendered_as_js {
-            self.render_callback.call(&self);
+            self.render_callback.call(self);
         }
 
         self
@@ -341,6 +342,24 @@ impl<
     /// WebGL is limited to an f32, so using performance.now() (for now) to limit the size of the f64
     fn now() -> f64 {
         window().unwrap().performance().unwrap().now()
+    }
+
+    pub fn render_callback(
+        &self,
+    ) -> RenderCallback<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        AttributeId,
+        TextureId,
+        FramebufferId,
+        TransformFeedbackId,
+        VertexArrayObjectId,
+        UserCtx,
+    > {
+        self.render_callback.to_owned()
     }
 }
 

@@ -1,5 +1,5 @@
-use crate::{CallbackWithContext, Either, FramebufferCreateContext, FramebufferCreateCallbackJs};
-use js_sys::Function;
+use crate::{CallbackWithContext, Either, FramebufferCreateCallbackJs, FramebufferCreateContext};
+
 use std::{ops::Deref, rc::Rc};
 use web_sys::WebGlFramebuffer;
 

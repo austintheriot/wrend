@@ -192,6 +192,6 @@ impl From<ProgramLinkBuilderJsInner> for JsValue {
 
 impl From<ProgramLinkJs> for ProgramLinkJsInner {
     fn from(js_program_link: ProgramLinkJs) -> Self {
-        js_program_link.inner()
+        js_program_link.into_inner()
     }
 }

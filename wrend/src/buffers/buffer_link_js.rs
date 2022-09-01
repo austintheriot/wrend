@@ -29,7 +29,7 @@ impl BufferLinkJs {
 }
 
 impl BufferLinkJs {
-    pub fn inner(self) -> BufferLinkJsInner {
+    pub fn into_inner(self) -> BufferLinkJsInner {
         self.0
     }
 }
@@ -50,6 +50,6 @@ impl DerefMut for BufferLinkJs {
 
 impl From<BufferLinkJs> for BufferLinkJsInner {
     fn from(buffer_link_js: BufferLinkJs) -> Self {
-        buffer_link_js.inner()
+        buffer_link_js.into_inner()
     }
 }

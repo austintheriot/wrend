@@ -20,7 +20,7 @@ impl TextureCreateContextJs {
 }
 
 impl TextureCreateContextJs {
-    pub fn inner(self) -> TextureCreateContextJsInner {
+    pub fn into_inner(self) -> TextureCreateContextJsInner {
         self.0
     }
 }

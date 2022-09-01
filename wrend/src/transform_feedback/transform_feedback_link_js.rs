@@ -23,7 +23,7 @@ impl TransformFeedbackLinkJs {
 }
 
 impl TransformFeedbackLinkJs {
-    pub fn inner(self) -> TransformFeedbackLinkJsInner {
+    pub fn into_inner(self) -> TransformFeedbackLinkJsInner {
         self.0
     }
 }
@@ -44,6 +44,6 @@ impl DerefMut for TransformFeedbackLinkJs {
 
 impl From<TransformFeedbackLinkJs> for TransformFeedbackLinkJsInner {
     fn from(buffer_link_js: TransformFeedbackLinkJs) -> Self {
-        buffer_link_js.inner()
+        buffer_link_js.into_inner()
     }
 }

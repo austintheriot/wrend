@@ -20,7 +20,7 @@ impl BufferCreateContextJs {
 }
 
 impl BufferCreateContextJs {
-    pub fn inner(self) -> BufferCreateContextJsInner {
+    pub fn into_inner(self) -> BufferCreateContextJsInner {
         self.0
     }
 }

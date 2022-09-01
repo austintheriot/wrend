@@ -30,7 +30,7 @@ impl AttributeCreateContextJs {
 }
 
 impl AttributeCreateContextJs {
-    pub fn inner(self) -> AttributeCreateContextJsInner {
+    pub fn into_inner(self) -> AttributeCreateContextJsInner {
         self.0
     }
 }

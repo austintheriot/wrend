@@ -1,10 +1,9 @@
 use std::ops::{Deref, DerefMut};
 
-use js_sys::Function;
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::{WebGl2RenderingContext, WebGlTexture};
 
-use crate::{TextureLink, TextureCreateCallbackJs};
+use crate::{TextureCreateCallbackJs, TextureLink};
 
 pub type TextureLinkJsInner = TextureLink<String>;
 
@@ -30,7 +29,7 @@ impl TextureLinkJs {
 }
 
 impl TextureLinkJs {
-    pub fn inner(self) -> TextureLinkJsInner {
+    pub fn into_inner(self) -> TextureLinkJsInner {
         self.0
     }
 }
@@ -51,6 +50,6 @@ impl DerefMut for TextureLinkJs {
 
 impl From<TextureLinkJs> for TextureLinkJsInner {
     fn from(buffer_link_js: TextureLinkJs) -> Self {
-        buffer_link_js.inner()
+        buffer_link_js.into_inner()
     }
 }

@@ -107,9 +107,32 @@ impl<
             UserCtx,
         >,
     ) -> Self {
+        Self::new_with_rc_renderer(Rc::new(RefCell::new(renderer)))
+    }
+
+    /// Allows providing an already-wrapped `Renderer` as an argument.
+    pub fn new_with_rc_renderer(
+        renderer: Rc<
+            RefCell<
+                Renderer<
+                    VertexShaderId,
+                    FragmentShaderId,
+                    ProgramId,
+                    UniformId,
+                    BufferId,
+                    AttributeId,
+                    TextureId,
+                    FramebufferId,
+                    TransformFeedbackId,
+                    VertexArrayObjectId,
+                    UserCtx,
+                >,
+            >,
+        >,
+    ) -> Self {
         Self {
             recording_data: None,
-            renderer: Rc::new(RefCell::new(renderer)),
+            renderer,
             animation_data: Rc::new(RefCell::new(AnimationData::new())),
         }
     }
@@ -277,24 +300,6 @@ impl<
             })
     }
 
-    pub fn into_renderer(
-        self,
-    ) -> Renderer<
-        VertexShaderId,
-        FragmentShaderId,
-        ProgramId,
-        UniformId,
-        BufferId,
-        AttributeId,
-        TextureId,
-        FramebufferId,
-        TransformFeedbackId,
-        VertexArrayObjectId,
-        UserCtx,
-    > {
-        (*self.renderer).borrow().to_owned()
-    }
-
     fn request_animation_frame(f: &Closure<dyn Fn()>) -> i32 {
         window()
             .unwrap()
@@ -406,6 +411,75 @@ impl<
         >,
     ) -> Self {
         RendererHandle::new(renderer)
+    }
+}
+
+impl<
+        VertexShaderId: Id,
+        FragmentShaderId: Id,
+        ProgramId: Id,
+        UniformId: Id + IdName,
+        BufferId: Id,
+        AttributeId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
+        TransformFeedbackId: Id,
+        VertexArrayObjectId: Id,
+        UserCtx: Clone,
+    >
+    From<
+        Rc<
+            RefCell<
+                Renderer<
+                    VertexShaderId,
+                    FragmentShaderId,
+                    ProgramId,
+                    UniformId,
+                    BufferId,
+                    AttributeId,
+                    TextureId,
+                    FramebufferId,
+                    TransformFeedbackId,
+                    VertexArrayObjectId,
+                    UserCtx,
+                >,
+            >,
+        >,
+    >
+    for RendererHandle<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        AttributeId,
+        TextureId,
+        FramebufferId,
+        TransformFeedbackId,
+        VertexArrayObjectId,
+        UserCtx,
+    >
+{
+    fn from(
+        renderer: Rc<
+            RefCell<
+                Renderer<
+                    VertexShaderId,
+                    FragmentShaderId,
+                    ProgramId,
+                    UniformId,
+                    BufferId,
+                    AttributeId,
+                    TextureId,
+                    FramebufferId,
+                    TransformFeedbackId,
+                    VertexArrayObjectId,
+                    UserCtx,
+                >,
+            >,
+        >,
+    ) -> Self {
+        RendererHandle::new_with_rc_renderer(renderer)
     }
 }
 

@@ -1,6 +1,6 @@
 use std::{ops::Deref, rc::Rc};
 
-use crate::{CallbackWithContext, Either, Id, IdDefault, IdName, Renderer, AnimationCallbackJs};
+use crate::{AnimationCallbackJs, CallbackWithContext, Either, Id, IdDefault, IdName, Renderer};
 
 #[derive(Clone, Hash, Eq, PartialOrd, Ord, Debug)]
 pub struct AnimationCallback<

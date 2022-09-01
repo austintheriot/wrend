@@ -1,10 +1,9 @@
 use std::ops::{Deref, DerefMut};
 
-use js_sys::Function;
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::{WebGl2RenderingContext, WebGlFramebuffer, WebGlTexture};
 
-use crate::{FramebufferLink, FramebufferCreateCallbackJs};
+use crate::{FramebufferCreateCallbackJs, FramebufferLink};
 
 pub type FramebufferLinkJsInner = FramebufferLink<String, String>;
 
@@ -49,7 +48,7 @@ impl FramebufferLinkJs {
 }
 
 impl FramebufferLinkJs {
-    pub fn inner(self) -> FramebufferLinkJsInner {
+    pub fn into_inner(self) -> FramebufferLinkJsInner {
         self.0
     }
 }
@@ -70,6 +69,6 @@ impl DerefMut for FramebufferLinkJs {
 
 impl From<FramebufferLinkJs> for FramebufferLinkJsInner {
     fn from(framebuffer_link_js: FramebufferLinkJs) -> Self {
-        framebuffer_link_js.inner()
+        framebuffer_link_js.into_inner()
     }
 }

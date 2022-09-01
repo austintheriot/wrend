@@ -1,7 +1,7 @@
-use crate::{UniformContext, AttributeLocation, IntoJsWrapper};
+use crate::{IntoJsWrapper, UniformContext};
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;
-use web_sys::{WebGl2RenderingContext, WebGlBuffer, WebGlUniformLocation};
+use web_sys::{WebGl2RenderingContext, WebGlUniformLocation};
 
 pub type UniformContextJsInner = UniformContext;
 
@@ -14,18 +14,18 @@ impl UniformContextJs {
         self.deref().gl().to_owned()
     }
 
-    pub fn now(self) -> f64 {
+    pub fn now(&self) -> f64 {
         self.deref().now()
     }
 
     #[wasm_bindgen(js_name = uniformLocation)]
-    pub fn uniform_location(self) -> WebGlUniformLocation {
+    pub fn uniform_location(&self) -> WebGlUniformLocation {
         self.deref().uniform_location().to_owned()
     }
 }
 
 impl UniformContextJs {
-    pub fn inner(self) -> UniformContextJsInner {
+    pub fn into_inner(self) -> UniformContextJsInner {
         self.0
     }
 }

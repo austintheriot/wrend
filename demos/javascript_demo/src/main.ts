@@ -37,7 +37,6 @@ const aPositionLink = new AttributeLink([VAO_ID], VERTEX_BUFFER_ID, POSITION_ATT
 })
 
 const render = (renderer: Renderer) => {
-  console.log('rendering with Renderer: ', { renderer });
   const gl = renderer.gl();
   const canvas = renderer.canvas();
 

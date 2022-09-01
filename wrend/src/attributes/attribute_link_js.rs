@@ -64,7 +64,7 @@ impl AttributeLinkJs {
 }
 
 impl AttributeLinkJs {
-    pub fn inner(self) -> AttributeLinkJsInner {
+    pub fn into_inner(self) -> AttributeLinkJsInner {
         self.0
     }
 }

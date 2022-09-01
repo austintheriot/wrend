@@ -186,10 +186,7 @@ impl<JsFunction: AsRef<Function>, A: AsRef<JsValue>>
         match &*self {
             crate::Either::A(rust_callback) => (rust_callback)(a),
             crate::Either::B(js_callback) => {
-                match js_callback
-                    .as_ref()
-                    .call1(&JsValue::NULL, a.as_ref())
-                {
+                match js_callback.as_ref().call1(&JsValue::NULL, a.as_ref()) {
                     Ok(_) => {}
                     Err(err) => {
                         error!("JavaScript function threw an error: {err:?}")

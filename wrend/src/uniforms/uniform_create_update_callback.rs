@@ -4,12 +4,17 @@ use std::{ops::Deref, rc::Rc};
 
 #[derive(Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct UniformCreateUpdateCallback(
-    Either<CallbackWithContext<dyn Fn(&UniformContext)>, CallbackWithContext<UniformCreateUpdateCallbackJs>>,
+    Either<
+        CallbackWithContext<dyn Fn(&UniformContext)>,
+        CallbackWithContext<UniformCreateUpdateCallbackJs>,
+    >,
 );
 
 impl Deref for UniformCreateUpdateCallback {
-    type Target =
-        Either<CallbackWithContext<dyn Fn(&UniformContext)>, CallbackWithContext<UniformCreateUpdateCallbackJs>>;
+    type Target = Either<
+        CallbackWithContext<dyn Fn(&UniformContext)>,
+        CallbackWithContext<UniformCreateUpdateCallbackJs>,
+    >;
 
     fn deref(&self) -> &Self::Target {
         &self.0

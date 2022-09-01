@@ -46,7 +46,7 @@ impl ProgramLinkJs {
 }
 
 impl ProgramLinkJs {
-    pub fn inner(self) -> ProgramLinkJsInner {
+    pub fn into_inner(self) -> ProgramLinkJsInner {
         self.0
     }
 }

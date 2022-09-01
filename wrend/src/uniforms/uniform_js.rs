@@ -27,7 +27,7 @@ impl UniformJs {
 }
 
 impl UniformJs {
-    pub fn inner(self) -> UniformJsInner {
+    pub fn into_inner(self) -> UniformJsInner {
         self.0
     }
 }

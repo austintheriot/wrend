@@ -105,6 +105,6 @@ impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName> Eq
 
 impl From<AttributeLinkJs> for AttributeLinkJsInner {
     fn from(js_attribute_link: AttributeLinkJs) -> Self {
-        js_attribute_link.inner()
+        js_attribute_link.into_inner()
     }
 }

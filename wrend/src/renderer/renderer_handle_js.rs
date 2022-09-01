@@ -1,4 +1,4 @@
-use crate::{AnimationCallbackJs, RendererHandle, RendererJs};
+use crate::{AnimationCallbackJs, RendererHandle};
 use js_sys::Object;
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -66,11 +66,6 @@ impl RendererHandleJs {
     pub fn is_recording(&self) -> bool {
         self.deref().is_recording()
     }
-
-    #[wasm_bindgen(js_name = intoRenderer)]
-    pub fn into_renderer(self) -> RendererJs {
-        self.0.into_renderer().into()
-    }
 }
 
 impl From<RendererHandleJsInner> for RendererHandleJs {
@@ -82,12 +77,6 @@ impl From<RendererHandleJsInner> for RendererHandleJs {
 impl From<&RendererHandleJsInner> for RendererHandleJs {
     fn from(js_renderer_handle_inner: &RendererHandleJsInner) -> Self {
         Self(js_renderer_handle_inner.to_owned())
-    }
-}
-
-impl From<RendererJs> for RendererHandleJs {
-    fn from(js_renderer: RendererJs) -> Self {
-        Self(js_renderer.inner().into())
     }
 }
 

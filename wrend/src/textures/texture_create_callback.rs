@@ -1,5 +1,5 @@
-use crate::{CallbackWithContext, Either, TextureCreateContext, TextureCreateCallbackJs};
-use js_sys::Function;
+use crate::{CallbackWithContext, Either, TextureCreateCallbackJs, TextureCreateContext};
+
 use std::fmt::Debug;
 use std::{ops::Deref, rc::Rc};
 use web_sys::WebGlTexture;

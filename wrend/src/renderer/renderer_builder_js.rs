@@ -1,6 +1,6 @@
 use crate::{
-    AttributeLinkJs, BufferLinkJs, FramebufferLinkJs, ProgramLinkJs, RendererBuilder, RendererJs,
-    TextureJs, TextureLinkJs, TransformFeedbackLinkJs, UniformLinkJs, RenderCallbackJs,
+    AttributeLinkJs, BufferLinkJs, FramebufferLinkJs, ProgramLinkJs, RenderCallbackJs,
+    RendererBuilder, RendererJs, TextureJs, TextureLinkJs, TransformFeedbackLinkJs, UniformLinkJs,
 };
 use js_sys::{Function, Object};
 use std::ops::{Deref, DerefMut};

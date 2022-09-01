@@ -100,7 +100,8 @@ impl<ProgramId: Id, UniformId: Id> Uniform<ProgramId, UniformId> {
 
             if should_call {
                 if self.use_init_callback_for_update {
-                    self.uniform_create_callback.call_with_arg_into_js_value(&ctx);
+                    self.uniform_create_callback
+                        .call_with_arg_into_js_value(&ctx);
                 } else if let Some(update_callback) = &self.update_callback {
                     update_callback.call_with_arg_into_js_value(&ctx)
                 }
@@ -142,6 +143,6 @@ impl From<UniformJsInner> for JsValue {
 
 impl From<UniformJs> for UniformJsInner {
     fn from(js_uniform: UniformJs) -> Self {
-        js_uniform.inner()
+        js_uniform.into_inner()
     }
 }
