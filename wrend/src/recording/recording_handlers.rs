@@ -78,7 +78,7 @@ pub(crate) fn make_handle_pause(
     media_recorder: MediaRecorder,
     recording_data: Rc<RefCell<RecordingData>>,
 ) -> Listener<MediaRecorder, Event> {
-    Listener::new(media_recorder, "stop", move |_: Event| {
+    Listener::new(media_recorder, "pause", move |_: Event| {
         info!("Recording paused");
         recording_data.borrow_mut().set_is_recording(false);
     })
@@ -88,8 +88,8 @@ pub(crate) fn make_handle_resume(
     media_recorder: MediaRecorder,
     recording_data: Rc<RefCell<RecordingData>>,
 ) -> Listener<MediaRecorder, Event> {
-    Listener::new(media_recorder, "stop", move |_: Event| {
+    Listener::new(media_recorder.clone(), "resume", move |_: Event| {
         info!("Recording resumed");
-        recording_data.borrow_mut().set_is_recording(false);
+        recording_data.borrow_mut().set_is_recording(true);
     })
 }
