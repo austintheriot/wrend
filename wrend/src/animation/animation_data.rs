@@ -76,8 +76,8 @@ impl<
     ///
     /// If no animation has been supplied yet, this is a no-op.
     pub fn call_animation_callback(
-        &mut self,
-        renderer: &mut Renderer<
+        &self,
+        renderer: &Renderer<
             VertexShaderId,
             FragmentShaderId,
             ProgramId,

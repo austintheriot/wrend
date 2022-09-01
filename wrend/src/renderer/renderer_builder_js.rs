@@ -35,95 +35,77 @@ impl RendererJsBuilder {
     }
 
     #[wasm_bindgen(js_name = setCanvas)]
-    pub fn set_canvas(mut self, canvas: HtmlCanvasElement) -> Self {
+    pub fn set_canvas(&mut self, canvas: HtmlCanvasElement) {
         self.deref_mut().set_canvas(canvas);
-        self
     }
 
     #[wasm_bindgen(js_name = addFragmentShaderSrc)]
-    pub fn add_fragment_shader_src(mut self, id: String, fragment_shader_src: String) -> Self {
+    pub fn add_fragment_shader_src(&mut self, id: String, fragment_shader_src: String) {
         self.deref_mut()
             .add_fragment_shader_src(id, fragment_shader_src);
-        self
     }
 
     #[wasm_bindgen(js_name = addVertexShaderSrc)]
-    pub fn add_vertex_shader_src(mut self, id: String, vertex_shader_src: String) -> Self {
+    pub fn add_vertex_shader_src(&mut self, id: String, vertex_shader_src: String) {
         self.deref_mut()
             .add_vertex_shader_src(id, vertex_shader_src);
-        self
     }
 
     #[wasm_bindgen(js_name = addProgramLink)]
-    pub fn add_program_link(mut self, program_link: ProgramLinkJs) -> Self {
+    pub fn add_program_link(&mut self, program_link: ProgramLinkJs) {
         self.deref_mut().add_program_link(program_link);
-        self
     }
 
     #[wasm_bindgen(js_name = setRenderCallback)]
-    pub fn set_render_callback(mut self, render_callback: RenderCallbackJs) -> Self {
+    pub fn set_render_callback(&mut self, render_callback: RenderCallbackJs) {
         self.deref_mut().set_render_callback(render_callback);
-        self
     }
 
     #[wasm_bindgen(js_name = setUserCtx)]
-    pub fn set_user_ctx(mut self, ctx: Object) -> Self {
+    pub fn set_user_ctx(&mut self, ctx: Object) {
         self.deref_mut().set_user_ctx(ctx);
-        self
     }
 
     #[wasm_bindgen(js_name = addUniformLink)]
-    pub fn add_uniform_link(mut self, uniform_link: UniformLinkJs) -> Self {
+    pub fn add_uniform_link(&mut self, uniform_link: UniformLinkJs) {
         self.deref_mut().add_uniform_link(uniform_link);
-
-        self
     }
 
     #[wasm_bindgen(js_name = addBufferLink)]
-    pub fn add_buffer_link(mut self, buffer_link: BufferLinkJs) -> Self {
+    pub fn add_buffer_link(&mut self, buffer_link: BufferLinkJs) {
         self.deref_mut().add_buffer_link(buffer_link);
-        self
     }
 
     #[wasm_bindgen(js_name = addAttributeLink)]
-    pub fn add_attribute_link(mut self, attribute_link: AttributeLinkJs) -> Self {
+    pub fn add_attribute_link(&mut self, attribute_link: AttributeLinkJs) {
         self.deref_mut().add_attribute_link(attribute_link);
-        self
     }
 
     #[wasm_bindgen(js_name = addTextureLink)]
-    pub fn add_texture_link(mut self, texture_link: TextureLinkJs) -> Self {
+    pub fn add_texture_link(&mut self, texture_link: TextureLinkJs) {
         self.deref_mut().add_texture_link(texture_link);
-        self
     }
 
     #[wasm_bindgen(js_name = addFramebufferLink)]
-    pub fn add_framebuffer_link(mut self, framebuffer_link: FramebufferLinkJs) -> Self {
+    pub fn add_framebuffer_link(&mut self, framebuffer_link: FramebufferLinkJs) {
         self.deref_mut().add_framebuffer_link(framebuffer_link);
-        self
     }
 
     #[wasm_bindgen(js_name = addTransformFeedbackLink)]
-    pub fn add_transform_feedback_link(
-        mut self,
-        transform_feedback_link: TransformFeedbackLinkJs,
-    ) -> Self {
+    pub fn add_transform_feedback_link(mut self, transform_feedback_link: TransformFeedbackLinkJs) {
         self.deref_mut()
             .add_transform_feedback_link(transform_feedback_link);
-        self
     }
 
     #[wasm_bindgen(js_name = addVAOLink)]
-    pub fn add_vao_link(mut self, vertex_array_object_id: String) -> Self {
+    pub fn add_vao_link(&mut self, vertex_array_object_id: String) {
         self.deref_mut().add_vao_link(vertex_array_object_id);
-        self
     }
 
     #[wasm_bindgen(js_name = setGetContextCallback)]
-    pub fn set_get_context_callback(mut self, get_context_callback: Function) -> Self {
+    pub fn set_get_context_callback(&mut self, get_context_callback: Function) {
         self.deref_mut()
             .set_get_context_callback(get_context_callback);
-        self
     }
 
     pub fn build(self) -> Result<RendererJs, String> {

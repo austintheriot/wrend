@@ -1,6 +1,6 @@
 use crate::{
-    utils, AttributeJs, BufferJs, FramebufferJs, IntoJsWrapper, Renderer, RendererHandleJs,
-    RendererHandleJsInner, RendererJsBuilder, TextureJs, UniformJs,
+    utils, AttributeJs, BufferJs, FramebufferJs, Renderer, RendererHandleJs, RendererHandleJsInner,
+    RendererJsBuilder, TextureJs, UniformJs,
 };
 use js_sys::{Array, Map, Object};
 use log::error;
@@ -233,7 +233,7 @@ impl RendererJs {
         self.deref().borrow().update_uniforms();
     }
 
-    // `render` does not deref to the internal `Renderer` here, because its way less complex to 
+    // `render` does not deref to the internal `Renderer` here, because its way less complex to
     // pass `RendererJs` as an argument to the `render` function here at this level than converting
     // back into a `RendererJs` from within the `Renderer` struct.
     pub fn render(&self) {
@@ -282,23 +282,22 @@ impl DerefMut for RendererJs {
 }
 
 impl From<RendererJsInner> for RendererJs {
-    fn from(js_renderer_inner: RendererJsInner) -> Self {
-        Self(Rc::new(RefCell::new(js_renderer_inner)))
+    fn from(renderer_js_inner: RendererJsInner) -> Self {
+        Self(Rc::new(RefCell::new(renderer_js_inner)))
+    }
+}
+
+impl From<Rc<RefCell<RendererJsInner>>> for RendererJs {
+    fn from(renderer_js_inner: Rc<RefCell<RendererJsInner>>) -> Self {
+        Self(renderer_js_inner)
     }
 }
 
 impl From<RendererJs> for RendererHandleJs {
     fn from(renderer_js: RendererJs) -> Self {
         let renderer = Rc::clone(renderer_js.deref());
-        let renderer_handle: RendererHandleJsInner = renderer.into();
+        let renderer_handle: RendererHandleJsInner =
+            RendererHandleJsInner::new_with_rc_renderer(renderer);
         renderer_handle.into()
-    }
-}
-
-impl IntoJsWrapper for RendererJsInner {
-    type Result = RendererJs;
-
-    fn into_js_wrapper(self) -> Self::Result {
-        self.into()
     }
 }

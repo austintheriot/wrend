@@ -213,7 +213,7 @@ impl<
                 // run animation callback
                 animation_data
                     .borrow_mut()
-                    .call_animation_callback(&mut renderer.borrow_mut());
+                    .call_animation_callback(&renderer.borrow());
 
                 // schedule another requestAnimationFrame callback
                 let animation_id = Self::request_animation_frame(f.borrow().as_ref().unwrap());
@@ -300,7 +300,29 @@ impl<
             })
     }
 
-    fn request_animation_frame(f: &Closure<dyn Fn()>) -> i32 {
+    pub(crate) fn renderer(
+        &self,
+    ) -> Rc<
+        RefCell<
+            Renderer<
+                VertexShaderId,
+                FragmentShaderId,
+                ProgramId,
+                UniformId,
+                BufferId,
+                AttributeId,
+                TextureId,
+                FramebufferId,
+                TransformFeedbackId,
+                VertexArrayObjectId,
+                UserCtx,
+            >,
+        >,
+    > {
+        Rc::clone(&self.renderer)
+    }
+
+    pub(crate) fn request_animation_frame(f: &Closure<dyn Fn()>) -> i32 {
         window()
             .unwrap()
             .request_animation_frame(f.as_ref().unchecked_ref())

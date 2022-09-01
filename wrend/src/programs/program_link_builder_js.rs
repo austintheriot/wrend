@@ -20,30 +20,26 @@ impl ProgramLinkJsBuilder {
     }
 
     #[wasm_bindgen(js_name = setProgramId)]
-    pub fn set_program_id(mut self, program_id: String) -> Self {
+    pub fn set_program_id(&mut self, program_id: String) {
         self.deref_mut().set_program_id(program_id);
-        self
     }
 
     #[wasm_bindgen(js_name = setVertexShaderId)]
-    pub fn set_vertex_shader_id(mut self, vertex_shader_id: String) -> Self {
+    pub fn set_vertex_shader_id(&mut self, vertex_shader_id: String) {
         self.deref_mut().set_vertex_shader_id(vertex_shader_id);
-        self
     }
 
     #[wasm_bindgen(js_name = setFragmentShaderId)]
-    pub fn set_fragment_shader_id(mut self, fragment_shader_id: String) -> Self {
+    pub fn set_fragment_shader_id(&mut self, fragment_shader_id: String) {
         self.deref_mut().set_fragment_shader_id(fragment_shader_id);
-        self
     }
 
     #[wasm_bindgen(js_name = setTransformFeedbackVaryings)]
-    pub fn set_transform_feedback_varyings(mut self, transform_feedback_varyings: Array) -> Self {
+    pub fn set_transform_feedback_varyings(&mut self, transform_feedback_varyings: Array) {
         let transform_feedback_varyings =
             utils::js_array_to_vec_strings(transform_feedback_varyings);
         self.deref_mut()
             .set_transform_feedback_varyings(transform_feedback_varyings);
-        self
     }
 
     pub fn build(self) -> Result<ProgramLinkJs, String> {

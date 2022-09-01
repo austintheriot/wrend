@@ -39,7 +39,6 @@ The following use cases should guide the development of this library:
   - Check that all structs have `#[wasm_bindgen(constructor)]` where needed
   - Make sure all public JavaScript API struct docs point / link to their respective Rust counterparts for documentation
   - Derive all traits for Js structs
-  - Update pretty much all Js functions to receive and return `self`
 
 - Make a procedural macro and/or a custom derive macro for `Id`, and possible `IdName`
 

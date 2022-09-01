@@ -44,9 +44,8 @@ impl UniformLinkJs {
     }
 
     #[wasm_bindgen(js_name = setInitializeCallback)]
-    pub fn set_initialize_callback(mut self, callback: UniformCreateUpdateCallbackJs) -> Self {
+    pub fn set_initialize_callback(&mut self, callback: UniformCreateUpdateCallbackJs) {
         self.deref_mut().set_initialize_callback(callback);
-        self
     }
 
     #[wasm_bindgen(js_name = shouldUpdateCallback)]
@@ -57,15 +56,13 @@ impl UniformLinkJs {
     }
 
     #[wasm_bindgen(js_name = setShouldUpdateCallback)]
-    pub fn set_should_update_callback(mut self, callback: UniformShouldUpdateCallbackJs) -> Self {
+    pub fn set_should_update_callback(&mut self, callback: UniformShouldUpdateCallbackJs) {
         self.deref_mut().set_should_update_callback(callback);
-        self
     }
 
     #[wasm_bindgen(js_name = setUpdateCallback)]
-    pub fn set_update_callback(mut self, callback: UniformCreateUpdateCallbackJs) -> Self {
+    pub fn set_update_callback(&mut self, callback: UniformCreateUpdateCallbackJs) {
         self.deref_mut().set_update_callback(callback);
-        self
     }
 
     #[wasm_bindgen(js_name = updateCallback)]
@@ -81,10 +78,9 @@ impl UniformLinkJs {
     }
 
     #[wasm_bindgen(js_name = setUseInitCallbackForUpdate)]
-    pub fn set_use_init_callback_for_update(mut self, use_init_callback_for_update: bool) -> Self {
+    pub fn set_use_init_callback_for_update(&mut self, use_init_callback_for_update: bool) {
         self.deref_mut()
             .set_use_init_callback_for_update(use_init_callback_for_update);
-        self
     }
 }
 

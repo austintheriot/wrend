@@ -1,7 +1,8 @@
 {
     "scripts": {
         "test": "wasm-pack test --chrome --headless",
-        "build": "RUST_BACKTRACE=full wasm-pack build --out-dir pkg --dev",
+        "build:dev": "RUST_BACKTRACE=full wasm-pack build --out-dir pkg --dev",
+        "build": "RUST_BACKTRACE=full wasm-pack build --out-dir dist --release",
         "pack": "wasm-pack pack",
         "publish": "wasm-pack publish"
     }

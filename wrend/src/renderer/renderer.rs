@@ -2,17 +2,12 @@ use crate::{
     Attribute, AttributeLink, Bridge, Buffer, BufferLink, BuildRendererError, CompileShaderError,
     CreateAttributeError, CreateBufferError, CreateTextureError, CreateTransformFeedbackError,
     CreateUniformError, CreateVAOError, Framebuffer, FramebufferLink, GetContextCallback, Id,
-    IdDefault, IdName, IntoJsWrapper, LinkProgramError, ProgramLink, RenderCallback,
-    RendererBuilderError, RendererHandle, RendererJs, RendererJsInner, SaveContextError,
-    ShaderType, Texture, TextureLink, TransformFeedbackLink, Uniform, UniformContext, UniformLink,
-    WebGlContextError,
+    IdDefault, IdName, LinkProgramError, ProgramLink, RenderCallback, RendererBuilderError,
+    RendererHandle, RendererJs, RendererJsInner, SaveContextError, ShaderType, Texture,
+    TextureLink, TransformFeedbackLink, Uniform, UniformContext, UniformLink, WebGlContextError,
 };
 
-use log::error;
-use std::{
-    any::Any,
-    collections::{HashMap, HashSet},
-};
+use std::collections::{HashMap, HashSet};
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{
     window, HtmlAnchorElement, HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram,
@@ -266,33 +261,7 @@ impl<
     }
 
     pub fn render(&self) -> &Self {
-        // If `Renderer` has been instantiated through JavaScript, we have to treat this as a special case.
-        // In order to convert `Renderer` into a `JsValue`, it must meet specific requirements for its generic arguments.
-        // We can check this at runtime using `Any` and downcasting
-        let rendered_as_js = (|| {
-            if let Some(renderer) = (self as &dyn Any).downcast_ref::<RendererJsInner>() {
-                if let Some(js_callback) = self.render_callback.b().as_ref() {
-                    if let Err(err) = js_callback
-                        // must clone the Renderer here, which could be potentially expensive
-                        // @todo: find a way to not have to clone the entire Renderer struct
-                        .call1(&JsValue::NULL, &renderer.clone().into_js_wrapper().into())
-                    {
-                        error!(
-                            "Error occurred while calling JavaScript `render` callback: {err:?}"
-                        );
-                    }
-                    return true;
-                }
-            }
-            false
-        })();
-
-        // If not already renderer as a JavaScript callback, should now be rendered
-        // as a Rust callback (or as a JavaScript called, without the `Renderer` argument supplied)
-        if !rendered_as_js {
-            self.render_callback.call(self);
-        }
-
+        self.render_callback.call(self);
         self
     }
 

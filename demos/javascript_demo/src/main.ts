@@ -1,5 +1,5 @@
 import './style.css'
-import { AttributeLink, BufferLink, ProgramLink, Renderer, enableErrorMessages } from 'wrend';
+import { AttributeLink, BufferLink, ProgramLink, Renderer, enableErrorMessages, UniformLink, RendererBuilder } from 'wrend';
 import vertexShader from './shaders/vertex.glsl?raw';
 import fragmentShader from './shaders/fragment.glsl?raw';
 
@@ -16,7 +16,8 @@ const VAO_ID = 'vao';
 const VERTEX_SHADER_ID = 'vertex_shader';
 const FRAGMENT_SHADER_ID = 'fragment_shader';
 const VERTEX_BUFFER_ID = 'buffer_id';
-const POSITION_ATTRIBUTE_ID = 'a_position';
+const A_POSITION_ID = 'a_position';
+const U_NOW_ID = 'u_now';
 
 const programLink = new ProgramLink(PROGRAM_ID, VERTEX_SHADER_ID, FRAGMENT_SHADER_ID);
 
@@ -28,13 +29,20 @@ const vertexBufferLink = new BufferLink(VERTEX_BUFFER_ID, (ctx) => {
   return buffer;
 })
 
-const aPositionLink = new AttributeLink([VAO_ID], VERTEX_BUFFER_ID, POSITION_ATTRIBUTE_ID, (ctx) => {
+const aPositionLink = new AttributeLink([VAO_ID], VERTEX_BUFFER_ID, A_POSITION_ID, (ctx) => {
   const gl = ctx.gl();
   const attributeLocation = ctx.attributeLocation();
   const webglBuffer = ctx.webglBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, webglBuffer);
   gl.vertexAttribPointer(attributeLocation.get(), 2, gl.FLOAT, false, 0, 0);
 })
+
+const uNowLink = new UniformLink([PROGRAM_ID], U_NOW_ID, (ctx) => {
+  const gl = ctx.gl();
+  const uniformLocation = ctx.uniformLocation();
+  gl.uniform1f(uniformLocation, ctx.now());
+});
+uNowLink.setUseInitCallbackForUpdate(true);
 
 const render = (renderer: Renderer) => {
   const gl = renderer.gl();
@@ -49,21 +57,28 @@ const render = (renderer: Renderer) => {
   gl.drawArrays(gl.TRIANGLES, 0, 6);
 };
 
-const renderer: Renderer = Renderer.builder()
-  .setCanvas(canvas)
-  .setRenderCallback(render)
-  .addProgramLink(programLink)
-  .addVertexShaderSrc(VERTEX_SHADER_ID, vertexShader)
-  .addFragmentShaderSrc(FRAGMENT_SHADER_ID, fragmentShader)
-  .addBufferLink(vertexBufferLink)
-  .addAttributeLink(aPositionLink)
-  .addVAOLink(VAO_ID)
-  .build();
+const rendererBuilder: RendererBuilder = Renderer.builder();
+rendererBuilder.setCanvas(canvas)
+rendererBuilder.setRenderCallback(render)
+rendererBuilder.addProgramLink(programLink)
+rendererBuilder.addVertexShaderSrc(VERTEX_SHADER_ID, vertexShader)
+rendererBuilder.addFragmentShaderSrc(FRAGMENT_SHADER_ID, fragmentShader)
+rendererBuilder.addBufferLink(vertexBufferLink)
+rendererBuilder.addAttributeLink(aPositionLink)
+rendererBuilder.addUniformLink(uNowLink)
+rendererBuilder.addVAOLink(VAO_ID)
+const renderer = rendererBuilder.build();
 
 renderer.render();
 
-// const rendererHandle = renderer.intoRendererHandle();
-// rendererHandle.setAnimationCallback(() => renderer.render());
-// rendererHandle.startAnimating();
+const rendererHandle = renderer.intoRendererHandle();
+rendererHandle.setAnimationCallback(() => {
+  const renderer = rendererHandle.renderer();
+  renderer.updateUniforms();
+  renderer.render();
+});
 
-// setTimeout(() => rendererHandle.intoRenderer(), 5000)
+rendererHandle.startAnimating();
+
+// will force the animation stop and clean up all wasm memory
+setTimeout(() => rendererHandle.free(), 5000)
