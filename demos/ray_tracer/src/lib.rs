@@ -7,13 +7,7 @@ pub mod objects;
 pub mod state;
 pub mod utils;
 
-// When the `wee_alloc` feature is enabled, this uses `wee_alloc` as the global
-// allocator.
-//
-// If you don't want to use `wee_alloc`, you can safely delete this.
-#[cfg(feature = "wee_alloc")]
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+
 
 /// This main function is only used for testing this portion of the app in isolation
 #[wasm_bindgen]
