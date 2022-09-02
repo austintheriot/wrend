@@ -19,9 +19,9 @@ If you're wondering about the name, `wrend` is short for **W**ebGL2 **Rend**erin
 
 ## Why
 
-This library exists because I found myself writing the same verbose, (occasionally `unsafe`) WebGL code over and over again, constantly struggling to find the right level and type of abstraction. Wrend is designed to ease the pain of working with low-level WebGL programming easier in Rust. One particular convenience Wrend provides is an abstraction over `requestAnimationFrame` calls, making continuous animations as simple as calling start and holding the returned handle in memory. Stopping is also as easy as dropping the handle and/or calling stop.
+This library exists because I found myself writing the same verbose, (occasionally `unsafe`) WebGL code over and over again, constantly struggling to find the right level and type of abstraction. Wrend is designed to ease the pain of working with low-level WebGL programming in Rust. One particular convenience Wrend provides is an abstraction over `requestAnimationFrame` calls, making continuous animations as simple as calling `start_animating` and then holding the returned handle in memory. Stopping is also as easy as dropping the handle and/or calling `stop_animating`.
 
-Another strength of Wrend is its flexibility: rather than focusing on pure rasterization, Wrend enables the ability to construct very unique pipelines for things like ray tracers, flow fields, and other non-traditional methods of rendering.
+Another strength of Wrend is its flexibility: rather than focusing on pure rasterization, Wrend enables constructing unique graphics pipelines for things like ray tracers, flow fields, and other non-traditional methods of rendering.
 
 ## Demos
 
