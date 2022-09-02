@@ -67,11 +67,13 @@ rendererBuilder.addUniformLink(uNowLink)
 rendererBuilder.addVAOLink(VAO_ID)
 const renderer = rendererBuilder.buildRenderer();
 
+// test lone render
 renderer.render();
 
-renderer.setAnimationCallback(() => {
-  renderer.updateUniforms();
-  renderer.render();
+// test an animated render
+renderer.setAnimationCallback((rendererData) => {
+  rendererData.updateUniforms();
+  rendererData.render();
 });
 
 renderer.startAnimating();
