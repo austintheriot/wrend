@@ -3,7 +3,7 @@ use wasm_bindgen::prelude::wasm_bindgen;
 
 #[wasm_bindgen(typescript_custom_section)]
 const ANIMATION_CALLBACK_JS: &'static str = r#"
-type AnimationCallbackJs = () => void;
+type AnimationCallbackJs = (renderer_data: RendererData) => void;
 "#;
 
 #[wasm_bindgen]

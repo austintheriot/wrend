@@ -221,7 +221,7 @@ impl<
                 // run animation callback
                 animation_data
                     .borrow_mut()
-                    .call_animation_callback(&renderer_data.borrow());
+                    .call_animation_callback(Rc::clone(&renderer_data));
 
                 // schedule another requestAnimationFrame callback
                 let animation_id = Self::request_animation_frame(f.borrow().as_ref().unwrap());

@@ -1,4 +1,12 @@
-use crate::{AnimationCallback, Id, IdDefault, IdName, RendererData};
+use std::{any::Any, cell::RefCell, rc::Rc};
+
+use wasm_bindgen::JsValue;
+
+use crate::{
+    AnimationCallback, Either, Id, IdDefault, IdName, RendererData, RendererDataJs,
+    RendererDataJsInner,
+};
+use log::error;
 
 #[derive(Clone, Debug)]
 pub(crate) struct AnimationData<
@@ -77,22 +85,52 @@ impl<
     /// If no animation has been supplied yet, this is a no-op.
     pub fn call_animation_callback(
         &self,
-        renderer_data: &RendererData<
-            VertexShaderId,
-            FragmentShaderId,
-            ProgramId,
-            UniformId,
-            BufferId,
-            AttributeId,
-            TextureId,
-            FramebufferId,
-            TransformFeedbackId,
-            VertexArrayObjectId,
-            UserCtx,
+        renderer_data: Rc<
+            RefCell<
+                RendererData<
+                    VertexShaderId,
+                    FragmentShaderId,
+                    ProgramId,
+                    UniformId,
+                    BufferId,
+                    AttributeId,
+                    TextureId,
+                    FramebufferId,
+                    TransformFeedbackId,
+                    VertexArrayObjectId,
+                    UserCtx,
+                >,
+            >,
         >,
     ) {
         if let Some(animation_callback) = &self.animation_callback {
-            animation_callback.call(renderer_data);
+            // if the types are compatible with JavaScript, treat as a special case and pass in the `RendererData` to the JavaScript function
+            let rendered = if let Some(renderer_data) =
+                (&renderer_data as &dyn Any).downcast_ref::<Rc<RefCell<RendererDataJsInner>>>()
+            {
+                let renderer_data = Rc::clone(&renderer_data);
+                match &**animation_callback {
+                    Either::A(_) => false,
+                    Either::B(js_callback) => {
+                        let renderer_data_js: RendererDataJs = renderer_data.into();
+                        let js_value: JsValue = renderer_data_js.into();
+                        let result = js_callback.call1(&JsValue::NULL, &js_value);
+                        if let Err(err) = result {
+                            error!("Error occurred while calling JavaScript animation callback: {err:?}");
+                        }
+                        true
+                    }
+                }
+            } else {
+                false
+            };
+
+            // if not already rendered in JavaScript, call with Rust values
+            // this does not pass the `RendererData` to the JavaScript callback if one was supplied,
+            // since the types are not compatible with the JavaScript/Wasm API
+            if !rendered {
+                animation_callback.call(&renderer_data.borrow());
+            }
         }
     }
 
