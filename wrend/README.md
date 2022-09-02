@@ -13,20 +13,18 @@ The following use cases should guide the development of this library:
   - Conway's Game of Life
   - Any iterative kernel-based rendering
 - Ray tracing
-P
+
 ## Todo
+
+- Make a clean wrapper around `Either` that functions as a callback abstraction (instead of implementing function utilities on `Either` itself)
+
+- Renderer technically calls stop animation and stop recording when its dropped, even its data lives on--delegate this to the drop implementations of its inner data?
 
 - Add custom TypeScript types:
   - Arrays
   - Maps
 
 - Make it more explicit when structs get cloned to convert them into a `JsValue`
-
-- Make a clean wrapper around `Either` that functions as a callback abstraction (instead of implementing function utilities on `Either` itself)
-
-- Add custom TypeScript types for *_create_context.rs callbacks
-
-- Make it possible access `RendererData` from the render callback in JavaScript
 
 - Implementing JavaScript API
   - Check that all structs implement `pub fn new()` where appropriate
@@ -39,7 +37,7 @@ P
 - Make some impl that do not need to be called from outside pub(crate)
   - Especially the `new` functions (or the structs themselves?) of Buffer, Uniform, etc. (internal types not built directly)
 
-- Move `js_conversion` utils into a generic trait impl on a new type around Vec
+- Move `js_conversion` utils into a generic trait impl on a new type around Vec, then impl `From` for that type so that the trait can be applied to plain `Vec`s
 
 - Bug: WebGL2 rendering contexts are not getting discarded when handle is dropped: enable this manually through browser extension (see MDN WebGL best practices article)
 
