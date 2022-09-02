@@ -1,16 +1,18 @@
 use crate::{
     AttributeLinkJs, BufferLinkJs, FramebufferLinkJs, ProgramLinkJs, RenderCallbackJs,
-    RendererBuilder, RendererJs, TextureJs, TextureLinkJs, TransformFeedbackLinkJs, UniformLinkJs,
+    RendererDataBuilder, RendererDataJs, RendererJs, TextureJs, TextureLinkJs,
+    TransformFeedbackLinkJs, UniformLinkJs,
 };
 use js_sys::{Function, Object};
+
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::HtmlCanvasElement;
 
-/// Wrapper around `Renderer` to make it callable from JavaScript.
+/// Wrapper around `RendererData` to make it callable from JavaScript.
 ///
 /// Types are adjusted to only use JavaScript-compatible types and no generics.
-type RendererJsBuilderInner = RendererBuilder<
+type RendererDataBuilderJsInner = RendererDataBuilder<
     String,
     String,
     String,
@@ -24,12 +26,12 @@ type RendererJsBuilderInner = RendererBuilder<
     Object,
 >;
 
-/// See [RendererBuilder](crate::RendererBuilder)
-#[wasm_bindgen(js_name = RendererBuilder)]
-pub struct RendererJsBuilder(RendererJsBuilderInner);
+/// See [RendererDataBuilder](crate::RendererDataBuilder)
+#[wasm_bindgen(js_name = RendererDataBuilder)]
+pub struct RendererDataBuilderJs(RendererDataBuilderJsInner);
 
-#[wasm_bindgen(js_class = RendererBuilder)]
-impl RendererJsBuilder {
+#[wasm_bindgen(js_class = RendererDataBuilder)]
+impl RendererDataBuilderJs {
     pub fn texture(&self, texture_id: String) -> Option<TextureJs> {
         self.deref().texture(&texture_id).map(Into::into)
     }
@@ -108,28 +110,40 @@ impl RendererJsBuilder {
             .set_get_context_callback(get_context_callback);
     }
 
-    pub fn build(self) -> Result<RendererJs, String> {
+    #[wasm_bindgen(js_name = buildRendererData)]
+    pub fn build_renderer_data(self) -> Result<RendererDataJs, String> {
         self.0
-            .build()
+            .build_renderer_data()
             .map(Into::into)
             .map_err(|err| err.to_string())
     }
 
-    pub fn default() -> Self {
-        Self(RendererBuilder::default())
+    #[wasm_bindgen(js_name = buildRenderer)]
+    pub fn build_renderer(self) -> Result<RendererJs, String> {
+        self.0
+            .build_renderer_data()
+            .map::<RendererDataJs, _>(Into::into)
+            .map::<RendererJs, _>(Into::into)
+            .map_err::<String, _>(|err| err.to_string())
     }
 }
 
-impl Deref for RendererJsBuilder {
-    type Target = RendererJsBuilderInner;
+impl Default for RendererDataBuilderJs {
+    fn default() -> Self {
+        Self(RendererDataBuilderJsInner::default())
+    }
+}
+
+impl Deref for RendererDataBuilderJs {
+    type Target = RendererDataBuilderJsInner;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl DerefMut for RendererJsBuilder {
-    fn deref_mut(&mut self) -> &mut RendererJsBuilderInner {
+impl DerefMut for RendererDataBuilderJs {
+    fn deref_mut(&mut self) -> &mut RendererDataBuilderJsInner {
         &mut self.0
     }
 }

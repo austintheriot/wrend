@@ -4,8 +4,6 @@ pub mod components;
 pub mod pages;
 pub mod switch;
 
-
-
 #[wasm_bindgen]
 pub fn entry() -> Result<(), JsValue> {
     // This provides better error messages in debug mode.

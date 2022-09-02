@@ -1,9 +1,7 @@
 import './style.css'
-import { AttributeLink, BufferLink, ProgramLink, Renderer, enableErrorMessages, UniformLink, RendererBuilder } from 'wrend';
+import { AttributeLink, BufferLink, ProgramLink, RendererData, UniformLink, Renderer } from 'wrend';
 import vertexShader from './shaders/vertex.glsl?raw';
 import fragmentShader from './shaders/fragment.glsl?raw';
-
-enableErrorMessages();
 
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 
@@ -44,7 +42,7 @@ const uNowLink = new UniformLink([PROGRAM_ID], U_NOW_ID, (ctx) => {
 });
 uNowLink.setUseInitCallbackForUpdate(true);
 
-const render = (renderer: Renderer) => {
+const render = (renderer: RendererData) => {
   const gl = renderer.gl();
   const canvas = renderer.canvas();
 
@@ -57,7 +55,7 @@ const render = (renderer: Renderer) => {
   gl.drawArrays(gl.TRIANGLES, 0, 6);
 };
 
-const rendererBuilder: RendererBuilder = Renderer.builder();
+const rendererBuilder = Renderer.builder();
 rendererBuilder.setCanvas(canvas)
 rendererBuilder.setRenderCallback(render)
 rendererBuilder.addProgramLink(programLink)
@@ -67,18 +65,16 @@ rendererBuilder.addBufferLink(vertexBufferLink)
 rendererBuilder.addAttributeLink(aPositionLink)
 rendererBuilder.addUniformLink(uNowLink)
 rendererBuilder.addVAOLink(VAO_ID)
-const renderer = rendererBuilder.build();
+const renderer = rendererBuilder.buildRenderer();
 
 renderer.render();
 
-const rendererHandle = renderer.intoRendererHandle();
-rendererHandle.setAnimationCallback(() => {
-  const renderer = rendererHandle.renderer();
+renderer.setAnimationCallback(() => {
   renderer.updateUniforms();
   renderer.render();
 });
 
-rendererHandle.startAnimating();
+renderer.startAnimating();
 
 // will force the animation stop and clean up all wasm memory
-setTimeout(() => rendererHandle.free(), 5000)
+setTimeout(() => renderer.free(), 5000)

@@ -5,7 +5,7 @@ pub fn create_render_framebuffer(ctx: &FramebufferCreateContext) -> WebGlFramebu
     let texture_a = ctx
         .webgl_texture()
         .as_ref()
-        .expect("RendererBuilder should have NoiseTexture built when creating framebuffers");
+        .expect("RendererDataBuilder should have NoiseTexture built when creating framebuffers");
     let gl = ctx.gl();
 
     let framebuffer_object = gl

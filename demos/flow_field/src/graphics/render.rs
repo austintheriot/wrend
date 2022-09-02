@@ -6,7 +6,7 @@ use super::{
 };
 use crate::{state::render_state_handle::RenderStateHandle, utils};
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
-use wrend::Renderer;
+use wrend::RendererData;
 
 // reusable draw call for both canvas and framebuffer
 fn draw_quad(gl: &WebGl2RenderingContext, canvas: &HtmlCanvasElement) {
@@ -25,7 +25,7 @@ fn draw_quad(gl: &WebGl2RenderingContext, canvas: &HtmlCanvasElement) {
 }
 
 pub fn render(
-    renderer: &Renderer<
+    renderer_data: &RendererData<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -39,9 +39,9 @@ pub fn render(
         RenderStateHandle,
     >,
 ) {
-    let gl = renderer.gl();
-    let canvas = renderer.canvas();
-    let user_ctx = renderer
+    let gl = renderer_data.gl();
+    let canvas = renderer_data.canvas();
+    let user_ctx = renderer_data
         .user_ctx()
         .expect("RenderState should exist during render callback")
         .get();
@@ -49,19 +49,19 @@ pub fn render(
     let num_particles = user_ctx.borrow().num_particles();
 
     // RETRIEVING ALL WEBGL OBJECTS --------------------------------------------------------
-    let white_noise_texture = renderer
+    let white_noise_texture = renderer_data
         .texture(&TextureId::WhiteNoise)
-        .expect("WhiteNoiseTexture should exist in renderer")
+        .expect("WhiteNoiseTexture should exist in renderer_data")
         .webgl_texture();
 
-    let perlin_noise_texture = renderer
+    let perlin_noise_texture = renderer_data
         .texture(&TextureId::PerlinNoise)
-        .expect("PerlinNoiseTexture should exist in renderer")
+        .expect("PerlinNoiseTexture should exist in renderer_data")
         .webgl_texture();
 
-    let perlin_noise_framebuffer = renderer
+    let perlin_noise_framebuffer = renderer_data
         .framebuffer(&FramebufferId::PerlinNoise)
-        .expect("PerlinNoise Framebuffer should exist in renderer")
+        .expect("PerlinNoise Framebuffer should exist in renderer_data")
         .webgl_framebuffer();
 
     // note: this mutates global state (so that on the next render, the buffers are swapped)
@@ -69,24 +69,24 @@ pub fn render(
 
     let (particle_read_buffer_id, update_particle_vao_read_id) =
         particle_read_write_buffer.read_ids();
-    let particle_read_buffer = renderer
+    let particle_read_buffer = renderer_data
         .buffer(&particle_read_buffer_id)
-        .expect("Particle read buffer should exist in renderer");
+        .expect("Particle read buffer should exist in renderer_data");
     let webgl_particle_read_buffer = particle_read_buffer.webgl_buffer();
 
     let (particle_write_buffer_id, _) = particle_read_write_buffer.write_ids();
-    let particle_write_buffer = renderer
+    let particle_write_buffer = renderer_data
         .buffer(&particle_write_buffer_id)
-        .expect("Particle write buffer should exist in renderer");
+        .expect("Particle write buffer should exist in renderer_data");
     let webgl_particle_write_buffer = particle_write_buffer.webgl_buffer();
 
-    let transform_feedback = renderer
+    let transform_feedback = renderer_data
         .transform_feedback(&TransformFeedbackId::Particle)
-        .expect("Transform feedback should exist in the renderer");
+        .expect("Transform feedback should exist in the renderer_data");
 
     // RENDER NEW PERLIN NOISE TO FRAMEBUFFER --------------------------------------------------------
-    renderer.use_program(&ProgramId::PerlinNoise);
-    renderer.use_vao(&VAOId::PerlinNoise);
+    renderer_data.use_program(&ProgramId::PerlinNoise);
+    renderer_data.use_vao(&VAOId::PerlinNoise);
     gl.active_texture(WebGl2RenderingContext::TEXTURE0);
     gl.bind_texture(
         WebGl2RenderingContext::TEXTURE_2D,
@@ -100,10 +100,10 @@ pub fn render(
     gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, None);
 
     // UPDATE PARTICLE POSITIONS --------------------------------------------------------
-    renderer.use_program(&ProgramId::UpdateParticles);
+    renderer_data.use_program(&ProgramId::UpdateParticles);
     // must bind the VAO that corresponds to the read buffer (and not the write buffer)
     // because it is a WebGL error to bind to a buffer via a VAO and Transform Feedback at the same time
-    renderer.use_vao(&update_particle_vao_read_id);
+    renderer_data.use_vao(&update_particle_vao_read_id);
     gl.bind_buffer(
         WebGl2RenderingContext::ARRAY_BUFFER,
         Some(webgl_particle_read_buffer),
@@ -132,8 +132,8 @@ pub fn render(
     gl.bind_transform_feedback(WebGl2RenderingContext::TRANSFORM_FEEDBACK, None);
 
     // DRAW PARTICLES TO CANVAS --------------------------------------------------------
-    renderer.use_program(&ProgramId::DrawParticles);
-    renderer.use_vao(&VAOId::DrawParticles);
+    renderer_data.use_program(&ProgramId::DrawParticles);
+    renderer_data.use_vao(&VAOId::DrawParticles);
     gl.viewport(0, 0, canvas.width() as i32, canvas.height() as i32);
 
     if user_ctx.borrow().is_first_render() {

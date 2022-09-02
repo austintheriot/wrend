@@ -2,12 +2,14 @@ use crate::{
     Attribute, AttributeLink, Bridge, Buffer, BufferLink, BuildRendererError, CompileShaderError,
     CreateAttributeError, CreateBufferError, CreateTextureError, CreateTransformFeedbackError,
     CreateUniformError, CreateVAOError, Framebuffer, FramebufferLink, GetContextCallback, Id,
-    IdDefault, IdName, LinkProgramError, ProgramLink, RenderCallback, RendererBuilderError,
-    RendererHandle, RendererJs, RendererJsInner, SaveContextError, ShaderType, Texture,
-    TextureLink, TransformFeedbackLink, Uniform, UniformContext, UniformLink, WebGlContextError,
+    IdDefault, IdName, LinkProgramError, ProgramLink, RenderCallback, Renderer,
+    RendererBuilderError, RendererDataJs, RendererDataJsInner, SaveContextError, ShaderType,
+    Texture, TextureLink, TransformFeedbackLink, Uniform, UniformContext, UniformLink,
+    WebGlContextError,
 };
 
 use std::collections::{HashMap, HashSet};
+
 use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{
     window, HtmlAnchorElement, HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram,
@@ -15,7 +17,7 @@ use web_sys::{
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Renderer<
+pub struct RendererData<
     VertexShaderId: Id = IdDefault,
     FragmentShaderId: Id = IdDefault,
     ProgramId: Id = IdDefault,
@@ -70,7 +72,7 @@ impl<
         VertexArrayObjectId: Id,
         UserCtx: Clone,
     >
-    Renderer<
+    RendererData<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -84,7 +86,7 @@ impl<
         UserCtx,
     >
 {
-    pub fn builder() -> RendererBuilder<
+    pub fn builder() -> RendererDataBuilder<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -97,7 +99,7 @@ impl<
         VertexArrayObjectId,
         UserCtx,
     > {
-        RendererBuilder::default()
+        RendererDataBuilder::default()
     }
 
     pub fn canvas(&self) -> &HtmlCanvasElement {
@@ -260,6 +262,13 @@ impl<
         self
     }
 
+    /// Note: if a JavaScript `render` callback has been supplied, then this function will NOT call
+    /// try to call it with `RendererData` passed in, because doing so would require copying all internal
+    /// data in order to pass that data into JavaScript, which would be very slow for large `RenderData` objects.
+    ///
+    /// If you want to render using a JavaScript `render` callback, instead consider using the `RendererJs` struct
+    /// (exported to JavaScript as `Renderer`) OR the `RendererDataJs` struct (exported to JavaScript as `RendererData`),
+    /// since these two functions automatically pass in `RendererData` if the types are compatible with JavaScript.
     pub fn render(&self) -> &Self {
         self.render_callback.call(self);
         self
@@ -285,12 +294,11 @@ impl<
         body.remove_child(&a).unwrap();
     }
 
-    /// Begins the animation process.
-    ///
-    /// If no animation callback has been provided, then the empty animation callback is run.
-    pub fn into_renderer_handle(
+    /// Moves Renderer into a `Renderer` struct, providing additional functionality like
+    /// managed animations and recording.
+    pub fn into_renderer(
         self,
-    ) -> RendererHandle<
+    ) -> Renderer<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -345,7 +353,7 @@ impl<
         VertexArrayObjectId: Id,
         UserCtx: Clone,
     > AsRef<HtmlCanvasElement>
-    for Renderer<
+    for RendererData<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -364,15 +372,15 @@ impl<
     }
 }
 
-impl From<RendererJsInner> for JsValue {
-    fn from(renderer: RendererJsInner) -> Self {
-        let js_renderer: RendererJs = renderer.into();
+impl From<RendererDataJsInner> for JsValue {
+    fn from(renderer_data: RendererDataJsInner) -> Self {
+        let js_renderer: RendererDataJs = renderer_data.into();
         js_renderer.into()
     }
 }
 
 #[derive(Debug, Clone)]
-pub struct RendererBuilder<
+pub struct RendererDataBuilder<
     VertexShaderId: Id = IdDefault,
     FragmentShaderId: Id = IdDefault,
     ProgramId: Id = IdDefault,
@@ -441,7 +449,7 @@ impl<
         VertexArrayObjectId: Id,
         UserCtx: Clone + 'static,
     >
-    RendererBuilder<
+    RendererDataBuilder<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -494,7 +502,7 @@ impl<
 
     /// Saves a link between a vertex shader id and a fragment shader id.
     ///
-    /// During the Renderer build process, this `program_link` is used to link a new WebGL2 program
+    /// During the RendererData build process, this `program_link` is used to link a new WebGL2 program
     /// together by associating the vertex shader id and the fragment shader id with their corresponding compiled shaders.
     pub fn add_program_link(
         &mut self,
@@ -744,11 +752,36 @@ impl<
 
     /// Compiles all vertex shaders and fragment shaders.
     /// Links together any programs that have been specified.
-    /// Outputs the final Renderer.
-    pub fn build(
-        mut self,
+    /// Outputs the final RendererData, wrapped in a top-level Renderer.
+    pub fn build_renderer(
+        self,
     ) -> Result<
         Renderer<
+            VertexShaderId,
+            FragmentShaderId,
+            ProgramId,
+            UniformId,
+            BufferId,
+            AttributeId,
+            TextureId,
+            FramebufferId,
+            TransformFeedbackId,
+            VertexArrayObjectId,
+            UserCtx,
+        >,
+        RendererBuilderError,
+    > {
+        let renderer_data = self.build_renderer_data()?;
+        Ok(renderer_data.into())
+    }
+
+    /// Compiles all vertex shaders and fragment shaders.
+    /// Links together any programs that have been specified.
+    /// Outputs the final RendererData.
+    pub fn build_renderer_data(
+        mut self,
+    ) -> Result<
+        RendererData<
             VertexShaderId,
             FragmentShaderId,
             ProgramId,
@@ -776,7 +809,7 @@ impl<
         self.create_framebuffers()?;
         self.create_transform_feedbacks()?;
 
-        let renderer = Renderer {
+        let renderer_data = RendererData {
             canvas: self.canvas.ok_or(BuildRendererError::NoCanvas)?,
             gl: self.gl.ok_or(BuildRendererError::NoContext)?,
             fragment_shaders: self.fragment_shaders,
@@ -795,7 +828,7 @@ impl<
             transform_feedbacks: self.transform_feedbacks,
         };
 
-        Ok(renderer)
+        Ok(renderer_data)
     }
 }
 
@@ -813,7 +846,7 @@ impl<
         VertexArrayObjectId: Id,
         UserCtx: Clone,
     >
-    RendererBuilder<
+    RendererDataBuilder<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -1233,7 +1266,7 @@ impl<
         VertexArrayObjectId: Id,
         UserCtx: Clone,
     > Default
-    for RendererBuilder<
+    for RendererDataBuilder<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,

@@ -25,7 +25,7 @@ use crate::{
 
 use web_sys::HtmlCanvasElement;
 use wrend::{
-    AttributeLink, BufferLink, FramebufferLink, ProgramLinkBuilder, Renderer, RendererHandle,
+    AttributeLink, BufferLink, FramebufferLink, ProgramLinkBuilder, Renderer, RendererData,
     TextureLink,
 };
 
@@ -34,11 +34,11 @@ const RAY_TRACER_FRAGMENT_SHADER: &str = include_str!("../shaders/ray_tracer.gls
 const AVERAGE_RENDERS_FRAGMENT_SHADERS: &str = include_str!("../shaders/average_renders.glsl");
 const PASS_THROUGH_FRAGMENT_SHADER: &str = include_str!("../shaders/pass_through.glsl");
 
-/// Builds the entire graphics pipeline / renderer and returns a handle to the started animation
+/// Builds the entire graphics pipeline / renderer_data and returns a handle to the started animation
 pub fn build_renderer(
     canvas: HtmlCanvasElement,
     app_context: AppContext,
-) -> RendererHandle<
+) -> Renderer<
     VertexShaderId,
     FragmentShaderId,
     ProgramId,
@@ -120,9 +120,9 @@ pub fn build_renderer(
         Some(TextureId::AveragedRenderB),
     );
 
-    let mut renderer_builder = Renderer::builder();
+    let mut renderer_data_builder = RendererData::builder();
 
-    renderer_builder
+    renderer_data_builder
         .set_canvas(canvas)
         .set_user_ctx(app_context.clone())
         .set_render_callback(render)
@@ -161,14 +161,14 @@ pub fn build_renderer(
         .add_uniform_links(create_shared_uniform_links(app_context))
         .add_vao_link(VAOId::Quad);
 
-    let renderer = renderer_builder
-        .build()
-        .expect("Renderer should successfully build");
+    let renderer_data = renderer_data_builder
+        .build_renderer_data()
+        .expect("RendererData should successfully build");
 
-    let mut new_renderer_handle = renderer.into_renderer_handle();
-    new_renderer_handle.set_animation_callback(Some(animate));
+    let mut new_renderer = renderer_data.into_renderer();
+    new_renderer.set_animation_callback(Some(animate));
 
-    new_renderer_handle.start_animating();
+    new_renderer.start_animating();
 
-    new_renderer_handle
+    new_renderer
 }

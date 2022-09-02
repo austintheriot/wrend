@@ -4,8 +4,6 @@ pub mod components;
 pub mod graphics;
 pub mod state;
 
-
-
 /// This main function is only used for testing this portion of the app in isolation
 #[wasm_bindgen]
 pub fn simplex_noise() -> Result<(), JsValue> {

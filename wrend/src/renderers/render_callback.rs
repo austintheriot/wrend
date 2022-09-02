@@ -1,4 +1,4 @@
-use crate::renderer::renderer::Renderer;
+use crate::RendererData;
 use crate::{CallbackWithContext, Either, Id, IdDefault, IdName, RenderCallbackJs};
 use std::ops::Deref;
 use std::rc::Rc;
@@ -20,7 +20,7 @@ pub struct RenderCallback<
     Either<
         CallbackWithContext<
             dyn Fn(
-                &Renderer<
+                &RendererData<
                     VertexShaderId,
                     FragmentShaderId,
                     ProgramId,
@@ -35,9 +35,9 @@ pub struct RenderCallback<
                 >,
             ),
         >,
-        // It's not crucial that the JavaScript function have access to the Renderer as
+        // It's not crucial that the JavaScript function have access to the RendererData as
         // as an argument to the function itself (like the Rust callback),
-        // since in JavaScript, it's very easy for the renderer function to hold the Renderer
+        // since in JavaScript, it's very easy for the renderer_data function to hold the RendererData
         // in the `render` callback closure
         CallbackWithContext<RenderCallbackJs>,
     >,
@@ -105,7 +105,7 @@ impl<
     type Target = Either<
         CallbackWithContext<
             dyn Fn(
-                &Renderer<
+                &RendererData<
                     VertexShaderId,
                     FragmentShaderId,
                     ProgramId,
@@ -141,7 +141,7 @@ impl<
         VertexArrayObjectId: Id,
         UserCtx: Clone,
         F: Fn(
-                &Renderer<
+                &RendererData<
                     VertexShaderId,
                     FragmentShaderId,
                     ProgramId,
@@ -174,7 +174,7 @@ impl<
         Self(Either::new_a(CallbackWithContext::from(Rc::new(callback)
             as Rc<
                 dyn Fn(
-                    &Renderer<
+                    &RendererData<
                         VertexShaderId,
                         FragmentShaderId,
                         ProgramId,
@@ -237,7 +237,7 @@ impl<
         VertexArrayObjectId: Id,
         UserCtx: Clone,
         F: Fn(
-                &Renderer<
+                &RendererData<
                     VertexShaderId,
                     FragmentShaderId,
                     ProgramId,
@@ -271,7 +271,7 @@ impl<
             callback
                 as Rc<
                     dyn Fn(
-                        &Renderer<
+                        &RendererData<
                             VertexShaderId,
                             FragmentShaderId,
                             ProgramId,

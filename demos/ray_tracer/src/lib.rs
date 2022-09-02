@@ -7,8 +7,6 @@ pub mod objects;
 pub mod state;
 pub mod utils;
 
-
-
 /// This main function is only used for testing this portion of the app in isolation
 #[wasm_bindgen]
 pub fn ray_tracer() -> Result<(), JsValue> {

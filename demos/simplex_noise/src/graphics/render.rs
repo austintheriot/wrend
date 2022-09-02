@@ -6,7 +6,7 @@ use super::{
 };
 use crate::state::render_state_handle::RenderStateHandle;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
-use wrend::Renderer;
+use wrend::RendererData;
 
 // reusable draw call for both canvas and framebuffer
 fn draw(gl: &WebGl2RenderingContext, canvas: &HtmlCanvasElement) {
@@ -25,7 +25,7 @@ fn draw(gl: &WebGl2RenderingContext, canvas: &HtmlCanvasElement) {
 }
 
 pub fn render(
-    renderer: &Renderer<
+    renderer_data: &RendererData<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -39,17 +39,17 @@ pub fn render(
         RenderStateHandle,
     >,
 ) {
-    let gl = renderer.gl();
-    let canvas = renderer.canvas();
+    let gl = renderer_data.gl();
+    let canvas = renderer_data.canvas();
 
     // render perlin noise to framebuffer
-    let white_noise_texture = renderer
+    let white_noise_texture = renderer_data
         .texture(&TextureId::WhiteNoise)
         .map(|texture| texture.webgl_texture());
     gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, white_noise_texture);
-    renderer.use_program(&ProgramId::SimplexNoise);
-    renderer.use_vao(&ProgramId::SimplexNoise);
-    let simplex_noise_framebuffer = renderer
+    renderer_data.use_program(&ProgramId::SimplexNoise);
+    renderer_data.use_vao(&ProgramId::SimplexNoise);
+    let simplex_noise_framebuffer = renderer_data
         .framebuffer(&FramebufferId::SimplexNoise)
         .map(|framebuffer| framebuffer.webgl_framebuffer());
     gl.bind_framebuffer(
@@ -61,9 +61,9 @@ pub fn render(
     // copy perlin noise from framebuffer to canvas
     // (this step could be replaced with a true render call,
     // where the perlin noise is used as a texture in the render)
-    renderer.use_program(&ProgramId::PassThrough);
-    renderer.use_vao(&ProgramId::PassThrough);
-    let simplex_noise_texture = renderer
+    renderer_data.use_program(&ProgramId::PassThrough);
+    renderer_data.use_vao(&ProgramId::PassThrough);
+    let simplex_noise_texture = renderer_data
         .texture(&TextureId::SimplexNoise)
         .map(|texture| texture.webgl_texture());
     gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, simplex_noise_texture);

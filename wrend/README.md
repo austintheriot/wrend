@@ -26,7 +26,7 @@ The following use cases should guide the development of this library:
 
 - Add custom TypeScript types for *_create_context.rs callbacks
 
-- Make it possible access `Renderer` from the render callback in JavaScript
+- Make it possible access `RendererData` from the render callback in JavaScript
 
 - Implementing JavaScript API
   - Check that all structs implement `pub fn new()` where appropriate
@@ -58,7 +58,7 @@ The following use cases should guide the development of this library:
 
 - Make using uniform links more ergonomic: use builder pattern, etc.
 
-- Make a trait for Texture numbers that is available from the Renderer?
+- Make a trait for Texture numbers that is available from the RendererData?
 
 - Cleanup:
   - Consume links when they are used during build time - would require less cloning in general
@@ -78,7 +78,7 @@ The following use cases should guide the development of this library:
 ## Nice to Haves
 
 - Make everything truly as modular as possible
-  - Make it renderer agnostic?
+  - Make it renderer_data agnostic?
   - Make recording codec customizable
 
 - Make cross-compatible /callable with vanilla JavaScript

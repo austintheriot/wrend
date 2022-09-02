@@ -2,8 +2,6 @@ use wasm_bindgen::prelude::*;
 
 pub mod components;
 
-
-
 /// This main function is only used for testing this portion of the app in isolation
 #[wasm_bindgen]
 pub fn recording_demo() -> Result<(), JsValue> {

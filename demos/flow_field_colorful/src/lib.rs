@@ -6,8 +6,6 @@ pub mod graphics;
 pub mod state;
 pub mod utils;
 
-
-
 /// This main function is only used for testing this portion of the app in isolation
 #[wasm_bindgen]
 pub fn flow_field_colorful() -> Result<(), JsValue> {

@@ -5,7 +5,7 @@ pub fn create_frame_buffer(ctx: &FramebufferCreateContext) -> WebGlFramebuffer {
     let texture_a = ctx
         .webgl_texture()
         .as_ref()
-        .expect("RendererBuilder should have Texture A built when creating framebuffers");
+        .expect("RendererDataBuilder should have Texture A built when creating framebuffers");
     let gl = ctx.gl();
 
     let framebuffer_object = gl

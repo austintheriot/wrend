@@ -100,7 +100,7 @@ impl<ProgramId: Id, UniformId: Id> Uniform<ProgramId, UniformId> {
                     }
                 }
             } else {
-                // by default, assume that all uniforms should be updated, since uniforms should 
+                // by default, assume that all uniforms should be updated, since uniforms should
                 // only be updated if no custom optimization callback is provided
                 true
             };

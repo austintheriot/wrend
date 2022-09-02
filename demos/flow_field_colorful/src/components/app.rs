@@ -30,7 +30,7 @@ use ui::route::Route;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, MouseEvent, WebGl2RenderingContext, WebGlContextAttributes};
 use wrend::{
-    AttributeLink, BufferLink, FramebufferLink, ProgramLinkBuilder, Renderer, TextureLink,
+    AttributeLink, BufferLink, FramebufferLink, ProgramLinkBuilder, RendererData, TextureLink,
     TransformFeedbackLink, UniformContext, UniformLink, WebGlContextError,
 };
 
@@ -49,12 +49,12 @@ const DRAW_PARTICLES_VERTEX_SHADER: &str = include_str!("../shaders/draw_particl
 pub fn app() -> Html {
     let canvas_ref = use_node_ref();
     let render_state = use_mut_ref(RenderState::default);
-    let renderer_handle = use_mut_ref(|| None);
+    let renderer = use_mut_ref(|| None);
 
     use_effect_with_deps(
         {
             let canvas_ref = canvas_ref.clone();
-            let renderer_handle = renderer_handle;
+            let renderer = renderer;
             let render_state = Rc::clone(&render_state);
             move |_| {
                 let canvas: HtmlCanvasElement = canvas_ref
@@ -213,8 +213,8 @@ pub fn app() -> Html {
                     Ok(gl)
                 };
 
-                let mut renderer_builder = Renderer::builder();
-                renderer_builder
+                let mut renderer_data_builder = RendererData::builder();
+                renderer_data_builder
                     .set_canvas(canvas)
                     .set_user_ctx(render_state_handle)
                     .set_render_callback(render)
@@ -269,22 +269,22 @@ pub fn app() -> Html {
                     .add_vao_link(VAOId::DrawParticles)
                     .set_get_context_callback(get_context_callback);
 
-                let renderer = renderer_builder
-                    .build()
-                    .expect("Renderer should successfully build");
+                let renderer_data = renderer_data_builder
+                    .build_renderer_data()
+                    .expect("RendererData should successfully build");
 
-                let mut new_renderer_handle = renderer.into_renderer_handle();
-                new_renderer_handle.set_animation_callback(Some(
-                    |renderer: &Renderer<_, _, _, _, _, _, _, _, _, _, _>| {
-                        renderer.update_uniforms();
-                        renderer.render();
+                let mut new_renderer = renderer_data.into_renderer();
+                new_renderer.set_animation_callback(Some(
+                    |renderer_data: &RendererData<_, _, _, _, _, _, _, _, _, _, _>| {
+                        renderer_data.update_uniforms();
+                        renderer_data.render();
                     },
                 ));
 
-                new_renderer_handle.start_animating();
+                new_renderer.start_animating();
 
                 // save handle to keep animation going
-                *renderer_handle.borrow_mut() = Some(new_renderer_handle);
+                *renderer.borrow_mut() = Some(new_renderer);
 
                 || {}
             }

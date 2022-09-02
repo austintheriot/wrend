@@ -12,8 +12,8 @@ use crate::{
 use ui::route::Route;
 use web_sys::HtmlCanvasElement;
 use wrend::{
-    AttributeLink, BufferLink, FramebufferLink, ProgramLink, Renderer, TextureLink, UniformContext,
-    UniformLink,
+    AttributeLink, BufferLink, FramebufferLink, ProgramLink, RendererData, TextureLink,
+    UniformContext, UniformLink,
 };
 
 use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
@@ -27,12 +27,12 @@ const PASS_THROUGH_FRAGMENT_SHADER: &str = include_str!("../shaders/pass_through
 pub fn app() -> Html {
     let canvas_ref = use_node_ref();
     let render_state = use_mut_ref(RenderState::default);
-    let renderer_handle = use_mut_ref(|| None);
+    let renderer = use_mut_ref(|| None);
 
     use_effect_with_deps(
         {
             let canvas_ref = canvas_ref.clone();
-            let renderer_handle = renderer_handle;
+            let renderer = renderer;
             move |_| {
                 let canvas: HtmlCanvasElement = canvas_ref
                     .cast()
@@ -80,9 +80,9 @@ pub fn app() -> Html {
                 let framebuffer_b_link =
                     FramebufferLink::new(FramebufferId::B, create_frame_buffer, Some(TextureId::B));
 
-                let mut renderer_builder = Renderer::builder();
+                let mut renderer_data_builder = RendererData::builder();
 
-                renderer_builder
+                renderer_data_builder
                     .set_canvas(canvas)
                     .set_user_ctx(render_state)
                     .set_render_callback(render)
@@ -107,21 +107,21 @@ pub fn app() -> Html {
                     .add_vao_link(ProgramId::PassThrough)
                     .add_vao_link(ProgramId::GameOfLife);
 
-                let renderer = renderer_builder
-                    .build()
-                    .expect("Renderer should successfully build");
+                let renderer_data = renderer_data_builder
+                    .build_renderer_data()
+                    .expect("RendererData should successfully build");
 
-                let mut new_renderer_handle = renderer.into_renderer_handle();
-                new_renderer_handle.set_animation_callback(Some(
-                    |renderer: &Renderer<_, _, _, _, _, _, _, _, _, _, _>| {
-                        renderer.render();
+                let mut new_renderer = renderer_data.into_renderer();
+                new_renderer.set_animation_callback(Some(
+                    |renderer_data: &RendererData<_, _, _, _, _, _, _, _, _, _, _>| {
+                        renderer_data.render();
                     },
                 ));
 
-                new_renderer_handle.start_animating();
+                new_renderer.start_animating();
 
                 // save handle to keep animation going
-                *renderer_handle.borrow_mut() = Some(new_renderer_handle);
+                *renderer.borrow_mut() = Some(new_renderer);
 
                 || {}
             }

@@ -88,7 +88,7 @@ pub(crate) fn make_handle_resume(
     media_recorder: MediaRecorder,
     recording_data: Rc<RefCell<RecordingData>>,
 ) -> Listener<MediaRecorder, Event> {
-    Listener::new(media_recorder.clone(), "resume", move |_: Event| {
+    Listener::new(media_recorder, "resume", move |_: Event| {
         info!("Recording resumed");
         recording_data.borrow_mut().set_is_recording(true);
     })

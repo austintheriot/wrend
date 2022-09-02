@@ -1,21 +1,26 @@
 use crate::{
-    recording_handlers, AnimationCallback, AnimationData, Id, IdName, RecordingData, Renderer,
-    RendererHandleJs, RendererHandleJsInner,
+    recording_handlers, AnimationCallback, AnimationData, Attribute, Buffer, Framebuffer, Id,
+    IdName, RecordingData, RenderCallback, RendererData, RendererDataBuilder, RendererJs,
+    RendererJsInner, Texture, Uniform,
 };
 
 use log::{error, info};
+
 use std::cell::RefCell;
+use std::ops::Deref;
 use std::rc::Rc;
 use wasm_bindgen::prelude::Closure;
 use wasm_bindgen::{JsCast, JsValue};
+use web_sys::{
+    window, HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram, WebGlShader,
+    WebGlTransformFeedback, WebGlVertexArrayObject,
+};
 
-use web_sys::window;
-
-/// The `RendererHandle` struct takes ownership of the `Renderer`, enabling it to
+/// The `Renderer` struct takes ownership of the `RendererData`, enabling it to
 /// perform more complex operations than would otherwise be possible, such as
 /// animating renders over time or recording canvas output.
 #[derive(Clone, Debug)]
-pub struct RendererHandle<
+pub struct Renderer<
     VertexShaderId: Id,
     FragmentShaderId: Id,
     ProgramId: Id,
@@ -28,9 +33,9 @@ pub struct RendererHandle<
     VertexArrayObjectId: Id,
     UserCtx: Clone + 'static,
 > {
-    renderer: Rc<
+    renderer_data: Rc<
         RefCell<
-            Renderer<
+            RendererData<
                 VertexShaderId,
                 FragmentShaderId,
                 ProgramId,
@@ -78,7 +83,7 @@ impl<
         VertexArrayObjectId: 'static + Id,
         UserCtx: Clone + 'static,
     >
-    RendererHandle<
+    Renderer<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -92,8 +97,8 @@ impl<
         UserCtx,
     >
 {
-    pub fn new(
-        renderer: Renderer<
+    pub(crate) fn new(
+        renderer_data: RendererData<
             VertexShaderId,
             FragmentShaderId,
             ProgramId,
@@ -107,14 +112,14 @@ impl<
             UserCtx,
         >,
     ) -> Self {
-        Self::new_with_rc_renderer(Rc::new(RefCell::new(renderer)))
+        Self::new_with_rc_renderer(Rc::new(RefCell::new(renderer_data)))
     }
 
-    /// Allows providing an already-wrapped `Renderer` as an argument.
-    pub fn new_with_rc_renderer(
-        renderer: Rc<
+    /// Allows providing an already-wrapped `RendererData` as an argument.
+    pub(crate) fn new_with_rc_renderer(
+        renderer_data: Rc<
             RefCell<
-                Renderer<
+                RendererData<
                     VertexShaderId,
                     FragmentShaderId,
                     ProgramId,
@@ -132,7 +137,7 @@ impl<
     ) -> Self {
         Self {
             recording_data: None,
-            renderer,
+            renderer_data,
             animation_data: Rc::new(RefCell::new(AnimationData::new())),
         }
     }
@@ -148,7 +153,7 @@ impl<
         }
 
         let canvas = {
-            let renderer_ref = self.renderer.borrow();
+            let renderer_ref = self.renderer_data.borrow();
             renderer_ref.canvas().clone()
         };
         let recording_data = RecordingData::new(&canvas);
@@ -196,7 +201,7 @@ impl<
     pub fn start_animating(&self) {
         // cancel previous animation before starting a new one
         if self.is_animating() {
-            error!("`start_animating` was called, but `RendererHandle` is already animating. Cancelling the previous animation and staring a new one");
+            error!("`start_animating` was called, but `Renderer` is already animating. Cancelling the previous animation and staring a new one");
             self.stop_animating();
         }
 
@@ -204,7 +209,7 @@ impl<
         let f = Rc::new(RefCell::new(None));
         let g = Rc::clone(&f);
         let animation_data = Rc::clone(&self.animation_data);
-        let renderer = Rc::clone(&self.renderer);
+        let renderer_data = Rc::clone(&self.renderer_data);
         {
             let animation_data = Rc::clone(&self.animation_data);
             *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
@@ -216,7 +221,7 @@ impl<
                 // run animation callback
                 animation_data
                     .borrow_mut()
-                    .call_animation_callback(&renderer.borrow());
+                    .call_animation_callback(&renderer_data.borrow());
 
                 // schedule another requestAnimationFrame callback
                 let animation_id = Self::request_animation_frame(f.borrow().as_ref().unwrap());
@@ -230,7 +235,7 @@ impl<
 
     pub fn stop_animating(&self) {
         if !self.is_animating() {
-            error!("`stop_animating` was called, but `RendererHandle` is not currently animating");
+            error!("`stop_animating` was called, but `Renderer` is not currently animating");
             return;
         }
 
@@ -319,11 +324,11 @@ impl<
             })
     }
 
-    pub(crate) fn renderer(
+    pub(crate) fn renderer_data(
         &self,
     ) -> Rc<
         RefCell<
-            Renderer<
+            RendererData<
                 VertexShaderId,
                 FragmentShaderId,
                 ProgramId,
@@ -338,7 +343,7 @@ impl<
             >,
         >,
     > {
-        Rc::clone(&self.renderer)
+        Rc::clone(&self.renderer_data)
     }
 
     pub(crate) fn request_animation_frame(f: &Closure<dyn Fn()>) -> i32 {
@@ -362,7 +367,7 @@ impl<
         VertexArrayObjectId: Id,
         UserCtx: Clone,
     > Drop
-    for RendererHandle<
+    for Renderer<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -408,7 +413,7 @@ impl<
         UserCtx: Clone,
     >
     From<
-        Renderer<
+        RendererData<
             VertexShaderId,
             FragmentShaderId,
             ProgramId,
@@ -422,7 +427,7 @@ impl<
             UserCtx,
         >,
     >
-    for RendererHandle<
+    for Renderer<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -437,7 +442,7 @@ impl<
     >
 {
     fn from(
-        renderer: Renderer<
+        renderer_data: RendererData<
             VertexShaderId,
             FragmentShaderId,
             ProgramId,
@@ -451,7 +456,174 @@ impl<
             UserCtx,
         >,
     ) -> Self {
-        RendererHandle::new(renderer)
+        Renderer::new(renderer_data)
+    }
+}
+
+// Re-export of the (inexpensive) functionality from `RendererData`
+impl<
+        VertexShaderId: Id,
+        FragmentShaderId: Id,
+        ProgramId: Id,
+        UniformId: Id + IdName,
+        BufferId: Id,
+        AttributeId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
+        TransformFeedbackId: Id,
+        VertexArrayObjectId: Id,
+        UserCtx: Clone,
+    >
+    Renderer<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        AttributeId,
+        TextureId,
+        FramebufferId,
+        TransformFeedbackId,
+        VertexArrayObjectId,
+        UserCtx,
+    >
+{
+    pub fn builder() -> RendererDataBuilder<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        AttributeId,
+        TextureId,
+        FramebufferId,
+        TransformFeedbackId,
+        VertexArrayObjectId,
+        UserCtx,
+    > {
+        RendererDataBuilder::default()
+    }
+
+    pub fn canvas(&self) -> HtmlCanvasElement {
+        self.deref().borrow().canvas().to_owned()
+    }
+
+    pub fn gl(&self) -> WebGl2RenderingContext {
+        self.deref().borrow().deref().gl().to_owned()
+    }
+
+    pub fn fragment_shader(&self, fragment_shader_id: &FragmentShaderId) -> Option<WebGlShader> {
+        self.deref()
+            .borrow()
+            .fragment_shader(fragment_shader_id)
+            .map(Clone::clone)
+    }
+
+    pub fn vertex_shader(&self, vertex_shader_id: &VertexShaderId) -> Option<WebGlShader> {
+        self.deref()
+            .borrow()
+            .vertex_shader(vertex_shader_id)
+            .map(Clone::clone)
+    }
+
+    pub fn program(&self, program_id: &ProgramId) -> Option<WebGlProgram> {
+        self.deref().borrow().program(program_id).map(Clone::clone)
+    }
+
+    pub fn uniform(&self, uniform_id: &UniformId) -> Option<Uniform<ProgramId, UniformId>> {
+        self.deref().borrow().uniform(uniform_id).map(Clone::clone)
+    }
+
+    pub fn buffer(&self, buffer_id: &BufferId) -> Option<Buffer<BufferId>> {
+        self.deref().borrow().buffer(buffer_id).map(Clone::clone)
+    }
+
+    pub fn attribute(
+        &self,
+        attribute_id: &AttributeId,
+    ) -> Option<Attribute<VertexArrayObjectId, BufferId, AttributeId>> {
+        self.deref()
+            .borrow()
+            .attribute(attribute_id)
+            .map(Clone::clone)
+    }
+
+    pub fn texture(&self, texture_id: &TextureId) -> Option<Texture<TextureId>> {
+        self.deref().borrow().texture(texture_id).map(Clone::clone)
+    }
+
+    pub fn framebuffer(
+        &self,
+        framebuffer_id: &FramebufferId,
+    ) -> Option<Framebuffer<FramebufferId>> {
+        self.deref()
+            .borrow()
+            .framebuffer(framebuffer_id)
+            .map(Clone::clone)
+    }
+
+    pub fn transform_feedback(
+        &self,
+        transform_feedback_id: &TransformFeedbackId,
+    ) -> Option<WebGlTransformFeedback> {
+        self.deref()
+            .borrow()
+            .transform_feedback(transform_feedback_id)
+            .map(Clone::clone)
+    }
+
+    pub fn vao(&self, vao_id: &VertexArrayObjectId) -> Option<WebGlVertexArrayObject> {
+        self.deref().borrow().vao(vao_id).map(Clone::clone)
+    }
+
+    pub fn user_ctx(&self) -> Option<UserCtx> {
+        self.deref().borrow().user_ctx().map(Clone::clone)
+    }
+
+    pub fn use_program(&self, program_id: &ProgramId) -> &Self {
+        self.deref().borrow().use_program(program_id);
+        self
+    }
+
+    pub fn use_vao(&self, vao_id: &VertexArrayObjectId) -> &Self {
+        self.deref().borrow().use_vao(vao_id);
+        self
+    }
+    pub fn update_uniform(&self, uniform_id: &UniformId) -> &Self {
+        self.deref().borrow().update_uniform(uniform_id);
+        self
+    }
+
+    pub fn update_uniforms(&self) -> &Self {
+        self.deref().borrow().update_uniforms();
+        self
+    }
+
+    pub fn render(&self) -> &Self {
+        self.deref().borrow().render();
+        self
+    }
+
+    pub fn save_image(&self) {
+        self.deref().borrow().save_image()
+    }
+
+    pub fn render_callback(
+        &self,
+    ) -> RenderCallback<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        AttributeId,
+        TextureId,
+        FramebufferId,
+        TransformFeedbackId,
+        VertexArrayObjectId,
+        UserCtx,
+    > {
+        self.deref().borrow().render_callback()
     }
 }
 
@@ -471,7 +643,7 @@ impl<
     From<
         Rc<
             RefCell<
-                Renderer<
+                RendererData<
                     VertexShaderId,
                     FragmentShaderId,
                     ProgramId,
@@ -487,7 +659,7 @@ impl<
             >,
         >,
     >
-    for RendererHandle<
+    for Renderer<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -502,9 +674,9 @@ impl<
     >
 {
     fn from(
-        renderer: Rc<
+        renderer_data: Rc<
             RefCell<
-                Renderer<
+                RendererData<
                     VertexShaderId,
                     FragmentShaderId,
                     ProgramId,
@@ -520,13 +692,63 @@ impl<
             >,
         >,
     ) -> Self {
-        RendererHandle::new_with_rc_renderer(renderer)
+        Renderer::new_with_rc_renderer(renderer_data)
     }
 }
 
-impl From<RendererHandleJsInner> for JsValue {
-    fn from(js_renderer_handle_inner: RendererHandleJsInner) -> Self {
-        let js_renderer_handle: RendererHandleJs = js_renderer_handle_inner.into();
+impl<
+        VertexShaderId: Id,
+        FragmentShaderId: Id,
+        ProgramId: Id,
+        UniformId: Id + IdName,
+        BufferId: Id,
+        AttributeId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
+        TransformFeedbackId: Id,
+        VertexArrayObjectId: Id,
+        UserCtx: Clone,
+    > Deref
+    for Renderer<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        AttributeId,
+        TextureId,
+        FramebufferId,
+        TransformFeedbackId,
+        VertexArrayObjectId,
+        UserCtx,
+    >
+{
+    type Target = Rc<
+        RefCell<
+            RendererData<
+                VertexShaderId,
+                FragmentShaderId,
+                ProgramId,
+                UniformId,
+                BufferId,
+                AttributeId,
+                TextureId,
+                FramebufferId,
+                TransformFeedbackId,
+                VertexArrayObjectId,
+                UserCtx,
+            >,
+        >,
+    >;
+
+    fn deref(&self) -> &Self::Target {
+        &self.renderer_data
+    }
+}
+
+impl From<RendererJsInner> for JsValue {
+    fn from(js_renderer_handle_inner: RendererJsInner) -> Self {
+        let js_renderer_handle: RendererJs = js_renderer_handle_inner.into();
         js_renderer_handle.into()
     }
 }

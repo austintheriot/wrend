@@ -6,7 +6,7 @@ use super::{
 use crate::state::render_state::RenderState;
 use std::{cell::RefCell, rc::Rc};
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
-use wrend::{IdDefault, Renderer};
+use wrend::{IdDefault, RendererData};
 
 // reusable draw call for both canvas and framebuffer
 fn draw(gl: &WebGl2RenderingContext, canvas: &HtmlCanvasElement) {
@@ -25,7 +25,7 @@ fn draw(gl: &WebGl2RenderingContext, canvas: &HtmlCanvasElement) {
 }
 
 pub fn render(
-    renderer: &Renderer<
+    renderer_data: &RendererData<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -40,18 +40,18 @@ pub fn render(
     >,
 ) {
     // get current count from state and update it
-    let user_ctx = renderer
+    let user_ctx = renderer_data
         .user_ctx()
         .expect("Should have user_ctx available in render");
     let current_count = user_ctx.borrow().count();
     user_ctx.borrow_mut().inc_count();
 
-    let gl = renderer.gl();
-    let canvas = renderer.canvas();
+    let gl = renderer_data.gl();
+    let canvas = renderer_data.canvas();
 
     // use the appropriate program
-    renderer.use_program(&ProgramId::GameOfLife);
-    renderer.use_vao(&ProgramId::GameOfLife);
+    renderer_data.use_program(&ProgramId::GameOfLife);
+    renderer_data.use_vao(&ProgramId::GameOfLife);
 
     // sample from texture previously rendered to
     // and render to the opposite framebuffer
@@ -60,23 +60,23 @@ pub fn render(
     } else {
         (TextureId::B, FramebufferId::A, TextureId::A)
     };
-    let previous_webgl_texture = renderer
+    let previous_webgl_texture = renderer_data
         .texture(&previous_texture_id)
         .map(|texture| texture.webgl_texture());
     gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, previous_webgl_texture);
 
     // render to framebuffer
-    let next_frame_buffer = renderer
+    let next_frame_buffer = renderer_data
         .framebuffer(&next_frame_buffer_id)
         .map(|framebuffer| framebuffer.webgl_framebuffer());
     gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, next_frame_buffer);
     draw(gl, canvas);
 
     // pull from the framebuffer just drawn to and copy to the canvas
-    renderer.use_program(&ProgramId::PassThrough);
-    renderer.use_vao(&ProgramId::PassThrough);
+    renderer_data.use_program(&ProgramId::PassThrough);
+    renderer_data.use_vao(&ProgramId::PassThrough);
 
-    let next_webgl_texture = renderer
+    let next_webgl_texture = renderer_data
         .texture(&next_texture_id)
         .map(|texture| texture.webgl_texture());
     gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, next_webgl_texture);

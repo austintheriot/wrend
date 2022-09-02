@@ -1,6 +1,6 @@
 use crate::{
-    utils, AttributeJs, BufferJs, FramebufferJs, Renderer, RendererHandleJs, RendererHandleJsInner,
-    RendererJsBuilder, TextureJs, UniformJs,
+    utils, AttributeJs, BufferJs, FramebufferJs, RenderCallback, RendererData,
+    RendererDataBuilderJs, RendererJs, RendererJsInner, TextureJs, UniformJs,
 };
 use js_sys::{Array, Map, Object};
 use log::error;
@@ -15,10 +15,10 @@ use web_sys::{
     WebGlVertexArrayObject,
 };
 
-/// Wrapper around `Renderer` to make it callable from JavaScript.
+/// Wrapper around `RendererData` to make it callable from JavaScript.
 ///
 /// Types are adjusted to only use JavaScript-compatible types and no generics.
-pub type RendererJsInner = Renderer<
+pub type RendererDataJsInner = RendererData<
     String,
     String,
     String,
@@ -32,16 +32,16 @@ pub type RendererJsInner = Renderer<
     Object,
 >;
 
-#[wasm_bindgen(js_name = Renderer)]
+#[wasm_bindgen(js_name = RendererData)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 // Reference counting the internals here is necessary to be able to
 // convert this value into a `JsValue` without cloning its internal data.
-pub struct RendererJs(Rc<RefCell<RendererJsInner>>);
+pub struct RendererDataJs(Rc<RefCell<RendererDataJsInner>>);
 
-#[wasm_bindgen(js_class = Renderer)]
-impl RendererJs {
-    pub fn builder() -> RendererJsBuilder {
-        RendererJsBuilder::default()
+#[wasm_bindgen(js_class = RendererData)]
+impl RendererDataJs {
+    pub fn builder() -> RendererDataBuilderJs {
+        RendererDataBuilderJs::default()
     }
 
     pub fn canvas(&self) -> HtmlCanvasElement {
@@ -233,14 +233,13 @@ impl RendererJs {
         self.deref().borrow().update_uniforms();
     }
 
-    // `render` does not deref to the internal `Renderer` here, because its way less complex to
-    // pass `RendererJs` as an argument to the `render` function here at this level than converting
-    // back into a `RendererJs` from within the `Renderer` struct.
+    // `render` does not deref to the internal `RendererData` here, because its much less complex (and much faster) to
+    // pass `RendererDataJs` as an argument to the `render` function here at this level , rather than converting
+    // back into a `RendererDataJs` from within the `RendererData` struct.
     pub fn render(&self) {
         let render_callback = self.deref().borrow().render_callback();
-
         if let Some(js_callback) = render_callback.b().as_ref() {
-            // Internals of `RendererJs` are stored behind an `Rc`, so this is a cheap operation
+            // Internals of `RendererDataJs` are stored behind an `Rc`, so this is a cheap operation
             let js_value: JsValue = self.clone().into();
             if let Err(err) = js_callback.call1(&JsValue::NULL, &js_value) {
                 error!("Error occurred while calling JavaScript `render` callback: {err:?}");
@@ -256,48 +255,65 @@ impl RendererJs {
     }
 
     #[wasm_bindgen(js_name = intoRendererHandle)]
-    pub fn into_renderer_handle(self) -> RendererHandleJs {
+    pub fn into_renderer_handle(self) -> RendererJs {
         self.into()
     }
 }
 
-impl RendererJs {
-    pub fn into_inner(self) -> Rc<RefCell<RendererJsInner>> {
+impl RendererDataJs {
+    pub fn into_inner(self) -> Rc<RefCell<RendererDataJsInner>> {
         self.0
+    }
+
+    pub fn render_callback(
+        &self,
+    ) -> RenderCallback<
+        String,
+        String,
+        String,
+        String,
+        String,
+        String,
+        String,
+        String,
+        String,
+        String,
+        Object,
+    > {
+        self.deref().borrow().render_callback()
     }
 }
 
-impl Deref for RendererJs {
-    type Target = Rc<RefCell<RendererJsInner>>;
+impl Deref for RendererDataJs {
+    type Target = Rc<RefCell<RendererDataJsInner>>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl DerefMut for RendererJs {
-    fn deref_mut(&mut self) -> &mut Rc<RefCell<RendererJsInner>> {
+impl DerefMut for RendererDataJs {
+    fn deref_mut(&mut self) -> &mut Rc<RefCell<RendererDataJsInner>> {
         &mut self.0
     }
 }
 
-impl From<RendererJsInner> for RendererJs {
-    fn from(renderer_js_inner: RendererJsInner) -> Self {
-        Self(Rc::new(RefCell::new(renderer_js_inner)))
+impl From<RendererDataJsInner> for RendererDataJs {
+    fn from(renderer_data_js_inner: RendererDataJsInner) -> Self {
+        Self(Rc::new(RefCell::new(renderer_data_js_inner)))
     }
 }
 
-impl From<Rc<RefCell<RendererJsInner>>> for RendererJs {
-    fn from(renderer_js_inner: Rc<RefCell<RendererJsInner>>) -> Self {
-        Self(renderer_js_inner)
+impl From<Rc<RefCell<RendererDataJsInner>>> for RendererDataJs {
+    fn from(renderer_data_js_inner: Rc<RefCell<RendererDataJsInner>>) -> Self {
+        Self(renderer_data_js_inner)
     }
 }
 
-impl From<RendererJs> for RendererHandleJs {
-    fn from(renderer_js: RendererJs) -> Self {
-        let renderer = Rc::clone(renderer_js.deref());
-        let renderer_handle: RendererHandleJsInner =
-            RendererHandleJsInner::new_with_rc_renderer(renderer);
-        renderer_handle.into()
+impl From<RendererDataJs> for RendererJs {
+    fn from(renderer_data_js: RendererDataJs) -> Self {
+        let renderer_data = Rc::clone(renderer_data_js.deref());
+        let renderer: RendererJsInner = RendererJsInner::new_with_rc_renderer(renderer_data);
+        renderer.into()
     }
 }

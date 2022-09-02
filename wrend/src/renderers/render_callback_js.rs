@@ -1,10 +1,10 @@
 use js_sys::Function;
 use wasm_bindgen::prelude::wasm_bindgen;
 
-// @todo: allow renderer to be provided as argument
+// @todo: allow renderer_data to be provided as argument
 #[wasm_bindgen(typescript_custom_section)]
 const RENDER_CALLBACK_JS: &'static str = r#"
-type RenderCallbackJs = (renderer: RendererJs) => void;
+type RenderCallbackJs = (renderer_data: RendererData) => void;
 "#;
 
 #[wasm_bindgen]

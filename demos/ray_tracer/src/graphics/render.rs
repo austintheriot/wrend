@@ -5,7 +5,7 @@ use super::{
 };
 use crate::state::app_context::AppContext;
 use web_sys::WebGl2RenderingContext;
-use wrend::{Renderer, QUAD};
+use wrend::{RendererData, QUAD};
 
 // reusable draw call for both canvas and framebuffer
 fn draw_quad(gl: &WebGl2RenderingContext) {
@@ -19,7 +19,7 @@ fn draw_quad(gl: &WebGl2RenderingContext) {
 }
 
 pub fn render(
-    renderer: &Renderer<
+    renderer_data: &RendererData<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -33,8 +33,8 @@ pub fn render(
         AppContext,
     >,
 ) {
-    let gl = renderer.gl();
-    let user_ctx = renderer.user_ctx().unwrap();
+    let gl = renderer_data.gl();
+    let user_ctx = renderer_data.user_ctx().unwrap();
 
     let write_averaged_render_framebuffer_id: FramebufferId;
     let write_averaged_render_texture_id: TextureId;
@@ -50,32 +50,32 @@ pub fn render(
         read_averaged_render_texture_id = TextureId::AveragedRenderA;
     };
 
-    let write_prev_render_framebuffer = renderer
+    let write_prev_render_framebuffer = renderer_data
         .framebuffer(&FramebufferId::PrevRender)
         .unwrap()
         .webgl_framebuffer();
-    let read_prev_render_texture = renderer
+    let read_prev_render_texture = renderer_data
         .texture(&TextureId::PrevRender)
         .unwrap()
         .webgl_texture();
-    let write_averaged_render_framebuffer = renderer
+    let write_averaged_render_framebuffer = renderer_data
         .framebuffer(&write_averaged_render_framebuffer_id)
         .unwrap()
         .webgl_framebuffer();
-    let write_averaged_render_texture = renderer
+    let write_averaged_render_texture = renderer_data
         .texture(&write_averaged_render_texture_id)
         .unwrap()
         .webgl_texture();
-    let read_averaged_render_texture = renderer
+    let read_averaged_render_texture = renderer_data
         .texture(&read_averaged_render_texture_id)
         .unwrap()
         .webgl_texture();
 
-    renderer.use_vao(&VAOId::Quad);
+    renderer_data.use_vao(&VAOId::Quad);
 
     // render a plain, raw render into the prev_render framebuffer
     // no textures are necessary for this operation
-    renderer.use_program(&ProgramId::RayTracer);
+    renderer_data.use_program(&ProgramId::RayTracer);
     gl.bind_framebuffer(
         WebGl2RenderingContext::FRAMEBUFFER,
         Some(write_prev_render_framebuffer),
@@ -85,7 +85,7 @@ pub fn render(
     // pull the raw, previous render texture, and combine with a PREVIOUS averaged render texture,
     // rendering into a NEW averaged render framebuffer
     // (if the render count is < 2, then the prev_render is just drawn to the framebuffer)
-    renderer.use_program(&ProgramId::AverageRenders);
+    renderer_data.use_program(&ProgramId::AverageRenders);
     gl.active_texture(WebGl2RenderingContext::TEXTURE0 + TextureId::PrevRender.location());
     gl.bind_texture(
         WebGl2RenderingContext::TEXTURE_2D,
@@ -106,7 +106,7 @@ pub fn render(
 
     // copy the just drawn-to, averaged render onto the canvas
     // (if the render count is < 2, then the prev_render is just drawn to the canvas)
-    renderer.use_program(&ProgramId::PassThrough);
+    renderer_data.use_program(&ProgramId::PassThrough);
     gl.active_texture(WebGl2RenderingContext::TEXTURE0 + TextureId::PrevRender.location());
     gl.bind_texture(
         WebGl2RenderingContext::TEXTURE_2D,

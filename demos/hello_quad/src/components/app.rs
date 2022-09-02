@@ -3,7 +3,7 @@ use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 use wrend::{
     AttributeCreateContext, AttributeLink, BufferCreateContext, BufferLink, Id, IdDefault, IdName,
-    ProgramLink, Renderer, QUAD,
+    ProgramLink, RendererData, QUAD,
 };
 use yew::{
     function_component, html, use_effect_with_deps, use_node_ref, use_state_eq, UseStateHandle,
@@ -113,7 +113,7 @@ pub fn app() -> Html {
                     },
                 );
 
-                let render_callback = |renderer: &Renderer<
+                let render_callback = |renderer_data: &RendererData<
                     VertexShaderId,
                     FragmentShaderId,
                     ProgramId,
@@ -126,11 +126,11 @@ pub fn app() -> Html {
                     ProgramId,
                     UseStateHandle<i32>,
                 >| {
-                    let gl = renderer.gl();
+                    let gl = renderer_data.gl();
                     let canvas: HtmlCanvasElement = gl.canvas().unwrap().dyn_into().unwrap();
 
-                    renderer.use_program(&ProgramId);
-                    renderer.use_vao(&ProgramId);
+                    renderer_data.use_program(&ProgramId);
+                    renderer_data.use_vao(&ProgramId);
 
                     // sync canvas dimensions with viewport
                     gl.viewport(0, 0, canvas.width() as i32, canvas.height() as i32);
@@ -146,9 +146,9 @@ pub fn app() -> Html {
                     gl.draw_arrays(primitive_type, offset, count);
                 };
 
-                let mut renderer_builder = Renderer::builder();
+                let mut renderer_data_builder = RendererData::builder();
 
-                renderer_builder
+                renderer_data_builder
                     .set_canvas(canvas)
                     .set_user_ctx(example_state)
                     .set_render_callback(render_callback)
@@ -159,12 +159,12 @@ pub fn app() -> Html {
                     .add_attribute_link(a_position_link)
                     .add_vao_link(ProgramId);
 
-                let renderer = renderer_builder
-                    .build()
-                    .expect("Renderer should successfully build");
+                let renderer_data = renderer_data_builder
+                    .build_renderer_data()
+                    .expect("RendererData should successfully build");
 
-                renderer.update_uniforms();
-                renderer.render();
+                renderer_data.update_uniforms();
+                renderer_data.render();
 
                 || {}
             }

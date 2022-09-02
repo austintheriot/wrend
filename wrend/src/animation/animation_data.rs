@@ -1,4 +1,4 @@
-use crate::{AnimationCallback, Id, IdDefault, IdName, Renderer};
+use crate::{AnimationCallback, Id, IdDefault, IdName, RendererData};
 
 #[derive(Clone, Debug)]
 pub(crate) struct AnimationData<
@@ -77,7 +77,7 @@ impl<
     /// If no animation has been supplied yet, this is a no-op.
     pub fn call_animation_callback(
         &self,
-        renderer: &Renderer<
+        renderer_data: &RendererData<
             VertexShaderId,
             FragmentShaderId,
             ProgramId,
@@ -92,7 +92,7 @@ impl<
         >,
     ) {
         if let Some(animation_callback) = &self.animation_callback {
-            animation_callback.call(renderer);
+            animation_callback.call(renderer_data);
         }
     }
 

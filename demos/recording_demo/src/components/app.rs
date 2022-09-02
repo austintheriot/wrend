@@ -5,7 +5,7 @@ use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, MouseEvent, WebGl2RenderingContext};
 use wrend::{
     AttributeCreateContext, AttributeLink, BufferCreateContext, BufferLink, Id, IdDefault, IdName,
-    ProgramLink, Renderer, UniformContext, UniformLink, QUAD,
+    ProgramLink, RendererData, UniformContext, UniformLink, QUAD,
 };
 use yew::{
     function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, use_state_eq,
@@ -139,7 +139,7 @@ pub fn app() -> Html {
                     },
                 );
 
-                let render_callback = |renderer: &Renderer<
+                let render_callback = |renderer_data: &RendererData<
                     VertexShaderId,
                     FragmentShaderId,
                     ProgramId,
@@ -152,12 +152,12 @@ pub fn app() -> Html {
                     ProgramId,
                     UseStateHandle<i32>,
                 >| {
-                    let gl = renderer.gl();
+                    let gl = renderer_data.gl();
                     let canvas: HtmlCanvasElement = gl.canvas().unwrap().dyn_into().unwrap();
 
                     // use the appropriate program
-                    renderer.use_program(&ProgramId);
-                    renderer.use_vao(&ProgramId);
+                    renderer_data.use_program(&ProgramId);
+                    renderer_data.use_vao(&ProgramId);
 
                     // sync canvas dimensions with viewport
                     gl.viewport(0, 0, canvas.width() as i32, canvas.height() as i32);
@@ -173,7 +173,7 @@ pub fn app() -> Html {
                     gl.draw_arrays(primitive_type, offset, count);
                 };
 
-                let mut renderer_builder = Renderer::builder();
+                let mut renderer_data_builder = RendererData::builder();
 
                 let mut u_now_link =
                     UniformLink::new(ProgramId, UniformId::UNow, |ctx: &UniformContext| {
@@ -183,7 +183,7 @@ pub fn app() -> Html {
                     });
                 u_now_link.set_use_init_callback_for_update(true);
 
-                renderer_builder
+                renderer_data_builder
                     .set_canvas(canvas)
                     .set_user_ctx(example_state)
                     .set_render_callback(render_callback)
@@ -195,22 +195,22 @@ pub fn app() -> Html {
                     .add_uniform_link(u_now_link)
                     .add_vao_link(ProgramId);
 
-                let renderer = renderer_builder
-                    .build()
-                    .expect("Renderer should successfully build");
+                let renderer_data = renderer_data_builder
+                    .build_renderer_data()
+                    .expect("RendererData should successfully build");
 
-                let mut renderer_handle = renderer.into_renderer_handle();
-                renderer_handle.set_animation_callback(Some(
-                    |renderer: &Renderer<_, _, _, _, _, _, _, _, _, _, _>| {
-                        renderer.update_uniforms();
-                        renderer.render();
+                let mut renderer = renderer_data.into_renderer();
+                renderer.set_animation_callback(Some(
+                    |renderer_data: &RendererData<_, _, _, _, _, _, _, _, _, _, _>| {
+                        renderer_data.update_uniforms();
+                        renderer_data.render();
                     },
                 ));
 
-                renderer_handle.start_animating();
+                renderer.start_animating();
 
                 // save handle to keep animation going
-                *recording_handle.borrow_mut() = Some(renderer_handle);
+                *recording_handle.borrow_mut() = Some(renderer);
 
                 || {}
             }

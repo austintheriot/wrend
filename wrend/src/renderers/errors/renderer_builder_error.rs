@@ -9,7 +9,7 @@ use thiserror::Error;
 pub enum RendererBuilderError {
     #[error("Error occurred while retrieving the WebGL2 context: {0:?}")]
     WebGlContextError(#[from] WebGlContextError),
-    #[error("Error occurred while building the Renderer {0:?}")]
+    #[error("Error occurred while building the RendererData {0:?}")]
     RendererBuildError(#[from] BuildRendererError),
     #[error("Error occurred while compiling shader: {0:?}")]
     CompileShaderError(#[from] CompileShaderError),

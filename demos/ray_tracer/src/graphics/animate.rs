@@ -7,11 +7,11 @@ use super::{
 };
 use crate::state::{app_context::AppContext, render_state::RESIZE_UPDATE_DEBOUNCE_INTERVAL};
 use web_sys::{window, WebGlTexture};
-use wrend::Renderer;
+use wrend::RendererData;
 
 /// This callback is called on every frame of the global animation cycle
 pub fn animate(
-    renderer: &Renderer<
+    renderer_data: &RendererData<
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
@@ -25,11 +25,11 @@ pub fn animate(
         AppContext,
     >,
 ) {
-    let gl = renderer.gl();
-    let canvas = renderer.canvas();
-    let render_state = Rc::clone(&renderer.user_ctx().as_ref().unwrap().render_state);
+    let gl = renderer_data.gl();
+    let canvas = renderer_data.canvas();
+    let render_state = Rc::clone(&renderer_data.user_ctx().as_ref().unwrap().render_state);
     let now = window().unwrap().performance().unwrap().now();
-    let render_textures: Vec<WebGlTexture> = renderer
+    let render_textures: Vec<WebGlTexture> = renderer_data
         .textures_by_id([
             TextureId::PrevRender,
             TextureId::AveragedRenderA,
@@ -62,8 +62,8 @@ pub fn animate(
     }
 
     if should_render {
-        renderer.update_uniforms();
-        renderer.render();
+        renderer_data.update_uniforms();
+        renderer_data.render();
         render_state.borrow_mut().inc_render_count();
 
         // screenshots should be saved immediately after rendering
@@ -71,7 +71,7 @@ pub fn animate(
             let mut render_state = render_state.borrow_mut();
             if render_state.should_save_image() {
                 render_state.set_should_save_image(false);
-                renderer.save_image();
+                renderer_data.save_image();
             }
         }
     }

@@ -1,6 +1,8 @@
 use std::{ops::Deref, rc::Rc};
 
-use crate::{AnimationCallbackJs, CallbackWithContext, Either, Id, IdDefault, IdName, Renderer};
+use crate::{
+    AnimationCallbackJs, CallbackWithContext, Either, Id, IdDefault, IdName, RendererData,
+};
 
 #[derive(Clone, Hash, Eq, PartialOrd, Ord, Debug)]
 pub struct AnimationCallback<
@@ -19,7 +21,7 @@ pub struct AnimationCallback<
     Either<
         CallbackWithContext<
             dyn Fn(
-                &Renderer<
+                &RendererData<
                     VertexShaderId,
                     FragmentShaderId,
                     ProgramId,
@@ -100,7 +102,7 @@ impl<
     type Target = Either<
         CallbackWithContext<
             dyn Fn(
-                &Renderer<
+                &RendererData<
                     VertexShaderId,
                     FragmentShaderId,
                     ProgramId,
@@ -136,7 +138,7 @@ impl<
         VertexArrayObjectId: Id,
         UserCtx: Clone,
         F: Fn(
-                &Renderer<
+                &RendererData<
                     VertexShaderId,
                     FragmentShaderId,
                     ProgramId,
@@ -169,7 +171,7 @@ impl<
         Self(Either::new_a(CallbackWithContext::from(Rc::new(callback)
             as Rc<
                 dyn Fn(
-                    &Renderer<
+                    &RendererData<
                         VertexShaderId,
                         FragmentShaderId,
                         ProgramId,
@@ -200,7 +202,7 @@ impl<
         VertexArrayObjectId: Id,
         UserCtx: Clone,
         F: Fn(
-                &Renderer<
+                &RendererData<
                     VertexShaderId,
                     FragmentShaderId,
                     ProgramId,
@@ -234,7 +236,7 @@ impl<
             callback
                 as Rc<
                     dyn Fn(
-                        &Renderer<
+                        &RendererData<
                             VertexShaderId,
                             FragmentShaderId,
                             ProgramId,
