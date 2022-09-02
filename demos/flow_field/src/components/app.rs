@@ -248,11 +248,10 @@ pub fn app() -> Html {
                     .add_vao_link(VAOId::DrawParticles)
                     .set_get_context_callback(get_context_callback);
 
-                let renderer_data = renderer_data_builder
-                    .build_renderer_data()
+                let mut new_renderer = renderer_data_builder
+                    .build_renderer()
                     .expect("RendererData should successfully build");
-
-                let mut new_renderer = renderer_data.into_renderer();
+                    
                 new_renderer.set_animation_callback(Some(
                     |renderer_data: &RendererData<_, _, _, _, _, _, _, _, _, _, _>| {
                         renderer_data.update_uniforms();
