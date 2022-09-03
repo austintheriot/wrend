@@ -1,10 +1,10 @@
 use crate::{
-    Attribute, AttributeLink, Bridge, Buffer, BufferLink, BuildRendererError, CompileShaderError,
-    CreateAttributeError, CreateBufferError, CreateTextureError, CreateTransformFeedbackError,
-    CreateUniformError, CreateVAOError, Framebuffer, FramebufferLink, GetContextCallback, Id,
-    IdDefault, IdName, LinkProgramError, ProgramLink, RenderCallback, Renderer,
-    RendererBuilderError, RendererDataJs, RendererDataJsInner, SaveContextError, ShaderType,
-    Texture, TextureLink, TransformFeedbackLink, Uniform, UniformContext, UniformLink,
+    Attribute, AttributeLink, Bridge, Buffer, BufferLink, BuildRendererError, Callback,
+    CompileShaderError, CreateAttributeError, CreateBufferError, CreateTextureError,
+    CreateTransformFeedbackError, CreateUniformError, CreateVAOError, Framebuffer, FramebufferLink,
+    GetContextCallback, Id, IdDefault, IdName, LinkProgramError, ProgramLink, RenderCallback,
+    Renderer, RendererBuilderError, RendererDataJs, RendererDataJsInner, SaveContextError,
+    ShaderType, Texture, TextureLink, TransformFeedbackLink, Uniform, UniformContext, UniformLink,
     WebGlContextError,
 };
 
@@ -879,14 +879,15 @@ impl<
         canvas: HtmlCanvasElement,
     ) -> Result<WebGl2RenderingContext, WebGlContextError> {
         let gl = match &*self.get_context_callback {
-            crate::Either::A(rust_callback) => (rust_callback)(canvas)?,
-            crate::Either::B(js_callback) => {
+            Callback::Rust(rust_callback) => (rust_callback)(canvas)?,
+            Callback::Js(js_callback) => {
                 let result = js_callback.call1(&JsValue::NULL, canvas.as_ref());
                 result.expect("Received error when trying call JavaScript `get_context_callback`")
                     .dyn_into()
                     .expect("Did not receive expected type `HtmlCanvasElement` from JavaScript function `get_context_callback`")
             }
         };
+
         Ok(gl)
     }
 
@@ -974,7 +975,7 @@ impl<
                 },
             )?;
             let uniform_context = UniformContext::new(gl.clone(), now, uniform_location.clone());
-            initialize_callback.call_with_arg_into_js_value(&uniform_context);
+            initialize_callback.call_with_into_js_arg(&uniform_context);
             uniform_locations.insert(program_id.to_owned(), uniform_location.clone());
 
             gl.use_program(None);

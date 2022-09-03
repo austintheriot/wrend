@@ -163,7 +163,7 @@ impl<
     >
 {
     fn from(callback: F) -> Self {
-        Self(Callback::new_rust(Rc::new(callback)
+        Self(Callback::new_rs(Rc::new(callback)
             as Rc<
                 dyn Fn(
                     &RendererData<
@@ -227,7 +227,7 @@ impl<
     >
 {
     fn from(callback: Rc<F>) -> Self {
-        Self(Callback::new_rust(
+        Self(Callback::new_rs(
             callback
                 as Rc<
                     dyn Fn(

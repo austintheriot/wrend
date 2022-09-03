@@ -1,19 +1,17 @@
-use crate::{CallbackWithContext, Either, WebGlContextError};
+use crate::{Callback, WebGlContextError};
 use js_sys::Function;
 use std::fmt::Debug;
 use std::{ops::Deref, rc::Rc};
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 
-pub type GetContextCallbackInner = Either<
-    CallbackWithContext<
-        dyn Fn(HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError>,
-    >,
-    CallbackWithContext<Function>,
+pub type GetContextCallbackInner = Callback<
+    dyn Fn(HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError>,
+    Function,
 >;
 
 /// Wrapper around CallbackWithContext to provide a default implementation
-#[derive(Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Hash, PartialEq, Eq, PartialOrd)]
 pub struct GetContextCallback(GetContextCallbackInner);
 
 impl GetContextCallback {
@@ -26,10 +24,10 @@ impl<F: Fn(HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextErro
     From<F> for GetContextCallback
 {
     fn from(callback: F) -> Self {
-        Self(Either::new_a(CallbackWithContext::from(Rc::new(callback)
+        Self(Callback::new_rs(Rc::new(callback)
             as Rc<
                 dyn Fn(HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError>,
-            >)))
+            >))
     }
 }
 
@@ -37,18 +35,18 @@ impl<F: Fn(HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextErro
     From<Rc<F>> for GetContextCallback
 {
     fn from(callback: Rc<F>) -> Self {
-        Self(Either::new_a(CallbackWithContext::from(
+        Self(Callback::new_rs(
             callback
                 as Rc<
                     dyn Fn(HtmlCanvasElement) -> Result<WebGl2RenderingContext, WebGlContextError>,
                 >,
-        )))
+        ))
     }
 }
 
 impl From<Function> for GetContextCallback {
     fn from(callback: Function) -> Self {
-        Self(Either::new_b(CallbackWithContext::from(callback)))
+        Self(Callback::new_js(callback))
     }
 }
 

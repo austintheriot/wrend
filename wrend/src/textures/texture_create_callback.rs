@@ -1,15 +1,13 @@
-use crate::{CallbackWithContext, Either, TextureCreateCallbackJs, TextureCreateContext};
+use crate::{Callback, TextureCreateCallbackJs, TextureCreateContext};
 
 use std::fmt::Debug;
 use std::{ops::Deref, rc::Rc};
 use web_sys::WebGlTexture;
 
-type TextureCreateCallbackInner = Either<
-    CallbackWithContext<dyn Fn(&TextureCreateContext) -> WebGlTexture>,
-    CallbackWithContext<TextureCreateCallbackJs>,
->;
+type TextureCreateCallbackInner =
+    Callback<dyn Fn(&TextureCreateContext) -> WebGlTexture, TextureCreateCallbackJs>;
 
-#[derive(Clone, Hash, Eq, PartialOrd, Ord)]
+#[derive(Clone, Hash, Eq, PartialOrd)]
 pub struct TextureCreateCallback(TextureCreateCallbackInner);
 
 impl PartialEq for TextureCreateCallback {
@@ -36,22 +34,22 @@ impl Debug for TextureCreateCallback {
 
 impl<F: Fn(&TextureCreateContext) -> WebGlTexture + 'static> From<F> for TextureCreateCallback {
     fn from(callback: F) -> Self {
-        Self(Either::new_a(CallbackWithContext::from(
+        Self(Callback::new_rs(
             Rc::new(callback) as Rc<dyn Fn(&TextureCreateContext) -> WebGlTexture>
-        )))
+        ))
     }
 }
 
 impl<F: Fn(&TextureCreateContext) -> WebGlTexture + 'static> From<Rc<F>> for TextureCreateCallback {
     fn from(callback: Rc<F>) -> Self {
-        Self(Either::new_a(CallbackWithContext::from(
+        Self(Callback::new_rs(
             callback as Rc<dyn Fn(&TextureCreateContext) -> WebGlTexture>,
-        )))
+        ))
     }
 }
 
 impl From<TextureCreateCallbackJs> for TextureCreateCallback {
     fn from(callback: TextureCreateCallbackJs) -> Self {
-        Self(Either::new_b(CallbackWithContext::from(callback)))
+        Self(Callback::new_js(callback))
     }
 }

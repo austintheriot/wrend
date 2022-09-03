@@ -1,20 +1,14 @@
-use crate::{CallbackWithContext, Either, UniformContext, UniformCreateUpdateCallbackJs};
+use crate::{Callback, UniformContext, UniformCreateUpdateCallbackJs};
 use std::fmt::Debug;
 use std::{ops::Deref, rc::Rc};
 
-#[derive(Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Hash, PartialEq, Eq, PartialOrd)]
 pub struct UniformCreateUpdateCallback(
-    Either<
-        CallbackWithContext<dyn Fn(&UniformContext)>,
-        CallbackWithContext<UniformCreateUpdateCallbackJs>,
-    >,
+    Callback<dyn Fn(&UniformContext), UniformCreateUpdateCallbackJs>,
 );
 
 impl Deref for UniformCreateUpdateCallback {
-    type Target = Either<
-        CallbackWithContext<dyn Fn(&UniformContext)>,
-        CallbackWithContext<UniformCreateUpdateCallbackJs>,
-    >;
+    type Target = Callback<dyn Fn(&UniformContext), UniformCreateUpdateCallbackJs>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
@@ -31,22 +25,20 @@ impl Debug for UniformCreateUpdateCallback {
 
 impl<F: Fn(&UniformContext) + 'static> From<F> for UniformCreateUpdateCallback {
     fn from(callback: F) -> Self {
-        Self(Either::new_a(CallbackWithContext::from(
+        Self(Callback::new_rs(
             Rc::new(callback) as Rc<dyn Fn(&UniformContext)>
-        )))
+        ))
     }
 }
 
 impl<F: Fn(&UniformContext) + 'static> From<Rc<F>> for UniformCreateUpdateCallback {
     fn from(callback: Rc<F>) -> Self {
-        Self(Either::new_a(CallbackWithContext::from(
-            callback as Rc<dyn Fn(&UniformContext)>,
-        )))
+        Self(Callback::new_rs(callback as Rc<dyn Fn(&UniformContext)>))
     }
 }
 
 impl From<UniformCreateUpdateCallbackJs> for UniformCreateUpdateCallback {
     fn from(callback: UniformCreateUpdateCallbackJs) -> Self {
-        Self(Either::new_b(CallbackWithContext::from(callback)))
+        Self(Callback::new_js(callback))
     }
 }

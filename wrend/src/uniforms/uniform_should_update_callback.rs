@@ -1,15 +1,11 @@
 use std::{fmt::Debug, ops::Deref, rc::Rc};
 
-use crate::{CallbackWithContext, Either, UniformContext, UniformShouldUpdateCallbackJs};
+use crate::{Callback, UniformContext, UniformShouldUpdateCallbackJs};
 
-pub type UniformShouldUpdateCallbackInner = Either<
-    CallbackWithContext<dyn Fn(&UniformContext) -> bool>,
-    CallbackWithContext<UniformShouldUpdateCallbackJs>,
->;
+pub type UniformShouldUpdateCallbackInner =
+    Callback<dyn Fn(&UniformContext) -> bool, UniformShouldUpdateCallbackJs>;
 
-/// Wrapper around CallbackWithContext -- allows for Default implementation to return `true` instead of false,
-/// since, by default, uniforms should be updated if no custom optimization callback is provided.
-#[derive(Clone, Hash, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Hash, PartialEq, Eq, PartialOrd)]
 pub struct UniformShouldUpdateCallback(UniformShouldUpdateCallbackInner);
 
 impl Deref for UniformShouldUpdateCallback {
@@ -30,22 +26,22 @@ impl Debug for UniformShouldUpdateCallback {
 
 impl<F: Fn(&UniformContext) -> bool + 'static> From<F> for UniformShouldUpdateCallback {
     fn from(callback: F) -> Self {
-        Self(Either::new_a(CallbackWithContext::from(
+        Self(Callback::new_rs(
             Rc::new(callback) as Rc<dyn Fn(&UniformContext) -> bool>
-        )))
+        ))
     }
 }
 
 impl<F: Fn(&UniformContext) -> bool + 'static> From<Rc<F>> for UniformShouldUpdateCallback {
     fn from(callback: Rc<F>) -> Self {
-        Self(Either::new_a(CallbackWithContext::from(
+        Self(Callback::new_rs(
             callback as Rc<dyn Fn(&UniformContext) -> bool>,
-        )))
+        ))
     }
 }
 
 impl From<UniformShouldUpdateCallbackJs> for UniformShouldUpdateCallback {
     fn from(callback: UniformShouldUpdateCallbackJs) -> Self {
-        Self(Either::new_b(CallbackWithContext::from(callback)))
+        Self(Callback::new_js(callback))
     }
 }

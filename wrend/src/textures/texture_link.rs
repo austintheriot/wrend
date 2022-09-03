@@ -28,7 +28,7 @@ impl<TextureId: Id> TextureLink<TextureId> {
     pub fn create_texture(&self, gl: WebGl2RenderingContext, now: f64) -> WebGlTexture {
         let texture_create_context = TextureCreateContext::new(gl, now);
         self.create_texture_callback
-            .call_with_arg_into_js_value_and_return(&texture_create_context)
+            .call_with_into_js_arg_and_return(&texture_create_context)
     }
 }
 

@@ -38,9 +38,8 @@ impl UniformLinkJs {
     pub fn initialize_callback(&self) -> Option<UniformCreateUpdateCallbackJs> {
         self.deref()
             .initialize_callback()
-            .b()
-            .map(Deref::deref)
-            .map(Clone::clone)
+            .js()
+            .map(|c| (*c).clone())
     }
 
     #[wasm_bindgen(js_name = setInitializeCallback)]
@@ -52,7 +51,7 @@ impl UniformLinkJs {
     pub fn should_update_callback(&self) -> Option<UniformShouldUpdateCallbackJs> {
         self.deref()
             .should_update_callback()
-            .and_then(|callback| callback.js_function())
+            .and_then(|callback| callback.js_inner_owned())
     }
 
     #[wasm_bindgen(js_name = setShouldUpdateCallback)]
@@ -69,7 +68,7 @@ impl UniformLinkJs {
     pub fn update_callback(&self) -> Option<UniformCreateUpdateCallbackJs> {
         self.deref()
             .update_callback()
-            .and_then(|callback| callback.js_function())
+            .and_then(|callback| callback.js_inner_owned())
     }
 
     #[wasm_bindgen(js_name = useInitCallbackForUpdate)]

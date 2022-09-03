@@ -251,7 +251,7 @@ pub fn app() -> Html {
                 let mut new_renderer = renderer_data_builder
                     .build_renderer()
                     .expect("RendererData should successfully build");
-                    
+
                 new_renderer.set_animation_callback(Some(
                     |renderer_data: &RendererData<_, _, _, _, _, _, _, _, _, _, _>| {
                         renderer_data.update_uniforms();

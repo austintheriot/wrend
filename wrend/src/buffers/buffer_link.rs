@@ -28,7 +28,7 @@ impl<BufferId: Id> BufferLink<BufferId> {
     pub fn create_buffer(&self, gl: WebGl2RenderingContext, now: f64) -> WebGlBuffer {
         let buffer_create_context = BufferCreateContext::new(gl, now);
         self.buffer_create_callback
-            .call_with_arg_into_js_value_and_return(&buffer_create_context)
+            .call_with_into_js_arg_and_return(&buffer_create_context)
     }
 }
 

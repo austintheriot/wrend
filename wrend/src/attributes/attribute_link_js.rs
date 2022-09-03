@@ -47,7 +47,7 @@ impl AttributeLinkJs {
 
     #[wasm_bindgen(js_name = createCallback)]
     pub fn create_callback(&self) -> Option<AttributeCreateCallbackJs> {
-        self.deref().create_callback().js_function()
+        self.deref().create_callback().js_inner_owned()
     }
 
     #[wasm_bindgen(js_name = createAttribute)]

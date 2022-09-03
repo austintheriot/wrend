@@ -1,12 +1,10 @@
-use crate::{AttributeCreateCallbackJs, AttributeCreateContext, CallbackWithContext, Either};
+use crate::{AttributeCreateCallbackJs, AttributeCreateContext, Callback};
 use std::{ops::Deref, rc::Rc};
 
-pub type AttributeCreateCallbackInner = Either<
-    CallbackWithContext<dyn Fn(&AttributeCreateContext)>,
-    CallbackWithContext<AttributeCreateCallbackJs>,
->;
+pub type AttributeCreateCallbackInner =
+    Callback<dyn Fn(&AttributeCreateContext), AttributeCreateCallbackJs>;
 
-#[derive(Clone, Hash, Eq, PartialOrd, Ord, Debug)]
+#[derive(Clone, Hash, Eq, PartialOrd, Debug)]
 pub struct AttributeCreateCallback(AttributeCreateCallbackInner);
 
 impl PartialEq for AttributeCreateCallback {
@@ -25,22 +23,22 @@ impl Deref for AttributeCreateCallback {
 
 impl<F: Fn(&AttributeCreateContext) + 'static> From<F> for AttributeCreateCallback {
     fn from(callback: F) -> Self {
-        Self(Either::new_a(CallbackWithContext::from(
+        Self(Callback::new_rs(
             Rc::new(callback) as Rc<dyn Fn(&AttributeCreateContext)>
-        )))
+        ))
     }
 }
 
 impl<F: Fn(&AttributeCreateContext) + 'static> From<Rc<F>> for AttributeCreateCallback {
     fn from(callback: Rc<F>) -> Self {
-        Self(Either::new_a(CallbackWithContext::from(
+        Self(Callback::new_rs(
             callback as Rc<dyn Fn(&AttributeCreateContext)>,
-        )))
+        ))
     }
 }
 
 impl From<AttributeCreateCallbackJs> for AttributeCreateCallback {
     fn from(callback: AttributeCreateCallbackJs) -> Self {
-        Self(Either::new_b(CallbackWithContext::from(callback)))
+        Self(Callback::new_js(callback))
     }
 }

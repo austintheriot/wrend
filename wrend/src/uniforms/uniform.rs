@@ -1,4 +1,4 @@
-use crate::Either;
+use crate::Callback;
 use crate::Id;
 use crate::UniformContext;
 use crate::UniformCreateUpdateCallback;
@@ -91,8 +91,8 @@ impl<ProgramId: Id, UniformId: Id> Uniform<ProgramId, UniformId> {
 
             let should_call = if let Some(should_update_callback) = should_update_callback {
                 match &*should_update_callback {
-                    Either::A(rust_callback) => (rust_callback)(&ctx),
-                    Either::B(js_callback) => {
+                    Callback::Rust(rust_callback) => (rust_callback)(&ctx),
+                    Callback::Js(js_callback) => {
                         JsValue::as_bool(&js_callback.call0(&JsValue::NULL).expect(
                             "Should be able to call `should_update_callback` JavaScript callback",
                         ))
@@ -107,10 +107,9 @@ impl<ProgramId: Id, UniformId: Id> Uniform<ProgramId, UniformId> {
 
             if should_call {
                 if self.use_init_callback_for_update {
-                    self.uniform_create_callback
-                        .call_with_arg_into_js_value(&ctx);
+                    self.uniform_create_callback.call_with_into_js_arg(&ctx);
                 } else if let Some(update_callback) = &self.update_callback {
-                    update_callback.call_with_arg_into_js_value(&ctx)
+                    update_callback.call_with_into_js_arg(&ctx)
                 }
             }
 

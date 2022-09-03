@@ -59,7 +59,7 @@ impl<VertexArrayObjectId: Id, BufferId: Id, AttributeId: Id + IdName>
         let attribute_create_context =
             AttributeCreateContext::new(gl, now, webgl_buffer, attribute_location);
         self.attribute_create_callback
-            .call_with_arg_into_js_value(&attribute_create_context);
+            .call_with_rust_arg(&attribute_create_context);
     }
 }
 
