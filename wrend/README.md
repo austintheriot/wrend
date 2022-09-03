@@ -16,8 +16,6 @@ The following use cases should guide the development of this library:
 
 ## Todo
 
-- Make a clean wrapper around `Either` that functions as a callback abstraction (instead of implementing function utilities on `Either` itself)
-
 - Renderer technically calls stop animation and stop recording when its dropped, even its data lives on--delegate this to the drop implementations of its inner data?
 
 - Add custom TypeScript types:
