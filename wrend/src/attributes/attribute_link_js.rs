@@ -1,10 +1,10 @@
 use std::ops::{Deref, DerefMut};
 
 use js_sys::Array;
-use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::{prelude::wasm_bindgen, JsCast};
 use web_sys::{WebGl2RenderingContext, WebGlBuffer};
 
-use crate::{utils, AttributeCreateCallbackJs, AttributeLink, AttributeLocation};
+use crate::{utils, AttributeCreateCallbackJs, AttributeLink, AttributeLocation, VaoIdArray};
 
 pub type AttributeLinkJsInner = AttributeLink<String, String, String>;
 
@@ -30,9 +30,11 @@ impl AttributeLinkJs {
     }
 
     #[wasm_bindgen(js_name = VAOIds)]
-    pub fn vao_ids(&self) -> Array {
+    pub fn vao_ids(&self) -> VaoIdArray {
         let ids = self.deref().vao_ids();
         utils::strings_to_js_array(ids)
+            .dyn_into()
+            .expect("Should be able to convert `Array` into `VaoIdArray`")
     }
 
     #[wasm_bindgen(js_name = bufferId)]
