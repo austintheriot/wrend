@@ -223,8 +223,7 @@ impl RendererJs {
         self.deref()
             .borrow()
             .render_callback()
-            .js_callback()
-            .map(Clone::clone)
+            .js()
             .map(|callback| callback.deref().clone())
     }
 }

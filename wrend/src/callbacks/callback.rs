@@ -15,27 +15,45 @@ pub enum Callback<R: ?Sized, J: AsRef<Function>> {
 }
 
 impl<R: ?Sized, J: AsRef<Function>> Callback<R, J> {
-    pub fn new_rust_callback(callback: impl Into<CallbackWithContext<R>>) -> Self {
+    pub fn new_rust(callback: impl Into<CallbackWithContext<R>>) -> Self {
         Self::Rust(callback.into())
     }
 
-    pub fn new_js_callback(callback: impl Into<CallbackWithContext<J>>) -> Self {
+    pub fn new_js(callback: impl Into<CallbackWithContext<J>>) -> Self {
         Self::Js(callback.into())
     }
 
-    pub fn js_callback(&self) -> Option<&CallbackWithContext<J>> {
+    pub fn js(&self) -> Option<CallbackWithContext<J>> {
         if let Callback::Js(js_callback) = &self {
-            Some(js_callback)
+            Some(js_callback.to_owned())
         } else {
             None
         }
     }
 
-    pub fn rust_callback(&self) -> Option<&CallbackWithContext<R>> {
+    pub fn rust(&self) -> Option<CallbackWithContext<R>> {
         if let Callback::Rust(rust_callback) = &self {
-            Some(rust_callback)
+            Some(rust_callback.to_owned())
         } else {
             None
+        }
+    }
+
+    pub fn js_unwrap(&self) -> CallbackWithContext<J> {
+        match &self {
+            Callback::Rust(rs_callback) => {
+                panic!("Called `Callback::js_unwrap()` on a `Callback::Rust(_)` value {rs_callback:#?}")
+            }
+            Callback::Js(js_callback) => js_callback.to_owned(),
+        }
+    }
+
+    pub fn rust_unwrap(&self) -> CallbackWithContext<R> {
+        match &self {
+            Callback::Rust(rs_callback) => rs_callback.to_owned(),
+            Callback::Js(js_callback) => {
+                panic!("Called `Callback::rust_unwrap()` on a `Callback::Js(_)` value {js_callback:#?}")
+            }
         }
     }
 }

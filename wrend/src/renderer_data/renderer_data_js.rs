@@ -238,7 +238,7 @@ impl RendererDataJs {
     // back into a `RendererDataJs` from within the `RendererData` struct.
     pub fn render(&self) {
         let render_callback = self.deref().borrow().render_callback();
-        if let Some(js_callback) = render_callback.js_callback().as_ref() {
+        if let Some(js_callback) = render_callback.js().as_ref() {
             // Internals of `RendererDataJs` are stored behind an `Rc`, so this is a cheap operation
             let js_value: JsValue = self.clone().into();
             if let Err(err) = js_callback.call1(&JsValue::NULL, &js_value) {

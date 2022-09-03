@@ -3,8 +3,8 @@ use std::{any::Any, cell::RefCell, rc::Rc};
 use wasm_bindgen::JsValue;
 
 use crate::{
-    AnimationCallback, Id, IdDefault, IdName, RendererData, RendererDataJs,
-    RendererDataJsInner, Callback,
+    AnimationCallback, Callback, Id, IdDefault, IdName, RendererData, RendererDataJs,
+    RendererDataJsInner,
 };
 use log::error;
 
@@ -119,7 +119,7 @@ impl<
                             error!("Error occurred while calling JavaScript animation callback: {err:?}");
                         }
                         true
-                    },
+                    }
                 }
             } else {
                 false

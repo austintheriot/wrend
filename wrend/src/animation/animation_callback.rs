@@ -1,8 +1,6 @@
 use std::{ops::Deref, rc::Rc};
 
-use crate::{
-    AnimationCallbackJs, Callback, Id, IdDefault, IdName, RendererData,
-};
+use crate::{AnimationCallbackJs, Callback, Id, IdDefault, IdName, RendererData};
 
 #[derive(Clone, Hash, Eq, PartialOrd, Debug)]
 pub struct AnimationCallback<
@@ -164,7 +162,7 @@ impl<
     >
 {
     fn from(callback: F) -> Self {
-        Self(Callback::new_rust_callback(Rc::new(callback)
+        Self(Callback::new_rust(Rc::new(callback)
             as Rc<
                 dyn Fn(
                     &RendererData<
@@ -228,7 +226,7 @@ impl<
     >
 {
     fn from(callback: Rc<F>) -> Self {
-        Self(Callback::new_rust_callback(
+        Self(Callback::new_rust(
             callback
                 as Rc<
                     dyn Fn(
@@ -279,6 +277,6 @@ impl<
     >
 {
     fn from(callback: AnimationCallbackJs) -> Self {
-        Self(Callback::new_js_callback(callback))
+        Self(Callback::new_js(callback))
     }
 }
