@@ -67,6 +67,14 @@ rendererBuilder.addUniformLink(uNowLink)
 rendererBuilder.addVAOLink(VAO_ID)
 const renderer = rendererBuilder.buildRenderer();
 
+console.log(renderer.rendererData().vertexShaders());
+console.log(renderer.rendererData().buffers());
+console.log(renderer.rendererData().attributes());
+console.log(renderer.rendererData().textures());
+console.log(renderer.rendererData().fragmentShaders());
+console.log(renderer.rendererData().programs());
+console.log(renderer.rendererData().uniforms());
+
 // test lone render
 renderer.render();
 

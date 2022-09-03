@@ -1,7 +1,7 @@
-use crate::{utils, StringArray, Uniform};
-use js_sys::Map;
+use crate::{utils, StringArray, Uniform, UniformLocationsMap};
+
 use std::ops::{Deref, DerefMut};
-use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::{prelude::wasm_bindgen, JsCast};
 
 pub type UniformJsInner = Uniform<String, String>;
 
@@ -21,8 +21,10 @@ impl UniformJs {
     }
 
     #[wasm_bindgen(js_name = uniformLocations)]
-    pub fn uniform_locations(&self) -> Map {
+    pub fn uniform_locations(&self) -> UniformLocationsMap {
         utils::hash_map_to_js_map(self.deref().uniform_locations())
+            .dyn_into()
+            .expect("Should be able to convert Map into UniformLocationsMap")
     }
 }
 

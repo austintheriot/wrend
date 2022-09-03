@@ -1,7 +1,7 @@
 use crate::{
-    utils, AttributeJs, BufferJs, FramebufferJs, RenderCallback, RendererData,
-    RendererDataBuilderJs, RendererJs, RendererJsInner, StringArray, TextureJs, TextureJsArray,
-    UniformJs,
+    utils, AttributeJs, AttributeMap, BufferJs, BufferMap, FramebufferJs, RenderCallback,
+    RendererData, RendererDataBuilderJs, RendererJs, RendererJsInner, StringArray, TextureJs,
+    TextureJsArray, TextureMap, UniformJs, UniformMap, WebGlProgramMap, WebGlShaderMap,
 };
 use js_sys::{Array, Map, Object};
 use log::error;
@@ -62,14 +62,15 @@ impl RendererDataJs {
     }
 
     #[wasm_bindgen(js_name = fragmentShaders)]
-    pub fn fragment_shaders(&self) -> Map {
+    pub fn fragment_shaders(&self) -> WebGlShaderMap {
         let map = Map::new();
 
         for (key, value) in self.deref().borrow().fragment_shaders().iter() {
             map.set(&JsValue::from_str(key), value.as_ref());
         }
 
-        map
+        map.dyn_into()
+            .expect("Should be able to convert Map into WebGlShaderMap")
     }
 
     #[wasm_bindgen(js_name = vertexShader)]
@@ -81,35 +82,37 @@ impl RendererDataJs {
     }
 
     #[wasm_bindgen(js_name = vertexShaders)]
-    pub fn vertex_shaders(&self) -> Map {
+    pub fn vertex_shaders(&self) -> WebGlShaderMap {
         let map = Map::new();
 
         for (key, value) in self.deref().borrow().vertex_shaders().iter() {
             map.set(&JsValue::from_str(key), value.as_ref());
         }
 
-        map
+        map.dyn_into()
+            .expect("Should be able to convert Map into WebGlShaderMap")
     }
 
     pub fn program(&self, program_id: String) -> Option<WebGlProgram> {
         self.deref().borrow().program(&program_id).map(Clone::clone)
     }
 
-    pub fn programs(&self) -> Map {
+    pub fn programs(&self) -> WebGlProgramMap {
         let map = Map::new();
 
         for (key, value) in self.deref().borrow().programs().iter() {
             map.set(&JsValue::from_str(key), value.as_ref());
         }
 
-        map
+        map.dyn_into()
+            .expect("Should be able to convert Map into WebGlProgramMap")
     }
 
     pub fn uniform(&self, uniform_id: String) -> Option<UniformJs> {
         self.deref().borrow().uniform(&uniform_id).map(Into::into)
     }
 
-    pub fn uniforms(&self) -> Map {
+    pub fn uniforms(&self) -> UniformMap {
         let map = Map::new();
 
         for (key, uniform) in self.deref().borrow().uniforms().iter() {
@@ -117,14 +120,15 @@ impl RendererDataJs {
             map.set(&JsValue::from_str(key), &js_uniform.into());
         }
 
-        map
+        map.dyn_into()
+            .expect("Should be able to convert Map into UniformMap")
     }
 
     pub fn buffer(&self, buffer_id: String) -> Option<BufferJs> {
         self.deref().borrow().buffer(&buffer_id).map(Into::into)
     }
 
-    pub fn buffers(&self) -> Map {
+    pub fn buffers(&self) -> BufferMap {
         let map = Map::new();
 
         for (key, buffer) in self.deref().borrow().buffers().iter() {
@@ -132,7 +136,8 @@ impl RendererDataJs {
             map.set(&JsValue::from_str(key), &js_buffer.into());
         }
 
-        map
+        map.dyn_into()
+            .expect("Should be able to convert Map into BufferMap")
     }
 
     pub fn attribute(&self, attribute_id: String) -> Option<AttributeJs> {
@@ -142,7 +147,7 @@ impl RendererDataJs {
             .map(Into::into)
     }
 
-    pub fn attributes(&self) -> Map {
+    pub fn attributes(&self) -> AttributeMap {
         let map = Map::new();
 
         for (key, value) in self.deref().borrow().attributes().iter() {
@@ -150,14 +155,15 @@ impl RendererDataJs {
             map.set(&JsValue::from_str(key), &attribute.into());
         }
 
-        map
+        map.dyn_into()
+            .expect("Should be able to convert Map into AttributeMap")
     }
 
     pub fn texture(&self, texture_id: String) -> Option<TextureJs> {
         self.deref().borrow().texture(&texture_id).map(Into::into)
     }
 
-    pub fn textures(&self) -> Map {
+    pub fn textures(&self) -> TextureMap {
         let map = Map::new();
 
         for (key, texture) in self.deref().borrow().textures().iter() {
@@ -165,7 +171,8 @@ impl RendererDataJs {
             map.set(&JsValue::from_str(key), &js_texture.into());
         }
 
-        map
+        map.dyn_into()
+            .expect("Should be able to convert Map into TextureMap")
     }
 
     #[wasm_bindgen(js_name = textureById)]
