@@ -19,7 +19,7 @@ use web_sys::{
 /// The `Renderer` struct takes ownership of the `RendererData`, enabling it to
 /// perform more complex operations than would otherwise be possible, such as
 /// animating renders over time or recording canvas output.
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Renderer<
     VertexShaderId: Id,
     FragmentShaderId: Id,

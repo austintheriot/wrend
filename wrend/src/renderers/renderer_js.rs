@@ -234,12 +234,6 @@ impl From<RendererJsInner> for RendererJs {
     }
 }
 
-impl From<&RendererJsInner> for RendererJs {
-    fn from(js_renderer_handle_inner: &RendererJsInner) -> Self {
-        Self(js_renderer_handle_inner.to_owned())
-    }
-}
-
 impl Deref for RendererJs {
     type Target = RendererJsInner;
 

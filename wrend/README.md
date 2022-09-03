@@ -16,8 +16,6 @@ The following use cases should guide the development of this library:
 
 ## Todo
 
-- Renderer technically calls stop animation and stop recording when its dropped, even its data lives on--delegate this to the drop implementations of its inner data?
-
 - Add custom TypeScript types:
   - Arrays
   - Maps
