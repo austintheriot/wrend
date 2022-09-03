@@ -17,8 +17,7 @@ The following use cases should guide the development of this library:
 ## Todo
 
 - Add custom TypeScript types:
-  - Arrays
-  - Maps
+  - Add getters and setters for structs
 
 - Make it more explicit when structs get cloned to convert them into a `JsValue`
 
