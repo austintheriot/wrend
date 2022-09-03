@@ -1,5 +1,5 @@
-use crate::{utils, Uniform};
-use js_sys::{Array, Map};
+use crate::{utils, StringArray, Uniform};
+use js_sys::Map;
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;
 
@@ -11,7 +11,7 @@ pub struct UniformJs(UniformJsInner);
 #[wasm_bindgen(js_class = Uniform)]
 impl UniformJs {
     #[wasm_bindgen(js_name = programIds)]
-    pub fn program_ids(&self) -> Array {
+    pub fn program_ids(&self) -> StringArray {
         utils::strings_to_js_array(self.deref().program_ids())
     }
 

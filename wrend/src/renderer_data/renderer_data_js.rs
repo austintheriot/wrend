@@ -1,6 +1,7 @@
 use crate::{
     utils, AttributeJs, BufferJs, FramebufferJs, RenderCallback, RendererData,
-    RendererDataBuilderJs, RendererJs, RendererJsInner, TextureJs, UniformJs,
+    RendererDataBuilderJs, RendererJs, RendererJsInner, StringArray, TextureJs, TextureJsArray,
+    UniformJs,
 };
 use js_sys::{Array, Map, Object};
 use log::error;
@@ -9,7 +10,7 @@ use std::{
     ops::{Deref, DerefMut},
     rc::Rc,
 };
-use wasm_bindgen::{prelude::wasm_bindgen, JsValue};
+use wasm_bindgen::{prelude::wasm_bindgen, JsCast, JsValue};
 use web_sys::{
     HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram, WebGlShader, WebGlTransformFeedback,
     WebGlVertexArrayObject,
@@ -168,8 +169,8 @@ impl RendererDataJs {
     }
 
     #[wasm_bindgen(js_name = textureById)]
-    pub fn textures_by_id(&self, texture_ids: Array) -> Array {
-        let string_vec: Vec<String> = utils::js_array_to_vec_strings(texture_ids);
+    pub fn textures_by_id(&self, texture_ids: StringArray) -> TextureJsArray {
+        let string_vec: Vec<String> = utils::js_array_to_vec_strings(&texture_ids);
 
         let textures: Vec<JsValue> = self
             .deref()
@@ -183,6 +184,8 @@ impl RendererDataJs {
             .collect();
 
         Array::from_iter(textures)
+            .dyn_into()
+            .expect("Should be able to convert Array of Textures into TextureJsArray")
     }
 
     pub fn framebuffer(&self, framebuffer_id: String) -> Option<FramebufferJs> {

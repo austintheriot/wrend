@@ -4,7 +4,9 @@ use std::collections::HashMap;
 use js_sys::{Array, Map};
 use wasm_bindgen::{JsCast, JsValue};
 
-pub fn js_array_to_vec<T: From<JsValue>>(array: Array) -> Vec<T> {
+use crate::StringArray;
+
+pub fn js_array_to_vec<A: AsRef<Array>, T: From<JsValue>>(array: &A) -> Vec<T> {
     js_sys::try_iter(array.as_ref())
         .expect("`js_array_to_vec` should be passed an Array that is iterable from JavaScript")
         .unwrap()
@@ -13,7 +15,7 @@ pub fn js_array_to_vec<T: From<JsValue>>(array: Array) -> Vec<T> {
         .collect()
 }
 
-pub fn strings_to_js_array<T: AsRef<str>>(strings: &[T]) -> Array {
+pub fn strings_to_js_array<T: AsRef<str>>(strings: &[T]) -> StringArray {
     let vec_strings: Vec<JsValue> = strings
         .iter()
         .map(|s| {
@@ -21,10 +23,13 @@ pub fn strings_to_js_array<T: AsRef<str>>(strings: &[T]) -> Array {
             JsValue::from_str(s)
         })
         .collect();
+
     Array::from_iter(vec_strings)
+        .dyn_into()
+        .expect("Should be able to convert Array of strings into a StringArray")
 }
 
-pub fn js_array_to_vec_strings(array: Array) -> Vec<String> {
+pub fn js_array_to_vec_strings<A: AsRef<Array>>(array: &A) -> Vec<String> {
     js_sys::try_iter(array.as_ref())
         .expect("`js_array_to_vec_strings` should be passed an array of strings")
         .expect("`js_array_to_vec_strings` should be passed an array of strings")

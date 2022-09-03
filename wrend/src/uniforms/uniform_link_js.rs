@@ -1,5 +1,7 @@
-use crate::{utils, UniformCreateUpdateCallbackJs, UniformLink, UniformShouldUpdateCallbackJs};
-use js_sys::Array;
+use crate::{
+    utils, StringArray, UniformCreateUpdateCallbackJs, UniformLink, UniformShouldUpdateCallbackJs,
+};
+
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;
 
@@ -12,11 +14,11 @@ pub struct UniformLinkJs(UniformLinkJsInner);
 impl UniformLinkJs {
     #[wasm_bindgen(constructor)]
     pub fn new(
-        program_ids: Array,
+        program_ids: StringArray,
         uniform_id: String,
         initialize_callback: UniformCreateUpdateCallbackJs,
     ) -> Self {
-        let program_ids = utils::js_array_to_vec_strings(program_ids);
+        let program_ids = utils::js_array_to_vec_strings(&program_ids);
         Self(UniformLinkJsInner::new(
             program_ids,
             uniform_id,
@@ -25,7 +27,7 @@ impl UniformLinkJs {
     }
 
     #[wasm_bindgen(js_name = programIds)]
-    pub fn program_ids(&self) -> Array {
+    pub fn program_ids(&self) -> StringArray {
         utils::strings_to_js_array(self.deref().program_ids())
     }
 

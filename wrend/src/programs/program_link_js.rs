@@ -1,7 +1,7 @@
 use std::ops::{Deref, DerefMut};
 
-use crate::{utils, ProgramLink, ProgramLinkJsBuilder};
-use js_sys::Array;
+use crate::{utils, ProgramLink, ProgramLinkJsBuilder, StringArray};
+
 use wasm_bindgen::prelude::wasm_bindgen;
 
 pub type ProgramLinkJsInner = ProgramLink<String, String, String>;
@@ -36,7 +36,7 @@ impl ProgramLinkJs {
     }
 
     #[wasm_bindgen(js_name = transformFeedbackVaryings)]
-    pub fn transform_feedback_varyings(&self) -> Array {
+    pub fn transform_feedback_varyings(&self) -> StringArray {
         utils::strings_to_js_array(self.deref().transform_feedback_varyings())
     }
 

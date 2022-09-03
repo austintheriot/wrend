@@ -13,6 +13,7 @@ mod renderers;
 mod shaders;
 mod textures;
 mod transform_feedback;
+mod types;
 mod uniforms;
 mod utils;
 
@@ -31,6 +32,7 @@ pub use renderers::*;
 pub use shaders::*;
 pub use textures::*;
 pub use transform_feedback::*;
+pub use types::*;
 pub use uniforms::*;
 pub use utils::*;
 
