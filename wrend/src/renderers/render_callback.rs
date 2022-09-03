@@ -1,9 +1,9 @@
-use crate::RendererData;
-use crate::{CallbackWithContext, Either, Id, IdDefault, IdName, RenderCallbackJs};
+use crate::{Callback, RendererData};
+use crate::{Id, IdDefault, IdName, RenderCallbackJs};
 use std::ops::Deref;
 use std::rc::Rc;
 
-#[derive(Clone, Hash, Eq, PartialOrd, Ord, Debug)]
+#[derive(Clone, Hash, Eq, PartialOrd, Debug)]
 pub struct RenderCallback<
     VertexShaderId: Id = IdDefault,
     FragmentShaderId: Id = IdDefault,
@@ -17,29 +17,23 @@ pub struct RenderCallback<
     VertexArrayObjectId: Id = IdDefault,
     UserCtx: Clone + 'static = (),
 >(
-    Either<
-        CallbackWithContext<
-            dyn Fn(
-                &RendererData<
-                    VertexShaderId,
-                    FragmentShaderId,
-                    ProgramId,
-                    UniformId,
-                    BufferId,
-                    AttributeId,
-                    TextureId,
-                    FramebufferId,
-                    TransformFeedbackId,
-                    VertexArrayObjectId,
-                    UserCtx,
-                >,
-            ),
-        >,
-        // It's not crucial that the JavaScript function have access to the RendererData as
-        // as an argument to the function itself (like the Rust callback),
-        // since in JavaScript, it's very easy for the renderer_data function to hold the RendererData
-        // in the `render` callback closure
-        CallbackWithContext<RenderCallbackJs>,
+    Callback<
+        dyn Fn(
+            &RendererData<
+                VertexShaderId,
+                FragmentShaderId,
+                ProgramId,
+                UniformId,
+                BufferId,
+                AttributeId,
+                TextureId,
+                FramebufferId,
+                TransformFeedbackId,
+                VertexArrayObjectId,
+                UserCtx,
+            >,
+        ),
+        RenderCallbackJs,
     >,
 );
 
@@ -102,25 +96,23 @@ impl<
         UserCtx,
     >
 {
-    type Target = Either<
-        CallbackWithContext<
-            dyn Fn(
-                &RendererData<
-                    VertexShaderId,
-                    FragmentShaderId,
-                    ProgramId,
-                    UniformId,
-                    BufferId,
-                    AttributeId,
-                    TextureId,
-                    FramebufferId,
-                    TransformFeedbackId,
-                    VertexArrayObjectId,
-                    UserCtx,
-                >,
-            ),
-        >,
-        CallbackWithContext<RenderCallbackJs>,
+    type Target = Callback<
+        dyn Fn(
+            &RendererData<
+                VertexShaderId,
+                FragmentShaderId,
+                ProgramId,
+                UniformId,
+                BufferId,
+                AttributeId,
+                TextureId,
+                FramebufferId,
+                TransformFeedbackId,
+                VertexArrayObjectId,
+                UserCtx,
+            >,
+        ),
+        RenderCallbackJs,
     >;
 
     fn deref(&self) -> &Self::Target {
@@ -171,7 +163,7 @@ impl<
     >
 {
     fn from(callback: F) -> Self {
-        Self(Either::new_a(CallbackWithContext::from(Rc::new(callback)
+        Self(Callback::new_rust_callback(Rc::new(callback)
             as Rc<
                 dyn Fn(
                     &RendererData<
@@ -188,39 +180,7 @@ impl<
                         UserCtx,
                     >,
                 ),
-            >)))
-    }
-}
-
-impl<
-        VertexShaderId: Id,
-        FragmentShaderId: Id,
-        ProgramId: Id,
-        UniformId: Id + IdName,
-        BufferId: Id,
-        AttributeId: Id + IdName,
-        TextureId: Id,
-        FramebufferId: Id,
-        TransformFeedbackId: Id,
-        VertexArrayObjectId: Id,
-        UserCtx: Clone,
-    > From<RenderCallbackJs>
-    for RenderCallback<
-        VertexShaderId,
-        FragmentShaderId,
-        ProgramId,
-        UniformId,
-        BufferId,
-        AttributeId,
-        TextureId,
-        FramebufferId,
-        TransformFeedbackId,
-        VertexArrayObjectId,
-        UserCtx,
-    >
-{
-    fn from(callback: RenderCallbackJs) -> Self {
-        Self(Either::new_b(CallbackWithContext::from(callback)))
+            >))
     }
 }
 
@@ -267,7 +227,7 @@ impl<
     >
 {
     fn from(callback: Rc<F>) -> Self {
-        Self(Either::new_a(CallbackWithContext::from(
+        Self(Callback::new_rust_callback(
             callback
                 as Rc<
                     dyn Fn(
@@ -286,6 +246,38 @@ impl<
                         >,
                     ),
                 >,
-        )))
+        ))
+    }
+}
+
+impl<
+        VertexShaderId: Id,
+        FragmentShaderId: Id,
+        ProgramId: Id,
+        UniformId: Id + IdName,
+        BufferId: Id,
+        AttributeId: Id + IdName,
+        TextureId: Id,
+        FramebufferId: Id,
+        TransformFeedbackId: Id,
+        VertexArrayObjectId: Id,
+        UserCtx: Clone,
+    > From<RenderCallbackJs>
+    for RenderCallback<
+        VertexShaderId,
+        FragmentShaderId,
+        ProgramId,
+        UniformId,
+        BufferId,
+        AttributeId,
+        TextureId,
+        FramebufferId,
+        TransformFeedbackId,
+        VertexArrayObjectId,
+        UserCtx,
+    >
+{
+    fn from(callback: RenderCallbackJs) -> Self {
+        Self(Callback::new_js_callback(callback))
     }
 }

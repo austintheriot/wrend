@@ -3,8 +3,8 @@ use std::{any::Any, cell::RefCell, rc::Rc};
 use wasm_bindgen::JsValue;
 
 use crate::{
-    AnimationCallback, Either, Id, IdDefault, IdName, RendererData, RendererDataJs,
-    RendererDataJsInner,
+    AnimationCallback, Id, IdDefault, IdName, RendererData, RendererDataJs,
+    RendererDataJsInner, Callback,
 };
 use log::error;
 
@@ -108,10 +108,10 @@ impl<
             let rendered = if let Some(renderer_data) =
                 (&renderer_data as &dyn Any).downcast_ref::<Rc<RefCell<RendererDataJsInner>>>()
             {
-                let renderer_data = Rc::clone(&renderer_data);
+                let renderer_data = Rc::clone(renderer_data);
                 match &**animation_callback {
-                    Either::A(_) => false,
-                    Either::B(js_callback) => {
+                    Callback::Rust(_) => false,
+                    Callback::Js(js_callback) => {
                         let renderer_data_js: RendererDataJs = renderer_data.into();
                         let js_value: JsValue = renderer_data_js.into();
                         let result = js_callback.call1(&JsValue::NULL, &js_value);
@@ -119,7 +119,7 @@ impl<
                             error!("Error occurred while calling JavaScript animation callback: {err:?}");
                         }
                         true
-                    }
+                    },
                 }
             } else {
                 false
@@ -129,7 +129,7 @@ impl<
             // this does not pass the `RendererData` to the JavaScript callback if one was supplied,
             // since the types are not compatible with the JavaScript/Wasm API
             if !rendered {
-                animation_callback.call(&renderer_data.borrow());
+                animation_callback.call_with_rust_arg(&renderer_data.borrow());
             }
         }
     }

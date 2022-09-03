@@ -1,10 +1,10 @@
 use std::{ops::Deref, rc::Rc};
 
 use crate::{
-    AnimationCallbackJs, CallbackWithContext, Either, Id, IdDefault, IdName, RendererData,
+    AnimationCallbackJs, Callback, Id, IdDefault, IdName, RendererData,
 };
 
-#[derive(Clone, Hash, Eq, PartialOrd, Ord, Debug)]
+#[derive(Clone, Hash, Eq, PartialOrd, Debug)]
 pub struct AnimationCallback<
     VertexShaderId: Id = IdDefault,
     FragmentShaderId: Id = IdDefault,
@@ -18,25 +18,23 @@ pub struct AnimationCallback<
     VertexArrayObjectId: Id = IdDefault,
     UserCtx: Clone + 'static = (),
 >(
-    Either<
-        CallbackWithContext<
-            dyn Fn(
-                &RendererData<
-                    VertexShaderId,
-                    FragmentShaderId,
-                    ProgramId,
-                    UniformId,
-                    BufferId,
-                    AttributeId,
-                    TextureId,
-                    FramebufferId,
-                    TransformFeedbackId,
-                    VertexArrayObjectId,
-                    UserCtx,
-                >,
-            ),
-        >,
-        CallbackWithContext<AnimationCallbackJs>,
+    Callback<
+        dyn Fn(
+            &RendererData<
+                VertexShaderId,
+                FragmentShaderId,
+                ProgramId,
+                UniformId,
+                BufferId,
+                AttributeId,
+                TextureId,
+                FramebufferId,
+                TransformFeedbackId,
+                VertexArrayObjectId,
+                UserCtx,
+            >,
+        ),
+        AnimationCallbackJs,
     >,
 );
 
@@ -99,25 +97,23 @@ impl<
         UserCtx,
     >
 {
-    type Target = Either<
-        CallbackWithContext<
-            dyn Fn(
-                &RendererData<
-                    VertexShaderId,
-                    FragmentShaderId,
-                    ProgramId,
-                    UniformId,
-                    BufferId,
-                    AttributeId,
-                    TextureId,
-                    FramebufferId,
-                    TransformFeedbackId,
-                    VertexArrayObjectId,
-                    UserCtx,
-                >,
-            ),
-        >,
-        CallbackWithContext<AnimationCallbackJs>,
+    type Target = Callback<
+        dyn Fn(
+            &RendererData<
+                VertexShaderId,
+                FragmentShaderId,
+                ProgramId,
+                UniformId,
+                BufferId,
+                AttributeId,
+                TextureId,
+                FramebufferId,
+                TransformFeedbackId,
+                VertexArrayObjectId,
+                UserCtx,
+            >,
+        ),
+        AnimationCallbackJs,
     >;
 
     fn deref(&self) -> &Self::Target {
@@ -168,7 +164,7 @@ impl<
     >
 {
     fn from(callback: F) -> Self {
-        Self(Either::new_a(CallbackWithContext::from(Rc::new(callback)
+        Self(Callback::new_rust_callback(Rc::new(callback)
             as Rc<
                 dyn Fn(
                     &RendererData<
@@ -185,7 +181,7 @@ impl<
                         UserCtx,
                     >,
                 ),
-            >)))
+            >))
     }
 }
 
@@ -232,7 +228,7 @@ impl<
     >
 {
     fn from(callback: Rc<F>) -> Self {
-        Self(Either::new_a(CallbackWithContext::from(
+        Self(Callback::new_rust_callback(
             callback
                 as Rc<
                     dyn Fn(
@@ -251,7 +247,7 @@ impl<
                         >,
                     ),
                 >,
-        )))
+        ))
     }
 }
 
@@ -283,6 +279,6 @@ impl<
     >
 {
     fn from(callback: AnimationCallbackJs) -> Self {
-        Self(Either::new_b(callback.into()))
+        Self(Callback::new_js_callback(callback))
     }
 }

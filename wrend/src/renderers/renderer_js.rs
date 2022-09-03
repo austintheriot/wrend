@@ -1,6 +1,6 @@
 use crate::{
-    AnimationCallbackJs, AttributeJs, BufferJs, FramebufferJs, RenderCallbackJs, Renderer,
-    RendererDataBuilderJs, RendererDataJs, TextureJs, UniformJs,
+    AnimationCallbackJs, AttributeJs, BufferJs, Callback, FramebufferJs, RenderCallbackJs,
+    Renderer, RendererDataBuilderJs, RendererDataJs, TextureJs, UniformJs,
 };
 use js_sys::Object;
 use log::error;
@@ -198,11 +198,11 @@ impl RendererJs {
         let renderer_data_js = self.renderer_data();
         let render_callback = renderer_data_js.render_callback();
         match &*render_callback {
-            crate::Either::A(rust_callback) => {
+            Callback::Rust(rust_callback) => {
                 let renderer_data = renderer_data_js.into_inner();
                 (rust_callback)(&renderer_data.borrow());
             }
-            crate::Either::B(js_callback) => {
+            Callback::Js(js_callback) => {
                 let js_callback = js_callback.deref();
                 let js_value: JsValue = renderer_data_js.into();
                 let result = js_callback.call1(&JsValue::NULL, &js_value);
@@ -223,7 +223,7 @@ impl RendererJs {
         self.deref()
             .borrow()
             .render_callback()
-            .b()
+            .js_callback()
             .map(Clone::clone)
             .map(|callback| callback.deref().clone())
     }

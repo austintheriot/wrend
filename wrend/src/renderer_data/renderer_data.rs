@@ -270,7 +270,7 @@ impl<
     /// (exported to JavaScript as `Renderer`) OR the `RendererDataJs` struct (exported to JavaScript as `RendererData`),
     /// since these two functions automatically pass in `RendererData` if the types are compatible with JavaScript.
     pub fn render(&self) -> &Self {
-        self.render_callback.call(self);
+        self.render_callback.call_with_rust_arg(self);
         self
     }
 
