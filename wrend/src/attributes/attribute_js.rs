@@ -7,7 +7,7 @@ use web_sys::WebGlBuffer;
 
 pub type AttributeJsInner = Attribute<String, String, String>;
 
-#[wasm_bindgen(js_name = Attribute)]
+#[wasm_bindgen(inspectable, js_name = Attribute)]
 pub struct AttributeJs(AttributeJsInner);
 
 #[wasm_bindgen(js_class = Attribute)]

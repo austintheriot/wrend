@@ -25,7 +25,7 @@ pub type RendererJsInner = Renderer<
     Object,
 >;
 
-#[wasm_bindgen(js_name = Renderer)]
+#[wasm_bindgen(inspectable, js_name = Renderer)]
 pub struct RendererJs(RendererJsInner);
 
 #[wasm_bindgen(js_class = Renderer)]

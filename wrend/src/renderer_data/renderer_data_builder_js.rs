@@ -27,7 +27,7 @@ type RendererDataBuilderJsInner = RendererDataBuilder<
 >;
 
 /// See [RendererDataBuilder](crate::RendererDataBuilder)
-#[wasm_bindgen(js_name = RendererDataBuilder)]
+#[wasm_bindgen(inspectable, js_name = RendererDataBuilder)]
 pub struct RendererDataBuilderJs(RendererDataBuilderJsInner);
 
 #[wasm_bindgen(js_class = RendererDataBuilder)]

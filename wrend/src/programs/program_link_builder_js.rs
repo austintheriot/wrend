@@ -5,7 +5,7 @@ use wasm_bindgen::prelude::wasm_bindgen;
 
 pub type ProgramLinkBuilderJsInner = ProgramLinkBuilder<String, String, String>;
 
-#[wasm_bindgen(js_name = ProgramLinkBuilder)]
+#[wasm_bindgen(inspectable, js_name = ProgramLinkBuilder)]
 pub struct ProgramLinkJsBuilder(ProgramLinkBuilderJsInner);
 
 #[wasm_bindgen(js_class = ProgramLinkBuilder)]

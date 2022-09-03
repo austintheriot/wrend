@@ -7,7 +7,7 @@ use crate::{utils, AttributeCreateCallbackJs, AttributeLink, AttributeLocation, 
 
 pub type AttributeLinkJsInner = AttributeLink<String, String, String>;
 
-#[wasm_bindgen(js_name = AttributeLink)]
+#[wasm_bindgen(inspectable, js_name = AttributeLink)]
 pub struct AttributeLinkJs(AttributeLinkJsInner);
 
 #[wasm_bindgen(js_class = AttributeLink)]

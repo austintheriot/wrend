@@ -7,7 +7,7 @@ use crate::{BufferCreateCallbackJs, BufferLink};
 
 pub type BufferLinkJsInner = BufferLink<String>;
 
-#[wasm_bindgen(js_name = BufferLink)]
+#[wasm_bindgen(inspectable, js_name = BufferLink)]
 pub struct BufferLinkJs(BufferLinkJsInner);
 
 #[wasm_bindgen(js_class = BufferLink)]

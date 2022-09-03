@@ -7,7 +7,7 @@ use wasm_bindgen::prelude::wasm_bindgen;
 
 pub type UniformLinkJsInner = UniformLink<String, String>;
 
-#[wasm_bindgen(js_name = UniformLink)]
+#[wasm_bindgen(inspectable, js_name = UniformLink)]
 pub struct UniformLinkJs(UniformLinkJsInner);
 
 #[wasm_bindgen(js_class = UniformLink)]

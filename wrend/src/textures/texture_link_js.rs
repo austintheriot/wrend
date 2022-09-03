@@ -7,7 +7,7 @@ use crate::{TextureCreateCallbackJs, TextureLink};
 
 pub type TextureLinkJsInner = TextureLink<String>;
 
-#[wasm_bindgen(js_name = TextureLink)]
+#[wasm_bindgen(inspectable, js_name = TextureLink)]
 pub struct TextureLinkJs(TextureLinkJsInner);
 
 #[wasm_bindgen(js_class = TextureLink)]

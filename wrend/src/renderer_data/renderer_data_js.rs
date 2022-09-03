@@ -33,7 +33,7 @@ pub type RendererDataJsInner = RendererData<
     Object,
 >;
 
-#[wasm_bindgen(js_name = RendererData)]
+#[wasm_bindgen(inspectable, js_name = RendererData)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 // Reference counting the internals here is necessary to be able to
 // convert this value into a `JsValue` without cloning its internal data.

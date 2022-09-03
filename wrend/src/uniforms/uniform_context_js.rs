@@ -5,7 +5,7 @@ use web_sys::{WebGl2RenderingContext, WebGlUniformLocation};
 
 pub type UniformContextJsInner = UniformContext;
 
-#[wasm_bindgen(js_name = UniformContext)]
+#[wasm_bindgen(inspectable, js_name = UniformContext)]
 pub struct UniformContextJs(UniformContextJsInner);
 
 #[wasm_bindgen(js_class = UniformContext)]

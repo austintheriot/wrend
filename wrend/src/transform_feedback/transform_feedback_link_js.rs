@@ -6,7 +6,7 @@ use crate::TransformFeedbackLink;
 
 pub type TransformFeedbackLinkJsInner = TransformFeedbackLink<String>;
 
-#[wasm_bindgen(js_name = TransformFeedbackLink)]
+#[wasm_bindgen(inspectable, js_name = TransformFeedbackLink)]
 pub struct TransformFeedbackLinkJs(TransformFeedbackLinkJsInner);
 
 #[wasm_bindgen(js_class = TransformFeedbackLink)]

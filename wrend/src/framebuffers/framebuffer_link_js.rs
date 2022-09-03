@@ -7,7 +7,7 @@ use crate::{FramebufferCreateCallbackJs, FramebufferLink};
 
 pub type FramebufferLinkJsInner = FramebufferLink<String, String>;
 
-#[wasm_bindgen(js_name = FramebufferLink)]
+#[wasm_bindgen(inspectable, js_name = FramebufferLink)]
 #[derive(Clone)]
 pub struct FramebufferLinkJs(FramebufferLinkJsInner);
 

@@ -5,7 +5,7 @@ use wasm_bindgen::{prelude::wasm_bindgen, JsCast};
 
 pub type UniformJsInner = Uniform<String, String>;
 
-#[wasm_bindgen(js_name = Uniform)]
+#[wasm_bindgen(inspectable, js_name = Uniform)]
 pub struct UniformJs(UniformJsInner);
 
 #[wasm_bindgen(js_class = Uniform)]

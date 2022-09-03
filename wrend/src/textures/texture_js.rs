@@ -6,7 +6,7 @@ use web_sys::WebGlTexture;
 
 pub type TextureJsInner = Texture<String>;
 
-#[wasm_bindgen(js_name = Texture)]
+#[wasm_bindgen(inspectable, js_name = Texture)]
 pub struct TextureJs(TextureJsInner);
 
 #[wasm_bindgen(js_class = Texture)]

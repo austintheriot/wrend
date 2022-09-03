@@ -5,7 +5,7 @@ use web_sys::WebGlFramebuffer;
 
 pub type FramebufferJsInner = Framebuffer<String>;
 
-#[wasm_bindgen(js_name = Framebuffer)]
+#[wasm_bindgen(inspectable, js_name = Framebuffer)]
 pub struct FramebufferJs(FramebufferJsInner);
 
 #[wasm_bindgen(js_class = Framebuffer)]

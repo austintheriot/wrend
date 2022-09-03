@@ -5,7 +5,7 @@ use web_sys::WebGl2RenderingContext;
 
 pub type BufferCreateContextJsInner = BufferCreateContext;
 
-#[wasm_bindgen(js_name = BufferCreateContext)]
+#[wasm_bindgen(inspectable, js_name = BufferCreateContext)]
 pub struct BufferCreateContextJs(BufferCreateContextJsInner);
 
 #[wasm_bindgen(js_class = BufferCreateContext)]

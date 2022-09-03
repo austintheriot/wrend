@@ -5,7 +5,7 @@ use web_sys::WebGlBuffer;
 
 pub type BufferJsInner = Buffer<String>;
 
-#[wasm_bindgen(js_name = Buffer)]
+#[wasm_bindgen(inspectable, js_name = Buffer)]
 pub struct BufferJs(BufferJsInner);
 
 #[wasm_bindgen(js_class = Buffer)]

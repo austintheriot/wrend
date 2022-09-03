@@ -5,7 +5,7 @@ use web_sys::{WebGl2RenderingContext, WebGlTexture};
 
 pub type BufferCreateContextJsInner = FramebufferCreateContext;
 
-#[wasm_bindgen(js_name = FramebufferCreateContext)]
+#[wasm_bindgen(inspectable, js_name = FramebufferCreateContext)]
 pub struct FramebufferCreateContextJs(BufferCreateContextJsInner);
 
 #[wasm_bindgen(js_class = FramebufferCreateContext)]
