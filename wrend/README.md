@@ -16,14 +16,9 @@ The following use cases should guide the development of this library:
 
 ## Todo
 
-- Add custom TypeScript types:
-  - Add getters and setters for structs
-
 - Make it more explicit when structs get cloned to convert them into a `JsValue`
 
 - Implementing JavaScript API
-  - Check that all structs implement `pub fn new()` where appropriate
-  - Check that all structs have `#[wasm_bindgen(constructor)]` where needed
   - Make sure all public JavaScript API struct docs point / link to their respective Rust counterparts for documentation
   - Derive all traits for Js structs
 
