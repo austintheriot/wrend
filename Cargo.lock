@@ -650,7 +650,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "raw_html"
+name = "raw_html_rs"
 version = "0.1.0"
 dependencies = [
  "js-sys",
