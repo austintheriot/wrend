@@ -3,7 +3,7 @@ use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::{window, HtmlCanvasElement, WebGl2RenderingContext};
 use wrend::{
     AttributeCreateContext, AttributeLink, BufferCreateContext, BufferLink, Id, IdDefault, IdName,
-    ProgramLink, RendererData,
+    ProgramLink, RendererData, Renderer,
 };
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Default)]
@@ -137,9 +137,9 @@ pub fn main() -> Result<(), JsValue> {
         gl.draw_arrays(WebGl2RenderingContext::TRIANGLES, 0, 3);
     };
 
-    let mut renderer_data_builder = RendererData::builder();
+    let mut render_builder = Renderer::builder();
 
-    renderer_data_builder
+    render_builder
         .set_canvas(canvas)
         .set_user_ctx(app_state)
         .add_vertex_shader_src(VertexShaderId, VERTEX_SHADER.to_string())
@@ -150,7 +150,7 @@ pub fn main() -> Result<(), JsValue> {
         .add_vao_link(ProgramId)
         .set_render_callback(render_callback);
 
-    let renderer = renderer_data_builder
+    let renderer = render_builder
         .build_renderer()
         .expect("RendererData should successfully build");
 
