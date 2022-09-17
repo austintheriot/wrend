@@ -3,7 +3,7 @@ name = "wrend"
 version = "0.1.0"
 authors = ["Austin Theriot <austinmtheriot@gmail.com>"]
 edition = "2021"
-description = "A WebGL2 rendering library for Rust/Wasm in the browser"
+description = "A WebGL2 rendering library for Rust/Wasm & JS"
 license = "MIT/Apache-2.0"
 repository = "https://github.com/austintheriot/wrend"
 
