@@ -3,7 +3,7 @@ use wasm_bindgen::prelude::wasm_bindgen;
 
 #[wasm_bindgen(typescript_custom_section)]
 const UNIFORM_LOCATIONS_mAP: &'static str = r#"
-type UniformLocationsMap = Map<string, WebGlUniformLocation>;
+type UniformLocationsMap = Map<string, WebGLUniformLocation>;
 "#;
 
 #[wasm_bindgen]
