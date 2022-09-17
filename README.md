@@ -10,6 +10,7 @@ Note: **This library is currently experimental and not considered stable for pub
     - [Particle Flow Field](#particle-flow-field)
     - [Conway's Game of Life](#conways-game-of-life)
     - [Larger Than Life](#larger-than-life)
+    - [Scripts](#scripts)
 
 ## About
 
@@ -52,3 +53,20 @@ The classic.
 This is similar to the classic Conway's Game of Life, except it uses an 11x11 convolution kernel (rather than the classic 3x3) to calculate the next state of each cell. This results in more organic, formations that behave surprisingly similar to the original.
 
 ![Screenshot of the Larger Than Life simulation](/demos/screenshots/larger_than_life.png)
+
+### Scripts
+
+Publishing
+
+```bash
+# builds the project to /dist using production mode, 
+# overwrites the auto-generated package.json,
+# and copies over the top-level README
+npm run prepare
+
+# must be logged into npm to publish
+npm login
+
+# publish package
+npm publish dist --access=public
+```

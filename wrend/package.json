@@ -1,6 +1,6 @@
 {
     "name": "wrend",
-    "version": "0.1.0",
+    "version": "0.1.4",
     "description": "A WebGL2 rendering library for Rust/Wasm & JS",
     "license": "(MIT OR Apache-2.0)",
     "repository": "https://github.com/austintheriot/wrend",
@@ -8,11 +8,12 @@
         "test": "wasm-pack test --chrome --headless",
         "build:dev": "RUST_BACKTRACE=full wasm-pack build --out-dir pkg --dev",
         "build": "RUST_BACKTRACE=full wasm-pack build --out-dir dist --release",
-        "pack": "wasm-pack pack",
-        "publish": "wasm-pack publish"
+        "prepare": "rimraf dist && npm run build && cp package.json dist && cp ../README.md dist"
     },
     "dependencies": {},
-    "devDependencies": {},
+    "devDependencies": {
+        "rimraf": "^3.0.2"
+    },
     "keywords": [
         "WebGL",
         "WebGL2",
@@ -31,5 +32,16 @@
         "email": "austinmtheriot@gmail.com",
         "name": "Austin Theriot",
         "url": "https://github.com/austintheriot"
-      }
+      },
+      "files": [
+        "wrend_bg.wasm",
+        "wrend.js",
+        "wrend_bg.js",
+        "wrend.d.ts",
+        "LICENSE_MIT",
+        "LICENSE_APACHE",
+        "snippets"
+      ],
+      "module": "wrend.js",
+      "types": "wrend.d.ts"
 }
