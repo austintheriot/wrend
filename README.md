@@ -56,7 +56,7 @@ This is similar to the classic Conway's Game of Life, except it uses an 11x11 co
 
 ### Scripts
 
-Publishing
+Publishing to npm:
 
 ```bash
 # must be in `wrend` npm package directory
@@ -72,4 +72,16 @@ npm login
 
 # publish package
 npm publish
+```
+
+Publishing to crates.io:
+
+```bash
+# must be in `wrend` npm package directory
+cd wrend
+
+# do a dry run to make sure everything is compiling ook
+cargo package
+
+cargo publish
 ```
