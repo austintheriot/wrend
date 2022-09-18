@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "wrend": "^0.1.6"
+    "wrend": "^0.1.12"
   },
   "devDependencies": {
     "typescript": "^4.6.4",

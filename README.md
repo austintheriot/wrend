@@ -59,14 +59,17 @@ This is similar to the classic Conway's Game of Life, except it uses an 11x11 co
 Publishing
 
 ```bash
-# builds the project to /dist using production mode, 
-# overwrites the auto-generated package.json,
-# and copies over the top-level README
-npm run prepare
+# must be in `wrend` npm package directory
+cd wrend
+
+# builds library and outputs to /dist directory
+npm run prepublish
+
+cd dist
 
 # must be logged into npm to publish
 npm login
 
 # publish package
-npm publish dist --access=public
+npm publish
 ```
