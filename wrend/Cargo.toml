@@ -6,6 +6,10 @@ edition = "2021"
 description = "A WebGL2 rendering library for Rust/Wasm & JS"
 license = "MIT/Apache-2.0"
 repository = "https://github.com/austintheriot/wrend"
+homepage = "https://github.com/austintheriot/wrend"
+readme = "../README.md"
+keywords = ["webgl2", "rendering", "graphics", "raytracer", "webassembly"]
+categories = ["wasm", "web-programming", "rendering", "multimedia"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]
