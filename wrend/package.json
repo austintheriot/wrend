@@ -1,6 +1,6 @@
 {
     "name": "wrend",
-    "version": "0.1.12",
+    "version": "0.1.0",
     "description": "A WebGL2 rendering library for Rust/Wasm & JS",
     "license": "(MIT OR Apache-2.0)",
     "repository": "https://github.com/austintheriot/wrend",
