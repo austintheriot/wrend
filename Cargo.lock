@@ -650,16 +650,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "raw_html_rs"
-version = "0.1.0"
-dependencies = [
- "js-sys",
- "wasm-bindgen",
- "web-sys",
- "wrend 0.2.0",
-]
-
-[[package]]
 name = "ray_tracer"
 version = "0.1.0"
 dependencies = [
@@ -899,6 +889,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dd6469f4314d5f1ffec476e05f17cc9a78bc7a27a6a857842170bdf8d6f98d2f"
 dependencies = [
  "getrandom",
+]
+
+[[package]]
+name = "vanilla_rs"
+version = "0.1.0"
+dependencies = [
+ "js-sys",
+ "wasm-bindgen",
+ "web-sys",
+ "wrend 0.2.0",
 ]
 
 [[package]]

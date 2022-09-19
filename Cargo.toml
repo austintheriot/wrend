@@ -11,7 +11,7 @@ members = [
     "demos/perlin_noise",
     "demos/simplex_noise",
     "demos/recording_demo",
-    "examples/raw_html_rs"
+    "examples/vanilla_rs"
 ]
 
 [profile.release]
