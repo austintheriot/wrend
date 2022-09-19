@@ -52,6 +52,8 @@
 //! A long term goal of `wrend` is to provide matchable errors (or `catch`able errors in JavaScript) for all fallible operations.
 //!
 //! # Example
+//! 
+//! The following is a "Hello, triangle!" example (the equivalent of "Hello, world!" for WebGL)
 //!
 //! ```no_run
 //! use js_sys::Float32Array;
