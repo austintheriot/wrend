@@ -1,12 +1,13 @@
 [package]
 name = "wrend"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Austin Theriot <austinmtheriot@gmail.com>"]
 edition = "2021"
 description = "A WebGL2 rendering library for Rust/Wasm & JS"
 license = "MIT/Apache-2.0"
 repository = "https://github.com/austintheriot/wrend"
 homepage = "https://github.com/austintheriot/wrend"
+documentation = "https://docs.rs/wrend/"
 readme = "../README.md"
 keywords = ["webgl2", "rendering", "graphics", "raytracer", "webassembly"]
 categories = ["wasm", "web-programming", "rendering", "multimedia"]
