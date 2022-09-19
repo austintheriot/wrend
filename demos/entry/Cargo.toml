@@ -31,7 +31,7 @@ yew-router = "0.16.0"
 hello_quad = { path = '../hello_quad' }
 hello_quad_animated = { path = '../hello_quad_animated' }
 game_of_life = { path = '../game_of_life' }
-wrend = { path = '../../wrend' }
+wrend = "0.2.0"
 ui = { path = '../ui' }
 larger_than_life = { path = '../larger_than_life' }
 perlin_noise = { path = '../perlin_noise' }
