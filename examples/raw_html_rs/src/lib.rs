@@ -11,6 +11,11 @@ pub struct ProgramId;
 
 impl Id for ProgramId {}
 
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Default)]
+pub struct VaoId;
+
+impl Id for VaoId {}
+
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 pub enum BufferId {
     VertexBuffer,
@@ -58,8 +63,26 @@ struct AppState {
     count: u32,
 }
 
-const VERTEX_SHADER: &str = include_str!("./vertex.glsl");
-const FRAGMENT_SHADER: &str = include_str!("./fragment.glsl");
+const VERTEX_SHADER: &str = r#"#version 300 es
+in vec2 a_position;
+out vec2 v_position;
+ 
+void main() {
+    gl_Position = vec4(a_position, 0, 1);
+    vec2 zero_to_two = a_position + 1.0;
+    vec2 zero_to_one = zero_to_two * 0.5;
+    v_position = zero_to_one;
+}"#;
+
+
+const FRAGMENT_SHADER: &str = r#"#version 300 es
+precision mediump float;
+in vec2 v_position;
+out vec4 out_color;
+
+void main() {
+  out_color = vec4(v_position.x, v_position.y, v_position.x * 0.5 + v_position.y * 0.5, 1);
+}"#;
 
 #[wasm_bindgen(start)]
 pub fn main() -> Result<(), JsValue> {
@@ -93,7 +116,7 @@ pub fn main() -> Result<(), JsValue> {
         });
 
     let a_position_link = AttributeLink::new(
-        ProgramId,
+        VaoId,
         BufferId::VertexBuffer,
         PositionAttributeId,
         |ctx: &AttributeCreateContext| {
@@ -122,14 +145,14 @@ pub fn main() -> Result<(), JsValue> {
         IdDefault,
         IdDefault,
         IdDefault,
-        ProgramId,
+        VaoId,
         AppState,
     >| {
         let gl = renderer_data.gl();
         let canvas: HtmlCanvasElement = gl.canvas().unwrap().dyn_into().unwrap();
 
         renderer_data.use_program(&ProgramId);
-        renderer_data.use_vao(&ProgramId);
+        renderer_data.use_vao(&VaoId);
 
         gl.viewport(0, 0, canvas.width() as i32, canvas.height() as i32);
         gl.clear_color(0.0, 0.0, 0.0, 0.0);
@@ -147,12 +170,12 @@ pub fn main() -> Result<(), JsValue> {
         .add_program_link(program_link)
         .add_buffer_link(vertex_buffer_link)
         .add_attribute_link(a_position_link)
-        .add_vao_link(ProgramId)
+        .add_vao_link(VaoId)
         .set_render_callback(render_callback);
 
     let renderer = render_builder
         .build_renderer()
-        .expect("RendererData should successfully build");
+        .expect("Renderer should successfully build");
 
     renderer.render();
 
