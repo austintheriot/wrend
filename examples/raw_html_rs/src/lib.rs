@@ -3,7 +3,7 @@ use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::{window, HtmlCanvasElement, WebGl2RenderingContext};
 use wrend::{
     AttributeCreateContext, AttributeLink, BufferCreateContext, BufferLink, Id, IdDefault, IdName,
-    ProgramLink, RendererData, Renderer,
+    ProgramLink, Renderer, RendererData,
 };
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Default)]

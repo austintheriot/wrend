@@ -1,19 +1,8 @@
-use core::hash::Hash;
-use std::collections::HashMap;
-
-use js_sys::{Array, Map};
-use wasm_bindgen::{JsCast, JsValue};
-
 use crate::StringArray;
-
-pub(crate) fn js_array_to_vec<A: AsRef<Array>, T: From<JsValue>>(array: &A) -> Vec<T> {
-    js_sys::try_iter(array.as_ref())
-        .expect("`js_array_to_vec` should be passed an Array that is iterable from JavaScript")
-        .unwrap()
-        .into_iter()
-        .map(|el| el.unwrap().into())
-        .collect()
-}
+use core::hash::Hash;
+use js_sys::{Array, Map};
+use std::collections::HashMap;
+use wasm_bindgen::{JsCast, JsValue};
 
 pub(crate) fn strings_to_js_array<T: AsRef<str>>(strings: &[T]) -> StringArray {
     let vec_strings: Vec<JsValue> = strings
