@@ -1,7 +1,7 @@
 use crate::components::button::Button;
 use crate::state::app_context::{AppContext, AppContextError};
 use crate::state::ui_state_action::UiStateAction;
-use ui::route::Route;
+use shared::route::Route;
 use wasm_bindgen::JsCast;
 use web_sys::{window, HtmlCanvasElement};
 use yew::prelude::*;

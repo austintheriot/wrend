@@ -7,7 +7,7 @@
 @use '../../flow_field_colorful/style.scss' as flow-field-colorful;
 @use '../../simplex_noise/style.scss' as simplex-noise;
 @use '../../ray_tracer/style.scss' as ray-tracer;
-@use '../../ui/global-styles.scss';
+@use '../../shared/global-styles.scss';
 
 .home {
   padding: 1rem;

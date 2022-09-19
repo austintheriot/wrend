@@ -1,5 +1,5 @@
 use crate::switch::switch;
-use ui::route::Route;
+use shared::route::Route;
 use yew::{function_component, html};
 use yew_router::prelude::*;
 

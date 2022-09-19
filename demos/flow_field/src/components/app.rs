@@ -23,7 +23,7 @@ use crate::{
     state::{render_state::RenderState, render_state_handle::RenderStateHandle},
 };
 use std::rc::Rc;
-use ui::route::Route;
+use shared::route::Route;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, MouseEvent, WebGl2RenderingContext, WebGlContextAttributes};
 use wrend::{

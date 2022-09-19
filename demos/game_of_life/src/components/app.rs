@@ -10,7 +10,7 @@ use crate::{
     state::render_state::RenderState,
 };
 
-use ui::route::Route;
+use shared::route::Route;
 use web_sys::HtmlCanvasElement;
 use wrend::{
     AttributeLink, BufferLink, FramebufferLink, ProgramLink, RendererData, TextureLink,

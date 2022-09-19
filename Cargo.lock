@@ -73,9 +73,9 @@ dependencies = [
  "rand",
  "ray_tracer",
  "recording_demo",
+ "shared",
  "simplex_noise",
  "thiserror",
- "ui",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -110,8 +110,8 @@ dependencies = [
  "lazy_static",
  "log",
  "rand",
+ "shared",
  "thiserror",
- "ui",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -131,8 +131,8 @@ dependencies = [
  "lazy_static",
  "log",
  "rand",
+ "shared",
  "thiserror",
- "ui",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -202,8 +202,8 @@ dependencies = [
  "lazy_static",
  "log",
  "rand",
+ "shared",
  "thiserror",
- "ui",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -360,8 +360,8 @@ dependencies = [
  "lazy_static",
  "log",
  "rand",
+ "shared",
  "thiserror",
- "ui",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -381,8 +381,8 @@ dependencies = [
  "lazy_static",
  "log",
  "rand",
+ "shared",
  "thiserror",
- "ui",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -436,8 +436,8 @@ dependencies = [
  "lazy_static",
  "log",
  "rand",
+ "shared",
  "thiserror",
- "ui",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -540,8 +540,8 @@ dependencies = [
  "lazy_static",
  "log",
  "rand",
+ "shared",
  "thiserror",
- "ui",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -670,8 +670,8 @@ dependencies = [
  "lazy_static",
  "log",
  "rand",
+ "shared",
  "thiserror",
- "ui",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -691,8 +691,8 @@ dependencies = [
  "lazy_static",
  "log",
  "rand",
+ "shared",
  "thiserror",
- "ui",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -782,7 +782,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "simplex_noise"
+name = "shared"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -792,7 +792,27 @@ dependencies = [
  "log",
  "rand",
  "thiserror",
- "ui",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wrend 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "yew",
+ "yew-router",
+]
+
+[[package]]
+name = "simplex_noise"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "console_error_panic_hook",
+ "js-sys",
+ "lazy_static",
+ "log",
+ "rand",
+ "shared",
+ "thiserror",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-logger",
@@ -864,26 +884,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d050e60b33d41c19108b32cea32164033a9013fe3b46cbd4457559bfbf77afaa"
 dependencies = [
  "num_cpus",
-]
-
-[[package]]
-name = "ui"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "console_error_panic_hook",
- "js-sys",
- "lazy_static",
- "log",
- "rand",
- "thiserror",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "wasm-logger",
- "web-sys",
- "wrend 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "yew",
- "yew-router",
 ]
 
 [[package]]

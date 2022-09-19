@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use ui::route::Route;
+use shared::route::Route;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, MouseEvent, WebGl2RenderingContext};
 use wrend::{

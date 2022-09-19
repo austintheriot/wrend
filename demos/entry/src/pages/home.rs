@@ -1,4 +1,4 @@
-use ui::route::Route;
+use shared::route::Route;
 use yew::prelude::*;
 use yew_router::prelude::*;
 
