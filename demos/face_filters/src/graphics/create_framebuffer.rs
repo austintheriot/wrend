@@ -1,7 +1,7 @@
 use web_sys::{WebGl2RenderingContext, WebGlFramebuffer};
 use wrend::FramebufferCreateContext;
 
-pub fn create_frame_buffer(ctx: &FramebufferCreateContext) -> WebGlFramebuffer {
+pub fn create_framebuffer(ctx: &FramebufferCreateContext) -> WebGlFramebuffer {
     let texture_a = ctx
         .webgl_texture()
         .as_ref()

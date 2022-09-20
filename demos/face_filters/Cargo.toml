@@ -62,4 +62,5 @@ features = [
   "CanvasRenderingContext2d",
   "File",
   "FileList",
+  "HtmlVideoElement"
 ]

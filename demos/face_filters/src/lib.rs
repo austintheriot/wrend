@@ -1,6 +1,9 @@
 use wasm_bindgen::prelude::*;
 
-pub mod ui;
+mod components;
+mod graphics;
+mod state;
+
 
 /// This main function is only used for testing this portion of the app in isolation
 #[wasm_bindgen]
@@ -22,7 +25,7 @@ pub fn face_filters_app() -> Result<(), JsValue> {
         .unwrap()
         .unwrap();
 
-    yew::start_app_in_element::<ui::App>(app_div);
+    yew::start_app_in_element::<components::App>(app_div);
 
     Ok(())
 }
