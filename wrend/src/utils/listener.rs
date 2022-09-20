@@ -3,7 +3,7 @@ use std::{fmt::Debug, ops::Deref};
 use wasm_bindgen::{convert::FromWasmAbi, prelude::Closure, JsCast, JsValue};
 use web_sys::EventTarget;
 
-/// Safe wrapper around eventListener callbacks that cleans them up once the `Listener` struct is dropped
+/// Safe wrapper around `eventListener` callbacks that cleans them up once the `Listener` struct is dropped
 /// For more information, see https://github.com/rustwasm/wasm-bindgen/issues/993.
 ///
 /// This utility can be used with any type that dereferences to EventTarget, so it is not limited
@@ -16,6 +16,7 @@ pub struct Listener<Element: Deref<Target = EventTarget>, Arg: FromWasmAbi + 'st
 }
 
 impl<Element: Deref<Target = EventTarget>, Arg: FromWasmAbi + 'static> Listener<Element, Arg> {
+    /// Attaches a listener callback to an element
     pub fn new<F>(element: Element, name: &'static str, cb: F) -> Self
     where
         F: Fn(Arg) + 'static,
@@ -28,14 +29,17 @@ impl<Element: Deref<Target = EventTarget>, Arg: FromWasmAbi + 'static> Listener<
         Self { element, name, cb }
     }
 
+    /// Get the element that this listener is attached to
     pub fn element(&self) -> &Element {
         &self.element
     }
 
+    /// Get the name of the event that this listener is listening for
     pub fn name(&self) -> &'static str {
         self.name
     }
 
+    /// Get the callback that is called when the listener's event is emitted
     pub fn callback(&self) -> &Closure<dyn Fn(Arg)> {
         &self.cb
     }

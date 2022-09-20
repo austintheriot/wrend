@@ -5,8 +5,8 @@ use crate::UniformShouldUpdateCallback;
 use std::fmt::Debug;
 use std::hash::Hash;
 
-/// This contains one or more ids for a program and and id for a uniform that is associated with it
-/// At build time, these get linked together to find the uniform's associated location in the program
+/// This link is used to associated a one or more `ProgramId`s with a conceptual uniform.
+/// This allows sharing uniforms across programs, even when each uniform's location differs between programs.
 #[derive(Clone)]
 pub struct UniformLink<ProgramId: Id, UniformId: Id> {
     program_ids: Vec<ProgramId>,
@@ -18,6 +18,7 @@ pub struct UniformLink<ProgramId: Id, UniformId: Id> {
 }
 
 impl<ProgramId: Id, UniformId: Id> UniformLink<ProgramId, UniformId> {
+    /// Creates a new uniform link
     pub fn new(
         program_ids: impl Into<Bridge<ProgramId>>,
         uniform_id: UniformId,
@@ -35,18 +36,22 @@ impl<ProgramId: Id, UniformId: Id> UniformLink<ProgramId, UniformId> {
         }
     }
 
+    /// Gets all program ids that this link is associated with
     pub fn program_ids(&self) -> &Vec<ProgramId> {
         &self.program_ids
     }
 
+    /// Gets the id of the uniform link
     pub fn uniform_id(&self) -> &UniformId {
         &self.uniform_id
     }
 
+    /// See [crate::Uniform::initialize_callback]
     pub fn initialize_callback(&self) -> UniformCreateUpdateCallback {
         self.initialize_callback.clone()
     }
 
+    /// See [crate::Uniform::initialize_callback]
     pub fn set_initialize_callback(
         &mut self,
         callback: impl Into<UniformCreateUpdateCallback>,
@@ -55,10 +60,12 @@ impl<ProgramId: Id, UniformId: Id> UniformLink<ProgramId, UniformId> {
         self
     }
 
+    /// See [crate::Uniform::should_update_callback]
     pub fn should_update_callback(&self) -> Option<UniformShouldUpdateCallback> {
         self.should_update_callback.as_ref().map(Clone::clone)
     }
 
+    /// See [crate::Uniform::should_update_callback]
     pub fn set_should_update_callback(
         &mut self,
         callback: impl Into<UniformShouldUpdateCallback>,
@@ -67,10 +74,12 @@ impl<ProgramId: Id, UniformId: Id> UniformLink<ProgramId, UniformId> {
         self
     }
 
+    /// See [crate::Uniform::update_callback]
     pub fn update_callback(&self) -> Option<UniformCreateUpdateCallback> {
         self.update_callback.as_ref().map(Clone::clone)
     }
 
+    /// See [crate::Uniform::update_callback]
     pub fn set_update_callback(
         &mut self,
         callback: impl Into<UniformCreateUpdateCallback>,
@@ -79,10 +88,12 @@ impl<ProgramId: Id, UniformId: Id> UniformLink<ProgramId, UniformId> {
         self
     }
 
+    /// See [Uniform::use_init_callback_for_update]
     pub fn use_init_callback_for_update(&self) -> bool {
         self.use_init_callback_for_update
     }
 
+    /// See [Uniform::use_init_callback_for_update]
     pub fn set_use_init_callback_for_update(
         &mut self,
         use_init_callback_for_update: bool,

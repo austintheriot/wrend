@@ -11,6 +11,11 @@ use std::hash::Hash;
 use wasm_bindgen::JsValue;
 use web_sys::{WebGl2RenderingContext, WebGlProgram, WebGlUniformLocation};
 
+/// Contains the build information for a WebGL uniform. 
+/// 
+/// A [`Uniform`] can be associated with any number of programs,
+/// and can be updated with [crate::RendererData::update_uniform] or
+/// [crate::RendererData::update_uniforms].
 #[derive(Clone)]
 pub struct Uniform<ProgramId: Id, UniformId: Id> {
     program_ids: Vec<ProgramId>,
@@ -45,32 +50,49 @@ impl<ProgramId: Id, UniformId: Id> Uniform<ProgramId, UniformId> {
         }
     }
 
+    /// Gets all program ids associated with this uniform
     pub fn program_ids(&self) -> &Vec<ProgramId> {
         &self.program_ids
     }
 
+    /// Gets this uniform's uniform id
     pub fn uniform_id(&self) -> &UniformId {
         &self.uniform_id
     }
 
+    /// Gets this uniform's location for all associated program ids
     pub fn uniform_locations(&self) -> &HashMap<ProgramId, WebGlUniformLocation> {
         &self.uniform_locations
     }
 
+    /// Gets the callback that is used to initialize this uniform
     pub fn initialize_callback(&self) -> UniformCreateUpdateCallback {
         self.uniform_create_callback.clone()
     }
 
+    /// Gets the callback that is used to determine whether this uniform should update when
+    /// [crate::RendererData::update_uniform] or [crate::RendererData::update_uniforms] is called.
     pub fn should_update_callback(&self) -> Option<UniformShouldUpdateCallback> {
         self.should_update_callback.as_ref().map(Clone::clone)
     }
 
+    /// Gets the callback that is used to updated this uniform whenever
+    /// [crate::RendererData::update_uniform] or [crate::RendererData::update_uniforms] is called.
     pub fn update_callback(&self) -> Option<UniformCreateUpdateCallback> {
         self.update_callback.as_ref().map(Clone::clone)
     }
 
-    /// updates the uniform for every Program where this uniform is used,
-    /// using the update callback that was passed in at creation time
+    /// If set to `true`, [Uniform] will use the [Uniform::initialize_callback] callback
+    /// to update when [crate::RendererData::update_uniform] or [crate::RendererData::update_uniforms] is called
+    /// rather than the [Uniform::update_callback]
+    pub fn use_init_callback_for_update(&self) -> bool {
+        self.use_init_callback_for_update
+    }
+
+    /// Updates the value of this uniform in WebGl for every Program where this uniform is used,
+    /// using the update callback that was passed in at creation time.
+    /// 
+    /// @todo: calling this function for anything more than the current program is useless without a UBO
     pub fn update(
         &self,
         gl: &WebGl2RenderingContext,

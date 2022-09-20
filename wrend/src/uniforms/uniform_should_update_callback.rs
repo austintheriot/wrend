@@ -2,9 +2,12 @@ use std::{fmt::Debug, ops::Deref, rc::Rc};
 
 use crate::{Callback, UniformContext, UniformShouldUpdateCallbackJs};
 
+/// This is the inner type that [`UniformShouldUpdateCallback`] stores
 pub type UniformShouldUpdateCallbackInner =
     Callback<dyn Fn(&UniformContext) -> bool, UniformShouldUpdateCallbackJs>;
 
+/// This callback is used to determine whether a [`crate::Uniform`] should be updated or not.
+/// Can be created by converting from either a Rust or a JavaScript callback.
 #[derive(Clone, Hash, PartialEq, Eq, PartialOrd)]
 pub struct UniformShouldUpdateCallback(UniformShouldUpdateCallbackInner);
 

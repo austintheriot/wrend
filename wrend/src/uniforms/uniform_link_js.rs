@@ -1,7 +1,6 @@
 use crate::{
     utils, StringArray, UniformCreateUpdateCallbackJs, UniformLink, UniformShouldUpdateCallbackJs,
 };
-
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;
 
