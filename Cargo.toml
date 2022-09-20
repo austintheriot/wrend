@@ -11,6 +11,7 @@ members = [
     "demos/perlin_noise",
     "demos/simplex_noise",
     "demos/recording_demo",
+    "demos/face_filters",
     "examples/vanilla_rs"
 ]
 

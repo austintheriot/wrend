@@ -101,6 +101,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "face_filters"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "console_error_panic_hook",
+ "js-sys",
+ "lazy_static",
+ "log",
+ "rand",
+ "shared",
+ "thiserror",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wrend 0.2.0",
+ "yew",
+ "yew-router",
+]
+
+[[package]]
 name = "flow_field"
 version = "0.1.0"
 dependencies = [
