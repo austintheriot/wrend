@@ -1,3 +1,5 @@
+use std::iter::Filter;
+
 use crate::graphics::FilterType;
 use web_sys::HtmlVideoElement;
 
@@ -13,6 +15,14 @@ impl RenderState {
             filter_type: FilterType::default(),
             src_video,
         }
+    }
+
+    pub fn filter_type(&self) -> &FilterType {
+        &self.filter_type
+    }
+
+    pub fn set_filter_type(&mut self, filter_type: FilterType) {
+        self.filter_type = filter_type;
     }
 
     pub fn src_video(&self) -> &HtmlVideoElement {

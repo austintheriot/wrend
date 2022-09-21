@@ -46,13 +46,9 @@ pub fn render(
 
     // adjust canvas to match video element size
     if canvas.width() != src_video_width {
-        info!("Canvas width is {}", canvas.width());
-        info!("Setting width {src_video_width}");
         canvas.set_width(src_video_width)
     }
     if canvas.height() != src_video_height {
-        info!("Canvas height is {}", canvas.height());
-        info!("Setting height {src_video_height}");
         canvas.set_height(src_video_height)
     }
 
@@ -72,7 +68,15 @@ pub fn render(
         }
     }
 
-    renderer_data.use_program(&ProgramId::Unfiltered);
+    match render_state_handle.borrow().filter_type() {
+        super::FilterType::Unfiltered => {
+            renderer_data.use_program(&ProgramId::Unfiltered);
+        },
+        super::FilterType::Grayscale => {
+            renderer_data.use_program(&ProgramId::Grayscale);
+        },
+    }
+
     renderer_data.use_vao(&VAOId::Quad);
     gl.active_texture(WebGl2RenderingContext::TEXTURE0 + TextureId::SrcVideo.location());
     gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(src_video_texture));

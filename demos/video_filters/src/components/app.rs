@@ -8,7 +8,7 @@ use crate::{
     state::{RenderState, RenderStateHandle},
 };
 
-use log::info;
+use log::{error, info};
 use shared::route::Route;
 use wasm_bindgen::JsCast;
 use web_sys::{Event, HtmlCanvasElement, HtmlSelectElement};
@@ -177,11 +177,18 @@ pub fn app() -> Html {
                     .dyn_into::<HtmlSelectElement>()
                     .unwrap();
                 let selected_index = select_element.selected_index();
-                match selected_index {
-                    0 => info!("Unfiltered"),
-                    1 => info!("Grayscale"),
-                    _ => info!("Other")
-                }
+                let filter_type = match selected_index {
+                    0 => FilterType::Unfiltered,
+                    1 => FilterType::Grayscale,
+                    _ => {
+                        error!("Unexpected select option reached: index =  {selected_index}");
+                        FilterType::Unfiltered
+                    }
+                };
+
+                render_state_handle
+                    .borrow_mut()
+                    .set_filter_type(filter_type);
             }
         })
     };
