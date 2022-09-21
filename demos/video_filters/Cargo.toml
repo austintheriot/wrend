@@ -1,5 +1,5 @@
 [package]
-name = "face_filters"
+name = "video_filters"
 description = ""
 version = "0.1.0"
 edition = "2021"

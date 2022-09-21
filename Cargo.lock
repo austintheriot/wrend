@@ -101,27 +101,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "face_filters"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "console_error_panic_hook",
- "js-sys",
- "lazy_static",
- "log",
- "rand",
- "shared",
- "thiserror",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "wasm-logger",
- "web-sys",
- "wrend 0.2.0",
- "yew",
- "yew-router",
-]
-
-[[package]]
 name = "flow_field"
 version = "0.1.0"
 dependencies = [
@@ -927,6 +906,27 @@ name = "version_check"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
+
+[[package]]
+name = "video_filters"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "console_error_panic_hook",
+ "js-sys",
+ "lazy_static",
+ "log",
+ "rand",
+ "shared",
+ "thiserror",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wrend 0.2.0",
+ "yew",
+ "yew-router",
+]
 
 [[package]]
 name = "wasi"

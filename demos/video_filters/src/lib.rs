@@ -6,7 +6,7 @@ mod state;
 
 /// This main function is only used for testing this portion of the app in isolation
 #[wasm_bindgen]
-pub fn face_filters_app() -> Result<(), JsValue> {
+pub fn video_filters_app() -> Result<(), JsValue> {
     // This provides better error messages in debug mode.
     // It's disabled in release mode, so it doesn't bloat up the file size.
     #[cfg(debug_assertions)]

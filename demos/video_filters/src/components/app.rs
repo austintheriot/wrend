@@ -161,7 +161,7 @@ pub fn app() -> Html {
     );
 
     html! {
-        <div class="face-filters">
+        <div class="video-filters">
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
             <video controls=true ref={video_ref} src="./big_buck_bunny.mp4" />
             <canvas ref={canvas_ref}  />
