@@ -2,14 +2,13 @@ use crate::{
     graphics::{
         create_framebuffer, create_position_attribute, create_vertex_buffer,
         make_crate_src_video_texture, make_create_render_texture, render, AttributeId, BufferId,
-        FragmentShaderId, FramebufferId, ProgramId, TextureId, UniformId, VertexShaderId,
+        FragmentShaderId, FramebufferId, ProgramId, TextureId, UniformId, VAOId, VertexShaderId,
     },
     state::{RenderState, RenderStateHandle},
 };
 
 use shared::route::Route;
-use wasm_bindgen::JsCast;
-use web_sys::{window, HtmlCanvasElement, HtmlVideoElement};
+use web_sys::HtmlCanvasElement;
 use wrend::{
     AttributeLink, BufferLink, FramebufferLink, ProgramLinkBuilder, RendererData, TextureLink,
     UniformContext, UniformLink,
@@ -63,13 +62,13 @@ pub fn app() -> Html {
                     .set_fragment_shader_id(FragmentShaderId::Grayscale);
                 let grayscale_program_link = grayscale_program_link
                     .build()
-                    .expect("Should build Unfiltered Grayscale successfully");
+                    .expect("Should build Grayscale ProgramLink successfully");
 
                 let vertex_buffer_link =
                     BufferLink::new(BufferId::QuadVertexBuffer, create_vertex_buffer);
 
                 let a_quad_vertex_link = AttributeLink::new(
-                    (ProgramId::Unfiltered, ProgramId::Grayscale),
+                    VAOId::Quad,
                     BufferId::QuadVertexBuffer,
                     AttributeId,
                     create_position_attribute,
@@ -108,7 +107,7 @@ pub fn app() -> Html {
                     |ctx: &UniformContext| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
-                        gl.uniform1i(Some(uniform_location), 1);
+                        gl.uniform1ui(Some(uniform_location), TextureId::SrcVideo.location());
                     },
                 );
 
@@ -137,8 +136,7 @@ pub fn app() -> Html {
                     .add_texture_link(prev_render_texture_link_b)
                     .add_framebuffer_link(prev_render_framebuffer_link_a)
                     .add_framebuffer_link(prev_render_framebuffer_link_b)
-                    .add_vao_link(ProgramId::Unfiltered)
-                    .add_vao_link(ProgramId::Grayscale);
+                    .add_vao_link(VAOId::Quad);
 
                 let mut new_renderer = renderer_data_builder
                     .build_renderer()
