@@ -1,5 +1,3 @@
-use std::default;
-
 use wrend::Id;
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, Hash, Debug)]
@@ -18,7 +16,6 @@ impl TextureId {
             TextureId::PrevRenderA => 0,
             TextureId::PrevRenderB => 1,
             TextureId::SrcVideo => 2,
-            
         }
     }
 }

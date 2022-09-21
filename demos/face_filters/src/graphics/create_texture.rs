@@ -1,8 +1,7 @@
-use wasm_bindgen::JsCast;
-use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlTexture};
+use web_sys::{WebGl2RenderingContext, WebGlTexture};
 use wrend::TextureCreateContext;
 
-use crate::state::{RenderState, RenderStateHandle};
+use crate::state::RenderStateHandle;
 
 use super::TextureId;
 

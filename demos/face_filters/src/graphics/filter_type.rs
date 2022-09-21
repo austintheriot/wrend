@@ -2,5 +2,5 @@
 pub enum FilterType {
     #[default]
     Unfiltered,
-    Grayscale
+    Grayscale,
 }

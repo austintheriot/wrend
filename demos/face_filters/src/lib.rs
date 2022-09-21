@@ -4,7 +4,6 @@ mod components;
 mod graphics;
 mod state;
 
-
 /// This main function is only used for testing this portion of the app in isolation
 #[wasm_bindgen]
 pub fn face_filters_app() -> Result<(), JsValue> {

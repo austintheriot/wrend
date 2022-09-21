@@ -32,8 +32,8 @@ pub fn app() -> Html {
         {
             let canvas_ref = canvas_ref.clone();
             let video_ref = video_ref.clone();
-            let renderer = renderer_ref.clone();
-            let render_state_ref = render_state_ref.clone();
+            let renderer = renderer_ref;
+            let render_state_ref = render_state_ref;
             move |_| {
                 let canvas: HtmlCanvasElement = canvas_ref
                     .cast()

@@ -37,9 +37,9 @@ pub fn render(
     let render_state_handle = renderer_data.user_ctx().unwrap();
     let src_video_element = render_state_handle.borrow().src_video().clone();
     let src_video_texture = renderer_data
-    .texture(&TextureId::SrcVideo)
-    .unwrap()
-    .webgl_texture();
+        .texture(&TextureId::SrcVideo)
+        .unwrap()
+        .webgl_texture();
 
     let src_video_width = src_video_element.video_width();
     let src_video_height = src_video_element.video_height();
@@ -76,9 +76,6 @@ pub fn render(
     renderer_data.use_vao(&VAOId::Quad);
     gl.active_texture(WebGl2RenderingContext::TEXTURE0 + TextureId::SrcVideo.location());
     gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(src_video_texture));
-    gl.bind_framebuffer(
-        WebGl2RenderingContext::FRAMEBUFFER,
-        None,
-    );
+    gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, None);
     draw(gl, canvas);
 }

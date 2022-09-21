@@ -1,7 +1,9 @@
-use lazy_static::__Deref;
-
 use super::render_state::RenderState;
-use std::{cell::RefCell, rc::Rc, ops::{Deref, DerefMut}};
+use std::{
+    cell::RefCell,
+    ops::{Deref, DerefMut},
+    rc::Rc,
+};
 
 #[derive(Clone, Debug)]
 pub struct RenderStateHandle(Rc<RefCell<RenderState>>);
@@ -27,7 +29,7 @@ impl Deref for RenderStateHandle {
 }
 
 impl DerefMut for RenderStateHandle {
-    fn deref_mut (&mut self) -> &mut Rc<RefCell<RenderState>> {
+    fn deref_mut(&mut self) -> &mut Rc<RefCell<RenderState>> {
         &mut self.0
     }
 }
