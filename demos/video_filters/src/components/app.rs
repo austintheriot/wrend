@@ -2,19 +2,22 @@ use crate::{
     graphics::{
         create_framebuffer, create_position_attribute, create_vertex_buffer,
         make_crate_src_video_texture, make_create_render_texture, render, AttributeId, BufferId,
-        FragmentShaderId, FramebufferId, ProgramId, TextureId, UniformId, VAOId, VertexShaderId,
+        FilterType, FragmentShaderId, FramebufferId, ProgramId, TextureId, UniformId, VAOId,
+        VertexShaderId,
     },
     state::{RenderState, RenderStateHandle},
 };
 
+use log::info;
 use shared::route::Route;
-use web_sys::HtmlCanvasElement;
+use wasm_bindgen::JsCast;
+use web_sys::{Event, HtmlCanvasElement, HtmlSelectElement};
 use wrend::{
     AttributeLink, BufferLink, FramebufferLink, ProgramLinkBuilder, RendererData, TextureLink,
     UniformContext, UniformLink,
 };
 
-use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
+use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, Callback};
 use yew_router::prelude::*;
 
 const QUAD_VERTEX_SHADER: &str = include_str!("../shaders/vertex.glsl");
@@ -25,15 +28,15 @@ const GRAYSCALE_FRAGMENT_SHADER: &str = include_str!("../shaders/grayscale.glsl"
 pub fn app() -> Html {
     let canvas_ref = use_node_ref();
     let video_ref = use_node_ref();
-    let render_state_ref = use_mut_ref(|| None);
+    let select_ref = use_node_ref();
+    let render_state_handle_ref = use_mut_ref(|| None);
     let renderer_ref = use_mut_ref(|| None);
 
     use_effect_with_deps(
         {
             let canvas_ref = canvas_ref.clone();
             let video_ref = video_ref.clone();
-            let renderer = renderer_ref;
-            let render_state_ref = render_state_ref;
+            let render_state_handle_ref = render_state_handle_ref.clone();
             move |_| {
                 let canvas: HtmlCanvasElement = canvas_ref
                     .cast()
@@ -44,7 +47,7 @@ pub fn app() -> Html {
                     .expect("Video element was not ready for initialization");
                 let render_state = RenderState::new(video);
                 let render_state_handle: RenderStateHandle = render_state.into();
-                render_state_ref.replace(Some(render_state_handle.clone()));
+                render_state_handle_ref.replace(Some(render_state_handle.clone()));
 
                 let mut unfiltered_program_link = ProgramLinkBuilder::new();
                 unfiltered_program_link
@@ -107,7 +110,10 @@ pub fn app() -> Html {
                     |ctx: &UniformContext| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
-                        gl.uniform1i(Some(uniform_location), TextureId::SrcVideo.location() as i32);
+                        gl.uniform1i(
+                            Some(uniform_location),
+                            TextureId::SrcVideo.location() as i32,
+                        );
                     },
                 );
 
@@ -152,7 +158,7 @@ pub fn app() -> Html {
                 new_renderer.start_animating();
 
                 // save handle to keep animation going
-                *renderer.borrow_mut() = Some(new_renderer);
+                *renderer_ref.borrow_mut() = Some(new_renderer);
 
                 || {}
             }
@@ -160,11 +166,46 @@ pub fn app() -> Html {
         (),
     );
 
+    let handle_change = {
+        let render_state_handle_ref = render_state_handle_ref.clone();
+        let select_ref = select_ref.clone();
+        Callback::from(move |_: Event| {
+            if let Some(render_state_handle) = render_state_handle_ref.borrow().as_ref() {
+                let select_element = select_ref
+                    .get()
+                    .unwrap()
+                    .dyn_into::<HtmlSelectElement>()
+                    .unwrap();
+                let selected_index = select_element.selected_index();
+                match selected_index {
+                    0 => info!("Unfiltered"),
+                    1 => info!("Grayscale"),
+                    _ => info!("Other")
+                }
+            }
+        })
+    };
+
     html! {
         <div class="video-filters">
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
             <video controls=true ref={video_ref} src="./big_buck_bunny.mp4" />
             <canvas ref={canvas_ref}  />
+            <label for="select-filter">{"Choose a filter"}</label>
+            <select
+                name="filter"
+                id="select-filter"
+                onchange={handle_change}
+                ref={select_ref}
+            >
+                <option value={FilterType::Unfiltered.plain_text_label()}>
+                    {FilterType::Unfiltered.plain_text_label()}
+                </option>
+                <option value={FilterType::Grayscale.plain_text_label()}>
+                    {FilterType::Grayscale.plain_text_label()}
+                </option>
+            </select>
+
         </div>
     }
 }
