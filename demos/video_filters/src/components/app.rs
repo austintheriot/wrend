@@ -10,6 +10,8 @@ use crate::{
 
 use log::{error, info};
 use shared::route::Route;
+use strum::IntoEnumIterator;
+use strum_macros::EnumIter;
 use wasm_bindgen::JsCast;
 use web_sys::{Event, HtmlCanvasElement, HtmlSelectElement};
 use wrend::{
@@ -177,12 +179,12 @@ pub fn app() -> Html {
                     .dyn_into::<HtmlSelectElement>()
                     .unwrap();
                 let selected_index = select_element.selected_index();
-                let filter_type = match selected_index {
-                    0 => FilterType::Unfiltered,
-                    1 => FilterType::Grayscale,
-                    _ => {
+
+                let filter_type = match FilterType::iter().skip(selected_index as usize).next() {
+                    Some(filter_type) => filter_type,
+                    None => {
                         error!("Unexpected select option reached: index =  {selected_index}");
-                        FilterType::Unfiltered
+                        Default::default()
                     }
                 };
 
@@ -205,12 +207,16 @@ pub fn app() -> Html {
                 onchange={handle_change}
                 ref={select_ref}
             >
-                <option value={FilterType::Unfiltered.plain_text_label()}>
-                    {FilterType::Unfiltered.plain_text_label()}
-                </option>
-                <option value={FilterType::Grayscale.plain_text_label()}>
-                    {FilterType::Grayscale.plain_text_label()}
-                </option>
+                {for FilterType::iter().map(|filter_type| {
+                    html!{
+                        <option 
+                            value={filter_type.to_string()} 
+                            selected={filter_type == FilterType::default()}
+                        >
+                            {filter_type.to_string()}
+                        </option>
+                    }
+                })}
             </select>
 
         </div>
