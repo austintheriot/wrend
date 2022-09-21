@@ -7,6 +7,7 @@ pub enum TextureId {
     #[default]
     PrevRenderA,
     PrevRenderB,
+    SrcVideo,
 }
 
 impl Id for TextureId {}
@@ -16,6 +17,8 @@ impl TextureId {
         match self {
             TextureId::PrevRenderA => 0,
             TextureId::PrevRenderB => 1,
+            TextureId::SrcVideo => 2,
+            
         }
     }
 }

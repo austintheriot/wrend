@@ -6,10 +6,17 @@
     padding: 0;
   }
 
+  video {
+    display: block;
+    max-width: 100vmin;
+    max-height: 100vmin;
+    margin: 1rem auto;
+  }
+
   canvas {
     display: block;
-    width: 100vmin;
-    height: 100vmin;
-    image-rendering: pixelated;
+    max-width: 100vmin;
+    max-height: 100vmin;
+    margin: 1rem auto;
   }
 }
