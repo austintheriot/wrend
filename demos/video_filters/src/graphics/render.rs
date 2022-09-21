@@ -5,7 +5,7 @@ use super::{
     vertex_shader_id::VertexShaderId, VAOId,
 };
 use crate::state::RenderStateHandle;
-use log::{error, info};
+use log::error;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 use wrend::RendererData;
 
@@ -71,10 +71,10 @@ pub fn render(
     match render_state_handle.borrow().filter_type() {
         super::FilterType::Unfiltered => {
             renderer_data.use_program(&ProgramId::Unfiltered);
-        },
+        }
         super::FilterType::Grayscale => {
             renderer_data.use_program(&ProgramId::Grayscale);
-        },
+        }
     }
 
     renderer_data.use_vao(&VAOId::Quad);

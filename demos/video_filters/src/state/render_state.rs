@@ -1,5 +1,3 @@
-use std::iter::Filter;
-
 use crate::graphics::FilterType;
 use web_sys::HtmlVideoElement;
 
