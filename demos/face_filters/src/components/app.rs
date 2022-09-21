@@ -107,7 +107,7 @@ pub fn app() -> Html {
                     |ctx: &UniformContext| {
                         let gl = ctx.gl();
                         let uniform_location = ctx.uniform_location();
-                        gl.uniform1ui(Some(uniform_location), TextureId::SrcVideo.location());
+                        gl.uniform1i(Some(uniform_location), TextureId::SrcVideo.location() as i32);
                     },
                 );
 
