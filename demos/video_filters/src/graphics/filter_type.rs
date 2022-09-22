@@ -2,6 +2,8 @@ use std::fmt::Display;
 
 use strum::EnumIter;
 
+use super::{ProgramId, FragmentShaderId};
+
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, EnumIter)]
 pub enum FilterType {
     #[default]
@@ -9,6 +11,28 @@ pub enum FilterType {
     Grayscale,
     Invert,
     Wavy,
+}
+
+impl FilterType {
+    /// Gets the associated ProgramId for the FilterType
+    pub fn program_id(&self) -> ProgramId{
+        match self {
+            FilterType::Unfiltered => ProgramId::Unfiltered,
+            FilterType::Grayscale => ProgramId::Grayscale,
+            FilterType::Invert => ProgramId::Invert,
+            FilterType::Wavy => ProgramId::Wavy,
+        }
+    }
+
+    /// Gets the associated FragmentShaderId for the FilterType
+    pub fn fragment_shader_id(&self) -> FragmentShaderId{
+        match self {
+            FilterType::Unfiltered => FragmentShaderId::Unfiltered,
+            FilterType::Grayscale => FragmentShaderId::Grayscale,
+            FilterType::Invert => FragmentShaderId::Invert,
+            FilterType::Wavy => FragmentShaderId::Wavy,
+        }
+    }
 }
 
 impl Display for FilterType {

@@ -17,7 +17,7 @@ use wrend::{
 
 use yew::NodeRef;
 
-use super::TransformFeedbackId;
+use super::{TransformFeedbackId, create_program_links};
 
 const QUAD_VERTEX_SHADER: &str = include_str!("../shaders/vertex.glsl");
 const UNFILTERED_FRAGMENT_SHADER: &str = include_str!("../shaders/unfiltered.glsl");
@@ -60,41 +60,7 @@ pub fn initialize_renderer(
     let render_state_handle: RenderStateHandle = RenderState::new(video).into();
     render_state_handle_ref.replace(Some(render_state_handle.clone()));
 
-    let mut unfiltered_program_link = ProgramLinkBuilder::new();
-    unfiltered_program_link
-        .set_vertex_shader_id(VertexShaderId::Quad)
-        .set_program_id(ProgramId::Unfiltered)
-        .set_fragment_shader_id(FragmentShaderId::Unfiltered);
-    let unfiltered_program_link = unfiltered_program_link
-        .build()
-        .expect("Should build Unfiltered ProgramLink successfully");
-
-    let mut grayscale_program_link = ProgramLinkBuilder::new();
-    grayscale_program_link
-        .set_vertex_shader_id(VertexShaderId::Quad)
-        .set_program_id(ProgramId::Grayscale)
-        .set_fragment_shader_id(FragmentShaderId::Grayscale);
-    let grayscale_program_link = grayscale_program_link
-        .build()
-        .expect("Should build Grayscale ProgramLink successfully");
-
-        let mut wavy_program_link = ProgramLinkBuilder::new();
-    wavy_program_link
-        .set_vertex_shader_id(VertexShaderId::Quad)
-        .set_program_id(ProgramId::Wavy)
-        .set_fragment_shader_id(FragmentShaderId::Wavy);
-    let wavy_program_link = wavy_program_link
-        .build()
-        .expect("Should build Wavy ProgramLink successfully");
-
-    let mut invert_program_link = ProgramLinkBuilder::new();
-    invert_program_link
-        .set_vertex_shader_id(VertexShaderId::Quad)
-        .set_program_id(ProgramId::Invert)
-        .set_fragment_shader_id(FragmentShaderId::Invert);
-    let invert_program_link = invert_program_link
-        .build()
-        .expect("Should build Invert ProgramLink successfully");
+    let program_links = create_program_links();
 
     let vertex_buffer_link = BufferLink::new(BufferId::QuadVertexBuffer, create_vertex_buffer);
 
@@ -181,10 +147,7 @@ pub fn initialize_renderer(
             FragmentShaderId::Wavy,
             WAVY_FRAGMENT_SHADER.to_string(),
         )
-        .add_program_link(unfiltered_program_link)
-        .add_program_link(grayscale_program_link)
-        .add_program_link(invert_program_link)
-        .add_program_link(wavy_program_link)
+        .add_program_links(program_links)
         .add_buffer_link(vertex_buffer_link)
         .add_attribute_link(a_quad_vertex_link)
         .add_uniform_link(u_src_video_texture)
