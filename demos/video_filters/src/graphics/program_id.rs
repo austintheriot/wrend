@@ -4,6 +4,7 @@ use wrend::Id;
 pub enum ProgramId {
     Unfiltered,
     Grayscale,
+    Invert
 }
 
 impl Id for ProgramId {}

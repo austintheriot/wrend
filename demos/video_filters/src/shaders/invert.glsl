@@ -9,5 +9,6 @@ uniform sampler2D u_src_video_texture;
 out vec4 out_color;
 
 void main() {
-  out_color = texture(u_src_video_texture, v_tex_coord);
+  vec4 original_texel_value = texture(u_src_video_texture, v_tex_coord);
+  out_color = vec4(1.0 - original_texel_value.rgb, 1.0);
 }

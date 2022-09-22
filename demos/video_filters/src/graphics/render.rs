@@ -2,7 +2,7 @@ use super::{
     attribute_id::AttributeId, buffer_id::BufferId, fragment_shader_id::FragmentShaderId,
     framebuffer_id::FramebufferId, program_id::ProgramId, texture_id::TextureId,
     transform_feedback_id::TransformFeedbackId, uniform_id::UniformId,
-    vertex_shader_id::VertexShaderId, VAOId,
+    vertex_shader_id::VertexShaderId, VAOId, FilterType,
 };
 use crate::state::RenderStateHandle;
 use log::error;
@@ -69,11 +69,14 @@ pub fn render(
     }
 
     match render_state_handle.borrow().filter_type() {
-        super::FilterType::Unfiltered => {
+        FilterType::Unfiltered => {
             renderer_data.use_program(&ProgramId::Unfiltered);
         }
-        super::FilterType::Grayscale => {
+        FilterType::Grayscale => {
             renderer_data.use_program(&ProgramId::Grayscale);
+        },
+        FilterType::Invert => {
+            renderer_data.use_program(&ProgramId::Invert);
         }
     }
 

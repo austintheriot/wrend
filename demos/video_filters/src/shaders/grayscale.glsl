@@ -1,6 +1,5 @@
 #version 300 es
 
-// fragment shaders don't have a default precision for floats
 precision highp float;
 
 uniform sampler2D u_src_video_texture;
