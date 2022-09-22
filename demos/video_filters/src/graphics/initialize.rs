@@ -56,8 +56,7 @@ pub fn initialize_renderer(
     let video = video_ref
         .cast()
         .expect("Video element was not ready for initialization");
-    let render_state = RenderState::new(video);
-    let render_state_handle: RenderStateHandle = render_state.into();
+    let render_state_handle: RenderStateHandle = RenderState::new(video).into();
     render_state_handle_ref.replace(Some(render_state_handle.clone()));
 
     let mut unfiltered_program_link = ProgramLinkBuilder::new();
