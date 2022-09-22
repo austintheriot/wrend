@@ -1,4 +1,4 @@
-use crate::graphics::{initialize_renderer, FilterType, MakeInitializeArgs};
+use crate::graphics::{initialize_renderer, FilterType, InitializeRendererArgs};
 
 use log::error;
 use shared::route::Route;
@@ -24,7 +24,7 @@ pub fn app() -> Html {
             let video_ref = video_ref.clone();
             let render_state_handle_ref = render_state_handle_ref.clone();
             move |_| {
-                let new_renderer = initialize_renderer(MakeInitializeArgs {
+                let new_renderer = initialize_renderer(InitializeRendererArgs {
                     canvas_ref,
                     video_ref,
                     render_state_handle_ref,

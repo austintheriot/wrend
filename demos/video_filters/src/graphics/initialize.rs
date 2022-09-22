@@ -25,18 +25,18 @@ const GRAYSCALE_FRAGMENT_SHADER: &str = include_str!("../shaders/grayscale.glsl"
 const INVERT_FRAGMENT_SHADER: &str = include_str!("../shaders/invert.glsl");
 const WAVY_FRAGMENT_SHADER: &str = include_str!("../shaders/wavy.glsl");
 
-pub struct MakeInitializeArgs {
+pub struct InitializeRendererArgs {
     pub canvas_ref: NodeRef,
     pub video_ref: NodeRef,
     pub render_state_handle_ref: Rc<RefCell<Option<RenderStateHandle>>>,
 }
 
 pub fn initialize_renderer(
-    MakeInitializeArgs {
+    InitializeRendererArgs {
         canvas_ref,
         video_ref,
         render_state_handle_ref,
-    }: MakeInitializeArgs,
+    }: InitializeRendererArgs,
 ) -> Renderer<
     VertexShaderId,
     FragmentShaderId,
