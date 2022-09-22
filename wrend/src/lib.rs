@@ -52,7 +52,7 @@
 //! A long term goal of `wrend` is to provide matchable errors (or `catch`able errors in JavaScript) for all fallible operations.
 //!
 //! # Example
-//! 
+//!
 //! The following is a "Hello, triangle!" example (the equivalent of "Hello, world!" for WebGL)
 //!
 //! ```no_run
@@ -124,7 +124,7 @@
 //! const VERTEX_SHADER: &str = r#"#version 300 es
 //! in vec2 a_position;
 //! out vec2 v_position;
- //!
+//!
 //! void main() {
 //!     gl_Position = vec4(a_position, 0, 1);
 //!     vec2 zero_to_two = a_position + 1.0;

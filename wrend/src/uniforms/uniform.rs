@@ -11,8 +11,8 @@ use std::hash::Hash;
 use wasm_bindgen::JsValue;
 use web_sys::{WebGl2RenderingContext, WebGlProgram, WebGlUniformLocation};
 
-/// Contains the build information for a WebGL uniform. 
-/// 
+/// Contains the build information for a WebGL uniform.
+///
 /// A [`Uniform`] can be associated with any number of programs,
 /// and can be updated with [crate::RendererData::update_uniform] or
 /// [crate::RendererData::update_uniforms].
@@ -91,7 +91,7 @@ impl<ProgramId: Id, UniformId: Id> Uniform<ProgramId, UniformId> {
 
     /// Updates the value of this uniform in WebGl for every Program where this uniform is used,
     /// using the update callback that was passed in at creation time.
-    /// 
+    ///
     /// @todo: calling this function for anything more than the current program is useless without a UBO
     pub fn update(
         &self,

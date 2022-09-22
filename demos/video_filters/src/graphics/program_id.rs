@@ -6,6 +6,7 @@ pub enum ProgramId {
     Grayscale,
     Invert,
     Wavy,
+    GaussianBlur,
 }
 
 impl Id for ProgramId {}

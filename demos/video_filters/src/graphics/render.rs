@@ -1,8 +1,8 @@
 use super::{
     attribute_id::AttributeId, buffer_id::BufferId, fragment_shader_id::FragmentShaderId,
     framebuffer_id::FramebufferId, program_id::ProgramId, texture_id::TextureId,
-    transform_feedback_id::TransformFeedbackId, uniform_id::UniformId,
-    vertex_shader_id::VertexShaderId, FilterType, VAOId,
+    transform_feedback_id::TransformFeedbackId, vertex_shader_id::VertexShaderId, FilterType,
+    VAOId,
 };
 use crate::state::RenderStateHandle;
 use log::error;
@@ -22,7 +22,7 @@ pub(crate) struct DataForRendering<'a> {
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
-        UniformId,
+        String,
         BufferId,
         AttributeId,
         TextureId,
@@ -97,6 +97,23 @@ pub(crate) fn render_wavy(
     }: DataForRendering,
 ) {
     renderer_data.use_program(&ProgramId::Wavy);
+    renderer_data.use_vao(&VAOId::Quad);
+    gl.active_texture(WebGl2RenderingContext::TEXTURE0 + TextureId::SrcVideo.location());
+    gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(src_video_texture));
+    gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, None);
+    draw(gl, canvas);
+}
+
+/// Renders using the GaussianBlur filter
+pub(crate) fn render_gaussian_blur(
+    DataForRendering {
+        canvas,
+        renderer_data,
+        gl,
+        src_video_texture,
+    }: DataForRendering,
+) {
+    renderer_data.use_program(&ProgramId::GaussianBlur);
     renderer_data.use_vao(&VAOId::Quad);
     gl.active_texture(WebGl2RenderingContext::TEXTURE0 + TextureId::SrcVideo.location());
     gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(src_video_texture));
@@ -187,6 +204,7 @@ pub(crate) fn render_any_filter<'a>(
         FilterType::Grayscale => render_grayscale(data_for_rendering),
         FilterType::Invert => render_inverted(data_for_rendering),
         FilterType::Wavy => render_wavy(data_for_rendering),
+        FilterType::GaussianBlur => render_gaussian_blur(data_for_rendering),
     }
 }
 
@@ -195,7 +213,7 @@ pub fn render(
         VertexShaderId,
         FragmentShaderId,
         ProgramId,
-        UniformId,
+        String,
         BufferId,
         AttributeId,
         TextureId,
@@ -228,7 +246,7 @@ pub fn render(
     });
 
     render_any_filter(
-        &render_state_handle,
+        render_state_handle,
         DataForRendering {
             renderer_data,
             gl,

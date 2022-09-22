@@ -6,6 +6,7 @@ pub enum FragmentShaderId {
     Grayscale,
     Invert,
     Wavy,
+    GaussianBlur,
 }
 
 impl Id for FragmentShaderId {}

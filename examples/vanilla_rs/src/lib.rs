@@ -74,7 +74,6 @@ void main() {
     v_position = zero_to_one;
 }"#;
 
-
 const FRAGMENT_SHADER: &str = r#"#version 300 es
 precision mediump float;
 in vec2 v_position;
