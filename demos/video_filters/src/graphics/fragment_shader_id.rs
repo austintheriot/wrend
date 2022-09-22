@@ -4,7 +4,8 @@ use wrend::Id;
 pub enum FragmentShaderId {
     Unfiltered,
     Grayscale,
-    Invert
+    Invert,
+    Wavy,
 }
 
 impl Id for FragmentShaderId {}

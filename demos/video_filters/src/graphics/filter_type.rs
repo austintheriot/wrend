@@ -8,6 +8,7 @@ pub enum FilterType {
     Unfiltered,
     Grayscale,
     Invert,
+    Wavy,
 }
 
 impl Display for FilterType {
@@ -16,6 +17,7 @@ impl Display for FilterType {
             FilterType::Unfiltered => write!(f, "Unfiltered"),
             FilterType::Grayscale => write!(f, "Grayscale"),
             FilterType::Invert => write!(f, "Invert"),
+            FilterType::Wavy => write!(f, "Wavy"),
         }
     }
 }

@@ -23,6 +23,7 @@ const QUAD_VERTEX_SHADER: &str = include_str!("../shaders/vertex.glsl");
 const UNFILTERED_FRAGMENT_SHADER: &str = include_str!("../shaders/unfiltered.glsl");
 const GRAYSCALE_FRAGMENT_SHADER: &str = include_str!("../shaders/grayscale.glsl");
 const INVERT_FRAGMENT_SHADER: &str = include_str!("../shaders/invert.glsl");
+const WAVY_FRAGMENT_SHADER: &str = include_str!("../shaders/wavy.glsl");
 
 pub struct MakeInitializeArgs {
     pub canvas_ref: NodeRef,
@@ -77,6 +78,15 @@ pub fn initialize_renderer(
         .build()
         .expect("Should build Grayscale ProgramLink successfully");
 
+        let mut wavy_program_link = ProgramLinkBuilder::new();
+    wavy_program_link
+        .set_vertex_shader_id(VertexShaderId::Quad)
+        .set_program_id(ProgramId::Wavy)
+        .set_fragment_shader_id(FragmentShaderId::Wavy);
+    let wavy_program_link = wavy_program_link
+        .build()
+        .expect("Should build Wavy ProgramLink successfully");
+
     let mut invert_program_link = ProgramLinkBuilder::new();
     invert_program_link
         .set_vertex_shader_id(VertexShaderId::Quad)
@@ -123,7 +133,7 @@ pub fn initialize_renderer(
     );
 
     let u_src_video_texture = UniformLink::new(
-        [ProgramId::Unfiltered, ProgramId::Grayscale, ProgramId::Invert],
+        [ProgramId::Unfiltered, ProgramId::Grayscale, ProgramId::Invert, ProgramId::Wavy],
         UniformId::USrcVideoTexture,
         |ctx: &UniformContext| {
             let gl = ctx.gl();
@@ -154,9 +164,14 @@ pub fn initialize_renderer(
             FragmentShaderId::Invert,
             INVERT_FRAGMENT_SHADER.to_string(),
         )
+        .add_fragment_shader_src(
+            FragmentShaderId::Wavy,
+            WAVY_FRAGMENT_SHADER.to_string(),
+        )
         .add_program_link(unfiltered_program_link)
         .add_program_link(grayscale_program_link)
         .add_program_link(invert_program_link)
+        .add_program_link(wavy_program_link)
         .add_buffer_link(vertex_buffer_link)
         .add_attribute_link(a_quad_vertex_link)
         .add_uniform_link(u_src_video_texture)
