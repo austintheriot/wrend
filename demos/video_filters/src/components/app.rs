@@ -69,7 +69,7 @@ pub fn app() -> Html {
     html! {
         <div class="video-filters">
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
-            <video controls=true ref={video_ref} src="./big_buck_bunny.mp4" />
+            <video controls=true ref={video_ref} autoplay=true src="./big_buck_bunny.mp4" />
             <canvas ref={canvas_ref}  />
             <label for="select-filter">{"Choose a filter"}</label>
             <select

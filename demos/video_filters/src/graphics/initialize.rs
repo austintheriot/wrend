@@ -145,6 +145,19 @@ pub fn initialize_renderer(
         },
     );
 
+    let mut u_now_link = {
+        UniformLink::new(
+            ProgramId::Wavy,
+            UniformId::UNow,
+            |ctx: &UniformContext| {
+                let gl = ctx.gl();
+                let uniform_location = ctx.uniform_location();
+                gl.uniform1f(Some(uniform_location), (ctx.now() / 2000.) as f32);
+            },
+        )
+    };
+    u_now_link.set_use_init_callback_for_update(true);
+
     let mut renderer_data_builder = RendererData::builder();
 
     renderer_data_builder
@@ -175,6 +188,7 @@ pub fn initialize_renderer(
         .add_buffer_link(vertex_buffer_link)
         .add_attribute_link(a_quad_vertex_link)
         .add_uniform_link(u_src_video_texture)
+        .add_uniform_link(u_now_link)
         .add_texture_link(src_video_texture_link)
         .add_texture_link(prev_render_texture_link_a)
         .add_texture_link(prev_render_texture_link_b)
