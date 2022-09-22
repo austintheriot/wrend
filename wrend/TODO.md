@@ -16,6 +16,8 @@ The following use cases should guide the development of this library:
 
 ## Todo
 
+- Make /entry page use a list of preview tile links with images and/or video
+
 - Make it more explicit when structs get cloned to convert them into a `JsValue`
 
 - Implementing JavaScript API
