@@ -139,7 +139,7 @@ pub fn render(
         .unwrap().webgl_framebuffer();
 
     // render into a framebuffer
-    generate_src_texture(&render_state_handle, &DataForRendering {
+    generate_src_texture(render_state_handle, &DataForRendering {
         renderer_data,
         gl,
         canvas,

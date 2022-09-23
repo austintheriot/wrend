@@ -215,7 +215,7 @@ impl<
         let program = self
             .programs
             .get(program_id)
-            .expect("Program should exist for ProgramId");
+            .unwrap_or_else(|| panic!("Error in `use_program`: No corresponding Program found for ProgramId: {program_id:?}"));
 
         self.gl().use_program(Some(program));
 
@@ -1101,10 +1101,11 @@ impl<
     fn create_textures(&mut self) -> Result<&mut Self, CreateTextureError> {
         let gl = self.gl.as_ref().ok_or(CreateTextureError::NoContext)?;
         let now = Self::now();
+        let canvas = self.canvas.clone().ok_or(CreateTextureError::NoCanvas)?;
 
         for texture_link in &self.texture_links {
             let texture_id = texture_link.texture_id().clone();
-            let webgl_texture = texture_link.create_texture(gl.clone(), now);
+            let webgl_texture = texture_link.create_texture(gl.clone(), now, canvas.clone());
             let texture = Texture::new(texture_id.clone(), webgl_texture);
 
             self.textures.insert(texture_id, texture);

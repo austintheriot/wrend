@@ -6,13 +6,14 @@ use crate::state::RenderStateHandle;
 use super::TextureId;
 
 pub fn make_create_src_texture(
-    render_state_handle: RenderStateHandle,
+    _render_state_handle: RenderStateHandle,
 ) -> impl Fn(&TextureCreateContext) -> WebGlTexture {
     move |ctx: &TextureCreateContext| {
         let gl = ctx.gl();
         let webgl_texture = gl
             .create_texture()
             .expect("Should be able to create textures from WebGL context");
+        let canvas = ctx.canvas();
 
         gl.active_texture(WebGl2RenderingContext::TEXTURE0 + TextureId::SrcTexture.location());
         gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(&webgl_texture));
@@ -44,8 +45,8 @@ pub fn make_create_src_texture(
             WebGl2RenderingContext::TEXTURE_2D,
             0,
             WebGl2RenderingContext::RGBA as i32,
-            1,
-            1,
+            canvas.width() as i32,
+            canvas.height() as i32,
             0,
             WebGl2RenderingContext::RGBA,
             WebGl2RenderingContext::UNSIGNED_BYTE,
@@ -59,7 +60,7 @@ pub fn make_create_src_texture(
 
 /// Creates a texture that will eventually hold a complete render from WebGL
 pub fn make_create_render_texture(
-    render_state_handle: RenderStateHandle,
+    _render_state_handle: RenderStateHandle,
     texture_id: TextureId,
 ) -> impl Fn(&TextureCreateContext) -> WebGlTexture {
     move |ctx: &TextureCreateContext| {
@@ -67,6 +68,7 @@ pub fn make_create_render_texture(
         let webgl_texture = gl
             .create_texture()
             .expect("Should be able to create textures from WebGL context");
+        let canvas = ctx.canvas();
 
         gl.active_texture(WebGl2RenderingContext::TEXTURE0 + texture_id.location());
         gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(&webgl_texture));
@@ -98,8 +100,8 @@ pub fn make_create_render_texture(
             WebGl2RenderingContext::TEXTURE_2D,
             0,
             WebGl2RenderingContext::RGBA as i32,
-            1 as i32,
-            1 as i32,
+            canvas.width() as i32,
+            canvas.height() as i32,
             0,
             WebGl2RenderingContext::RGBA,
             WebGl2RenderingContext::UNSIGNED_BYTE,

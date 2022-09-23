@@ -1,7 +1,7 @@
 use crate::{IntoJsWrapper, TextureCreateContext};
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;
-use web_sys::WebGl2RenderingContext;
+use web_sys::{WebGl2RenderingContext, HtmlCanvasElement};
 
 pub type TextureCreateContextJsInner = TextureCreateContext;
 
@@ -16,6 +16,10 @@ impl TextureCreateContextJs {
 
     pub fn now(&self) -> f64 {
         self.deref().now()
+    }
+
+    pub fn canvas(&self) -> HtmlCanvasElement {
+        self.deref().canvas().clone()
     }
 }
 

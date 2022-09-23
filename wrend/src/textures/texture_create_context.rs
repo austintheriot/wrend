@@ -1,15 +1,16 @@
-use web_sys::WebGl2RenderingContext;
+use web_sys::{WebGl2RenderingContext, HtmlCanvasElement};
 
 /// This is the context object that is passed to the create_texture callback function
 #[derive(Debug, Clone)]
 pub struct TextureCreateContext {
     gl: WebGl2RenderingContext,
     now: f64,
+    canvas: HtmlCanvasElement,
 }
 
 impl TextureCreateContext {
-    pub fn new(gl: WebGl2RenderingContext, now: f64) -> Self {
-        Self { gl, now }
+    pub fn new(gl: WebGl2RenderingContext, now: f64, canvas: HtmlCanvasElement) -> Self {
+        Self { gl, now, canvas }
     }
 
     pub fn gl(&self) -> &WebGl2RenderingContext {
@@ -18,5 +19,9 @@ impl TextureCreateContext {
 
     pub fn now(&self) -> f64 {
         self.now
+    }
+
+    pub fn canvas(&self) -> &HtmlCanvasElement {
+        &self.canvas
     }
 }
