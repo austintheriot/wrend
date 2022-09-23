@@ -4,7 +4,8 @@ use wrend::{ProgramLink, ProgramLinkBuilder};
 use super::{FilterType, FragmentShaderId, ProgramId, VertexShaderId};
 
 /// Programmatically creates program links for all filter types
-pub fn create_filter_program_links() -> Vec<ProgramLink<ProgramId, VertexShaderId, FragmentShaderId>> {
+pub fn create_filter_program_links() -> Vec<ProgramLink<ProgramId, VertexShaderId, FragmentShaderId>>
+{
     let mut program_links = Vec::new();
 
     for filter_type in FilterType::iter() {

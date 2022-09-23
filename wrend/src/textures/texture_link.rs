@@ -2,7 +2,7 @@ use super::texture_create_context::TextureCreateContext;
 use crate::{Id, TextureCreateCallback};
 use std::fmt::Debug;
 use std::hash::Hash;
-use web_sys::{WebGl2RenderingContext, WebGlTexture, HtmlCanvasElement};
+use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlTexture};
 
 #[derive(Clone)]
 pub struct TextureLink<TextureId: Id> {
@@ -25,7 +25,12 @@ impl<TextureId: Id> TextureLink<TextureId> {
         &self.texture_id
     }
 
-    pub fn create_texture(&self, gl: WebGl2RenderingContext, now: f64, canvas: HtmlCanvasElement) -> WebGlTexture {
+    pub fn create_texture(
+        &self,
+        gl: WebGl2RenderingContext,
+        now: f64,
+        canvas: HtmlCanvasElement,
+    ) -> WebGlTexture {
         let texture_create_context = TextureCreateContext::new(gl, now, canvas);
         self.create_texture_callback
             .call_with_into_js_arg_and_return(&texture_create_context)

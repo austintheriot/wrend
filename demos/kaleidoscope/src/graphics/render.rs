@@ -4,7 +4,7 @@ use super::{
     transform_feedback_id::TransformFeedbackId, vertex_shader_id::VertexShaderId, FilterType,
     GenerationType, VAOId,
 };
-use crate::state::RenderStateHandle;
+use crate::state::AppStateHandle;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlFramebuffer, WebGlTexture};
 use wrend::RendererData;
 
@@ -16,7 +16,7 @@ fn draw(gl: &WebGl2RenderingContext, canvas: &HtmlCanvasElement) {
     gl.draw_arrays(WebGl2RenderingContext::TRIANGLES, 0, 6);
 }
 
-pub(crate) struct DataForRendering<'a> {
+pub struct DataForRendering<'a> {
     renderer_data: &'a RendererData<
         VertexShaderId,
         FragmentShaderId,
@@ -28,16 +28,16 @@ pub(crate) struct DataForRendering<'a> {
         FramebufferId,
         TransformFeedbackId,
         VAOId,
-        RenderStateHandle,
+        AppStateHandle,
     >,
     gl: &'a WebGl2RenderingContext,
     canvas: &'a HtmlCanvasElement,
     src_texture: &'a WebGlTexture,
-    dest_framebuffer: Option<&'a WebGlFramebuffer>
+    dest_framebuffer: Option<&'a WebGlFramebuffer>,
 }
 
 /// Generates a src texture using the Circle Gradient fragment shader
-pub(crate) fn generate_circle_gradient(
+pub fn generate_circle_gradient(
     DataForRendering {
         canvas,
         renderer_data,
@@ -56,57 +56,73 @@ pub(crate) fn generate_circle_gradient(
 }
 
 /// Chooses the correct generation shader to generate the src texture
-pub(crate) fn generate_src_texture<'a>(
-    render_state_handle: &'a RenderStateHandle,
+pub fn generate_src_texture<'a>(
+    app_state_handle: &'a AppStateHandle,
     data_for_generating: &DataForRendering,
 ) {
-    match render_state_handle.borrow().generation_type() {
+    match *app_state_handle
+        .borrow()
+        .ui_state()
+        .generation_type_ref()
+        .borrow()
+    {
         GenerationType::CircleGradient => generate_circle_gradient(data_for_generating),
     }
 }
 
 /// Renders using the Unfiltered filter
-pub(crate) fn render_filter_unfiltered(
+pub fn render_filter_unfiltered(
     DataForRendering {
         canvas,
         renderer_data,
         gl,
         src_texture,
-        dest_framebuffer
+        dest_framebuffer,
     }: &DataForRendering,
 ) {
     renderer_data.use_program(&ProgramId::FilterUnfiltered);
     renderer_data.use_vao(&VAOId::Quad);
     gl.active_texture(WebGl2RenderingContext::TEXTURE0 + TextureId::SrcTexture.location());
     gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(src_texture));
-    gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, dest_framebuffer.as_deref());
+    gl.bind_framebuffer(
+        WebGl2RenderingContext::FRAMEBUFFER,
+        dest_framebuffer.as_deref(),
+    );
     draw(gl, canvas);
 }
 
 /// Renders using the Split filter
-pub(crate) fn render_filter_split(
+pub fn render_filter_split(
     DataForRendering {
         canvas,
         renderer_data,
         gl,
         src_texture,
-        dest_framebuffer
+        dest_framebuffer,
     }: &DataForRendering,
 ) {
     renderer_data.use_program(&ProgramId::FilterSplit);
     renderer_data.use_vao(&VAOId::Quad);
     gl.active_texture(WebGl2RenderingContext::TEXTURE0 + TextureId::SrcTexture.location());
     gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(src_texture));
-    gl.bind_framebuffer(WebGl2RenderingContext::FRAMEBUFFER, dest_framebuffer.as_deref());
+    gl.bind_framebuffer(
+        WebGl2RenderingContext::FRAMEBUFFER,
+        dest_framebuffer.as_deref(),
+    );
     draw(gl, canvas);
 }
 
 /// Chooses the correct filter to render based on what is currently selected
-pub(crate) fn render_filter<'a>(
-    render_state_handle: &'a RenderStateHandle,
+pub fn render_filter<'a>(
+    app_state_handle: &'a AppStateHandle,
     data_for_filtering: &DataForRendering,
 ) {
-    match render_state_handle.borrow().filter_type() {
+    match *app_state_handle
+        .borrow()
+        .as_ref()
+        .filter_type_ref()
+        .borrow()
+    {
         FilterType::Unfiltered => render_filter_unfiltered(data_for_filtering),
         FilterType::Split => render_filter_split(data_for_filtering),
     }
@@ -124,35 +140,42 @@ pub fn render(
         FramebufferId,
         TransformFeedbackId,
         VAOId,
-        RenderStateHandle,
+        AppStateHandle,
     >,
 ) {
     let gl = renderer_data.gl();
     let canvas = renderer_data.canvas();
-    let render_state_handle = renderer_data.user_ctx().unwrap();
+    let app_state_handle = renderer_data.user_ctx().unwrap();
     let src_texture = renderer_data
         .texture(&TextureId::SrcTexture)
         .unwrap()
         .webgl_texture();
     let src_texture_framebuffer = renderer_data
         .framebuffer(&FramebufferId::SrcTexture)
-        .unwrap().webgl_framebuffer();
+        .unwrap()
+        .webgl_framebuffer();
 
     // render into a framebuffer
-    generate_src_texture(render_state_handle, &DataForRendering {
-        renderer_data,
-        gl,
-        canvas,
-        src_texture,
-        dest_framebuffer: Some(src_texture_framebuffer),
-    });
+    generate_src_texture(
+        app_state_handle,
+        &DataForRendering {
+            renderer_data,
+            gl,
+            canvas,
+            src_texture,
+            dest_framebuffer: Some(src_texture_framebuffer),
+        },
+    );
 
     // for now, test rendering directly to the canvas
-    render_filter(render_state_handle, &DataForRendering {
-        renderer_data,
-        gl,
-        canvas,
-        src_texture,
-        dest_framebuffer: None,
-    });
+    render_filter(
+        app_state_handle,
+        &DataForRendering {
+            renderer_data,
+            gl,
+            canvas,
+            src_texture,
+            dest_framebuffer: None,
+        },
+    );
 }

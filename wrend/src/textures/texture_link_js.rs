@@ -1,7 +1,7 @@
 use std::ops::{Deref, DerefMut};
 
 use wasm_bindgen::prelude::wasm_bindgen;
-use web_sys::{WebGl2RenderingContext, WebGlTexture, HtmlCanvasElement};
+use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlTexture};
 
 use crate::{TextureCreateCallbackJs, TextureLink};
 
@@ -23,7 +23,12 @@ impl TextureLinkJs {
     }
 
     #[wasm_bindgen(js_name = createTexture)]
-    pub fn create_texture(&self, gl: WebGl2RenderingContext, now: f64, canvas: HtmlCanvasElement) -> WebGlTexture {
+    pub fn create_texture(
+        &self,
+        gl: WebGl2RenderingContext,
+        now: f64,
+        canvas: HtmlCanvasElement,
+    ) -> WebGlTexture {
         self.deref().create_texture(gl, now, canvas)
     }
 }

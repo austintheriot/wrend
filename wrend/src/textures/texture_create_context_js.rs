@@ -1,7 +1,7 @@
 use crate::{IntoJsWrapper, TextureCreateContext};
 use std::ops::{Deref, DerefMut};
 use wasm_bindgen::prelude::wasm_bindgen;
-use web_sys::{WebGl2RenderingContext, HtmlCanvasElement};
+use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 
 pub type TextureCreateContextJsInner = TextureCreateContext;
 

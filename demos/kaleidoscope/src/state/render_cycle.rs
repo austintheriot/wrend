@@ -2,5 +2,5 @@
 pub enum RenderCycle {
     #[default]
     A,
-    B
+    B,
 }

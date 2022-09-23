@@ -1,4 +1,4 @@
-use web_sys::{WebGl2RenderingContext, HtmlCanvasElement};
+use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 
 /// This is the context object that is passed to the create_texture callback function
 #[derive(Debug, Clone)]

@@ -6,7 +6,7 @@ pub fn build_gaussian_kernel(kernel_size: usize) -> Vec<f32> {
 
     // see comment for rule of thumb around Sigma value:
     // https://stackoverflow.com/a/62002971/14967537
-    let sigma: f32 = (kernel_size as f32 - 1.0 ) / 6.0;
+    let sigma: f32 = (kernel_size as f32 - 1.0) / 6.0;
     for x in 0..kernel_size {
         for y in 0..kernel_size {
             kernel[y * kernel_size + x] = {

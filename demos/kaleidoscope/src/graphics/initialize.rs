@@ -6,19 +6,19 @@ use crate::{
         make_create_render_texture, make_create_src_texture, render, AttributeId, BufferId,
         FragmentShaderId, FramebufferId, ProgramId, TextureId, UniformId, VAOId, VertexShaderId,
     },
-    state::{RenderState, RenderStateHandle},
+    state::{AppState, AppStateHandle, UiState},
 };
 
 use strum::IntoEnumIterator;
 use web_sys::HtmlCanvasElement;
 use wrend::{
-    AttributeLink, BufferLink, FramebufferLink, IdName, Renderer, RendererData, TextureLink,
-    UniformContext, UniformLink, ProgramLinkBuilder,
+    AttributeLink, BufferLink, FramebufferLink, IdName, ProgramLinkBuilder, Renderer, RendererData,
+    TextureLink, UniformContext, UniformLink,
 };
 
 use yew::NodeRef;
 
-use super::{create_filter_program_links, FilterType, TransformFeedbackId, GenerationType};
+use super::{create_filter_program_links, FilterType, GenerationType, TransformFeedbackId};
 
 const QUAD_VERTEX_SHADER: &str = include_str!("../shaders/vertex.glsl");
 const GENERATE_CIRCLE_GRADIENT: &str = include_str!("../shaders/generate_circle_gradient.glsl");
@@ -26,14 +26,16 @@ const FILTER_UNFILTERED_FRAGMENT_SHADER: &str = include_str!("../shaders/filter_
 const FILTER_SPLIT_FRAGMENT_SHADER: &str = include_str!("../shaders/filter_split.glsl");
 
 pub struct InitializeRendererArgs {
+    pub ui_state: UiState,
     pub canvas_ref: NodeRef,
-    pub render_state_handle_ref: Rc<RefCell<Option<RenderStateHandle>>>,
+    pub app_state_handle_ref: Rc<RefCell<Option<AppStateHandle>>>,
 }
 
 pub fn initialize_renderer(
     InitializeRendererArgs {
+        ui_state,
         canvas_ref,
-        render_state_handle_ref,
+        app_state_handle_ref,
     }: InitializeRendererArgs,
 ) -> Renderer<
     VertexShaderId,
@@ -46,14 +48,14 @@ pub fn initialize_renderer(
     FramebufferId,
     TransformFeedbackId,
     VAOId,
-    RenderStateHandle,
+    AppStateHandle,
 > {
     let canvas: HtmlCanvasElement = canvas_ref
         .cast()
         .expect("Canvas ref should point to a canvas in the use_effect hook");
 
-    let render_state_handle: RenderStateHandle = RenderState::new().into();
-    render_state_handle_ref.replace(Some(render_state_handle.clone()));
+    let app_state_handle: AppStateHandle = AppState::new(ui_state).into();
+    app_state_handle_ref.replace(Some(app_state_handle.clone()));
 
     let filter_program_links = create_filter_program_links();
 
@@ -64,7 +66,12 @@ pub fn initialize_renderer(
         .set_fragment_shader_id(FragmentShaderId::GenerateCircleGradient);
     let generate_circle_gradient_program_link = generate_circle_gradient_program_link
         .build()
-        .unwrap_or_else(|_| panic!("Should build program link successfully: {:?}", GenerationType::CircleGradient));
+        .unwrap_or_else(|_| {
+            panic!(
+                "Should build program link successfully: {:?}",
+                GenerationType::CircleGradient
+            )
+        });
 
     let vertex_buffer_link = BufferLink::new(BufferId::QuadVertexBuffer, create_vertex_buffer);
 
@@ -77,17 +84,17 @@ pub fn initialize_renderer(
 
     let src_texture_link = TextureLink::new(
         TextureId::SrcTexture,
-        make_create_src_texture(render_state_handle.clone()),
+        make_create_src_texture(app_state_handle.clone()),
     );
 
     let prev_render_texture_link_a = TextureLink::new(
         TextureId::PrevRenderA,
-        make_create_render_texture(render_state_handle.clone(), TextureId::PrevRenderA),
+        make_create_render_texture(app_state_handle.clone(), TextureId::PrevRenderA),
     );
 
     let prev_render_texture_link_b = TextureLink::new(
         TextureId::PrevRenderB,
-        make_create_render_texture(render_state_handle.clone(), TextureId::PrevRenderB),
+        make_create_render_texture(app_state_handle.clone(), TextureId::PrevRenderB),
     );
 
     let src_texture_framebuffer_link = FramebufferLink::new(
@@ -138,7 +145,7 @@ pub fn initialize_renderer(
 
     renderer_data_builder
         .set_canvas(canvas)
-        .set_user_ctx(render_state_handle)
+        .set_user_ctx(app_state_handle)
         .set_render_callback(render)
         .add_vertex_shader_src(VertexShaderId::Quad, QUAD_VERTEX_SHADER.to_string())
         .add_fragment_shader_src(

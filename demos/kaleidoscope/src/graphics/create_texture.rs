@@ -1,12 +1,12 @@
 use web_sys::{WebGl2RenderingContext, WebGlTexture};
 use wrend::TextureCreateContext;
 
-use crate::state::RenderStateHandle;
+use crate::state::AppStateHandle;
 
 use super::TextureId;
 
 pub fn make_create_src_texture(
-    _render_state_handle: RenderStateHandle,
+    _app_state_handle: AppStateHandle,
 ) -> impl Fn(&TextureCreateContext) -> WebGlTexture {
     move |ctx: &TextureCreateContext| {
         let gl = ctx.gl();
@@ -60,7 +60,7 @@ pub fn make_create_src_texture(
 
 /// Creates a texture that will eventually hold a complete render from WebGL
 pub fn make_create_render_texture(
-    _render_state_handle: RenderStateHandle,
+    _app_state_handle: AppStateHandle,
     texture_id: TextureId,
 ) -> impl Fn(&TextureCreateContext) -> WebGlTexture {
     move |ctx: &TextureCreateContext| {
