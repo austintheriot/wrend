@@ -1,0 +1,69 @@
+[package]
+name = "kaleidoscope"
+description = ""
+version = "0.1.0"
+edition = "2021"
+authors = ["Austin Theriot"]
+license = "MIT OR Apache-2.0"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+
+
+[dependencies]
+# The `wasm-bindgen` crate provides the bare minimum functionality needed
+# to interact with JavaScript.
+wasm-bindgen = "0.2.82"
+wasm-bindgen-futures = "0.4.31"
+js-sys = "0.3.55"
+wrend = "0.2.0"
+shared = { path = '../shared' }
+anyhow = "1.0.58"
+thiserror = "1.0.31"
+rand = { version = "0.8.4" }
+# These two crates enable the info!() logging macro, etc.
+log = "0.4"
+wasm-logger = "0.2.0"
+lazy_static = "1.4.0"
+yew = { version = "0.19" }
+yew-router = "0.16.0"
+# The `console_error_panic_hook` crate provides better debugging of panics by
+# logging them with `console.error`. This is great for development, but requires
+# all the `std::fmt` and `std::panicking` infrastructure, so it's only enabled
+# in debug mode.
+console_error_panic_hook = "0.1.5"
+strum = { version = "0.24", features = ["derive"] }
+strum_macros = "0.24"
+
+
+
+# The `web-sys` crate allows you to interact with the various browser APIs,
+# like the DOM.
+[dependencies.web-sys]
+version = "0.3.4"
+features = [
+  "console",
+  'Document',
+  'Element',
+  "HtmlDivElement",
+  "Touch",
+  "TouchEvent",
+  "TouchList",
+  "DomRect",
+  "DomRectReadOnly",
+  "HtmlSelectElement",
+  "KeyboardEvent",
+  "Blob",
+  "BlobPropertyBag",
+  "Url",
+  "HtmlAnchorElement",
+  "CssStyleDeclaration",
+  "HtmlElement",
+  "Node",
+  "HtmlCanvasElement",
+  "CanvasRenderingContext2d",
+  "File",
+  "FileList",
+  "HtmlVideoElement"
+]

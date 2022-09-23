@@ -12,6 +12,7 @@ members = [
     "demos/simplex_noise",
     "demos/recording_demo",
     "demos/video_filters",
+    "demos/kaleidoscope",
     "examples/vanilla_rs"
 ]
 

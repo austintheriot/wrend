@@ -433,6 +433,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "kaleidoscope"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "console_error_panic_hook",
+ "js-sys",
+ "lazy_static",
+ "log",
+ "rand",
+ "shared",
+ "strum",
+ "strum_macros",
+ "thiserror",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-logger",
+ "web-sys",
+ "wrend 0.2.0",
+ "yew",
+ "yew-router",
+]
+
+[[package]]
 name = "larger_than_life"
 version = "0.1.0"
 dependencies = [
