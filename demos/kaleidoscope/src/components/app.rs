@@ -5,7 +5,7 @@ use crate::{
     state::UiState,
 };
 
-use log::{error, info};
+use log::error;
 use shared::route::Route;
 use strum::IntoEnumIterator;
 
@@ -102,13 +102,9 @@ pub fn app() -> Html {
         })
     };
 
-    info!("re-rendering");
-
     let handle_filter_change = {
         let filter_type = filter_type.clone();
-        let generation_type = generation_type.clone();
         let filter_select_ref = filter_select_ref.clone();
-        let app_state_handle_ref = app_state_handle_ref;
         Callback::from(move |_: Event| {
             let select_element = filter_select_ref
                 .get()
@@ -124,15 +120,6 @@ pub fn app() -> Html {
                     Default::default()
                 }
             };
-
-            if let Some(app_state_handle_ref) = &*app_state_handle_ref.borrow() {
-                let app_state_handle_ref = app_state_handle_ref.borrow();
-                let ref_generation_type = &*app_state_handle_ref.ui_state().generation_type();
-                info!(
-                    "{}",
-                    ref_generation_type.setter() == generation_type.setter()
-                );
-            }
 
             filter_type.set(new_filter_type);
         })
