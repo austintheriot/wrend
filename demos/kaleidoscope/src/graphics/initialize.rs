@@ -2,8 +2,8 @@ use std::{cell::RefCell, rc::Rc};
 
 use crate::{
     graphics::{
-        build_gaussian_kernel, create_framebuffer, create_position_attribute, create_vertex_buffer,
-        make_crate_src_video_texture, make_create_render_texture, render, AttributeId, BufferId,
+        create_framebuffer, create_position_attribute, create_vertex_buffer,
+        make_create_src_texture, make_create_render_texture, render, AttributeId, BufferId,
         FragmentShaderId, FramebufferId, ProgramId, TextureId, UniformId, VAOId, VertexShaderId,
     },
     state::{RenderState, RenderStateHandle},
@@ -21,22 +21,18 @@ use yew::NodeRef;
 use super::{create_program_links, FilterType, TransformFeedbackId};
 
 const QUAD_VERTEX_SHADER: &str = include_str!("../shaders/vertex.glsl");
-const UNFILTERED_FRAGMENT_SHADER: &str = include_str!("../shaders/unfiltered.glsl");
-const GRAYSCALE_FRAGMENT_SHADER: &str = include_str!("../shaders/grayscale.glsl");
-const INVERT_FRAGMENT_SHADER: &str = include_str!("../shaders/invert.glsl");
-const WAVY_FRAGMENT_SHADER: &str = include_str!("../shaders/wavy.glsl");
-const GAUSSIAN_BLUR_FRAGMENT_SHADER: &str = include_str!("../shaders/gaussian_blur.glsl");
+const GENERATE_CIRCLE_GRADIENT: &str = include_str!("../shaders/generate_circle_gradient.glsl");
+const FILTER_UNFILTERED_FRAGMENT_SHADER: &str = include_str!("../shaders/filter_unfiltered.glsl");
+const FILTER_SPLIT_FRAGMENT_SHADER: &str = include_str!("../shaders/filter_split.glsl");
 
 pub struct InitializeRendererArgs {
     pub canvas_ref: NodeRef,
-    pub video_ref: NodeRef,
     pub render_state_handle_ref: Rc<RefCell<Option<RenderStateHandle>>>,
 }
 
 pub fn initialize_renderer(
     InitializeRendererArgs {
         canvas_ref,
-        video_ref,
         render_state_handle_ref,
     }: InitializeRendererArgs,
 ) -> Renderer<
@@ -56,10 +52,7 @@ pub fn initialize_renderer(
         .cast()
         .expect("Canvas ref should point to a canvas in the use_effect hook");
 
-    let video = video_ref
-        .cast()
-        .expect("Video element was not ready for initialization");
-    let render_state_handle: RenderStateHandle = RenderState::new(video).into();
+    let render_state_handle: RenderStateHandle = RenderState::new().into();
     render_state_handle_ref.replace(Some(render_state_handle.clone()));
 
     let program_links = create_program_links();
@@ -73,9 +66,9 @@ pub fn initialize_renderer(
         create_position_attribute,
     );
 
-    let src_video_texture_link = TextureLink::new(
-        TextureId::SrcVideo,
-        make_crate_src_video_texture(render_state_handle.clone()),
+    let src_texture_link = TextureLink::new(
+        TextureId::SrcTexture,
+        make_create_src_texture(render_state_handle.clone()),
     );
 
     let prev_render_texture_link_a = TextureLink::new(
@@ -86,6 +79,12 @@ pub fn initialize_renderer(
     let prev_render_texture_link_b = TextureLink::new(
         TextureId::PrevRenderB,
         make_create_render_texture(render_state_handle.clone(), TextureId::PrevRenderB),
+    );
+
+    let src_texture_framebuffer_link = FramebufferLink::new(
+        FramebufferId::SrcTexture,
+        create_framebuffer,
+        Some(TextureId::SrcTexture),
     );
 
     let prev_render_framebuffer_link_a = FramebufferLink::new(
@@ -100,46 +99,26 @@ pub fn initialize_renderer(
         Some(TextureId::PrevRenderB),
     );
 
-    // it's safe to assume for now that we'll need the source video for every Filter
-    let program_ids_for_u_src_video_texture = FilterType::iter()
+    // it's safe to assume for now that we may need the source texture for every Filter
+    let program_ids_for_u_src_texture = FilterType::iter()
         .map(|filter_type| filter_type.program_id())
         .collect::<Vec<_>>();
-    let u_src_video_texture = UniformLink::new(
-        program_ids_for_u_src_video_texture,
-        UniformId::USrcVideoTexture.name(),
+    let u_src_texture = UniformLink::new(
+        program_ids_for_u_src_texture,
+        UniformId::USrcTexture.name(),
         |ctx: &UniformContext| {
             let gl = ctx.gl();
             let uniform_location = ctx.uniform_location();
             gl.uniform1i(
                 Some(uniform_location),
-                TextureId::SrcVideo.location() as i32,
+                TextureId::SrcTexture.location() as i32,
             );
         },
     );
 
-    // set all Gaussian Blur kernel element uniforms
-    const GAUSSIAN_KERNEL_SIZE: usize = 9;
-    let gaussian_kernel = Rc::new(build_gaussian_kernel(GAUSSIAN_KERNEL_SIZE));
-    let mut kernel_element_uniform_links = Vec::with_capacity(GAUSSIAN_KERNEL_SIZE);
-    for i in 0..GAUSSIAN_KERNEL_SIZE {
-        let u_kernel_element_link = {
-            let gaussian_kernel = Rc::clone(&gaussian_kernel);
-            UniformLink::new(
-                ProgramId::GaussianBlur,
-                format!("u_kernel[{}]", i),
-                move |ctx: &UniformContext| {
-                    let gl = ctx.gl();
-                    let uniform_location = ctx.uniform_location();
-                    gl.uniform1f(Some(uniform_location), gaussian_kernel[i]);
-                },
-            )
-        };
-        kernel_element_uniform_links.push(u_kernel_element_link);
-    }
-
     let mut u_now_link = {
         UniformLink::new(
-            ProgramId::Wavy,
+            [],
             UniformId::UNow.name(),
             |ctx: &UniformContext| {
                 let gl = ctx.gl();
@@ -158,30 +137,28 @@ pub fn initialize_renderer(
         .set_render_callback(render)
         .add_vertex_shader_src(VertexShaderId::Quad, QUAD_VERTEX_SHADER.to_string())
         .add_fragment_shader_src(
-            FragmentShaderId::Grayscale,
-            GRAYSCALE_FRAGMENT_SHADER.to_string(),
+            FragmentShaderId::GenerateCircleGradient,
+            GENERATE_CIRCLE_GRADIENT.to_string(),
         )
         .add_fragment_shader_src(
-            FragmentShaderId::Unfiltered,
-            UNFILTERED_FRAGMENT_SHADER.to_string(),
+            FragmentShaderId::FilterSplit,
+            FILTER_SPLIT_FRAGMENT_SHADER.to_string(),
         )
-        .add_fragment_shader_src(FragmentShaderId::Invert, INVERT_FRAGMENT_SHADER.to_string())
-        .add_fragment_shader_src(FragmentShaderId::Wavy, WAVY_FRAGMENT_SHADER.to_string())
         .add_fragment_shader_src(
-            FragmentShaderId::GaussianBlur,
-            GAUSSIAN_BLUR_FRAGMENT_SHADER.to_string(),
+            FragmentShaderId::FilterUnfiltered,
+            FILTER_UNFILTERED_FRAGMENT_SHADER.to_string(),
         )
         .add_program_links(program_links)
         .add_buffer_link(vertex_buffer_link)
         .add_attribute_link(a_quad_vertex_link)
-        .add_uniform_links(kernel_element_uniform_links)
-        .add_uniform_link(u_src_video_texture)
+        .add_uniform_link(u_src_texture)
         .add_uniform_link(u_now_link)
-        .add_texture_link(src_video_texture_link)
+        .add_texture_link(src_texture_link)
         .add_texture_link(prev_render_texture_link_a)
         .add_texture_link(prev_render_texture_link_b)
         .add_framebuffer_link(prev_render_framebuffer_link_a)
         .add_framebuffer_link(prev_render_framebuffer_link_b)
+        .add_framebuffer_link(src_texture_framebuffer_link)
         .add_vao_link(VAOId::Quad);
 
     let mut new_renderer = renderer_data_builder

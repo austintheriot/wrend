@@ -13,7 +13,6 @@ use yew_router::prelude::*;
 #[function_component(App)]
 pub fn app() -> Html {
     let canvas_ref = use_node_ref();
-    let video_ref = use_node_ref();
     let select_ref = use_node_ref();
     let render_state_handle_ref = use_mut_ref(|| None);
     let renderer_ref = use_mut_ref(|| None);
@@ -21,12 +20,10 @@ pub fn app() -> Html {
     use_effect_with_deps(
         {
             let canvas_ref = canvas_ref.clone();
-            let video_ref = video_ref.clone();
             let render_state_handle_ref = render_state_handle_ref.clone();
             move |_| {
                 let new_renderer = initialize_renderer(InitializeRendererArgs {
                     canvas_ref,
-                    video_ref,
                     render_state_handle_ref,
                 });
 
@@ -69,8 +66,7 @@ pub fn app() -> Html {
     html! {
         <div class="kaleidoscope">
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
-            <video controls=true ref={video_ref} autoplay=true src="./big_buck_bunny.mp4" />
-            <canvas ref={canvas_ref}  />
+            <canvas ref={canvas_ref} width="1000" height="1000" />
             <label for="select-filter">{"Choose a filter"}</label>
             <select
                 name="filter"
