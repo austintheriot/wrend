@@ -16,6 +16,7 @@ mod transform_feedback_id;
 mod uniform_id;
 mod vao_id;
 mod vertex_shader_id;
+mod kernels;
 
 pub use attribute_id::*;
 pub use buffer_id::*;
@@ -35,3 +36,4 @@ pub use transform_feedback_id::*;
 pub use uniform_id::*;
 pub use vao_id::*;
 pub use vertex_shader_id::*;
+pub use kernels::*;

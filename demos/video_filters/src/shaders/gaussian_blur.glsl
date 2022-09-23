@@ -6,7 +6,7 @@ precision highp float;
 
 uniform sampler2D u_src_video_texture;
 
-uniform float u_kernel[9];
+uniform float u_kernel[81];
 const int KERNEL_SIZE = int(sqrt(float(u_kernel.length())));
 
 in vec2 v_tex_coord;

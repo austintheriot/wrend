@@ -2,7 +2,7 @@ use std::{cell::RefCell, rc::Rc};
 
 use crate::{
     graphics::{
-        create_framebuffer, create_position_attribute, create_vertex_buffer,
+        build_gaussian_kernel, create_framebuffer, create_position_attribute, create_vertex_buffer,
         make_crate_src_video_texture, make_create_render_texture, render, AttributeId, BufferId,
         FragmentShaderId, FramebufferId, ProgramId, TextureId, UniformId, VAOId, VertexShaderId,
     },
@@ -117,36 +117,23 @@ pub fn initialize_renderer(
         },
     );
 
-    // build Gaussian Blur kernel
-    const KERNEL_WIDTH: usize = 9;
-    const KERNEL_LEN: usize = KERNEL_WIDTH.pow(2);
-    const SIGMA: f32 = 1.4;
-    let mut kernel = [0.0; KERNEL_LEN];
-    for x in 0..KERNEL_WIDTH {
-        for y in 0..KERNEL_WIDTH {
-            kernel[y * KERNEL_WIDTH + x] = {
-                let x = x as f32;
-                let y = y as f32;
-                f32::exp(-((x.powf(2.0) + y.powf(2.0)) / (2.0 * SIGMA.powf(2.0))))
-                    / (2.0 * std::f32::consts::PI * SIGMA.powf(2.0))
-            }
-        }
-    }
-    let kernel_sum: f32 = kernel.iter().sum();
-    kernel.iter_mut().for_each(|el| *el /= kernel_sum);
-
     // set all Gaussian Blur kernel element uniforms
-    let mut kernel_element_uniform_links = Vec::with_capacity(KERNEL_WIDTH);
-    for i in 0..KERNEL_WIDTH {
-        let u_kernel_element_link = UniformLink::new(
-            ProgramId::GaussianBlur,
-            format!("u_kernel[{}]", i),
-            move |ctx: &UniformContext| {
-                let gl = ctx.gl();
-                let uniform_location = ctx.uniform_location();
-                gl.uniform1f(Some(uniform_location), kernel[i]);
-            },
-        );
+    const GAUSSIAN_KERNEL_SIZE: usize = 9;
+    let gaussian_kernel = Rc::new(build_gaussian_kernel(GAUSSIAN_KERNEL_SIZE));
+    let mut kernel_element_uniform_links = Vec::with_capacity(GAUSSIAN_KERNEL_SIZE);
+    for i in 0..GAUSSIAN_KERNEL_SIZE {
+        let u_kernel_element_link = {
+            let gaussian_kernel = Rc::clone(&gaussian_kernel);
+            UniformLink::new(
+                ProgramId::GaussianBlur,
+                format!("u_kernel[{}]", i),
+                move |ctx: &UniformContext| {
+                    let gl = ctx.gl();
+                    let uniform_location = ctx.uniform_location();
+                    gl.uniform1f(Some(uniform_location), gaussian_kernel[i]);
+                },
+            )
+        };
         kernel_element_uniform_links.push(u_kernel_element_link);
     }
 
