@@ -117,11 +117,10 @@ pub fn render_filter<'a>(
     app_state_handle: &'a AppStateHandle,
     data_for_filtering: &DataForRendering,
 ) {
-    match *app_state_handle
-        .borrow()
-        .as_ref()
-        .filter_type_ref()
-        .borrow()
+    match (*app_state_handle.borrow().as_ref().applied_filters())
+        .first()
+        .map(Clone::clone)
+        .unwrap_or_default()
     {
         FilterType::Unfiltered => render_filter_unfiltered(data_for_filtering),
         FilterType::Split => render_filter_split(data_for_filtering),

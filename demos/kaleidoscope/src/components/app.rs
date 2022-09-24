@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{borrow::Borrow, rc::Rc};
 
 use crate::{
     graphics::{initialize_renderer, FilterType, GenerationType, InitializeRendererArgs},
@@ -10,7 +10,7 @@ use shared::route::Route;
 use strum::IntoEnumIterator;
 
 use wasm_bindgen::JsCast;
-use web_sys::{Event, HtmlSelectElement};
+use web_sys::{Event, HtmlSelectElement, MouseEvent};
 
 use yew::{
     function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, use_state_eq,
@@ -20,46 +20,50 @@ use yew_router::prelude::*;
 
 #[function_component(App)]
 pub fn app() -> Html {
+    // element refs
     let canvas_ref = use_node_ref();
     let generation_select_ref = use_node_ref();
     let filter_select_ref = use_node_ref();
+
+    // state handles (for setting)
+    let generation_type = use_state_eq(GenerationType::default);
+    let applied_filters = use_state_eq(Vec::new);
+
+    // state refs (for getting)
+    let generation_type_ref = use_mut_ref(GenerationType::default);
+    let applied_filters_ref = use_mut_ref(Vec::default);
+
     let app_state_handle_ref = use_mut_ref(|| None);
     let renderer_ref = use_mut_ref(|| None);
-    let generation_type = use_state_eq(GenerationType::default);
-    let filter_type = use_state_eq(FilterType::default);
-    let applied_filters = use_state_eq(Vec::new);
-    let generation_type_ref = use_mut_ref(GenerationType::default);
-    let filter_type_ref = use_mut_ref(FilterType::default);
 
     use_effect_with_deps(
         {
             let generation_type_ref = Rc::clone(&generation_type_ref);
-            let filter_type_ref = Rc::clone(&filter_type_ref);
-            move |(filter_type, generation_type): &(
-                UseStateHandle<FilterType>,
+            let applied_filters_ref = Rc::clone(&applied_filters_ref);
+            move |(applied_filters, generation_type): &(
+                UseStateHandle<Vec<FilterType>>,
                 UseStateHandle<GenerationType>,
             )| {
                 *generation_type_ref.borrow_mut() = **generation_type;
-                *filter_type_ref.borrow_mut() = **filter_type;
+                *applied_filters_ref.borrow_mut() = (**applied_filters).clone();
 
                 || {}
             }
         },
-        (filter_type.clone(), generation_type.clone()),
+        (applied_filters.clone(), generation_type.clone()),
     );
 
     use_effect_with_deps(
         {
             let canvas_ref = canvas_ref.clone();
             let app_state_handle_ref = app_state_handle_ref.clone();
+            let applied_filters_ref = applied_filters_ref.clone();
             let generation_type = generation_type.clone();
-            let filter_type = filter_type.clone();
             let applied_filters = applied_filters.clone();
             move |_| {
                 let ui_state = UiState::new(
-                    filter_type_ref,
                     generation_type_ref,
-                    filter_type,
+                    applied_filters_ref,
                     generation_type,
                     applied_filters,
                 );
@@ -103,7 +107,7 @@ pub fn app() -> Html {
     };
 
     let handle_filter_change = {
-        let filter_type = filter_type.clone();
+        let applied_filters = applied_filters.clone();
         let filter_select_ref = filter_select_ref.clone();
         Callback::from(move |_: Event| {
             let select_element = filter_select_ref
@@ -121,8 +125,22 @@ pub fn app() -> Html {
                 }
             };
 
-            filter_type.set(new_filter_type);
+            let mut new_applied_filters = (*applied_filters).clone();
+            new_applied_filters.push(new_filter_type);
+            applied_filters.set(new_applied_filters);
         })
+    };
+
+    let make_handle_filter_button_click = {
+        let applied_filters = applied_filters.clone();
+        move |i: usize| {
+            let applied_filters = applied_filters.clone();
+            Callback::from(move |_: MouseEvent| {
+                let mut new_applied_filters = (*applied_filters).clone();
+                new_applied_filters.remove(i);
+                applied_filters.set(new_applied_filters);
+            })
+        }
     };
 
     html! {
@@ -156,16 +174,29 @@ pub fn app() -> Html {
             >
                 {for FilterType::iter().map(|filter_type_el| {
                     html!{
-                        <option
-                            value={filter_type_el.to_string()}
-                            selected={filter_type_el == *filter_type}
-                        >
+                        <option value={filter_type_el.to_string()}>
                             {filter_type_el.to_string()}
                         </option>
                     }
                 })}
             </select>
 
+            <p>{"Currently Set Filters: "}</p>
+            {if applied_filters.is_empty() {
+                html!{ <p>{"No filters selected"}</p>}
+            } else {
+               html!{
+                <>
+                    {for applied_filters.iter().enumerate().map(|(i, filter_type_el)| {
+                        html!{
+                            <button onclick={make_handle_filter_button_click(i)}>
+                                {filter_type_el.to_string()}
+                            </button>
+                        }
+                    })}
+                </>
+               }
+            }}
         </div>
     }
 }
