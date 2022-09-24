@@ -14,12 +14,12 @@ impl AppState {
         }
     }
 
-    pub fn render_cycle(&self) -> &RenderCycle {
-        &self.render_cycle
+    pub fn current_render_cycle(&self) -> RenderCycle {
+        self.render_cycle
     }
 
-    pub fn set_render_cycle(&mut self, render_cycle: RenderCycle) {
-        self.render_cycle = render_cycle;
+    pub fn advance_render_cycle(&mut self) {
+        self.render_cycle = self.render_cycle.next();
     }
 
     pub fn ui_state(&self) -> &UiState {

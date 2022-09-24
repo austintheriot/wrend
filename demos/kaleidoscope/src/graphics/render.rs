@@ -1,10 +1,13 @@
+use std::rc::Rc;
+
 use super::{
     attribute_id::AttributeId, buffer_id::BufferId, fragment_shader_id::FragmentShaderId,
     framebuffer_id::FramebufferId, program_id::ProgramId, texture_id::TextureId,
     transform_feedback_id::TransformFeedbackId, vertex_shader_id::VertexShaderId, FilterType,
     GenerationType, VAOId,
 };
-use crate::state::AppStateHandle;
+use crate::state::{AppStateHandle, RenderCycle};
+use log::info;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlFramebuffer, WebGlTexture};
 use wrend::RendererData;
 
@@ -166,15 +169,103 @@ pub fn render(
         },
     );
 
-    // for now, test rendering directly to the canvas
-    render_filter(
-        app_state_handle,
-        &DataForRendering {
-            renderer_data,
-            gl,
-            canvas,
-            src_texture,
-            dest_framebuffer: None,
-        },
-    );
+    // Test scenarios:
+    // No filters:
+    // Copy directly from src_texture to Canvas
+    //
+    // 1 Filter:
+    // Render Cycle A:
+    // - Render into Framebuffer A
+    // - Copy from Framebuffer A to Canvas
+    //
+    // 2 Filters:
+    // Render Cycle A:
+    // - Read directly from src_texture
+    // - Render into Framebuffer A
+    // Render Cycle B:
+    // - Read from Framebuffer A
+    // - Render into Framebuffer B
+    // Copy from Framebuffer B to Canvas
+    //
+    // 3 Filters:
+    // Render Cycle A:
+    // - Read directly from src_texture
+    // - Render into Framebuffer A
+    // Render Cycle B:
+    // - Read from Framebuffer A
+    // - Render into Framebuffer B
+    // Render Cycle A:
+    // - ead from Framebuffer B
+    // - Render into Framebuffer A
+    // Copy from Framebuffer A to Canvas
+    let applied_filters = Rc::clone(&app_state_handle.borrow().ui_state().applied_filters_ref());
+    info!("{:?}", applied_filters);
+    let mut prev_render_cycle: Option<RenderCycle> = None;
+    for filter_type in &(*applied_filters.borrow()) {
+        let current_render_cycle = app_state_handle.borrow_mut().current_render_cycle();
+        let render_framebuffer_id = current_render_cycle.framebuffer_id();
+        let render_webgl_framebuffer = renderer_data
+            .framebuffer(&render_framebuffer_id)
+            .unwrap()
+            .webgl_framebuffer();
+
+        {
+            // pull data from the previous render destination (or from the original src_texture if no filter has already been rendered)
+            let src_texture = if let Some(prev_render_cycle) = prev_render_cycle {
+                let prev_render_texture_id = prev_render_cycle.texture_id();
+                let prev_render_texture = renderer_data
+                    .texture(&prev_render_texture_id)
+                    .unwrap()
+                    .webgl_texture();
+                prev_render_texture
+            } else {
+                src_texture
+            };
+
+            let data_for_rendering = DataForRendering {
+                renderer_data,
+                gl,
+                canvas,
+                src_texture,
+                dest_framebuffer: Some(render_webgl_framebuffer),
+            };
+
+            match filter_type {
+                FilterType::Unfiltered => render_filter_unfiltered(&data_for_rendering),
+                FilterType::Split => render_filter_split(&data_for_rendering),
+            }
+        }
+
+        prev_render_cycle = Some(current_render_cycle);
+        app_state_handle.borrow_mut().advance_render_cycle();
+    }
+
+    match prev_render_cycle {
+        None => {
+            // no filters were applied: copy original src_texture to canvas
+            render_filter_unfiltered(&DataForRendering {
+                renderer_data,
+                gl,
+                canvas,
+                src_texture,
+                dest_framebuffer: None,
+            });
+        }
+        Some(prev_render_cycle) => {
+            let prev_render_texture_id = prev_render_cycle.texture_id();
+            let prev_render_texture = renderer_data
+                .texture(&prev_render_texture_id)
+                .unwrap()
+                .webgl_texture();
+
+            // copy framebuffer that was previously rendered into to canvas
+            render_filter_unfiltered(&DataForRendering {
+                renderer_data,
+                gl,
+                canvas,
+                src_texture: prev_render_texture,
+                dest_framebuffer: None,
+            });
+        }
+    }
 }
