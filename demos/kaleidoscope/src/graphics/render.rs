@@ -195,9 +195,9 @@ pub fn render(
 
         {
             let src_texture = match prev_render_cycle {
-                // no filter has been rendered yet: pull data directly from original render
+                // no filter has been rendered yet: pull data directly from original src render
                 None => src_texture,
-                // pull data from last filtered render
+                // at least on filter has been rendered: pull data from last filtered render
                 Some(prev_render_cycle) => {
                     let prev_render_texture_id = prev_render_cycle.texture_id();
                     renderer_data
@@ -226,7 +226,7 @@ pub fn render(
     }
 
     match prev_render_cycle {
-        // no filters were applied: copy original src_texture to canvas
+        // no filters were rendered: copy original src_texture to canvas
         None => {
             render_filter_unfiltered(&DataForRendering {
                 renderer_data,
@@ -236,7 +236,7 @@ pub fn render(
                 dest_framebuffer: None,
             });
         }
-        // at least 1 filter was applied: copy previous filtered render to canvas
+        // at least 1 filter was rendered: copy previous filtered render to canvas
         Some(prev_render_cycle) => {
             let prev_render_texture_id = prev_render_cycle.texture_id();
             let prev_render_texture = renderer_data
