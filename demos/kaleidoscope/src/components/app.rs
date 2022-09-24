@@ -23,7 +23,6 @@ pub fn app() -> Html {
     // element refs
     let canvas_ref = use_node_ref();
     let generation_select_ref = use_node_ref();
-    let filter_select_ref = use_node_ref();
 
     // state handles (for setting)
     let generation_type = use_state_eq(GenerationType::default);
@@ -106,32 +105,19 @@ pub fn app() -> Html {
         })
     };
 
-    let handle_filter_change = {
+    let make_handle_add_filter_click = {
         let applied_filters = applied_filters.clone();
-        let filter_select_ref = filter_select_ref.clone();
-        Callback::from(move |_: Event| {
-            let select_element = filter_select_ref
-                .get()
-                .unwrap()
-                .dyn_into::<HtmlSelectElement>()
-                .unwrap();
-            let selected_index = select_element.selected_index();
-
-            let new_filter_type = match FilterType::iter().nth(selected_index as usize) {
-                Some(new_filter_type) => new_filter_type,
-                None => {
-                    error!("Unexpected select option reached for filter_type: index =  {selected_index}");
-                    Default::default()
-                }
-            };
-
-            let mut new_applied_filters = (*applied_filters).clone();
-            new_applied_filters.push(new_filter_type);
-            applied_filters.set(new_applied_filters);
-        })
+        move |filter_type: FilterType| {
+            let applied_filters = applied_filters.clone();
+            Callback::from(move |_: MouseEvent| {
+                let mut new_applied_filters = (*applied_filters).clone();
+                new_applied_filters.push(filter_type);
+                applied_filters.set(new_applied_filters);
+            })
+        }
     };
 
-    let make_handle_filter_button_click = {
+    let make_handle_remove_filter_click = {
         let applied_filters = applied_filters.clone();
         move |i: usize| {
             let applied_filters = applied_filters.clone();
@@ -166,20 +152,16 @@ pub fn app() -> Html {
                 })}
             </select>
             <label for="select-filter">{"Choose a filter"}</label>
-            <select
-                name="filter"
-                id="select-filter"
-                onchange={handle_filter_change}
-                ref={filter_select_ref}
-            >
-                {for FilterType::iter().map(|filter_type_el| {
-                    html!{
-                        <option value={filter_type_el.to_string()}>
-                            {filter_type_el.to_string()}
-                        </option>
-                    }
-                })}
-            </select>
+
+
+            <p>{"Add a Filter: "}</p>
+           {for FilterType::iter().map(|filter_type_el| {
+            html!{
+                <button onclick={make_handle_add_filter_click(filter_type_el)}>
+                    {filter_type_el.to_string()}
+                </button>
+            }
+            })}
 
             <p>{"Currently Set Filters: "}</p>
             {if applied_filters.is_empty() {
@@ -189,7 +171,7 @@ pub fn app() -> Html {
                 <>
                     {for applied_filters.iter().enumerate().map(|(i, filter_type_el)| {
                         html!{
-                            <button onclick={make_handle_filter_button_click(i)}>
+                            <button onclick={make_handle_remove_filter_click(i)}>
                                 {filter_type_el.to_string()}
                             </button>
                         }
