@@ -1,4 +1,4 @@
-use std::{borrow::Borrow, rc::Rc};
+use std::rc::Rc;
 
 use crate::{
     graphics::{initialize_renderer, FilterType, GenerationType, InitializeRendererArgs},
@@ -56,8 +56,8 @@ pub fn app() -> Html {
     use_effect_with_deps(
         {
             let canvas_ref = canvas_ref.clone();
-            let app_state_handle_ref = app_state_handle_ref.clone();
-            let applied_filters_ref = applied_filters_ref.clone();
+            let app_state_handle_ref = app_state_handle_ref;
+            let applied_filters_ref = applied_filters_ref;
             let generation_type = generation_type.clone();
             let applied_filters = applied_filters.clone();
             move |_| {

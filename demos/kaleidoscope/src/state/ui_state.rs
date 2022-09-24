@@ -18,7 +18,7 @@ impl UiState {
         // hack: for some reason, Yew when de-referencing values from `UseStateHandle`, stale
         // values are returned, so this is a hack around that (using refs to get state and UseStateHandle
         // to set state)
-        
+
         // getters:
         generation_type_ref: Rc<RefCell<GenerationType>>,
         applied_filters_ref: Rc<RefCell<Vec<FilterType>>>,
