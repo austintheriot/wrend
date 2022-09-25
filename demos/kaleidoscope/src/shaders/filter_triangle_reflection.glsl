@@ -15,30 +15,12 @@ float radians_to_degrees(float radians) {
   return radians * (180.0 / PI);
 }
 
-float _get_phi(float x, float y) {
-  float phi;
-
-  if (x > 0.0) {
-    phi = atan(y / x);
-  } else if (x < 0.0 && y >= 0.0) {
-    phi = atan(y / x) + PI;
-  } else if (x < 0.0 && y < 0.0) {
-    phi = atan(y / x) - PI;
-  } else if (x == 0.0 && y > 0.0) {
-    phi = PI / 2.0;
-  } else if (x == 0.0 && y < 0.0) {
-    phi = (PI / 2.0) * -1.0;
-  }
-
-  return phi;
-}
-
 float get_phi(float x, float y, float r) {
   float phi;
 
   if (y >= 0.0 && r != 0.0) {
     phi = acos(x / r);
-  } else if (y > 0.0) {
+  } else if (y < 0.0) {
     phi = -acos(x / r);
   }
 
@@ -70,14 +52,5 @@ void main() {
   // map to (0, 1]
   phi = phi / (2.0 * PI);
 
-  float output_color;
-  if (phi > 0.6666) {
-    output_color = 1.0;
-  } else if (phi > 0.33333) {
-    output_color = 0.5;
-  } else {
-    output_color = 0.0;
-  }
-
-  out_color = vec4(output_color, 0, 0, 1);
+  out_color = vec4(phi, 0, 0, 1);
 }
