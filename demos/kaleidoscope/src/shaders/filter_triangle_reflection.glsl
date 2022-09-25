@@ -9,48 +9,61 @@ uniform sampler2D u_src_texture;
 out vec4 out_color;
 
 const float PI = 3.141592653589793;
-const vec2 CARTESIAN_CENTER = vec2(0.5, 0.5);
+const vec2 CARTESIAN_TEXTURE_CENTER = vec2(0.5, 0.5);
 
-float radians_to_degrees(float radians) {
-  return radians * (180.0 / PI);
-}
-
+// see https://en.wikipedia.org/wiki/Polar_coordinate_system for formula
 float get_phi(float x, float y, float r) {
   float phi;
 
-  if (y >= 0.0 && r != 0.0) {
+  if (y >= 0. && r != 0.) {
     phi = acos(x / r);
-  } else if (y < 0.0) {
+  } else if (y < 0.) {
     phi = -acos(x / r);
   }
 
   return phi;
 }
 
-void main() {
-  vec4 _unused = texture(u_src_texture, vec2(0, 0));
+// inputs: (r, phi), where phi ranges from (−π, π]
+// output: (x, y) in cartesian coordinates
+vec2 polar_to_cartesian_coordinates(vec2 polar) {
+  float r = polar.x;
+  float phi = polar.y;
+  float x = r * cos(phi);
+  float y = r * sin(phi);
+  return vec2(x, y);
+}
 
-  float y = v_tex_coord.y;
-  float x = v_tex_coord.x;
+// inputs: (x, y) in cartesian coordinates
+// output (r, phi), where phi ranges from (−π, π]
+vec2 cartesian_to_polar_coordinates(vec2 cartesian, vec2 origin) {
+  float r = distance(cartesian, origin);
 
-  // use origin
-  y = y - 0.5;
-  x = x - 0.5;
+  float y = cartesian.y;
+  float x = cartesian.x;
 
+  x = x - origin.x;
+  y = y - origin.y;
+
+  // prevent undefined phi
   if (x == 0.) {
-    // prevent undefined phi
     x = x + 0.00001;
   }
 
-  // get radius
-  float r = distance(v_tex_coord, CARTESIAN_CENTER);
-
   // get phi (−π, π]
-  float phi = get_phi(x, y, r) + _unused.x * 0.0000001;
-  // map to (0, 2π]
-  phi = phi + PI;
-  // map to (0, 1]
-  phi = phi / (2.0 * PI);
+  float phi = get_phi(x, y, r);
+  
+  return vec2(r, phi);
+}
 
-  out_color = vec4(phi, r, 0, 1);
+void main() {
+  // convert texture coordinates into polar coordinates
+  vec2 polar_coords = cartesian_to_polar_coordinates(v_tex_coord, CARTESIAN_TEXTURE_CENTER);
+
+  // sample only the first 1/3 of the polar coordinate plane
+  polar_coords = mod(polar_coords, vec2(10000, (2. * PI) / 3.));
+
+  vec2 cartesian_coords = polar_to_cartesian_coordinates(polar_coords);
+  
+  out_color = texture(u_src_texture, cartesian_coords);
 }
