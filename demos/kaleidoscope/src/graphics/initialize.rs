@@ -12,20 +12,23 @@ use crate::{
 use strum::IntoEnumIterator;
 use web_sys::HtmlCanvasElement;
 use wrend::{
-    AttributeLink, BufferLink, FramebufferLink, IdName, ProgramLinkBuilder, Renderer, RendererData,
-    TextureLink, UniformContext, UniformLink,
+    AttributeLink, BufferLink, FramebufferLink, IdName, Renderer, RendererData, TextureLink,
+    UniformContext, UniformLink,
 };
 
 use yew::NodeRef;
 
-use super::{create_filter_program_links, FilterType, GenerationType, TransformFeedbackId, create_generate_program_links};
+use super::{
+    create_filter_program_links, create_generate_program_links, FilterType, TransformFeedbackId,
+};
 
 const QUAD_VERTEX_SHADER: &str = include_str!("../shaders/vertex.glsl");
 const GENERATE_CIRCLE_GRADIENT: &str = include_str!("../shaders/generate_circle_gradient.glsl");
 const GENERATE_LINEAR_GRADIENT: &str = include_str!("../shaders/generate_linear_gradient.glsl");
 const FILTER_UNFILTERED_FRAGMENT_SHADER: &str = include_str!("../shaders/filter_unfiltered.glsl");
 const FILTER_SPLIT_FRAGMENT_SHADER: &str = include_str!("../shaders/filter_split.glsl");
-const FILTER_TRIANGLE_REFLECTION_FRAGMENT_SHADER: &str = include_str!("../shaders/filter_triangle_reflection.glsl");
+const FILTER_TRIANGLE_REFLECTION_FRAGMENT_SHADER: &str =
+    include_str!("../shaders/filter_triangle_reflection.glsl");
 
 pub struct InitializeRendererArgs {
     pub ui_state: UiState,

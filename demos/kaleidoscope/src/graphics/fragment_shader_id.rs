@@ -6,7 +6,7 @@ pub enum FragmentShaderId {
     GenerateLinearGradient,
     FilterUnfiltered,
     FilterSplit,
-    FilterTriangleReflection
+    FilterTriangleReflection,
 }
 
 impl Id for FragmentShaderId {}

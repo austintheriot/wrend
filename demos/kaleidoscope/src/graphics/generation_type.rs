@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use strum::EnumIter;
 
-use super::{ProgramId, FragmentShaderId};
+use super::{FragmentShaderId, ProgramId};
 
 /// This represents the possible initially generated source textures we can work with
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, EnumIter)]

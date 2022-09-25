@@ -258,7 +258,9 @@ pub fn render(
             match filter_type {
                 FilterType::Unfiltered => render_filter_unfiltered(&data_for_rendering),
                 FilterType::Split => render_filter_split(&data_for_rendering),
-                FilterType::TriangleReflection => render_filter_triangle_reflection(&data_for_rendering),
+                FilterType::TriangleReflection => {
+                    render_filter_triangle_reflection(&data_for_rendering)
+                }
             }
         }
 

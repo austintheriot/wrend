@@ -9,7 +9,7 @@ pub enum FilterType {
     #[default]
     Unfiltered,
     Split,
-    TriangleReflection
+    TriangleReflection,
 }
 
 impl FilterType {
