@@ -8,6 +8,7 @@ use wrend::{Id, IdName};
 pub enum UniformId {
     #[default]
     USrcTexture,
+    USrcVideo,
     UNow,
 }
 
@@ -17,6 +18,7 @@ impl IdName for UniformId {
     fn name(&self) -> String {
         match self {
             UniformId::USrcTexture => "u_src_texture".to_string(),
+            UniformId::USrcVideo => "u_src_video".to_string(),
             UniformId::UNow => "u_now".to_string(),
         }
     }

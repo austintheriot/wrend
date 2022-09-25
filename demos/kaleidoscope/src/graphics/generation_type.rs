@@ -10,6 +10,7 @@ pub enum GenerationType {
     #[default]
     CircleGradient,
     LinearGradient,
+    VideoInput,
 }
 
 impl GenerationType {
@@ -18,6 +19,7 @@ impl GenerationType {
         match self {
             GenerationType::CircleGradient => ProgramId::GenerateCircleGradient,
             GenerationType::LinearGradient => ProgramId::GenerateLinearGradient,
+            GenerationType::VideoInput => ProgramId::GenerateVideoInput,
         }
     }
 
@@ -26,6 +28,7 @@ impl GenerationType {
         match self {
             GenerationType::CircleGradient => FragmentShaderId::GenerateCircleGradient,
             GenerationType::LinearGradient => FragmentShaderId::GenerateLinearGradient,
+            GenerationType::VideoInput => FragmentShaderId::GenerateVideoInput,
         }
     }
 }
@@ -33,8 +36,9 @@ impl GenerationType {
 impl Display for GenerationType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            GenerationType::CircleGradient => write!(f, "CircleGradient"),
-            GenerationType::LinearGradient => write!(f, "LinearGradient"),
+            GenerationType::CircleGradient => write!(f, "Circle Gradient"),
+            GenerationType::LinearGradient => write!(f, "Linear Gradient"),
+            GenerationType::VideoInput => write!(f, "Video Input"),
         }
     }
 }

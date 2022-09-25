@@ -7,8 +7,11 @@ use super::{
     GenerationType, VAOId,
 };
 use crate::state::{AppStateHandle, RenderCycle};
+use log::{error, info};
 
-use web_sys::{HtmlCanvasElement, WebGl2RenderingContext, WebGlFramebuffer, WebGlTexture};
+use web_sys::{
+    HtmlCanvasElement, HtmlVideoElement, WebGl2RenderingContext, WebGlFramebuffer, WebGlTexture,
+};
 use wrend::RendererData;
 
 /// Reusable draw call for multiple filter types
@@ -35,7 +38,9 @@ pub struct DataForRendering<'a> {
     >,
     gl: &'a WebGl2RenderingContext,
     canvas: &'a HtmlCanvasElement,
+    src_video_element: HtmlVideoElement,
     src_texture: &'a WebGlTexture,
+    src_video_texture: &'a WebGlTexture,
     dest_framebuffer: Option<&'a WebGlFramebuffer>,
 }
 
@@ -77,10 +82,96 @@ pub fn generate_linear_gradient(
     draw(gl, canvas);
 }
 
+pub(crate) struct DataForUploadingSrcVideoTexture<'a> {
+    gl: &'a WebGl2RenderingContext,
+    src_video_element: HtmlVideoElement,
+    src_video_texture: &'a WebGlTexture,
+}
+
+/// If video has data to show (i.e. it is not zero width and height), data is uploaded as
+/// as a texture for access from the fragment shaders, else uploads a single black pixel
+/// as a texture to prevent stale data from being sampled in the fragment shaders
+pub(crate) fn upload_src_video_as_texture(
+    DataForUploadingSrcVideoTexture {
+        gl,
+        src_video_element,
+        src_video_texture,
+    }: DataForUploadingSrcVideoTexture,
+) {
+    if src_video_element.video_width() > 0 && src_video_element.video_height() > 0 {
+        info!("uploading video as texture");
+        // upload video data as texture
+        gl.active_texture(WebGl2RenderingContext::TEXTURE0 + TextureId::SrcTexture.location());
+        gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(src_video_texture));
+        if let Err(err) = gl.tex_image_2d_with_u32_and_u32_and_html_video_element(
+            WebGl2RenderingContext::TEXTURE_2D,
+            0,
+            WebGl2RenderingContext::RGBA as i32,
+            WebGl2RenderingContext::RGBA,
+            WebGl2RenderingContext::UNSIGNED_BYTE,
+            &src_video_element,
+        ) {
+            error!("Error uploading src video as a WebGL texture: {:?}", err);
+        }
+    } else {
+        info!("video element has no data");
+        // upload black pixel as texture to prevent reading from stale data
+        gl.active_texture(WebGl2RenderingContext::TEXTURE0 + TextureId::SrcTexture.location());
+        gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(src_video_texture));
+        if let Err(err) = gl
+            .tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_u8_array(
+                WebGl2RenderingContext::TEXTURE_2D,
+                0,
+                WebGl2RenderingContext::RGBA as i32,
+                1,
+                1,
+                0,
+                WebGl2RenderingContext::RGBA,
+                WebGl2RenderingContext::UNSIGNED_BYTE,
+                None,
+            )
+        {
+            error!(
+                "Error uploading single-pixel blank WebGL texture: {:?}",
+                err
+            );
+        }
+    }
+}
+
+/// Generates a src texture by uploading from a src_video_element
+pub fn generate_video_input(
+    DataForRendering {
+        canvas,
+        renderer_data,
+        gl,
+        dest_framebuffer,
+        src_texture,
+        src_video_texture,
+        src_video_element,
+    }: &DataForRendering,
+) {
+    upload_src_video_as_texture(DataForUploadingSrcVideoTexture {
+        gl,
+         src_video_texture,
+        src_video_element: src_video_element.to_owned(),
+    });
+
+    renderer_data.use_program(&ProgramId::GenerateVideoInput);
+    renderer_data.use_vao(&VAOId::Quad);
+    gl.active_texture(WebGl2RenderingContext::TEXTURE0 + TextureId::SrcVideoTexture.location());
+    gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(src_video_texture));
+    gl.bind_framebuffer(
+        WebGl2RenderingContext::FRAMEBUFFER,
+        dest_framebuffer.as_deref(),
+    );
+    draw(gl, canvas);
+}
+
 /// Chooses the correct generation shader to generate the src texture
 pub fn generate_src_texture<'a>(
     app_state_handle: &'a AppStateHandle,
-    data_for_generating: &DataForRendering,
+    data_for_rendering: &DataForRendering,
 ) {
     match *app_state_handle
         .borrow()
@@ -88,8 +179,9 @@ pub fn generate_src_texture<'a>(
         .generation_type_ref()
         .borrow()
     {
-        GenerationType::CircleGradient => generate_circle_gradient(data_for_generating),
-        GenerationType::LinearGradient => generate_linear_gradient(data_for_generating),
+        GenerationType::CircleGradient => generate_circle_gradient(data_for_rendering),
+        GenerationType::LinearGradient => generate_linear_gradient(data_for_rendering),
+        GenerationType::VideoInput => generate_video_input(data_for_rendering),
     }
 }
 
@@ -101,6 +193,7 @@ pub fn render_filter_unfiltered(
         gl,
         src_texture,
         dest_framebuffer,
+        ..
     }: &DataForRendering,
 ) {
     renderer_data.use_program(&ProgramId::FilterUnfiltered);
@@ -122,6 +215,7 @@ pub fn render_filter_split(
         gl,
         src_texture,
         dest_framebuffer,
+        ..
     }: &DataForRendering,
 ) {
     renderer_data.use_program(&ProgramId::FilterSplit);
@@ -143,6 +237,7 @@ pub fn render_filter_triangle_reflection(
         gl,
         src_texture,
         dest_framebuffer,
+        ..
     }: &DataForRendering,
 ) {
     renderer_data.use_program(&ProgramId::FilterTriangleReflection);
@@ -182,6 +277,8 @@ pub fn render(
         .framebuffer(&FramebufferId::SrcTexture)
         .unwrap()
         .webgl_framebuffer();
+    let src_video_element = app_state_handle.borrow().src_video_element();
+    let src_video_texture = renderer_data.texture(&TextureId::SrcVideoTexture).unwrap().webgl_texture();
 
     // render initial src_texture into the src_texture_framebuffer
     generate_src_texture(
@@ -190,7 +287,9 @@ pub fn render(
             renderer_data,
             gl,
             canvas,
+            src_video_element: src_video_element.clone(),
             src_texture,
+            src_video_texture,
             dest_framebuffer: Some(src_texture_framebuffer),
         },
     );
@@ -253,6 +352,8 @@ pub fn render(
                 gl,
                 canvas,
                 src_texture,
+                src_video_texture,
+                src_video_element: src_video_element.clone(),
                 dest_framebuffer: Some(render_webgl_framebuffer),
             };
             match filter_type {
@@ -277,6 +378,8 @@ pub fn render(
                 gl,
                 canvas,
                 src_texture,
+                src_video_texture,
+                src_video_element,
                 dest_framebuffer: None,
             });
         }
@@ -291,6 +394,8 @@ pub fn render(
                 renderer_data,
                 gl,
                 canvas,
+                src_video_element,
+                src_video_texture,
                 src_texture: prev_render_texture,
                 dest_framebuffer: None,
             });

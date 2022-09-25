@@ -4,6 +4,7 @@ use wrend::Id;
 pub enum ProgramId {
     GenerateCircleGradient,
     GenerateLinearGradient,
+    GenerateVideoInput,
     FilterUnfiltered,
     FilterSplit,
     FilterTriangleReflection,

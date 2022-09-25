@@ -6,6 +6,7 @@ pub enum TextureId {
     PrevRenderA,
     PrevRenderB,
     SrcTexture,
+    SrcVideoTexture,
 }
 
 impl Id for TextureId {}
@@ -16,6 +17,7 @@ impl TextureId {
             TextureId::PrevRenderA => 0,
             TextureId::PrevRenderB => 1,
             TextureId::SrcTexture => 2,
+            TextureId::SrcVideoTexture => 3,
         }
     }
 }

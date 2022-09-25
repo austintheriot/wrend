@@ -4,6 +4,7 @@ use wrend::Id;
 pub enum FragmentShaderId {
     GenerateCircleGradient,
     GenerateLinearGradient,
+    GenerateVideoInput,
     FilterUnfiltered,
     FilterSplit,
     FilterTriangleReflection,

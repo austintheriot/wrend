@@ -10,7 +10,7 @@ use crate::{
 };
 
 use strum::IntoEnumIterator;
-use web_sys::HtmlCanvasElement;
+use web_sys::{HtmlCanvasElement, HtmlVideoElement, Node};
 use wrend::{
     AttributeLink, BufferLink, FramebufferLink, IdName, Renderer, RendererData, TextureLink,
     UniformContext, UniformLink,
@@ -19,12 +19,13 @@ use wrend::{
 use yew::NodeRef;
 
 use super::{
-    create_filter_program_links, create_generate_program_links, FilterType, TransformFeedbackId,
+    create_filter_program_links, create_generate_program_links, FilterType, TransformFeedbackId, make_create_src_video_texture,
 };
 
 const QUAD_VERTEX_SHADER: &str = include_str!("../shaders/vertex.glsl");
 const GENERATE_CIRCLE_GRADIENT: &str = include_str!("../shaders/generate_circle_gradient.glsl");
 const GENERATE_LINEAR_GRADIENT: &str = include_str!("../shaders/generate_linear_gradient.glsl");
+const GENERATE_VIDEO_INPUT: &str = include_str!("../shaders/generate_video_input.glsl");
 const FILTER_UNFILTERED_FRAGMENT_SHADER: &str = include_str!("../shaders/filter_unfiltered.glsl");
 const FILTER_SPLIT_FRAGMENT_SHADER: &str = include_str!("../shaders/filter_split.glsl");
 const FILTER_TRIANGLE_REFLECTION_FRAGMENT_SHADER: &str =
@@ -34,6 +35,7 @@ pub struct InitializeRendererArgs {
     pub ui_state: UiState,
     pub canvas_ref: NodeRef,
     pub app_state_handle_ref: Rc<RefCell<Option<AppStateHandle>>>,
+    pub video_ref: NodeRef,
 }
 
 pub fn initialize_renderer(
@@ -41,6 +43,7 @@ pub fn initialize_renderer(
         ui_state,
         canvas_ref,
         app_state_handle_ref,
+        video_ref,
     }: InitializeRendererArgs,
 ) -> Renderer<
     VertexShaderId,
@@ -55,11 +58,15 @@ pub fn initialize_renderer(
     VAOId,
     AppStateHandle,
 > {
-    let canvas: HtmlCanvasElement = canvas_ref
+    let canvas_element: HtmlCanvasElement = canvas_ref
         .cast()
-        .expect("Canvas ref should point to a canvas in the use_effect hook");
+        .expect("Canvas ref should point to a canvas");
 
-    let app_state_handle: AppStateHandle = AppState::new(ui_state).into();
+    let src_video_element: HtmlVideoElement = video_ref
+        .cast()
+        .expect("Video ref should point to a video");
+
+    let app_state_handle: AppStateHandle = AppState::new(ui_state, src_video_element).into();
     app_state_handle_ref.replace(Some(app_state_handle.clone()));
 
     let generation_program_links = create_generate_program_links();
@@ -77,6 +84,11 @@ pub fn initialize_renderer(
     let src_texture_link = TextureLink::new(
         TextureId::SrcTexture,
         make_create_src_texture(app_state_handle.clone()),
+    );
+
+    let src_video_texture_link = TextureLink::new(
+        TextureId::SrcVideoTexture,
+        make_create_src_video_texture(app_state_handle.clone()),
     );
 
     let prev_render_texture_link_a = TextureLink::new(
@@ -123,6 +135,18 @@ pub fn initialize_renderer(
             );
         },
     );
+    let u_src_video = UniformLink::new(
+        ProgramId::GenerateVideoInput,
+        UniformId::USrcVideo.name(),
+        |ctx: &UniformContext| {
+            let gl = ctx.gl();
+            let uniform_location = ctx.uniform_location();
+            gl.uniform1i(
+                Some(uniform_location),
+                TextureId::SrcTexture.location() as i32,
+            );
+        },
+    );
 
     let mut u_now_link = {
         UniformLink::new([], UniformId::UNow.name(), |ctx: &UniformContext| {
@@ -136,7 +160,7 @@ pub fn initialize_renderer(
     let mut renderer_data_builder = RendererData::builder();
 
     renderer_data_builder
-        .set_canvas(canvas)
+        .set_canvas(canvas_element)
         .set_user_ctx(app_state_handle)
         .set_render_callback(render)
         .add_vertex_shader_src(VertexShaderId::Quad, QUAD_VERTEX_SHADER.to_string())
@@ -147,6 +171,10 @@ pub fn initialize_renderer(
         .add_fragment_shader_src(
             FragmentShaderId::GenerateCircleGradient,
             GENERATE_CIRCLE_GRADIENT.to_string(),
+        )
+        .add_fragment_shader_src(
+            FragmentShaderId::GenerateVideoInput,
+            GENERATE_VIDEO_INPUT.to_string(),
         )
         .add_fragment_shader_src(
             FragmentShaderId::FilterSplit,
@@ -165,8 +193,10 @@ pub fn initialize_renderer(
         .add_buffer_link(vertex_buffer_link)
         .add_attribute_link(a_quad_vertex_link)
         .add_uniform_link(u_src_texture)
+        .add_uniform_link(u_src_video)
         .add_uniform_link(u_now_link)
         .add_texture_link(src_texture_link)
+        .add_texture_link(src_video_texture_link)
         .add_texture_link(prev_render_texture_link_a)
         .add_texture_link(prev_render_texture_link_b)
         .add_framebuffer_link(prev_render_framebuffer_link_a)

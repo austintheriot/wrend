@@ -22,6 +22,7 @@ use yew_router::prelude::*;
 pub fn app() -> Html {
     // element refs
     let canvas_ref = use_node_ref();
+    let video_ref = use_node_ref();
     let generation_select_ref = use_node_ref();
 
     // state handles (for setting)
@@ -55,6 +56,7 @@ pub fn app() -> Html {
     use_effect_with_deps(
         {
             let canvas_ref = canvas_ref.clone();
+            let video_ref = video_ref.clone();
             let app_state_handle_ref = Rc::clone(&app_state_handle_ref);
             let applied_filters_ref = Rc::clone(&applied_filters_ref);
             let renderer_ref = Rc::clone(&renderer_ref);
@@ -70,6 +72,7 @@ pub fn app() -> Html {
 
                 let new_renderer = initialize_renderer(InitializeRendererArgs {
                     canvas_ref,
+                    video_ref,
                     app_state_handle_ref,
                     ui_state,
                 });
@@ -139,10 +142,19 @@ pub fn app() -> Html {
         })
     };
 
+    // hide video element when not using video as input
+    let video_style = if *generation_type == GenerationType::VideoInput {
+       ""
+    } else {
+       "display: none;"
+    };
+
     html! {
         <div class="kaleidoscope">
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
             <canvas ref={canvas_ref} width="2500" height="2500" />
+
+            <video controls=true ref={video_ref} autoplay=true src="./big_buck_bunny.mp4" style={video_style} />
             <label for="select-generation">{"Choose a generation"}</label>
             <select
                 name="generation"

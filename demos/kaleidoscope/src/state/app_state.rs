@@ -1,3 +1,6 @@
+use web_sys::HtmlVideoElement;
+use yew::Html;
+
 use super::{RenderCycle, UiState};
 
 #[derive(Clone, Debug, PartialEq)]
@@ -5,14 +8,16 @@ pub struct AppState {
     render_cycle: RenderCycle,
     ui_state: UiState,
     should_save: bool,
+    src_video_element: HtmlVideoElement,
 }
 
 impl AppState {
-    pub fn new(ui_state: UiState) -> Self {
+    pub fn new(ui_state: UiState, src_video_element: HtmlVideoElement) -> Self {
         Self {
             ui_state,
             render_cycle: Default::default(),
             should_save: false,
+            src_video_element,
         }
     }
 
@@ -36,6 +41,11 @@ impl AppState {
     pub fn set_should_save(&mut self, should_save: bool) {
         self.should_save = should_save;
     }
+
+    pub fn src_video_element(&self) -> HtmlVideoElement {
+        self.src_video_element.clone()
+    }
+
 }
 
 impl AsRef<UiState> for AppState {
