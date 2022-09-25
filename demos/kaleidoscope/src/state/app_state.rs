@@ -1,5 +1,4 @@
 use web_sys::HtmlVideoElement;
-use yew::Html;
 
 use super::{RenderCycle, UiState};
 
@@ -33,7 +32,6 @@ impl AppState {
         self.as_ref()
     }
 
-
     pub fn should_save(&self) -> bool {
         self.should_save
     }
@@ -45,7 +43,6 @@ impl AppState {
     pub fn src_video_element(&self) -> HtmlVideoElement {
         self.src_video_element.clone()
     }
-
 }
 
 impl AsRef<UiState> for AppState {

@@ -10,7 +10,7 @@ use crate::{
 };
 
 use strum::IntoEnumIterator;
-use web_sys::{HtmlCanvasElement, HtmlVideoElement, Node};
+use web_sys::{HtmlCanvasElement, HtmlVideoElement};
 use wrend::{
     AttributeLink, BufferLink, FramebufferLink, IdName, Renderer, RendererData, TextureLink,
     UniformContext, UniformLink,
@@ -19,7 +19,8 @@ use wrend::{
 use yew::NodeRef;
 
 use super::{
-    create_filter_program_links, create_generate_program_links, FilterType, TransformFeedbackId, make_create_src_video_texture,
+    create_filter_program_links, create_generate_program_links, make_create_src_video_texture,
+    FilterType, TransformFeedbackId,
 };
 
 const QUAD_VERTEX_SHADER: &str = include_str!("../shaders/vertex.glsl");
@@ -62,9 +63,8 @@ pub fn initialize_renderer(
         .cast()
         .expect("Canvas ref should point to a canvas");
 
-    let src_video_element: HtmlVideoElement = video_ref
-        .cast()
-        .expect("Video ref should point to a video");
+    let src_video_element: HtmlVideoElement =
+        video_ref.cast().expect("Video ref should point to a video");
 
     let app_state_handle: AppStateHandle = AppState::new(ui_state, src_video_element).into();
     app_state_handle_ref.replace(Some(app_state_handle.clone()));

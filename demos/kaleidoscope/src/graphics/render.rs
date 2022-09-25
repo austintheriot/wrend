@@ -146,14 +146,14 @@ pub fn generate_video_input(
         renderer_data,
         gl,
         dest_framebuffer,
-        src_texture,
         src_video_texture,
         src_video_element,
+        ..
     }: &DataForRendering,
 ) {
     upload_src_video_as_texture(DataForUploadingSrcVideoTexture {
         gl,
-         src_video_texture,
+        src_video_texture,
         src_video_element: src_video_element.to_owned(),
     });
 
@@ -278,7 +278,10 @@ pub fn render(
         .unwrap()
         .webgl_framebuffer();
     let src_video_element = app_state_handle.borrow().src_video_element();
-    let src_video_texture = renderer_data.texture(&TextureId::SrcVideoTexture).unwrap().webgl_texture();
+    let src_video_texture = renderer_data
+        .texture(&TextureId::SrcVideoTexture)
+        .unwrap()
+        .webgl_texture();
 
     // render initial src_texture into the src_texture_framebuffer
     generate_src_texture(

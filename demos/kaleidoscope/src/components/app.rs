@@ -144,9 +144,9 @@ pub fn app() -> Html {
 
     // hide video element when not using video as input
     let video_style = if *generation_type == GenerationType::VideoInput {
-       ""
+        ""
     } else {
-       "display: none;"
+        "display: none;"
     };
 
     html! {
