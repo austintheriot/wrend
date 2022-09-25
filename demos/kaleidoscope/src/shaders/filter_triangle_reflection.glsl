@@ -52,5 +52,5 @@ void main() {
   // map to (0, 1]
   phi = phi / (2.0 * PI);
 
-  out_color = vec4(phi, 0, 0, 1);
+  out_color = vec4(phi, r, 0, 1);
 }

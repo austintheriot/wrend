@@ -969,11 +969,10 @@ impl<
 
             gl.use_program(Some(program));
 
-            let uniform_location = gl.get_uniform_location(program, &uniform_id.name()).ok_or(
-                CreateUniformError::UniformLocationNotFound {
-                    uniform_id: uniform_id.name(),
-                },
-            )?;
+            let uniform_location = gl.get_uniform_location(program, &uniform_id.name()).ok_or_else(|| CreateUniformError::UniformLocationNotFound {
+                uniform_id: uniform_id.name(),
+                program_id: format!("{program_id:?}"),
+            })?;
             let uniform_context = UniformContext::new(gl.clone(), now, uniform_location.clone());
             initialize_callback.call_with_into_js_arg(&uniform_context);
             uniform_locations.insert(program_id.to_owned(), uniform_location.clone());
