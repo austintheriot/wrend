@@ -296,4 +296,9 @@ pub fn render(
             });
         }
     }
+
+    if app_state_handle.borrow().should_save() {
+        app_state_handle.borrow_mut().set_should_save(false);
+        renderer_data.save_image();
+    }
 }

@@ -4,6 +4,7 @@ use super::{RenderCycle, UiState};
 pub struct AppState {
     render_cycle: RenderCycle,
     ui_state: UiState,
+    should_save: bool,
 }
 
 impl AppState {
@@ -11,6 +12,7 @@ impl AppState {
         Self {
             ui_state,
             render_cycle: Default::default(),
+            should_save: false,
         }
     }
 
@@ -24,6 +26,15 @@ impl AppState {
 
     pub fn ui_state(&self) -> &UiState {
         self.as_ref()
+    }
+
+
+    pub fn should_save(&self) -> bool {
+        self.should_save
+    }
+
+    pub fn set_should_save(&mut self, should_save: bool) {
+        self.should_save = should_save;
     }
 }
 

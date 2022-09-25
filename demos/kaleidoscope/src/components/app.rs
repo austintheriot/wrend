@@ -55,8 +55,9 @@ pub fn app() -> Html {
     use_effect_with_deps(
         {
             let canvas_ref = canvas_ref.clone();
-            let app_state_handle_ref = app_state_handle_ref;
-            let applied_filters_ref = applied_filters_ref;
+            let app_state_handle_ref = Rc::clone(&app_state_handle_ref);
+            let applied_filters_ref = Rc::clone(&applied_filters_ref);
+            let renderer_ref = Rc::clone(&renderer_ref);
             let generation_type = generation_type.clone();
             let applied_filters = applied_filters.clone();
             move |_| {
@@ -129,6 +130,15 @@ pub fn app() -> Html {
         }
     };
 
+    let handle_save_image = {
+        let app_state_handle_ref = Rc::clone(&app_state_handle_ref);
+        Callback::from(move |_: MouseEvent| {
+            if let Some(app_state_handle_ref) = &*app_state_handle_ref.borrow() {
+                app_state_handle_ref.borrow_mut().set_should_save(true);
+            }
+        })
+    };
+
     html! {
         <div class="kaleidoscope">
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
@@ -151,8 +161,10 @@ pub fn app() -> Html {
                     }
                 })}
             </select>
-            <label for="select-filter">{"Choose a filter"}</label>
 
+            <button onclick={handle_save_image}>
+                {"Save Image"}
+            </button>
 
             <p>{"Add a Filter: "}</p>
            {for FilterType::iter().map(|filter_type_el| {
