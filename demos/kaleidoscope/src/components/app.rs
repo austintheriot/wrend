@@ -132,7 +132,7 @@ pub fn app() -> Html {
     html! {
         <div class="kaleidoscope">
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
-            <canvas ref={canvas_ref} width="1000" height="1000" />
+            <canvas ref={canvas_ref} width="2500" height="2500" />
             <label for="select-generation">{"Choose a generation"}</label>
             <select
                 name="generation"
