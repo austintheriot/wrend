@@ -58,6 +58,25 @@ pub fn generate_circle_gradient(
     draw(gl, canvas);
 }
 
+/// Generates a src texture using the Linear Gradient fragment shader
+pub fn generate_linear_gradient(
+    DataForRendering {
+        canvas,
+        renderer_data,
+        gl,
+        dest_framebuffer,
+        ..
+    }: &DataForRendering,
+) {
+    renderer_data.use_program(&ProgramId::GenerateLinearGradient);
+    renderer_data.use_vao(&VAOId::Quad);
+    gl.bind_framebuffer(
+        WebGl2RenderingContext::FRAMEBUFFER,
+        dest_framebuffer.as_deref(),
+    );
+    draw(gl, canvas);
+}
+
 /// Chooses the correct generation shader to generate the src texture
 pub fn generate_src_texture<'a>(
     app_state_handle: &'a AppStateHandle,
@@ -70,6 +89,7 @@ pub fn generate_src_texture<'a>(
         .borrow()
     {
         GenerationType::CircleGradient => generate_circle_gradient(data_for_generating),
+        GenerationType::LinearGradient => generate_linear_gradient(data_for_generating),
     }
 }
 
@@ -105,6 +125,27 @@ pub fn render_filter_split(
     }: &DataForRendering,
 ) {
     renderer_data.use_program(&ProgramId::FilterSplit);
+    renderer_data.use_vao(&VAOId::Quad);
+    gl.active_texture(WebGl2RenderingContext::TEXTURE0 + TextureId::SrcTexture.location());
+    gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(src_texture));
+    gl.bind_framebuffer(
+        WebGl2RenderingContext::FRAMEBUFFER,
+        dest_framebuffer.as_deref(),
+    );
+    draw(gl, canvas);
+}
+
+/// Renders using the Triangle Reflection filter
+pub fn render_filter_triangle_reflection(
+    DataForRendering {
+        canvas,
+        renderer_data,
+        gl,
+        src_texture,
+        dest_framebuffer,
+    }: &DataForRendering,
+) {
+    renderer_data.use_program(&ProgramId::FilterTriangleReflection);
     renderer_data.use_vao(&VAOId::Quad);
     gl.active_texture(WebGl2RenderingContext::TEXTURE0 + TextureId::SrcTexture.location());
     gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(src_texture));
@@ -217,6 +258,7 @@ pub fn render(
             match filter_type {
                 FilterType::Unfiltered => render_filter_unfiltered(&data_for_rendering),
                 FilterType::Split => render_filter_split(&data_for_rendering),
+                FilterType::TriangleReflection => render_filter_triangle_reflection(&data_for_rendering),
             }
         }
 

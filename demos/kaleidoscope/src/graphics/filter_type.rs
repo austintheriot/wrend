@@ -9,6 +9,7 @@ pub enum FilterType {
     #[default]
     Unfiltered,
     Split,
+    TriangleReflection
 }
 
 impl FilterType {
@@ -17,6 +18,7 @@ impl FilterType {
         match self {
             FilterType::Unfiltered => ProgramId::FilterUnfiltered,
             FilterType::Split => ProgramId::FilterSplit,
+            FilterType::TriangleReflection => ProgramId::FilterTriangleReflection,
         }
     }
 
@@ -25,6 +27,7 @@ impl FilterType {
         match self {
             FilterType::Unfiltered => FragmentShaderId::FilterUnfiltered,
             FilterType::Split => FragmentShaderId::FilterSplit,
+            FilterType::TriangleReflection => FragmentShaderId::FilterTriangleReflection,
         }
     }
 }
@@ -34,6 +37,7 @@ impl Display for FilterType {
         match self {
             FilterType::Unfiltered => write!(f, "Unfiltered"),
             FilterType::Split => write!(f, "Split"),
+            FilterType::TriangleReflection => write!(f, "Triangle Reflection"),
         }
     }
 }

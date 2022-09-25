@@ -18,12 +18,14 @@ use wrend::{
 
 use yew::NodeRef;
 
-use super::{create_filter_program_links, FilterType, GenerationType, TransformFeedbackId};
+use super::{create_filter_program_links, FilterType, GenerationType, TransformFeedbackId, create_generate_program_links};
 
 const QUAD_VERTEX_SHADER: &str = include_str!("../shaders/vertex.glsl");
 const GENERATE_CIRCLE_GRADIENT: &str = include_str!("../shaders/generate_circle_gradient.glsl");
+const GENERATE_LINEAR_GRADIENT: &str = include_str!("../shaders/generate_linear_gradient.glsl");
 const FILTER_UNFILTERED_FRAGMENT_SHADER: &str = include_str!("../shaders/filter_unfiltered.glsl");
 const FILTER_SPLIT_FRAGMENT_SHADER: &str = include_str!("../shaders/filter_split.glsl");
+const FILTER_TRIANGLE_REFLECTION_FRAGMENT_SHADER: &str = include_str!("../shaders/filter_triangle_reflection.glsl");
 
 pub struct InitializeRendererArgs {
     pub ui_state: UiState,
@@ -57,21 +59,8 @@ pub fn initialize_renderer(
     let app_state_handle: AppStateHandle = AppState::new(ui_state).into();
     app_state_handle_ref.replace(Some(app_state_handle.clone()));
 
+    let generation_program_links = create_generate_program_links();
     let filter_program_links = create_filter_program_links();
-
-    let mut generate_circle_gradient_program_link = ProgramLinkBuilder::new();
-    generate_circle_gradient_program_link
-        .set_vertex_shader_id(VertexShaderId::Quad)
-        .set_program_id(ProgramId::GenerateCircleGradient)
-        .set_fragment_shader_id(FragmentShaderId::GenerateCircleGradient);
-    let generate_circle_gradient_program_link = generate_circle_gradient_program_link
-        .build()
-        .unwrap_or_else(|_| {
-            panic!(
-                "Should build program link successfully: {:?}",
-                GenerationType::CircleGradient
-            )
-        });
 
     let vertex_buffer_link = BufferLink::new(BufferId::QuadVertexBuffer, create_vertex_buffer);
 
@@ -149,6 +138,10 @@ pub fn initialize_renderer(
         .set_render_callback(render)
         .add_vertex_shader_src(VertexShaderId::Quad, QUAD_VERTEX_SHADER.to_string())
         .add_fragment_shader_src(
+            FragmentShaderId::GenerateLinearGradient,
+            GENERATE_LINEAR_GRADIENT.to_string(),
+        )
+        .add_fragment_shader_src(
             FragmentShaderId::GenerateCircleGradient,
             GENERATE_CIRCLE_GRADIENT.to_string(),
         )
@@ -160,8 +153,12 @@ pub fn initialize_renderer(
             FragmentShaderId::FilterUnfiltered,
             FILTER_UNFILTERED_FRAGMENT_SHADER.to_string(),
         )
+        .add_fragment_shader_src(
+            FragmentShaderId::FilterTriangleReflection,
+            FILTER_TRIANGLE_REFLECTION_FRAGMENT_SHADER.to_string(),
+        )
         .add_program_links(filter_program_links)
-        .add_program_links(generate_circle_gradient_program_link)
+        .add_program_links(generation_program_links)
         .add_buffer_link(vertex_buffer_link)
         .add_attribute_link(a_quad_vertex_link)
         .add_uniform_link(u_src_texture)
