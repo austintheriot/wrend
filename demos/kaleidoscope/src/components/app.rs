@@ -154,7 +154,7 @@ pub fn app() -> Html {
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
             <canvas ref={canvas_ref} width="2500" height="2500" />
 
-            <video controls=true ref={video_ref} autoplay=true src="./big_buck_bunny.mp4" style={video_style} />
+            <video controls=true ref={video_ref} src="./big_buck_bunny.mp4" style={video_style} />
             <label for="select-generation">{"Choose a generation"}</label>
             <select
                 name="generation"
