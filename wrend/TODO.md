@@ -18,6 +18,8 @@ The following use cases should guide the development of this library:
 
 - Use ok_or_else on errors to prevent unnecessary work
 
+- Add note that users should make should they perform a render immediately before calling .save_image() (or prevent buffer clearing) so that the saved image isn't empty
+
 - Make /entry page use a list of preview tile links with images and/or video
 
 - Make it more explicit when structs get cloned to convert them into a `JsValue`
