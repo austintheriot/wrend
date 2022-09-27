@@ -31,6 +31,8 @@ const FILTER_UNFILTERED_FRAGMENT_SHADER: &str = include_str!("../shaders/filter_
 const FILTER_SPLIT_FRAGMENT_SHADER: &str = include_str!("../shaders/filter_split.glsl");
 const FILTER_TRIANGLE_REFLECTION_FRAGMENT_SHADER: &str =
     include_str!("../shaders/filter_triangle_reflection.glsl");
+const FILTER_OFFSET_FRAGMENTS_FRAGMENT_SHADER: &str =
+    include_str!("../shaders/filter_offset_fragments.glsl");
 
 pub struct InitializeRendererArgs {
     pub ui_state: UiState,
@@ -187,6 +189,10 @@ pub fn initialize_renderer(
         .add_fragment_shader_src(
             FragmentShaderId::FilterTriangleReflection,
             FILTER_TRIANGLE_REFLECTION_FRAGMENT_SHADER.to_string(),
+        )
+        .add_fragment_shader_src(
+            FragmentShaderId::FilterOffsetFragments,
+            FILTER_OFFSET_FRAGMENTS_FRAGMENT_SHADER.to_string(),
         )
         .add_program_links(filter_program_links)
         .add_program_links(generation_program_links)

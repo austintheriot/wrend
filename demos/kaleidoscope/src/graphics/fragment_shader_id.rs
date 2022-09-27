@@ -8,6 +8,7 @@ pub enum FragmentShaderId {
     FilterUnfiltered,
     FilterSplit,
     FilterTriangleReflection,
+    FilterOffsetFragments,
 }
 
 impl Id for FragmentShaderId {}

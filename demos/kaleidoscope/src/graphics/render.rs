@@ -251,6 +251,28 @@ pub fn render_filter_triangle_reflection(
     draw(gl, canvas);
 }
 
+/// Renders using the Offset Fragments filter
+pub fn render_filter_offset_fragments(
+    DataForRendering {
+        canvas,
+        renderer_data,
+        gl,
+        src_texture,
+        dest_framebuffer,
+        ..
+    }: &DataForRendering,
+) {
+    renderer_data.use_program(&ProgramId::FilterOffsetFragments);
+    renderer_data.use_vao(&VAOId::Quad);
+    gl.active_texture(WebGl2RenderingContext::TEXTURE0 + TextureId::SrcTexture.location());
+    gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(src_texture));
+    gl.bind_framebuffer(
+        WebGl2RenderingContext::FRAMEBUFFER,
+        dest_framebuffer.as_deref(),
+    );
+    draw(gl, canvas);
+}
+
 pub fn render(
     renderer_data: &RendererData<
         VertexShaderId,
@@ -365,6 +387,7 @@ pub fn render(
                 FilterType::TriangleReflection => {
                     render_filter_triangle_reflection(&data_for_rendering)
                 }
+                FilterType::OffsetFragments => render_filter_offset_fragments(&data_for_rendering),
             }
         }
 

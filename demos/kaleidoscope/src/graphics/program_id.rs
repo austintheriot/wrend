@@ -8,6 +8,7 @@ pub enum ProgramId {
     FilterUnfiltered,
     FilterSplit,
     FilterTriangleReflection,
+    FilterOffsetFragments,
 }
 
 impl Id for ProgramId {}

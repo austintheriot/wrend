@@ -10,6 +10,7 @@ pub enum FilterType {
     Unfiltered,
     Split,
     TriangleReflection,
+    OffsetFragments,
 }
 
 impl FilterType {
@@ -19,6 +20,7 @@ impl FilterType {
             FilterType::Unfiltered => ProgramId::FilterUnfiltered,
             FilterType::Split => ProgramId::FilterSplit,
             FilterType::TriangleReflection => ProgramId::FilterTriangleReflection,
+            FilterType::OffsetFragments => ProgramId::FilterOffsetFragments,
         }
     }
 
@@ -28,6 +30,7 @@ impl FilterType {
             FilterType::Unfiltered => FragmentShaderId::FilterUnfiltered,
             FilterType::Split => FragmentShaderId::FilterSplit,
             FilterType::TriangleReflection => FragmentShaderId::FilterTriangleReflection,
+            FilterType::OffsetFragments => FragmentShaderId::FilterOffsetFragments,
         }
     }
 }
@@ -38,6 +41,7 @@ impl Display for FilterType {
             FilterType::Unfiltered => write!(f, "Unfiltered"),
             FilterType::Split => write!(f, "Split"),
             FilterType::TriangleReflection => write!(f, "Triangle Reflection"),
+            FilterType::OffsetFragments => write!(f, "Offset Fragments"),
         }
     }
 }
