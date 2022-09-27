@@ -28,6 +28,7 @@ pub fn app() -> Html {
     // state handles (for setting)
     let generation_type = use_state_eq(GenerationType::default);
     let applied_filters = use_state_eq(Vec::new);
+    let is_recording = use_state_eq(bool::default);
 
     // state refs (for getting)
     let generation_type_ref = use_mut_ref(GenerationType::default);
@@ -142,6 +143,35 @@ pub fn app() -> Html {
         })
     };
 
+    let handle_clear_all_filters = {
+        let applied_filters = applied_filters.clone();
+        Callback::from(move |_: MouseEvent| {
+            applied_filters.set(Vec::new());
+        })
+    };
+
+    let handle_start_recording = {
+        let renderer_ref = Rc::clone(&renderer_ref);
+        let is_recording = is_recording.clone();
+        Callback::from(move |_: MouseEvent| {
+            if let Some(renderer) = &mut *renderer_ref.borrow_mut() {
+                renderer.start_recording();
+                is_recording.set(true);
+            }
+        })
+    };
+
+    let handle_stop_recording = {
+        let renderer_ref = Rc::clone(&renderer_ref);
+        let is_recording = is_recording.clone();
+        Callback::from(move |_: MouseEvent| {
+            if let Some(renderer) = &mut *renderer_ref.borrow_mut() {
+                renderer.stop_recording();
+                is_recording.set(false);
+            }
+        })
+    };
+
     // hide video element when not using video as input
     let video_style = if *generation_type == GenerationType::VideoInput {
         ""
@@ -177,7 +207,24 @@ pub fn app() -> Html {
             <button onclick={handle_save_image}>
                 {"Save Image"}
             </button>
+            {if !*is_recording {
+                html!{
+                    <button onclick={handle_start_recording}>
+                        {"Start Recording"}
+                    </button>
+                }
+            } else {
+                html!{
+                    <button onclick={handle_stop_recording}>
+                        {"Stop Recording"}
+                    </button>
+                }
+            }}
 
+            <button onclick={handle_clear_all_filters}>
+                {"Clear All Filters"}
+            </button>
+          
             <p>{"Add a Filter: "}</p>
            {for FilterType::iter().map(|filter_type_el| {
             html!{
