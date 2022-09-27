@@ -11,6 +11,7 @@ pub enum FilterType {
     Split,
     TriangleReflection,
     OffsetFragments,
+    MovingFragments,
 }
 
 impl FilterType {
@@ -21,6 +22,7 @@ impl FilterType {
             FilterType::Split => ProgramId::FilterSplit,
             FilterType::TriangleReflection => ProgramId::FilterTriangleReflection,
             FilterType::OffsetFragments => ProgramId::FilterOffsetFragments,
+            FilterType::MovingFragments => ProgramId::FilterMovingFragments,
         }
     }
 
@@ -31,6 +33,7 @@ impl FilterType {
             FilterType::Split => FragmentShaderId::FilterSplit,
             FilterType::TriangleReflection => FragmentShaderId::FilterTriangleReflection,
             FilterType::OffsetFragments => FragmentShaderId::FilterOffsetFragments,
+            FilterType::MovingFragments => FragmentShaderId::FilterMovingFragments,
         }
     }
 }
@@ -42,6 +45,7 @@ impl Display for FilterType {
             FilterType::Split => write!(f, "Split"),
             FilterType::TriangleReflection => write!(f, "Triangle Reflection"),
             FilterType::OffsetFragments => write!(f, "Offset Fragments"),
+            FilterType::MovingFragments => write!(f, "Moving Fragments"),
         }
     }
 }

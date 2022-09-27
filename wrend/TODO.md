@@ -16,6 +16,8 @@ The following use cases should guide the development of this library:
 
 ## Todo
 
+- Add a clear_recording function to recording_data
+
 - Use ok_or_else on errors to prevent unnecessary work
 
 - Add note that users should make should they perform a render immediately before calling .save_image() (or prevent buffer clearing) so that the saved image isn't empty

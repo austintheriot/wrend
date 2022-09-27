@@ -99,7 +99,6 @@ pub(crate) fn upload_src_video_as_texture(
     }: DataForUploadingSrcVideoTexture,
 ) {
     if src_video_element.video_width() > 0 && src_video_element.video_height() > 0 {
-        info!("uploading video as texture");
         // upload video data as texture
         gl.active_texture(WebGl2RenderingContext::TEXTURE0 + TextureId::SrcTexture.location());
         gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(src_video_texture));
@@ -273,6 +272,28 @@ pub fn render_filter_offset_fragments(
     draw(gl, canvas);
 }
 
+/// Renders using the Moving Fragments filter
+pub fn render_filter_moving_fragments(
+    DataForRendering {
+        canvas,
+        renderer_data,
+        gl,
+        src_texture,
+        dest_framebuffer,
+        ..
+    }: &DataForRendering,
+) {
+    renderer_data.use_program(&ProgramId::FilterMovingFragments);
+    renderer_data.use_vao(&VAOId::Quad);
+    gl.active_texture(WebGl2RenderingContext::TEXTURE0 + TextureId::SrcTexture.location());
+    gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(src_texture));
+    gl.bind_framebuffer(
+        WebGl2RenderingContext::FRAMEBUFFER,
+        dest_framebuffer.as_deref(),
+    );
+    draw(gl, canvas);
+}
+
 pub fn render(
     renderer_data: &RendererData<
         VertexShaderId,
@@ -388,6 +409,7 @@ pub fn render(
                     render_filter_triangle_reflection(&data_for_rendering)
                 }
                 FilterType::OffsetFragments => render_filter_offset_fragments(&data_for_rendering),
+                FilterType::MovingFragments => render_filter_moving_fragments(&data_for_rendering),
             }
         }
 

@@ -33,6 +33,8 @@ const FILTER_TRIANGLE_REFLECTION_FRAGMENT_SHADER: &str =
     include_str!("../shaders/filter_triangle_reflection.glsl");
 const FILTER_OFFSET_FRAGMENTS_FRAGMENT_SHADER: &str =
     include_str!("../shaders/filter_offset_fragments.glsl");
+const FILTER_MOVING_FRAGMENTS_FRAGMENT_SHADER: &str =
+    include_str!("../shaders/filter_moving_fragments.glsl");
 
 pub struct InitializeRendererArgs {
     pub ui_state: UiState,
@@ -151,7 +153,7 @@ pub fn initialize_renderer(
     );
 
     let mut u_now_link = {
-        UniformLink::new([], UniformId::UNow.name(), |ctx: &UniformContext| {
+        UniformLink::new([ProgramId::FilterMovingFragments], UniformId::UNow.name(), |ctx: &UniformContext| {
             let gl = ctx.gl();
             let uniform_location = ctx.uniform_location();
             gl.uniform1f(Some(uniform_location), (ctx.now() / 2000.) as f32);
@@ -193,6 +195,10 @@ pub fn initialize_renderer(
         .add_fragment_shader_src(
             FragmentShaderId::FilterOffsetFragments,
             FILTER_OFFSET_FRAGMENTS_FRAGMENT_SHADER.to_string(),
+        )
+        .add_fragment_shader_src(
+            FragmentShaderId::FilterMovingFragments,
+            FILTER_MOVING_FRAGMENTS_FRAGMENT_SHADER.to_string(),
         )
         .add_program_links(filter_program_links)
         .add_program_links(generation_program_links)
