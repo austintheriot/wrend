@@ -308,6 +308,16 @@ impl<
         }
     }
 
+    pub fn clear_recorded_data(&self) {
+        const ERROR_START: &str = "Error trying to clear video recording data";
+
+        if let Some(recording_data) = &self.recording_data {
+            recording_data.borrow_mut().recorded_chunks_mut().clear();
+        } else {
+            error!("{ERROR_START}: recorder was not properly initialized");
+        }
+    }
+
     pub fn recorder_initialized(&self) -> bool {
         self.recording_data.is_some()
     }

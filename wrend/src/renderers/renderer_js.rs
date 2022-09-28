@@ -60,6 +60,11 @@ impl RendererJs {
         self.deref().stop_recording();
     }
 
+    #[wasm_bindgen(js_name = clearRecordedData)]
+    pub fn clear_recorded_data(&self) {
+        self.deref().clear_recorded_data();
+    }
+
     #[wasm_bindgen(js_name = recorderInitialized)]
     pub fn recorder_initialized(&self) -> bool {
         self.deref().recorder_initialized()

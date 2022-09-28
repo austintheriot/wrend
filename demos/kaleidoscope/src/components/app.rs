@@ -172,6 +172,16 @@ pub fn app() -> Html {
         })
     };
 
+    let handle_clear_recorded_data = {
+        let renderer_ref = Rc::clone(&renderer_ref);
+        let is_recording = is_recording.clone();
+        Callback::from(move |_: MouseEvent| {
+            if let Some(renderer) = &mut *renderer_ref.borrow_mut() {
+                renderer.clear_recorded_data();
+            }
+        })
+    };
+
     // hide video element when not using video as input
     let video_style = if *generation_type == GenerationType::VideoInput {
         ""
@@ -220,6 +230,10 @@ pub fn app() -> Html {
                     </button>
                 }
             }}
+
+            <button onclick={handle_clear_recorded_data}>
+                {"Clear Recorded Data"}
+            </button>
 
             <button onclick={handle_clear_all_filters}>
                 {"Clear All Filters"}
