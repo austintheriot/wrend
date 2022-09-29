@@ -9,10 +9,13 @@
   - [About](#about)
   - [Why](#why)
   - [Getting Started](#getting-started)
+    - [Rust (compiling to WebAssembly)](#rust-compiling-to-webassembly)
     - [JavaScript / TypeScript](#javascript--typescript)
       - [npm](#npm)
       - [yarn](#yarn)
-    - [Rust (WebAssembly)](#rust-webassembly)
+      - [Compatible JavaScript Bundlers](#compatible-javascript-bundlers)
+      - [Webpack Configuration](#webpack-configuration)
+      - [Vite Configuration](#vite-configuration)
   - [Examples](#examples)
   - [Demos](#demos)
     - [Ray Tracer](#ray-tracer)
@@ -38,6 +41,16 @@ Another strength of Wrend is its flexibility: rather than focusing on more commo
 
 ## Getting Started
 
+### Rust (compiling to WebAssembly)
+
+Add `wrend` as a dependency to your crate's Cargo.toml file:
+
+```toml
+# Add this to your project's Cargo.toml file
+[dependencies]
+wrend = "0.2.0"
+```
+
 ### JavaScript / TypeScript
 
 #### npm
@@ -52,7 +65,51 @@ npm i wrend
 yarn add wrend
 ```
 
-Note: if you are using Vite as your bundler, you must configure a few things in your `vite.config.js` file:
+#### Compatible JavaScript Bundlers
+
+These bundlers are known to be compatible (implementation has been tested in the [examples directory](https://github.com/austintheriot/wrend/tree/master/examples)):
+
+- Webpack v5: [see configuration notes](#webpack-configuration)
+- Vite: [see configuration notes](#vite-configuration)
+
+These bundlers are likely to be compatible:
+
+- Webpack v4
+- Parcel 1 (supports wasm holistically, so likely to support `wrend`)
+
+These bundlers are known to be incompatible:
+
+- Parcel 2 (they do not yet support wasm holistically)
+
+#### Webpack Configuration
+
+If you are using Webpack version 5, you must configure a few things in your `webpack.config.js` file:
+
+```js
+// webpack.config.js
+module.exports = (env, argv) => {
+  return {
+    // ... your config items here
+
+    // syncWebAssembly or syncWebAssembly must be enabled here
+    experiments: {
+      syncWebAssembly: true,
+    },
+  };
+};
+
+```
+
+Then, when importing `wrend`, you must do so asynchronously:
+
+```js
+// import WebAssembly modules asynchronously
+const { Renderer } = await import('wrend');
+```
+
+#### Vite Configuration
+
+If you are using Vite as your bundler, you must configure a few things in your `vite.config.js` file:
 
 ```js
 // vite.config.js
@@ -70,16 +127,6 @@ export default {
     wasm(),
   ]
 };
-```
-
-### Rust (WebAssembly)
-
-Add `wrend` as a dependency to your crate's Cargo.toml file:
-
-```toml
-# Add this to your project's Cargo.toml file
-[dependencies]
-wrend = "0.2.0"
 ```
 
 ## Examples
