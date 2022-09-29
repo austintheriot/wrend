@@ -20,6 +20,7 @@
     - [Conway's Game of Life](#conways-game-of-life)
     - [Larger Than Life](#larger-than-life)
   - [Contributing](#contributing)
+    - [Local dev environment](#local-dev-environment)
     - [Publishing to npm](#publishing-to-npm)
     - [Publishing to crates.io](#publishing-to-cratesio)
 
@@ -124,6 +125,13 @@ This is similar to the classic Conway's Game of Life, except it uses an 11x11 co
 ## Contributing
 
 There aren't any formal processes in place for contributing yet, as `wrend` is a very young project, but if you're interested in contributing, please feel free to reach out.
+
+### Local dev environment
+
+- Install the latest version of [nvm](https://github.com/nvm-sh/nvm) (for Linux / MacOS) or [nvm-windows](https://github.com/coreybutler/nvm-windows) (for Windows)
+- Install node through `nvm` or `nvm-windows` (see .nvmrc for compatible Node version)
+  - This should automatically install a compatible version of `npm` at the same time
+- Install [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/)
 
 ### Publishing to npm
 
