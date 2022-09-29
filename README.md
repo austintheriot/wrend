@@ -132,6 +132,7 @@ There aren't any formal processes in place for contributing yet, as `wrend` is a
 - Install node through `nvm` or `nvm-windows` (see .nvmrc for compatible Node version)
   - This should automatically install a compatible version of `npm` at the same time
 - Install [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/)
+- Install [Rust](https://www.rust-lang.org/tools/install)
 
 ### Publishing to npm
 
