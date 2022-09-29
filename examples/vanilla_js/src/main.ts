@@ -67,19 +67,10 @@ rendererBuilder.addUniformLink(uNowLink)
 rendererBuilder.addVAOLink(VAO_ID)
 const renderer = rendererBuilder.buildRenderer();
 
-console.log(renderer)
-console.log(renderer.rendererData().vertexShaders());
-console.log(renderer.rendererData().buffers());
-console.log(renderer.rendererData().attributes());
-console.log(renderer.rendererData().textures());
-console.log(renderer.rendererData().fragmentShaders());
-console.log(renderer.rendererData().programs());
-console.log(renderer.rendererData().uniforms());
-
-// test lone render
+// test a lone render() from the renderer
 renderer.render();
 
-// test an animated render
+// test an animated render() from the renderer
 renderer.setAnimationCallback((rendererData) => {
   rendererData.updateUniforms();
   rendererData.render();
@@ -88,4 +79,6 @@ renderer.setAnimationCallback((rendererData) => {
 renderer.startAnimating();
 
 // will force the animation stop and clean up all wasm memory
+// (this something you would want to call when you're ready to stop
+// using the renderer you created)
 setTimeout(() => renderer.free(), 5000)
