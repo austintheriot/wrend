@@ -1,6 +1,6 @@
 # Demos
 
-These demos are more extensive than the `examples` directory, intended for showcasing how `wrend` can be used in more extensive applications and for exploring new ideas with Rust / WebGL.
+These demos are more extensive than the `examples` directory, intended for showcasing how `wrend` can be used in more real-world applications and for exploring new ideas with Rust / WebGL.
 
 ## About
 
