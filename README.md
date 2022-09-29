@@ -16,6 +16,7 @@
       - [Compatible JavaScript Bundlers](#compatible-javascript-bundlers)
       - [Webpack Configuration](#webpack-configuration)
       - [Vite Configuration](#vite-configuration)
+  - [Documentation](#documentation)
   - [Examples](#examples)
   - [Demos](#demos)
     - [Ray Tracer](#ray-tracer)
@@ -43,15 +44,19 @@ Another strength of Wrend is its flexibility: rather than focusing on more commo
 
 ### Rust (compiling to WebAssembly)
 
+See [crates.io package](https://crates.io/crates/wrend)
+
 Add `wrend` as a dependency to your crate's Cargo.toml file:
 
 ```toml
 # Add this to your project's Cargo.toml file
 [dependencies]
-wrend = "0.2.0"
+wrend = "~0"
 ```
 
 ### JavaScript / TypeScript
+
+See [npm package](https://www.npmjs.com/package/wrend)
 
 #### npm
 
@@ -128,6 +133,10 @@ export default {
   ]
 };
 ```
+
+## Documentation
+
+See latest documentation at [https://docs.rs/wrend/latest/wrend/](https://docs.rs/wrend/latest/wrend/)
 
 ## Examples
 
