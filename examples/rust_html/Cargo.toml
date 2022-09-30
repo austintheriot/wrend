@@ -1,5 +1,5 @@
 [package]
-name = "vanilla_rs"
+name = "rust_html"
 description = ""
 version = "0.1.0"
 edition = "2021"
