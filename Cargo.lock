@@ -116,7 +116,7 @@ dependencies = [
  "wasm-bindgen-futures",
  "wasm-logger",
  "web-sys",
- "wrend 0.2.0",
+ "wrend 0.3.4 (registry+https://github.com/rust-lang/crates.io-index)",
  "yew",
  "yew-router",
 ]
@@ -1080,23 +1080,6 @@ checksum = "ed055ab27f941423197eb86b2035720b1a3ce40504df082cac2ecc6ed73335a1"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
-]
-
-[[package]]
-name = "wrend"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "be4f6adc1532981885de48cd06392714008a05df6232a079ce12852e2fb41e0d"
-dependencies = [
- "console_error_panic_hook",
- "js-sys",
- "log",
- "thiserror",
- "uuid",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "wasm-logger",
- "web-sys",
 ]
 
 [[package]]
