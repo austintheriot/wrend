@@ -1,5 +1,5 @@
 import './style.css'
-import init, { AttributeLink, BufferLink, ProgramLink, RendererData, UniformLink, Renderer } from 'wrend/wrend';
+import init, { AttributeLink, BufferLink, ProgramLink, RendererData, UniformLink, Renderer } from 'wrend';
 import vertexShader from './shaders/vertex.glsl?raw';
 import fragmentShader from './shaders/fragment.glsl?raw';
 

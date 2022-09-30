@@ -20,6 +20,6 @@
     "webpack-dev-server": "^4.7.4"
   },
   "dependencies": {
-    "wrend": "^0.3.3"
+    "wrend": "^0.3.4"
   }
 }

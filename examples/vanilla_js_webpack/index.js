@@ -1,7 +1,7 @@
 import './style.scss'
 import vertexShader from './shaders/vertex.glsl?raw';
 import fragmentShader from './shaders/fragment.glsl?raw';
-import init, { AttributeLink, BufferLink, ProgramLink, UniformLink, Renderer }  from 'wrend/wrend';
+import init, { AttributeLink, BufferLink, ProgramLink, UniformLink, Renderer }  from 'wrend';
 
 const main = async () => {
     // it's necessary to initialize wasm module before using
