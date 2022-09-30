@@ -14,6 +14,7 @@
       - [npm](#npm)
       - [yarn](#yarn)
       - [Compatible JavaScript Bundlers](#compatible-javascript-bundlers)
+      - [No Bundler Configuration](#no-bundler-configuration)
       - [Webpack Configuration](#webpack-configuration)
       - [Vite Configuration](#vite-configuration)
   - [Documentation](#documentation)
@@ -51,7 +52,7 @@ Add `wrend` as a dependency to your crate's Cargo.toml file:
 ```toml
 # Add this to your project's Cargo.toml file
 [dependencies]
-wrend = "~0"
+wrend = "0.3.4"
 ```
 
 ### JavaScript / TypeScript
@@ -74,6 +75,7 @@ yarn add wrend
 
 These bundlers are known to be compatible (implementation has been tested in the [examples directory](https://github.com/austintheriot/wrend/tree/master/examples)):
 
+- No bundler: script fetched via CDN: [see configuration notes](#no-bundler-configuration)
 - Webpack v5: [see configuration notes](#webpack-configuration)
 - Vite: [see configuration notes](#vite-configuration)
 
@@ -85,6 +87,24 @@ These bundlers are likely to be compatible:
 These bundlers are known to be incompatible:
 
 - Parcel 2 (they do not yet support wasm holistically)
+
+#### No Bundler Configuration
+
+```html
+ <script type="module">
+        // this is a CDN file that is auto-generated when `wrend` is published to npm
+        import init, { Renderer, /* any other named imports go here*/ } from "https://cdn.jsdelivr.net/npm/wrend@0.3.4/wrend.js";
+
+        const main = async () => {
+            // it's necessary to initialize wasm module before using
+            await init();
+
+            // your rendering logic goes here
+        }
+
+        main();
+    </script>
+```
 
 #### Webpack Configuration
 
@@ -102,14 +122,20 @@ module.exports = (env, argv) => {
     },
   };
 };
-
 ```
 
-Then, when importing `wrend`, you must do so asynchronously:
-
 ```js
-// import WebAssembly modules asynchronously
-const { Renderer } = await import('wrend');
+// your webpack javascript entry file
+import init, { Renderer, /* any other named imports go here*/ }  from 'wrend';
+
+const main = async () => {
+    // it's necessary to initialize wasm module before using
+    await init();
+
+    // your rendering logic goes here
+}
+
+main();
 ```
 
 #### Vite Configuration
@@ -132,6 +158,20 @@ export default {
     wasm(),
   ]
 };
+```
+
+```js
+// your entry file for Vite
+import init, { Renderer, /* any other named imports go here*/  } from 'wrend';
+
+const main = async () => {
+    // it's necessary to initialize wasm module before using
+    await init();
+
+    // your rendering logic goes here
+}
+
+main();
 ```
 
 ## Documentation
