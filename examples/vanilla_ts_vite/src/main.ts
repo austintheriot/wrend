@@ -1,7 +1,11 @@
 import './style.css'
-import { AttributeLink, BufferLink, ProgramLink, RendererData, UniformLink, Renderer } from 'wrend/wrend';
+import init, { AttributeLink, BufferLink, ProgramLink, RendererData, UniformLink, Renderer } from 'wrend/wrend';
 import vertexShader from './shaders/vertex.glsl?raw';
 import fragmentShader from './shaders/fragment.glsl?raw';
+
+// top-level-await is enabled via plugin, but is not strictly necessary
+// however, it IS necessary to initialize wasm module before use
+await init();
 
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 

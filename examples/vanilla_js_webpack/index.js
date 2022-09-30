@@ -1,11 +1,12 @@
 import './style.scss'
 import vertexShader from './shaders/vertex.glsl?raw';
 import fragmentShader from './shaders/fragment.glsl?raw';
+import init, { AttributeLink, BufferLink, ProgramLink, UniformLink, Renderer }  from 'wrend/wrend';
 
 const main = async () => {
-    // import WebAssembly modules asynchronously
-    const { AttributeLink, BufferLink, ProgramLink, UniformLink, Renderer } = await import('wrend');
-    
+    // it's necessary to initialize wasm module before using
+    await init();
+
     const canvas = document.querySelector('canvas');
 
     const QUAD = [
