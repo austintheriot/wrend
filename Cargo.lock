@@ -450,7 +450,7 @@ dependencies = [
  "wasm-bindgen-futures",
  "wasm-logger",
  "web-sys",
- "wrend 0.3.3",
+ "wrend 0.3.4",
  "yew",
  "yew-router",
 ]
@@ -1101,7 +1101,7 @@ dependencies = [
 
 [[package]]
 name = "wrend"
-version = "0.3.3"
+version = "0.3.4"
 dependencies = [
  "console_error_panic_hook",
  "js-sys",

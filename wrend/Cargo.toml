@@ -1,6 +1,6 @@
 [package]
 name = "wrend"
-version = "0.3.3"
+version = "0.3.4"
 authors = ["Austin Theriot <austinmtheriot@gmail.com>"]
 edition = "2021"
 description = "A WebGL2 rendering library for Rust/Wasm & JS"
