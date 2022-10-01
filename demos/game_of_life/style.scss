@@ -6,10 +6,23 @@
     padding: 0;
   }
 
+  a {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background-color: white;
+    border-radius: 5px;
+    color: black;
+    padding: 0.5rem 1rem;
+    min-width: 100px;
+    text-align: center;
+  }
+
   canvas {
     display: block;
     width: 100vmin;
     height: 100vmin;
+    margin: 0 auto;
     image-rendering: pixelated;
   }
 }
