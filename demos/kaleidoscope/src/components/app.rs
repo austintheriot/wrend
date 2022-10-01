@@ -190,7 +190,7 @@ pub fn app() -> Html {
     };
 
     html! {
-        <div class="kaleidoscope">
+        <>
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
             <canvas ref={canvas_ref} width="2500" height="2500" />
 
@@ -264,6 +264,6 @@ pub fn app() -> Html {
                 </>
                }
             }}
-        </div>
+        </>
     }
 }
