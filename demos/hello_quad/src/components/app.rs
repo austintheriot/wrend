@@ -175,7 +175,7 @@ pub fn app() -> Html {
     html! {
         <>
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
-            <canvas class="hello-quad" ref={canvas_ref} />
+            <canvas ref={canvas_ref} />
         </>
     }
 }
