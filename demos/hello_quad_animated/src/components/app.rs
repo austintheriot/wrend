@@ -217,7 +217,7 @@ pub fn app() -> Html {
     );
 
     html! {
-        <div class="hello-quad-animated">
+        <div>
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
             <canvas ref={canvas_ref} />
         </div>
