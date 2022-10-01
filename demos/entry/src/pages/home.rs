@@ -30,11 +30,6 @@ pub fn home() -> Html {
            {"Larger Than Life"}
        </Link<Route>>
        <Link<Route>
-           to={Route::PerlinNoise}
-       >
-           {"Perlin Noise"}
-       </Link<Route>>
-       <Link<Route>
            to={Route::SimplexNoise}
        >
            {"Simplex Noise"}

@@ -149,7 +149,7 @@ pub fn app() -> Html {
     );
 
     html! {
-        <div class="simplex-noise">
+        <div>
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
             <canvas ref={canvas_ref} height={1000} width={1000} />
         </div>

@@ -6,7 +6,6 @@ use game_of_life::components::app::App as GameOfLifeApp;
 use hello_quad::components::app::App as HelloQuadApp;
 use hello_quad_animated::components::app::App as HelloQuadAnimatedApp;
 use larger_than_life::components::app::App as LargerThanLifeApp;
-use perlin_noise::components::app::App as PerlinNoiseApp;
 use ray_tracer::components::app::App as RayTracerApp;
 use recording_demo::components::app::App as RecordingDemoApp;
 use shared::route::Route;
@@ -21,7 +20,6 @@ pub fn switch(routes: &Route) -> Html {
         Route::HelloQuadAnimated => html! { <HelloQuadAnimatedApp /> },
         Route::GameOfLife => html! { <GameOfLifeApp /> },
         Route::LargerThanLife => html! { <LargerThanLifeApp /> },
-        Route::PerlinNoise => html! { <PerlinNoiseApp /> },
         Route::FlowField => html! { <FlowFieldApp /> },
         Route::FlowFieldColorful => html! { <FlowFieldColorfulApp /> },
         Route::SimplexNoise => html! { <SimplexNoiseApp /> },

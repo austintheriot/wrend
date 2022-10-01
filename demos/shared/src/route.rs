@@ -15,8 +15,6 @@ pub enum Route {
     GameOfLife,
     #[at("/larger-than-life")]
     LargerThanLife,
-    #[at("/perlin-noise")]
-    PerlinNoise,
     #[at("/simplex-noise")]
     SimplexNoise,
     #[at("/flow-field")]
