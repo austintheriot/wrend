@@ -10,14 +10,14 @@ use crate::{
     state::{render_state::RenderState, render_state_handle::RenderStateHandle},
 };
 
-use shared::route::Route;
+use shared::{route::Route, Class};
 use web_sys::HtmlCanvasElement;
 use wrend::{
     AttributeLink, BufferLink, FramebufferLink, ProgramLinkBuilder, RendererData, TextureLink,
     UniformContext, UniformLink,
 };
 
-use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref};
+use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, classes};
 use yew_router::prelude::*;
 
 const VERTEX_SHADER: &str = include_str!("../shaders/vertex.glsl");
@@ -149,9 +149,9 @@ pub fn app() -> Html {
     );
 
     html! {
-        <>
-            <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
+        <div class="simplex-noise">
+            <Link<Route> to={Route::Home} classes={classes!(Class::SharedButton.to_string())}>{"Home"}</Link<Route>>
             <canvas ref={canvas_ref} height={1000} width={1000} />
-        </>
+        </div>
     }
 }

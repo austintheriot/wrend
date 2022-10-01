@@ -1,11 +1,6 @@
-.flow-field-colorful {
-  * {
-    font-family: 'Roboto', sans-serif;
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
+@use '../shared/global-styles.scss';
 
+.flow-field-colorful {
   canvas {
     display: block;
     width: 100vmin;

@@ -246,7 +246,7 @@ pub fn app() -> Html {
     };
 
     html! {
-        <>
+        <div class="recording-demo">
             <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
             <button type="button" onclick={handle_initialize_recorder}>
                 {"Initialize Recorder"}
@@ -258,6 +258,6 @@ pub fn app() -> Html {
                 {"Stop Recording"}
             </button>
             <canvas ref={canvas_ref} />
-        </>
+        </div>
     }
 }

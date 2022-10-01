@@ -4,4 +4,29 @@
     margin: 0;
     padding: 0;
   }
-  
+
+.shared-button {
+  background-color: white;
+  border-radius: 5px;
+  color: black;
+  padding: 0.5rem 1rem;
+  min-width: 100px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 1rem;
+  border: none;
+  box-shadow: none;
+  border: 1px solid #ddd;
+}
+
+.shared-button:hover {
+  cursor: pointer;
+  background-color: #eee;
+}
+
+.shared-button:focus {
+  cursor: pointer;
+  background-color: #eee;
+  outline: 1px solid teal;
+  outline-offset: 0.25rem;
+}

@@ -1,15 +1,20 @@
+@use '../shared/global-styles.scss';
+
 .flow-field {
-  * {
-    font-family: 'Roboto', sans-serif;
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+  .ui-container {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    display: flex;
+    gap: 1rem;
+    max-width: calc(100% - 1rem);
+    max-width: calc(100% - 1rem);
   }
 
   canvas {
     display: block;
     width: 100vmin;
     height: 100vmin;
-    image-rendering: pixelated;
+    margin: 0 auto;
   }
 }

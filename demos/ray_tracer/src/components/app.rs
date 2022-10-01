@@ -11,10 +11,10 @@ pub fn app() -> Html {
         <ContextProvider<AppContext> context={AppContext::default()}>
             <KeyboardListener>
                 <GlobalControlListeners>
-                    <>
+                    <div class="ray-tracer">
                         <Canvas />
                         <Menu />
-                    </>
+                    </div>
                 </ GlobalControlListeners>
             </ KeyboardListener>
         </ContextProvider<AppContext>>

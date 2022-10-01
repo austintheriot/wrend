@@ -22,7 +22,7 @@ use crate::{
     },
     state::{render_state::RenderState, render_state_handle::RenderStateHandle},
 };
-use shared::route::Route;
+use shared::{route::Route, Class};
 use std::rc::Rc;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, MouseEvent, WebGl2RenderingContext, WebGlContextAttributes};
@@ -31,7 +31,7 @@ use wrend::{
     TransformFeedbackLink, UniformContext, UniformLink, WebGlContextError,
 };
 
-use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, Callback};
+use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, Callback, classes};
 use yew_router::prelude::*;
 
 const QUAD_VERTEX_SHADER: &str = include_str!("../shaders/quad.vert");
@@ -279,10 +279,12 @@ pub fn app() -> Html {
     };
 
     html! {
-        <>
-            <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
-            <button onclick={handle_click}>{"Save Image"}</button>
+        <div class="flow-field">
+            <div class="ui-container">
+                <Link<Route> to={Route::Home} classes={classes!(Class::SharedButton.to_string())}>{"Home"}</Link<Route>>
+                <button onclick={handle_click} class={Class::SharedButton.to_string()}>{"Save Image"}</button>
+            </div>
             <canvas ref={canvas_ref} height={1000} width={1000} />
-        </>
+        </div>
     }
 }

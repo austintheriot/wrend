@@ -1,4 +1,4 @@
-use shared::route::Route;
+use shared::{route::Route, Class};
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 use wrend::{
@@ -7,7 +7,7 @@ use wrend::{
 };
 use yew::{
     function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, use_state_eq,
-    UseStateHandle,
+    UseStateHandle, classes,
 };
 use yew_router::prelude::*;
 
@@ -217,9 +217,9 @@ pub fn app() -> Html {
     );
 
     html! {
-        <>
-            <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
+        <div class="hello-quad-animated">
+            <Link<Route> to={Route::Home} classes={classes!(Class::SharedButton.to_string())}>{"Home"}</Link<Route>>
             <canvas ref={canvas_ref} />
-        </>
+        </div>
     }
 }
