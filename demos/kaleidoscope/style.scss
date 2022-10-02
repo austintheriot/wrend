@@ -12,6 +12,12 @@
     display: block;
     max-width: 100vmin;
     max-height: 100vmin;
-    margin: 1rem auto;
+    margin: 0 auto;
+  }
+
+  .home-link {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
   }
 }

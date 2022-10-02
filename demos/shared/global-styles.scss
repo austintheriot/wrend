@@ -1,13 +1,17 @@
-* {
+*, *:before, *:after {
     font-family: 'Roboto', sans-serif;
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+
+    --shared-button-border-radius: 5px;
   }
 
 .shared-button {
+  
+
   background-color: white;
-  border-radius: 5px;
+  border-radius: var(--shared-button-border-radius);
   color: black;
   padding: 0.5rem 1rem;
   min-width: 100px;
@@ -17,16 +21,34 @@
   border: none;
   box-shadow: none;
   border: 1px solid #ddd;
-}
+  position: relative;
 
-.shared-button:hover {
-  cursor: pointer;
-  background-color: #eee;
-}
+  &:hover {
+    cursor: pointer;
+    background-color: #eee;
+  }
 
-.shared-button:focus {
-  cursor: pointer;
-  background-color: #eee;
-  outline: 1px solid teal;
-  outline-offset: 0.25rem;
+  &:focus {
+    outline: none;
+  }
+  
+  &:after {
+    position: absolute;
+    content: " ";
+    top: -0.25rem;
+    left: -0.25rem;
+    width: calc(100% + 0.5rem);
+    height: calc(100% + 0.5rem);
+    border-radius: var(--shared-button-border-radius);
+    border: 2px solid transparent;
+    transition: transform 0.1s, border 0.1s;
+    pointer-events: none;
+    transform: scale(1.1);
+  }
+  
+  &:focus:after {
+    border: 2px solid orange;
+    z-index: 1;
+    transform: scale(1);
+  }
 }

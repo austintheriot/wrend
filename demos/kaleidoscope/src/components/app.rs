@@ -6,7 +6,7 @@ use crate::{
 };
 
 use log::error;
-use shared::route::Route;
+use shared::{route::Route, SharedClass};
 use strum::IntoEnumIterator;
 
 use wasm_bindgen::JsCast;
@@ -14,7 +14,7 @@ use web_sys::{Event, HtmlSelectElement, MouseEvent};
 
 use yew::{
     function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, use_state_eq,
-    Callback, UseStateHandle,
+    Callback, UseStateHandle, classes,
 };
 use yew_router::prelude::*;
 
@@ -191,7 +191,7 @@ pub fn app() -> Html {
 
     html! {
         <div class="kaleidoscope">
-            <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
+            <Link<Route> to={Route::Home} classes={classes!(SharedClass::Button.to_string(), "home-link")}>{"Home"}</Link<Route>>
             <canvas ref={canvas_ref} width="2500" height="2500" />
 
             <video controls=true ref={video_ref} src="./big_buck_bunny.mp4" style={video_style} />
@@ -214,35 +214,35 @@ pub fn app() -> Html {
                 })}
             </select>
 
-            <button onclick={handle_save_image}>
+            <button onclick={handle_save_image} class={SharedClass::Button.to_string()}>
                 {"Save Image"}
             </button>
             {if !*is_recording {
                 html!{
-                    <button onclick={handle_start_recording}>
+                    <button onclick={handle_start_recording} class={SharedClass::Button.to_string()}>
                         {"Start Recording"}
                     </button>
                 }
             } else {
                 html!{
-                    <button onclick={handle_stop_recording}>
+                    <button onclick={handle_stop_recording} class={SharedClass::Button.to_string()}>
                         {"Stop Recording"}
                     </button>
                 }
             }}
 
-            <button onclick={handle_clear_recorded_data}>
+            <button onclick={handle_clear_recorded_data} class={SharedClass::Button.to_string()}>
                 {"Clear Recorded Data"}
             </button>
 
-            <button onclick={handle_clear_all_filters}>
+            <button onclick={handle_clear_all_filters} class={SharedClass::Button.to_string()}>
                 {"Clear All Filters"}
             </button>
           
             <p>{"Add a Filter: "}</p>
            {for FilterType::iter().map(|filter_type_el| {
             html!{
-                <button onclick={make_handle_add_filter_click(filter_type_el)}>
+                <button onclick={make_handle_add_filter_click(filter_type_el)} class={SharedClass::Button.to_string()}>
                     {filter_type_el.to_string()}
                 </button>
             }
@@ -256,7 +256,7 @@ pub fn app() -> Html {
                 <>
                     {for applied_filters.iter().enumerate().map(|(i, filter_type_el)| {
                         html!{
-                            <button onclick={make_handle_remove_filter_click(i)}>
+                            <button onclick={make_handle_remove_filter_click(i)} class={SharedClass::Button.to_string()}>
                                 {filter_type_el.to_string()}
                             </button>
                         }
