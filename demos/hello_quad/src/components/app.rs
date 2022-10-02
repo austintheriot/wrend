@@ -1,4 +1,4 @@
-use shared::{route::Route, Class};
+use shared::{route::Route, SharedClass};
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext};
 use wrend::{
@@ -174,7 +174,7 @@ pub fn app() -> Html {
 
     html! {
         <div class="hello-quad">
-            <Link<Route> to={Route::Home} classes={classes!(Class::SharedButton.to_string())}>{"Home"}</Link<Route>>
+            <Link<Route> to={Route::Home} classes={classes!(SharedClass::Button.to_string())}>{"Home"}</Link<Route>>
             <canvas ref={canvas_ref} />
         </div>
     }

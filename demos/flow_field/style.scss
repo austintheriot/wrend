@@ -7,8 +7,8 @@
     left: 1rem;
     display: flex;
     gap: 1rem;
-    max-width: calc(100% - 1rem);
-    max-width: calc(100% - 1rem);
+    max-width: calc(100vw - 1rem);
+    flex-wrap: wrap;
   }
 
   canvas {

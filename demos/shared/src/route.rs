@@ -19,8 +19,6 @@ pub enum Route {
     SimplexNoise,
     #[at("/flow-field")]
     FlowField,
-    #[at("/flow-field-colorful")]
-    FlowFieldColorful,
     #[at("/ray-tracer")]
     RayTracer,
     #[at("/recording-demo")]

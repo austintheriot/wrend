@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use shared::route::Route;
+use shared::{route::Route, SharedClass};
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, MouseEvent, WebGl2RenderingContext};
 use wrend::{
@@ -9,7 +9,7 @@ use wrend::{
 };
 use yew::{
     function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, use_state_eq,
-    Callback, UseStateHandle,
+    Callback, UseStateHandle, classes,
 };
 use yew_router::prelude::*;
 
@@ -247,16 +247,18 @@ pub fn app() -> Html {
 
     html! {
         <div class="recording-demo">
-            <Link<Route> to={Route::Home}>{"Home"}</Link<Route>>
-            <button type="button" onclick={handle_initialize_recorder}>
-                {"Initialize Recorder"}
-            </button>
-            <button type="button" onclick={handle_start_recording}>
-                {"Start Recording"}
-            </button>
-            <button type="button" onclick={handle_stop_recording}>
-                {"Stop Recording"}
-            </button>
+            <div class="ui-container">
+                <Link<Route> to={Route::Home} classes={classes!(SharedClass::Button.to_string())}>{"Home"}</Link<Route>>
+                <button type="button" onclick={handle_initialize_recorder} class={SharedClass::Button.to_string()}>
+                    {"Initialize Recorder"}
+                </button>
+                <button type="button" onclick={handle_start_recording} class={SharedClass::Button.to_string()}>
+                    {"Start Recording"}
+                </button>
+                <button type="button" onclick={handle_stop_recording} class={SharedClass::Button.to_string()}>
+                    {"Stop Recording"}
+                </button>
+            </div>
             <canvas ref={canvas_ref} />
         </div>
     }

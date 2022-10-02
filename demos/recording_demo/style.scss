@@ -1,3 +1,19 @@
 @use '../shared/global-styles.scss';
 
-.recording-demo { }
+.recording-demo {
+  .ui-container {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    display: flex;
+    gap: 1rem;
+    max-width: calc(100vw - 1rem);
+    flex-wrap: wrap;
+  }
+
+  canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+  }
+}

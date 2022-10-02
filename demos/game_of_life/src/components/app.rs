@@ -10,7 +10,7 @@ use crate::{
     state::render_state::RenderState,
 };
 
-use shared::{route::Route, Class};
+use shared::{route::Route, SharedClass};
 use web_sys::HtmlCanvasElement;
 use wrend::{
     AttributeLink, BufferLink, FramebufferLink, ProgramLink, RendererData, TextureLink,
@@ -131,7 +131,7 @@ pub fn app() -> Html {
 
     html! {
         <div class="game-of-life">
-            <Link<Route> to={Route::Home} classes={classes!(Class::SharedButton.to_string())}>{"Home"}</Link<Route>>
+            <Link<Route> to={Route::Home} classes={classes!(SharedClass::Button.to_string())}>{"Home"}</Link<Route>>
             <canvas ref={canvas_ref} height={250} width={250} />
         </div>
     }

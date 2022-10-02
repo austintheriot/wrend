@@ -1,7 +1,6 @@
 use crate::pages::home::Home;
 use crate::pages::not_found::NotFound;
 use flow_field::components::app::App as FlowFieldApp;
-use flow_field_colorful::components::app::App as FlowFieldColorfulApp;
 use game_of_life::components::app::App as GameOfLifeApp;
 use hello_quad::components::app::App as HelloQuadApp;
 use hello_quad_animated::components::app::App as HelloQuadAnimatedApp;
@@ -21,7 +20,6 @@ pub fn switch(routes: &Route) -> Html {
         Route::GameOfLife => html! { <GameOfLifeApp /> },
         Route::LargerThanLife => html! { <LargerThanLifeApp /> },
         Route::FlowField => html! { <FlowFieldApp /> },
-        Route::FlowFieldColorful => html! { <FlowFieldColorfulApp /> },
         Route::SimplexNoise => html! { <SimplexNoiseApp /> },
         Route::RayTracer => html! { <RayTracerApp /> },
         Route::RecordingDemo => html! { <RecordingDemoApp /> },

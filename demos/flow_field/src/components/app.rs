@@ -22,7 +22,7 @@ use crate::{
     },
     state::{render_state::RenderState, render_state_handle::RenderStateHandle},
 };
-use shared::{route::Route, Class};
+use shared::{route::Route, SharedClass};
 use std::rc::Rc;
 use wasm_bindgen::JsCast;
 use web_sys::{HtmlCanvasElement, MouseEvent, WebGl2RenderingContext, WebGlContextAttributes};
@@ -281,8 +281,8 @@ pub fn app() -> Html {
     html! {
         <div class="flow-field">
             <div class="ui-container">
-                <Link<Route> to={Route::Home} classes={classes!(Class::SharedButton.to_string())}>{"Home"}</Link<Route>>
-                <button onclick={handle_click} class={Class::SharedButton.to_string()}>{"Save Image"}</button>
+                <Link<Route> to={Route::Home} classes={classes!(SharedClass::Button.to_string())}>{"Home"}</Link<Route>>
+                <button onclick={handle_click} class={SharedClass::Button.to_string()}>{"Save Image"}</button>
             </div>
             <canvas ref={canvas_ref} height={1000} width={1000} />
         </div>

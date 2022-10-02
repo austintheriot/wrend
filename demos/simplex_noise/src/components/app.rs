@@ -10,7 +10,7 @@ use crate::{
     state::{render_state::RenderState, render_state_handle::RenderStateHandle},
 };
 
-use shared::{route::Route, Class};
+use shared::{route::Route, SharedClass};
 use web_sys::HtmlCanvasElement;
 use wrend::{
     AttributeLink, BufferLink, FramebufferLink, ProgramLinkBuilder, RendererData, TextureLink,
@@ -150,7 +150,7 @@ pub fn app() -> Html {
 
     html! {
         <div class="simplex-noise">
-            <Link<Route> to={Route::Home} classes={classes!(Class::SharedButton.to_string())}>{"Home"}</Link<Route>>
+            <Link<Route> to={Route::Home} classes={classes!(SharedClass::Button.to_string())}>{"Home"}</Link<Route>>
             <canvas ref={canvas_ref} height={1000} width={1000} />
         </div>
     }
