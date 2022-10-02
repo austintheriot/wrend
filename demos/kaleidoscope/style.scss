@@ -15,9 +15,46 @@
     margin: 0 auto;
   }
 
-  .home-link {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
+  @media (max-width: 599px) {
+    .quick-access-container {
+      margin: 0 auto;
+      padding: 1rem;
+    }
+  }
+
+  @media (min-width: 600px) {
+    .quick-access-container {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      max-width: calc(100vw - 2rem);
+      max-height: calc(100vh - 2rem);
+    }
+  }
+
+  .quick-access-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  details {
+    display: block;
+    width: fit-content;
+    background-color: white;
+    border-radius: 5px;
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    margin: 1rem 0;
+  }
+
+  details[open] {
+    padding-bottom: 1rem;
+
+    summary {
+      margin-bottom: 1rem;
+    }
   }
 }

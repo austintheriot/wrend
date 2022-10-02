@@ -191,79 +191,91 @@ pub fn app() -> Html {
 
     html! {
         <div class="kaleidoscope">
-            <Link<Route> to={Route::Home} classes={classes!(SharedClass::Button.to_string(), "home-link")}>{"Home"}</Link<Route>>
-            <canvas ref={canvas_ref} width="2500" height="2500" />
-
-            <video controls=true ref={video_ref} src="./big_buck_bunny.mp4" style={video_style} />
-            <label for="select-generation">{"Choose a generation"}</label>
-            <select
-                name="generation"
-                id="select-generation"
-                onchange={handle_generation_change}
-                ref={generation_select_ref}
-            >
-                {for GenerationType::iter().map(|generation_type_el| {
-                    html!{
-                        <option
-                            value={generation_type_el.to_string()}
-                            selected={generation_type_el == *generation_type}
-                        >
-                            {generation_type_el.to_string()}
-                        </option>
-                    }
-                })}
-            </select>
-
-            <button onclick={handle_save_image} class={SharedClass::Button.to_string()}>
-                {"Save Image"}
-            </button>
-            {if !*is_recording {
-                html!{
-                    <button onclick={handle_start_recording} class={SharedClass::Button.to_string()}>
-                        {"Start Recording"}
+            <div class="quick-access-container">
+                <div class="quick-access-buttons">
+                    <Link<Route> to={Route::Home} classes={classes!(SharedClass::Button.to_string())}>{"Home"}</Link<Route>>
+                    <button onclick={handle_save_image} class={SharedClass::Button.to_string()}>
+                        {"Save Image"}
                     </button>
-                }
-            } else {
-                html!{
-                    <button onclick={handle_stop_recording} class={SharedClass::Button.to_string()}>
-                        {"Stop Recording"}
-                    </button>
-                }
-            }}
-
-            <button onclick={handle_clear_recorded_data} class={SharedClass::Button.to_string()}>
-                {"Clear Recorded Data"}
-            </button>
-
-            <button onclick={handle_clear_all_filters} class={SharedClass::Button.to_string()}>
-                {"Clear All Filters"}
-            </button>
-          
-            <p>{"Add a Filter: "}</p>
-           {for FilterType::iter().map(|filter_type_el| {
-            html!{
-                <button onclick={make_handle_add_filter_click(filter_type_el)} class={SharedClass::Button.to_string()}>
-                    {filter_type_el.to_string()}
-                </button>
-            }
-            })}
-
-            <p>{"Currently Set Filters: "}</p>
-            {if applied_filters.is_empty() {
-                html!{ <p>{"No filters selected"}</p>}
-            } else {
-               html!{
-                <>
-                    {for applied_filters.iter().enumerate().map(|(i, filter_type_el)| {
+                    {if !*is_recording {
                         html!{
-                            <button onclick={make_handle_remove_filter_click(i)} class={SharedClass::Button.to_string()}>
+                            <button onclick={handle_start_recording} class={SharedClass::Button.to_string()}>
+                                {"Start Recording"}
+                            </button>
+                        }
+                    } else {
+                        html!{
+                            <button onclick={handle_stop_recording} class={SharedClass::Button.to_string()}>
+                                {"Stop Recording"}
+                            </button>
+                        }
+                    }}
+
+                    <button onclick={handle_clear_recorded_data} class={SharedClass::Button.to_string()}>
+                        {"Clear Recorded Data"}
+                    </button>
+                </div>
+
+                <details>
+                    <summary>{"Choose input"}</summary>
+                    <label for="select-generation">{"Choose a generation"}</label>
+                    <select
+                        name="generation"
+                        id="select-generation"
+                        onchange={handle_generation_change}
+                        ref={generation_select_ref}
+                    >
+                        {for GenerationType::iter().map(|generation_type_el| {
+                            html!{
+                                <option
+                                    value={generation_type_el.to_string()}
+                                    selected={generation_type_el == *generation_type}
+                                >
+                                    {generation_type_el.to_string()}
+                                </option>
+                            }
+                        })}
+                    </select>
+                </details>
+
+                <details>
+                    <summary>{"Add a filter"}</summary>
+                    {for FilterType::iter().map(|filter_type_el| {
+                        html!{
+                            <button onclick={make_handle_add_filter_click(filter_type_el)} class={SharedClass::Button.to_string()}>
                                 {filter_type_el.to_string()}
                             </button>
                         }
                     })}
-                </>
-               }
-            }}
+                </details>
+
+                <details>
+                    <summary>{"Remove filters"}</summary>
+                    <button onclick={handle_clear_all_filters} class={SharedClass::Button.to_string()}>
+                        {"Clear All Filters"}
+                    </button>
+                
+                    <p>{"Currently Set Filters: "}</p>
+                    {if applied_filters.is_empty() {
+                        html!{ <p>{"No filters selected"}</p>}
+                    } else {
+                    html!{
+                        <>
+                            {for applied_filters.iter().enumerate().map(|(i, filter_type_el)| {
+                                html!{
+                                    <button onclick={make_handle_remove_filter_click(i)} class={SharedClass::Button.to_string()}>
+                                        {filter_type_el.to_string()}
+                                    </button>
+                                }
+                            })}
+                        </>
+                    }
+                    }}
+                </details>
+            </div>
+
+            <canvas ref={canvas_ref} width="2500" height="2500" />
+            <video controls=true ref={video_ref} src="./big_buck_bunny.mp4" style={video_style} />
         </div>
     }
 }
