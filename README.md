@@ -1,6 +1,16 @@
 # wrend
 
-**This library is currently in active development**. Feel free to use it, but do so with the knowledge that APIs are likely to change without consideration for backwards compatibility.
+[![Crates Version]][crates.io] [![NPM Version]][npm] [![Docs Image]][docs.rs]
+
+[Crates Version]: https://img.shields.io/crates/v/wrend.svg
+[NPM Version]: https://img.shields.io/npm/v/wrend.svg
+[Docs Image]: https://img.shields.io/badge/docs.rs-wrend-blue
+
+[crates.io]: https://crates.io/crates/wrend
+[npm]: https://www.npmjs.com/package/wrend
+[docs.rs]: https://docs.rs/wrend/latest/wrend/
+
+**This library is currently in early development**. Feel free to use it, but do so with the knowledge that APIs are likely to change without consideration for backwards compatibility.
 
 ## Table of Contents
 
@@ -176,7 +186,7 @@ main();
 
 ## Documentation
 
-See latest documentation at [https://docs.rs/wrend/latest/wrend/](https://docs.rs/wrend/latest/wrend/)
+See latest documentation at [https://docs.rs/wrend/latest/wrend/][docs.rs]
 
 ## Examples
 
