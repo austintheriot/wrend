@@ -1,10 +1,11 @@
 # wrend
 
-[![Crates Version]][crates.io] [![NPM Version]][npm] [![Docs Image]][docs.rs]
+[![Crates Version]][crates.io] [![NPM Version]][npm] [![Docs Image]][docs.rs] [![Downloads Image]][crates.io]
 
 [Crates Version]: https://img.shields.io/crates/v/wrend.svg
 [NPM Version]: https://img.shields.io/npm/v/wrend.svg
 [Docs Image]: https://img.shields.io/badge/docs.rs-wrend-blue
+[Downloads Image]: https://img.shields.io/crates/d/wrend.svg
 
 [crates.io]: https://crates.io/crates/wrend
 [npm]: https://www.npmjs.com/package/wrend
