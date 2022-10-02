@@ -19,7 +19,7 @@ pub fn home() -> Html {
             <LinkCard 
                 route={Route::HelloQuadAnimated}
                 title="Hello Quad Animated"
-                img_src="./assets/hello_quad.png"
+                vid_src="./assets/hello_quad_animated.webm"
             />
             <LinkCard 
                 route={Route::RecordingDemo}
