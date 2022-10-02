@@ -1,6 +1,6 @@
 use yew_router::prelude::*;
 
-#[derive(Clone, Routable, PartialEq)]
+#[derive(Copy, Clone, Routable, PartialEq)]
 pub enum Route {
     #[at("/")]
     Home,

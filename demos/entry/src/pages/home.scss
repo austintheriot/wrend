@@ -1,0 +1,14 @@
+.home {
+    padding: 1rem;
+
+    h1 {
+        margin-bottom: 1rem;
+    }
+
+    .link-card-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        justify-content: center;
+    }
+}

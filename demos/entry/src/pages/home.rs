@@ -1,54 +1,57 @@
 use shared::route::Route;
 use yew::prelude::*;
 use yew_router::prelude::*;
+use crate::components::LinkCard;
 
 #[function_component(Home)]
 pub fn home() -> Html {
     html! {
     <div class="home">
-       <h1>
+        <h1>
            {"Demos"}
-       </h1>
-       <Link<Route>
-           to={Route::HelloQuad}
-       >
-           {"Hello Quad"}
-       </Link<Route>>
-       <Link<Route>
-           to={Route::HelloQuadAnimated}
-       >
-           {"Hello Quad Animated"}
-       </Link<Route>>
-       <Link<Route>
-           to={Route::GameOfLife}
-       >
-           {"Game of Life"}
-       </Link<Route>>
-       <Link<Route>
-           to={Route::LargerThanLife}
-       >
-           {"Larger Than Life"}
-       </Link<Route>>
-       <Link<Route>
-           to={Route::SimplexNoise}
-       >
-           {"Simplex Noise"}
-       </Link<Route>>
-       <Link<Route>
-           to={Route::FlowField}
-       >
-           {"Particle Flow Field"}
-       </Link<Route>>
-       <Link<Route>
-       to={Route::RayTracer}
-       >
-           {"Ray Tracer"}
-       </Link<Route>>
-       <Link<Route>
-           to={Route::RecordingDemo}
-       >
-           {"Recording Demo"}
-       </Link<Route>>
+        </h1>
+        <div class="link-card-container">
+            <LinkCard 
+                route={Route::HelloQuad}
+                title="Hello Quad"
+                img_src="./assets/hello_quad.png"
+            />
+            <LinkCard 
+                route={Route::HelloQuadAnimated}
+                title="Hello Quad Animated"
+                img_src="./assets/hello_quad.png"
+            />
+            <LinkCard 
+                route={Route::RecordingDemo}
+                title="Recording Demo"
+                img_src="./assets/hello_quad.png"
+            />
+            <LinkCard 
+                route={Route::GameOfLife}
+                title="Game of Life"
+                img_src="./assets/hello_quad.png"
+            />
+            <LinkCard 
+                route={Route::LargerThanLife}
+                title="Larger Than Life"
+                img_src="./assets/hello_quad.png"
+            />
+            <LinkCard 
+                route={Route::SimplexNoise}
+                title="Simplex Noise"
+                img_src="./assets/hello_quad.png"
+            />
+            <LinkCard 
+                route={Route::FlowField}
+                title="Flow Field"
+                img_src="./assets/hello_quad.png"
+            />
+            <LinkCard 
+                route={Route::RayTracer}
+                title="Ray Tracer"
+                img_src="./assets/hello_quad.png"
+            />
+       </div>
     </div>
            }
 }

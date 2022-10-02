@@ -1,0 +1,59 @@
+.link-card {
+    --border-radius: 10px;
+
+    width: 200px;
+    height: 225px;
+    background-color: white;
+    transition: transform 0.1s;
+    border: none;
+    outline: none;
+    position: relative;
+    border-radius: var(--border-radius);
+
+    display: flex;
+    flex-direction: column;
+    
+    box-shadow: 4px 10px 37px -10px rgba(0,0,0,0.37);
+    -webkit-box-shadow: 4px 10px 37px -10px rgba(0,0,0,0.37);
+    -moz-box-shadow: 4px 10px 37px -10px rgba(0,0,0,0.37);
+
+    &, &:link, &:visited, &:focus, &:hover, &:active {
+        text-decoration: none;
+    }
+
+    &:hover {
+        transform: scale(1.025);
+    }
+
+    &:after {
+        position: absolute;
+        content: " ";
+        top: -0.25rem;
+        left: -0.25rem;
+        width: calc(100% + 0.5rem);
+        height: calc(100% + 0.5rem);
+        border-radius: var(--border-radius);
+        border: 2px solid transparent;
+        transition: transform 0.1s, border 0.1s;
+        pointer-events: none;
+        transform: scale(1.1);
+    }
+
+    &:focus:after {
+        border: 2px solid orange;
+        transform: scale(1);
+    }
+
+    .title {
+        padding: 1rem;
+        text-align: center;
+        color: black;
+    }
+
+    video, img {
+        width: 100%;
+        object-fit: cover;
+        flex: 1 1 auto;
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+    }
+}

@@ -1,5 +1,5 @@
 pub mod route;
-pub mod classes;
+pub mod shared_class;
 
-pub use classes::*;
+pub use shared_class::*;
 pub use route::*;
