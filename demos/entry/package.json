@@ -6,6 +6,7 @@
     "start": "rimraf dist pkg && webpack-dev-server --mode development",
     "serve": "rimraf dist pkg && webpack-dev-server --mode production",
     "test": "cargo test",
+    "deploy:nobuild": "gh-pages -d dist",
     "deploy": "npm run build && gh-pages -d dist"
   },
   "devDependencies": {
