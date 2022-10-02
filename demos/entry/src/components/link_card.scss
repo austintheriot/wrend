@@ -63,5 +63,6 @@
         object-fit: cover;
         flex: 1 1 auto;
         border-radius: 0 0 var(--border-radius) var(--border-radius);
+        min-height: 0;
     }
 }
