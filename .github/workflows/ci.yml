@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+
+  build-and-test-workspace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Update local toolchain
+        run: |
+          rustup update
+          rustup component add clippy
+          rustup install nightly          
+
+      - name: Toolchain info
+        run: |
+          cargo --version --verbose
+          rustc --version
+          cargo clippy --version          
+
+      - name: Test
+        run: |
+          cargo check --workspace
+          cargo test --workspace
+
+  build-example-typescript-vite:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: examples/typescript_vite
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node
+        uses: actions/setup-node@v2
+        with:
+          node-version-file: 'examples/typescript_vite/.nvmrc'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+  build-example-javascript-webpack-5:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: examples/javascript_webpack_5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node
+        uses: actions/setup-node@v2
+        with:
+          node-version-file: 'examples/javascript_webpack_5/.nvmrc'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build

@@ -1,15 +1,17 @@
 # wrend
 
-[![Crates Version]][crates.io] [![NPM Version]][npm] [![Docs Image]][docs.rs] [![Downloads Image]][crates.io]
+[![Crates Version]][crates.io] [![NPM Version]][npm] [![CI Image]][wrend CI] [![Docs Image]][docs.rs]
 
 [Crates Version]: https://img.shields.io/crates/v/wrend.svg
 [NPM Version]: https://img.shields.io/npm/v/wrend.svg
 [Docs Image]: https://img.shields.io/badge/docs.rs-wrend-blue
 [Downloads Image]: https://img.shields.io/crates/d/wrend.svg
+[CI Image]: https://img.shields.io/github/workflow/status/austintheriot/wrend/CI/master
 
 [crates.io]: https://crates.io/crates/wrend
 [npm]: https://www.npmjs.com/package/wrend
 [docs.rs]: https://docs.rs/wrend/latest/wrend/
+[wrend CI]: https://github.com/austintheriot/wrend/actions/workflows/cy.yml
 
 **This library is currently in early development**. Feel free to use it, but do so with the knowledge that APIs are likely to change without consideration for backwards compatibility.
 
