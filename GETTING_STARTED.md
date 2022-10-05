@@ -19,7 +19,7 @@ Add `wrend` as a dependency to your crate's Cargo.toml file:
 ```toml
 # Add this to your project's Cargo.toml file
 [dependencies]
-wrend = "0.3.4"
+wrend = "0.3.5"
 ```
 
 ## JavaScript / TypeScript
@@ -60,7 +60,7 @@ These bundlers are known to be incompatible:
 ```html
  <script type="module">
         // this is a CDN file that is auto-generated when `wrend` is published to npm
-        import init, { Renderer, /* any other named imports go here*/ } from "https://cdn.jsdelivr.net/npm/wrend@0.3.4/wrend.js";
+        import init, { Renderer, /* any other named imports go here*/ } from "https://cdn.jsdelivr.net/npm/wrend@0.3.5/wrend.js";
 
         const main = async () => {
             // it's necessary to initialize wasm module before using
