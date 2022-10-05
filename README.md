@@ -5,7 +5,6 @@
 [Crates Version]: https://img.shields.io/crates/v/wrend.svg
 [NPM Version]: https://img.shields.io/npm/v/wrend.svg
 [Docs Image]: https://img.shields.io/badge/docs.rs-wrend-blue
-[Downloads Image]: https://img.shields.io/crates/d/wrend.svg
 [CI Image]: https://img.shields.io/github/workflow/status/austintheriot/wrend/CI/master
 
 [crates.io]: https://crates.io/crates/wrend
@@ -15,36 +14,18 @@
 
 **This library is currently in early development**. Feel free to use it, but do so with the knowledge that APIs are likely to change without consideration for backwards compatibility.
 
-## Table of Contents
+## Quick Links
 
-- [wrend](#wrend)
-  - [Table of Contents](#table-of-contents)
-  - [About](#about)
-  - [Why](#why)
-  - [Getting Started](#getting-started)
-    - [Rust (compiling to WebAssembly)](#rust-compiling-to-webassembly)
-    - [JavaScript / TypeScript](#javascript--typescript)
-      - [npm](#npm)
-      - [yarn](#yarn)
-      - [Compatible JavaScript Bundlers](#compatible-javascript-bundlers)
-      - [No Bundler Configuration](#no-bundler-configuration)
-      - [Webpack Configuration](#webpack-configuration)
-      - [Vite Configuration](#vite-configuration)
-  - [Documentation](#documentation)
-  - [Examples](#examples)
-  - [Demos](#demos)
-    - [Ray Tracer](#ray-tracer)
-    - [Particle Flow Field](#particle-flow-field)
-    - [Conway's Game of Life](#conways-game-of-life)
-    - [Larger Than Life](#larger-than-life)
-  - [Contributing](#contributing)
-    - [Local dev environment](#local-dev-environment)
-    - [Publishing to npm](#publishing-to-npm)
-    - [Publishing to crates.io](#publishing-to-cratesio)
+- [Documentation][docs.rs]
+- [Getting Started](GETTING_STARTED.md)
+- [Simple Examples](examples)
+- [Extensive Demos (code)](demos)
+- [Extensive Demos (live)](https://austintheriot.github.io/wrend/)
+- [Contributing](CONTRIBUTING.md)
 
 ## About
 
-Wrend is a wrapper library around raw WebGL2 code and is written in Rust, which then gets compiled to WebAssembly for running in the browser. Its goal is to make working with WebGL more convenient when writing Rust and/or JavaScript/TypeScript code. Though most of the demo app examples are built using Yew, `wrend` itself is framework agnostic and is designed to be used in a variety of settings with diverse rendering pipelines. See the [examples directory](https://github.com/austintheriot/wrend/tree/master/examples) of the repo for examples.
+Wrend is a wrapper library around raw WebGL2 code and is written in Rust, which then gets compiled to WebAssembly for running in the browser. Its goal is to make working with WebGL more convenient when writing Rust and/or JavaScript/TypeScript code. Though most of the demo app examples are built using Yew, `wrend` itself is framework agnostic and is designed to be used in a variety of settings with diverse rendering pipelines. See the [examples directory](examples) of the repo for examples.
 
 If you're wondering about the name, `wrend` is short for **W**ebGL2 **Rend**ering Library.
 
@@ -54,156 +35,7 @@ This library exists because I found myself writing the same verbose, (occasional
 
 Another strength of Wrend is its flexibility: rather than focusing on more common 3D rasterization techniques, Wrend enables constructing unique graphics pipelines for things like ray tracers, flow fields, and other non-traditional methods of rendering.
 
-## Getting Started
-
-### Rust (compiling to WebAssembly)
-
-See [crates.io package](https://crates.io/crates/wrend)
-
-Add `wrend` as a dependency to your crate's Cargo.toml file:
-
-```toml
-# Add this to your project's Cargo.toml file
-[dependencies]
-wrend = "0.3.4"
-```
-
-### JavaScript / TypeScript
-
-See [npm package](https://www.npmjs.com/package/wrend)
-
-#### npm
-
-```sh
-npm i wrend
-```
-
-#### yarn
-
-```sh
-yarn add wrend
-```
-
-#### Compatible JavaScript Bundlers
-
-These bundlers are known to be compatible (implementation has been tested in the [examples directory](https://github.com/austintheriot/wrend/tree/master/examples)):
-
-- No bundler: script fetched via CDN: [see configuration notes](#no-bundler-configuration)
-- Webpack v5: [see configuration notes](#webpack-configuration)
-- Vite: [see configuration notes](#vite-configuration)
-
-These bundlers are likely to be compatible:
-
-- Webpack v4
-- Parcel 1 (supports wasm holistically, so likely to support `wrend`)
-
-These bundlers are known to be incompatible:
-
-- Parcel 2 (they do not yet support wasm holistically)
-
-#### No Bundler Configuration
-
-```html
- <script type="module">
-        // this is a CDN file that is auto-generated when `wrend` is published to npm
-        import init, { Renderer, /* any other named imports go here*/ } from "https://cdn.jsdelivr.net/npm/wrend@0.3.4/wrend.js";
-
-        const main = async () => {
-            // it's necessary to initialize wasm module before using
-            await init();
-
-            // your rendering logic goes here
-        }
-
-        main();
-    </script>
-```
-
-#### Webpack Configuration
-
-If you are using Webpack version 5, you must configure a few things in your `webpack.config.js` file:
-
-```js
-// webpack.config.js
-module.exports = (env, argv) => {
-  return {
-    // ... your config items here
-
-    // syncWebAssembly or syncWebAssembly must be enabled here
-    experiments: {
-      syncWebAssembly: true,
-    },
-  };
-};
-```
-
-```js
-// your webpack javascript entry file
-import init, { Renderer, /* any other named imports go here*/ }  from 'wrend';
-
-const main = async () => {
-    // it's necessary to initialize wasm module before using
-    await init();
-
-    // your rendering logic goes here
-}
-
-main();
-```
-
-#### Vite Configuration
-
-If you are using Vite as your bundler, you must configure a few things in your `vite.config.js` file:
-
-```js
-// vite.config.js
-import wasm from "vite-plugin-wasm";
-
-export default {
-  optimizeDeps: {
-    // must exclude `wrend` from Vite's automatic optimization 
-    // to prevent weird initialization errors from the wasm module
-    exclude: ['wrend']
-  },
-  plugins: [
-    // this plugin is necessary to support npm modules that 
-    // are generated with `wasm-pack`
-    wasm(),
-  ]
-};
-```
-
-```js
-// your entry file for Vite
-import init, { Renderer, /* any other named imports go here*/  } from 'wrend';
-
-const main = async () => {
-    // it's necessary to initialize wasm module before using
-    await init();
-
-    // your rendering logic goes here
-}
-
-main();
-```
-
-## Documentation
-
-See latest documentation at [https://docs.rs/wrend/latest/wrend/][docs.rs]
-
-## Examples
-
-To see a list of simple, self-contained TypeScript and Rust projects that use `wrend`, see:
-
-- [Examples directory](https://github.com/austintheriot/wrend/tree/master/examples) in the GitHub repo
-
 ## Demos
-
-To see a list of more extensive demos that exhibit what is possible with the `wrend` library see:
-
-- [Demos directory](https://github.com/austintheriot/wrend/tree/master/demos) in the GitHub repo
-- [Live demos](https://austintheriot.github.io/wrend/) that you can interact with
-- Continue reading below for more information on some of the featured demos
 
 ### [Ray Tracer](https://austintheriot.github.io/wrend/ray-tracer)
 
@@ -230,52 +62,3 @@ The classic.
 This is similar to the classic Conway's Game of Life, except it uses an 11x11 convolution kernel (rather than the classic 3x3) to calculate the next state of each cell. This results in more organic, formations that behave surprisingly similar to the original.
 
 ![Screenshot of the Larger Than Life simulation](/demos/screenshots/larger_than_life.png)
-
-## Contributing
-
-There aren't any formal processes in place for contributing yet, as `wrend` is a very young project, but if you're interested in contributing, please feel free to reach out.
-
-### Local dev environment
-
-- Install the latest version of [nvm](https://github.com/nvm-sh/nvm) (for Linux / MacOS) or [nvm-windows](https://github.com/coreybutler/nvm-windows) (for Windows)
-- Install node through `nvm` or `nvm-windows` (see .nvmrc for compatible Node version)
-  - This should automatically install a compatible version of `npm` at the same time
-- Install [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/)
-- Install [Rust](https://www.rust-lang.org/tools/install)
-
-### Publishing to npm
-
-```bash
-# starting from the project root,
-# must be in the actual npm package directory /wrend
-cd wrend
-
-# builds library and outputs to /dist directory
-npm run prepublish
-
-# publish happens from the /dist folder, 
-# where built output files are located
-cd dist
-
-# must be logged into npm to publish
-npm login
-
-# publish package
-npm publish
-```
-
-### Publishing to crates.io
-
-```bash
-# starting from the project root,
-# must be in actual crate directory /wrend
-cd wrend
-
-# run tests before publishing
-cargo test
-
-# do a dry run to make sure everything is bundling ok
-cargo package
-
-cargo publish
-```
