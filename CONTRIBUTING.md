@@ -10,6 +10,12 @@ There aren't any formal processes in place for contributing yet, as `wrend` is a
 - Install [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/)
 - Install [Rust](https://www.rust-lang.org/tools/install)
 
+## Prior to publishing a new version
+
+- bump version manually in [`wrend/package.json`](wrend/package.json)
+- bump version manually in [`wrend/Cargo.toml`](wrend/Cargo.toml)
+- commit changes
+
 ## Publishing to npm
 
 ```bash
@@ -46,3 +52,8 @@ cargo package
 
 cargo publish
 ```
+
+## After publishing a new version
+
+- update dependencies in /examples and /demos
+- commit changes
