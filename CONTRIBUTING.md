@@ -55,5 +55,33 @@ cargo publish
 
 ## After publishing a new version
 
-- update dependencies in /examples and /demos
+- update all `wrend` dependencies in [/examples](examples) and [/demos](demos)
+- npm install new dependencies in:
+  - [`examples/typescript_vite`](examples/typescript_vite)
+  - [`examples/javascript_webpack_5`](examples/javascript_webpack_5)
+
+```sh
+# examples/typescript_vite
+npm i
+```
+
+```sh
+# examples/javascript_webpack_5
+npm i
+```
+
+- test builds in:
+  - [`examples/typescript_vite`](examples/typescript_vite)
+  - [`examples/javascript_webpack_5`](examples/javascript_webpack_5)
+
+```sh
+# examples/typescript_vite
+npm run build
+```
+
+```sh
+# examples/javascript_webpack_5
+npm run build
+```
+
 - commit changes
