@@ -218,10 +218,11 @@ pub fn app() -> Html {
 
                 <details>
                     <summary>{"Choose input"}</summary>
-                    <label for="select-generation">{"Choose a generation"}</label>
+                    <label for="select-generation" class="generation-select-label">{"Choose a generation"}</label>
                     <select
                         name="generation"
                         id="select-generation"
+                        class="generation-select"
                         onchange={handle_generation_change}
                         ref={generation_select_ref}
                     >
@@ -240,37 +241,41 @@ pub fn app() -> Html {
 
                 <details>
                     <summary>{"Add a filter"}</summary>
-                    {for FilterType::iter().map(|filter_type_el| {
-                        html!{
-                            <button onclick={make_handle_add_filter_click(filter_type_el)} class={SharedClass::Button.to_string()}>
-                                {filter_type_el.to_string()}
-                            </button>
-                        }
-                    })}
+                    <div class="add-filter-button-container">
+                        {for FilterType::iter().map(|filter_type_el| {
+                            html!{
+                                <button onclick={make_handle_add_filter_click(filter_type_el)} class={SharedClass::Button.to_string()}>
+                                    {filter_type_el.to_string()}
+                                </button>
+                            }
+                        })}
+                    </div>
                 </details>
 
                 <details>
                     <summary>{"Remove filters"}</summary>
-                    <button onclick={handle_clear_all_filters} class={SharedClass::Button.to_string()}>
+                    <button 
+                        onclick={handle_clear_all_filters} 
+                        class={classes!(SharedClass::Button.to_string(), "clear-all-filters-button")}>
                         {"Clear All Filters"}
                     </button>
                 
                     <p>{"Currently Set Filters: "}</p>
-                    {if applied_filters.is_empty() {
-                        html!{ <p>{"No filters selected"}</p>}
-                    } else {
-                    html!{
-                        <>
-                            {for applied_filters.iter().enumerate().map(|(i, filter_type_el)| {
-                                html!{
-                                    <button onclick={make_handle_remove_filter_click(i)} class={SharedClass::Button.to_string()}>
-                                        {filter_type_el.to_string()}
-                                    </button>
-                                }
-                            })}
-                        </>
-                    }
-                    }}
+                    <div class="remove-filter-button-container">
+                        {if applied_filters.is_empty() {
+                            html!{ <p>{"No filters selected"}</p>}
+                        } else {
+                            html!{
+                                {for applied_filters.iter().enumerate().map(|(i, filter_type_el)| {
+                                    html!{
+                                        <button onclick={make_handle_remove_filter_click(i)} class={SharedClass::Button.to_string()}>
+                                            {filter_type_el.to_string()}
+                                        </button>
+                                    }
+                                })}
+                            }
+                        }}
+                    </div>
                 </details>
             </div>
 

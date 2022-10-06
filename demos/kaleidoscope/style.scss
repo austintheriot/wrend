@@ -57,4 +57,38 @@
       margin-bottom: 1rem;
     }
   }
+
+  .generation-select-label {
+    display: block;
+    margin: 1rem 0;
+  }
+
+  .generation-select {
+    display: block;
+    margin: 1rem 0;
+
+    height: 2rem;
+    width: 250px;
+    padding: 0.25rem 1rem;
+    border-radius: 5px;
+    background-color: white;
+    font-size: 1rem;
+  }
+
+  .add-filter-button-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .clear-all-filters-button {
+    margin: 1rem 0;
+  }
+
+  .remove-filter-button-container {
+    margin: 1rem 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
 }
