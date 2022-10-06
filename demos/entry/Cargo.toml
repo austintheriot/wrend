@@ -39,6 +39,7 @@ simplex_noise = { path = '../simplex_noise' }
 flow_field = { path = '../flow_field' }
 ray_tracer = { path = '../ray_tracer' }
 recording_demo = { path = '../recording_demo' }
+kaleidoscope = { path = '../kaleidoscope' }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires

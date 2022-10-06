@@ -65,6 +65,7 @@ dependencies = [
  "hello_quad",
  "hello_quad_animated",
  "js-sys",
+ "kaleidoscope",
  "larger_than_life",
  "lazy_static",
  "log",
@@ -428,7 +429,7 @@ dependencies = [
  "wasm-bindgen-futures",
  "wasm-logger",
  "web-sys",
- "wrend 0.3.5",
+ "wrend 0.3.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "yew",
  "yew-router",
 ]

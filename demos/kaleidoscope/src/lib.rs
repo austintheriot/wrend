@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::*;
 
-mod components;
+pub mod components;
 mod graphics;
 mod state;
 
@@ -24,7 +24,7 @@ pub fn kaleidoscope_app() -> Result<(), JsValue> {
         .unwrap()
         .unwrap();
 
-    yew::start_app_in_element::<components::App>(app_div);
+    yew::start_app_in_element::<components::app::App>(app_div);
 
     Ok(())
 }

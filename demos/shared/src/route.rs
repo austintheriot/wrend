@@ -23,4 +23,6 @@ pub enum Route {
     RayTracer,
     #[at("/recording-demo")]
     RecordingDemo,
+    #[at("/kaleidoscope")]
+    Kaleidoscope,
 }

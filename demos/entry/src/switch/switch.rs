@@ -9,6 +9,7 @@ use ray_tracer::components::app::App as RayTracerApp;
 use recording_demo::components::app::App as RecordingDemoApp;
 use shared::route::Route;
 use simplex_noise::components::app::App as SimplexNoiseApp;
+use kaleidoscope::components::app::App as KaleidoscopeApp;
 use yew::{html, Html};
 
 pub fn switch(routes: &Route) -> Html {
@@ -23,5 +24,6 @@ pub fn switch(routes: &Route) -> Html {
         Route::SimplexNoise => html! { <SimplexNoiseApp /> },
         Route::RayTracer => html! { <RayTracerApp /> },
         Route::RecordingDemo => html! { <RecordingDemoApp /> },
+        Route::Kaleidoscope => html! { <KaleidoscopeApp /> },
     }
 }
