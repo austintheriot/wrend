@@ -13,22 +13,28 @@ The following use cases should guide the development of this library:
   - Conway's Game of Life
   - Any iterative kernel-based rendering
 - Ray tracing
+- General 2D / 3D rendering
 
 ## Todo
 
-- Add a clear_recording function to recording_data
+- Loose road map:
+  - Add tests
+  - Improve error messages
+  - Make renderer runtime agnostic (i.e. allow native OpenGL as well as WebGL contexts)
+  - Allow build to be async ? (this would require `async`s to permeate the library until Rust implements the ability to be generic over `async`/`sync`)
+  - Add Vec / Matrix utilities
+  - Build out a more structured Scene Graphs, etc. ?
+  - Enable more run time options:
+    - Enable compiling new shaders / programs
+    - Enable updating buffers
 
 - Use ok_or_else on errors to prevent unnecessary work
 
+- Add event system for emitting events related to changes of internal state
+
 - Add note that users should make should they perform a render immediately before calling .save_image() (or prevent buffer clearing) so that the saved image isn't empty
 
-- Make /entry page use a list of preview tile links with images and/or video
-
 - Make it more explicit when structs get cloned to convert them into a `JsValue`
-
-- Implementing JavaScript API
-  - Make sure all public JavaScript API struct docs point / link to their respective Rust counterparts for documentation
-  - Derive all traits for Js structs
 
 - Make a procedural macro and/or a custom derive macro for `Id`, and possible `IdName`
 
@@ -39,18 +45,10 @@ The following use cases should guide the development of this library:
 
 - Bug: WebGL2 rendering contexts are not getting discarded when handle is dropped: enable this manually through browser extension (see MDN WebGL best practices article)
 
-- Only set up RecordingData when requested
-
-- Do not use dynamic functions for callbacks
-
-- Enable recording video from canvas
-  - Enable starting/stopping recording and downloading as separate steps
-
-- Add event system for emitting events related to changes of internal state
+- Do not use dynamic functions for callbacks--use generics all the way down?
+  - (model after Yew's `Callback` type--using generic instead of dynamic dispatch)
 
 - Clean up "into" ergonomics around animation_handle and recording_handle
-
-- Fix callback system (model after Yew's `Callback` type--using generic instead of dynamic dispatch)
 
 - Make using uniform links more ergonomic: use builder pattern, etc.
 
@@ -60,15 +58,6 @@ The following use cases should guide the development of this library:
   - Consume links when they are used during build time - would require less cloning in general
   - Enable borrowing in context structs - would also require less cloning to occur
 
-- Road map:
-  - Add Vec / Matrix utilities
-  - Build out a more structured Scene Graphs, etc. ?
-  - Enable compiling new shaders / programs at run time ?
-
-- Enable transform feedback
-
-- Make passing in buffer update / should_update callbacks optional
-
 - Return error when a duplicate item is added to HashMap?
 
 ## Nice to Haves
@@ -76,9 +65,3 @@ The following use cases should guide the development of this library:
 - Make everything truly as modular as possible
   - Make it renderer_data agnostic?
   - Make recording codec customizable
-
-- Make cross-compatible /callable with vanilla JavaScript
-  - This would require making sure all returned handles can cross the WasmAbi
-  - It would also probably require a refactor of callbacks, so that plain JavaScript closures could be accepted as well
-    - This could be achieved with a enum for callbacks (one for plain Rust callbacks & one for JavaScript)
-    - Plain JavaScript `Function` types can be called with a simple `call0` function
