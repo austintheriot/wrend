@@ -17,13 +17,8 @@ pub fn home() -> Html {
                 img_alt="Multicolored quadrilateral"
             />
             <LinkCard 
-                route={Route::HelloQuadAnimated}
-                title="Hello Quad Animated"
-                vid_src="./assets/hello_quad_animated.webm"
-            />
-            <LinkCard 
                 route={Route::RecordingDemo}
-                title="Recording Demo"
+                title="Canvas Recording Demo"
                 vid_src="./assets/hello_quad_animated.webm"
             />
             <LinkCard 
