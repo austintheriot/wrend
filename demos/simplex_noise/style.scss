@@ -1,10 +1,14 @@
 @use '../shared/global-styles.scss';
 
 .simplex-noise {
-  a {
+  .ui-container {
     position: absolute;
     top: 1rem;
     left: 1rem;
+    display: flex;
+    gap: 1rem;
+    max-width: calc(100vw - 1rem);
+    flex-wrap: wrap;
   }
 
   canvas {
