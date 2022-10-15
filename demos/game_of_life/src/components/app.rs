@@ -35,7 +35,7 @@ pub fn app() -> Html {
     use_effect_with_deps(
         {
             let canvas_ref = canvas_ref.clone();
-            let renderer = renderer.clone();
+            let renderer = Rc::clone(&renderer);
             move |_| {
                 let canvas: HtmlCanvasElement = canvas_ref
                     .cast()

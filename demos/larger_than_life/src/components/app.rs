@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{
     graphics::{
         attribute_id::AttributeId, buffer_id::BufferId, create_buffer::create_vertex_buffer,
@@ -10,13 +12,13 @@ use crate::{
 };
 
 use shared::{route::Route, SharedClass};
-use web_sys::HtmlCanvasElement;
+use web_sys::{HtmlCanvasElement, MouseEvent};
 use wrend::{
     AttributeLink, BufferLink, FramebufferLink, ProgramLink, RendererData, TextureLink,
     UniformContext, UniformLink,
 };
 
-use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, classes};
+use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, classes, Callback, use_state_eq};
 use yew_router::prelude::*;
 
 const VERTEX_SHADER: &str = include_str!("../shaders/vertex.glsl");
@@ -28,11 +30,12 @@ pub fn app() -> Html {
     let canvas_ref = use_node_ref();
     let render_state = use_mut_ref(RenderState::default);
     let renderer = use_mut_ref(|| None);
+    let is_recording = use_state_eq(bool::default);
 
     use_effect_with_deps(
         {
             let canvas_ref = canvas_ref.clone();
-            let renderer = renderer;
+            let renderer = Rc::clone(&renderer);
             move |_| {
                 let canvas: HtmlCanvasElement = canvas_ref
                     .cast()
@@ -129,9 +132,46 @@ pub fn app() -> Html {
         (),
     );
 
+    let handle_start_recording = {
+        let renderer = Rc::clone(&renderer);
+        let is_recording = is_recording.clone();
+        Callback::from(move |_: MouseEvent| {
+            if let Some(renderer) = &mut *renderer.borrow_mut() {
+                renderer.start_recording();
+                is_recording.set(true);
+            }
+        })
+    };
+
+    let handle_stop_recording = {
+        let renderer = Rc::clone(&renderer);
+        let is_recording = is_recording.clone();
+        Callback::from(move |_: MouseEvent| {
+            if let Some(renderer) = &*renderer.borrow() {
+                renderer.stop_recording();
+                is_recording.set(false);
+            }
+        })
+    };
+
     html! {
         <div class="larger-than-life">
-            <Link<Route> to={Route::Home} classes={classes!(SharedClass::Button.to_string())}>{"Home"}</Link<Route>>
+            <div class="ui-container">
+                <Link<Route> to={Route::Home} classes={classes!(SharedClass::Button.to_string())}>{"Home"}</Link<Route>>
+                {if !*is_recording {
+                    html!{
+                        <button type="button" onclick={handle_start_recording} class={SharedClass::Button.to_string()}>
+                            {"Start Recording"}
+                        </button>
+                    }
+                } else {
+                    html!{
+                        <button type="button" onclick={handle_stop_recording} class={SharedClass::Button.to_string()}>
+                            {"Stop Recording"}
+                        </button>
+                    }
+                }}
+            </div>
             <canvas ref={canvas_ref} height={1000} width={1000} />
         </div>
     }
