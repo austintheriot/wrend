@@ -14,6 +14,9 @@ impl Reducible for UiState {
             UiStateAction::SetShowMenu(show_menu) => {
                 next_state.set_show_menu(show_menu);
             }
+            UiStateAction::SetIsRecording(is_recording) => {
+                next_state.set_is_recording(is_recording);
+            }
         }
         Rc::new(next_state)
     }

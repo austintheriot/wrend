@@ -2,4 +2,5 @@
 pub enum UiStateAction {
     SetIsKeyboardUser,
     SetShowMenu(bool),
+    SetIsRecording(bool)
 }

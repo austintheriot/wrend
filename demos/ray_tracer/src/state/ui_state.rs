@@ -2,6 +2,7 @@
 pub struct UiState {
     is_keyboard_user: bool,
     show_menu: bool,
+    is_recording: bool,
 }
 
 impl UiState {
@@ -22,6 +23,15 @@ impl UiState {
         self.show_menu = show_menu;
         self
     }
+
+    pub fn is_recording(&self) -> bool {
+        self.is_recording
+    }
+
+    pub fn set_is_recording(&mut self, is_recording: bool) -> &mut Self {
+        self.is_recording = is_recording;
+        self
+    }
 }
 
 impl Default for UiState {
@@ -29,6 +39,7 @@ impl Default for UiState {
         Self {
             is_keyboard_user: Default::default(),
             show_menu: true,
+            is_recording: false,
         }
     }
 }

@@ -72,8 +72,29 @@ pub fn menu() -> Html {
     };
 
     let handle_reset_button_click = {
+        let app_context = app_context.clone();
         Callback::from(move |_: MouseEvent| {
             *app_context.render_state.borrow_mut() = Default::default();
+        })
+    };
+
+    let handle_start_recording = {
+        let app_context = app_context.clone();
+        Callback::from(move |_: MouseEvent| {
+            if let Some(renderer) = &mut *app_context.renderer.borrow_mut() {
+                renderer.start_recording();
+                app_context.ui_state.dispatch(UiStateAction::SetIsRecording(true));
+            }
+        })
+    };
+
+    let handle_stop_recording = {
+        let app_context = app_context.clone();
+        Callback::from(move |_: MouseEvent| {
+            if let Some(renderer) = &mut *app_context.renderer.borrow_mut() {
+                renderer.stop_recording();
+                app_context.ui_state.dispatch(UiStateAction::SetIsRecording(false));
+            }
         })
     };
 
@@ -92,6 +113,19 @@ pub fn menu() -> Html {
                 <Button onclick={handle_save_button_click}>
                     {"Save Image"}
                 </Button>
+                {if !app_context.ui_state.is_recording() {
+                    html!{
+                        <Button onclick={handle_start_recording}>
+                            {"Start Recording"}
+                        </Button>
+                    }
+                } else {
+                    html!{
+                        <Button onclick={handle_stop_recording}>
+                            {"Stop Recording"}
+                        </Button>
+                    }
+                }}
                 <Button onclick={handle_reset_button_click}>
                     {"Reset"}
                 </Button>
