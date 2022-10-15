@@ -31,7 +31,7 @@ use wrend::{
     TransformFeedbackLink, UniformContext, UniformLink, WebGlContextError,
 };
 
-use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, Callback, classes};
+use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, Callback, classes, use_state_eq};
 use yew_router::prelude::*;
 
 const QUAD_VERTEX_SHADER: &str = include_str!("../shaders/quad.vert");
@@ -47,11 +47,12 @@ pub fn app() -> Html {
     let canvas_ref = use_node_ref();
     let render_state = use_mut_ref(RenderState::default);
     let renderer = use_mut_ref(|| None);
+    let is_recording = use_state_eq(bool::default);
 
     use_effect_with_deps(
         {
             let canvas_ref = canvas_ref.clone();
-            let renderer = renderer;
+            let renderer = Rc::clone(&renderer);
             let render_state = Rc::clone(&render_state);
             move |_| {
                 let canvas: HtmlCanvasElement = canvas_ref
@@ -278,11 +279,46 @@ pub fn app() -> Html {
         })
     };
 
+    let handle_start_recording = {
+        let renderer = Rc::clone(&renderer);
+        let is_recording = is_recording.clone();
+        Callback::from(move |_: MouseEvent| {
+            if let Some(renderer) = &mut *renderer.borrow_mut() {
+                renderer.start_recording();
+                is_recording.set(true);
+            }
+        })
+    };
+
+    let handle_stop_recording = {
+        let renderer = Rc::clone(&renderer);
+        let is_recording = is_recording.clone();
+        Callback::from(move |_: MouseEvent| {
+            if let Some(renderer) = &*renderer.borrow() {
+                renderer.stop_recording();
+                is_recording.set(false);
+            }
+        })
+    };
+
     html! {
         <div class="flow-field">
             <div class="ui-container">
                 <Link<Route> to={Route::Home} classes={classes!(SharedClass::Button.to_string())}>{"Home"}</Link<Route>>
                 <button onclick={handle_click} class={SharedClass::Button.to_string()}>{"Save Image"}</button>
+                {if !*is_recording {
+                    html!{
+                        <button type="button" onclick={handle_start_recording} class={SharedClass::Button.to_string()}>
+                            {"Start Recording"}
+                        </button>
+                    }
+                } else {
+                    html!{
+                        <button type="button" onclick={handle_stop_recording} class={SharedClass::Button.to_string()}>
+                            {"Stop Recording"}
+                        </button>
+                    }
+                }}
             </div>
             <canvas ref={canvas_ref} height={1000} width={1000} />
         </div>
