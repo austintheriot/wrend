@@ -18,9 +18,9 @@
 
 - [Documentation][docs.rs]
 - [Getting Started](GETTING_STARTED.md)
-- [Simple Examples](examples)
-- [Extensive Demos (code)](demos)
-- [Extensive Demos (live)](https://austintheriot.github.io/wrend/)
+- [Simple Demo Apps (code)](examples)
+- [Extensive Demo Apps (code)](demos)
+- [Extensive Demo Apps (live)](https://austintheriot.github.io/wrend/)
 - [Contributing](CONTRIBUTING.md)
 
 ## About
