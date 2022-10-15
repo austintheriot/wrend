@@ -10,7 +10,7 @@
 [crates.io]: https://crates.io/crates/wrend
 [npm]: https://www.npmjs.com/package/wrend
 [docs.rs]: https://docs.rs/wrend/latest/wrend/
-[wrend CI]: https://github.com/austintheriot/wrend/actions/workflows/cy.yml
+[wrend CI]: https://github.com/austintheriot/wrend/actions/workflows/ci.yml
 
 **This library is currently in early development**. Feel free to use it, but do so with the knowledge that APIs are likely to change without consideration for backwards compatibility.
 
