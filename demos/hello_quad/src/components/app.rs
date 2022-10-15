@@ -6,7 +6,8 @@ use wrend::{
     ProgramLink, RendererData, QUAD,
 };
 use yew::{
-    function_component, html, use_effect_with_deps, use_node_ref, use_state_eq, UseStateHandle, classes,
+    classes, function_component, html, use_effect_with_deps, use_node_ref, use_state_eq,
+    UseStateHandle,
 };
 use yew_router::prelude::*;
 

@@ -31,7 +31,10 @@ use wrend::{
     TransformFeedbackLink, UniformContext, UniformLink, WebGlContextError,
 };
 
-use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, Callback, classes, use_state_eq};
+use yew::{
+    classes, function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref,
+    use_state_eq, Callback,
+};
 use yew_router::prelude::*;
 
 const QUAD_VERTEX_SHADER: &str = include_str!("../shaders/quad.vert");

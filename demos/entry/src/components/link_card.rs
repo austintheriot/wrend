@@ -53,8 +53,8 @@ pub fn link_card(props: &LinkCardProps) -> Html {
     };
 
     html! {
-        <div 
-            class={classes!("link-card", props.classes.clone())} 
+        <div
+            class={classes!("link-card", props.classes.clone())}
             onmouseenter={handle_mouse_enter}
             onmouseleave={handle_mouse_leave}
         >
@@ -62,9 +62,9 @@ pub fn link_card(props: &LinkCardProps) -> Html {
                 <p class="title">{props.title.clone()}</p>
                 {if !props.img_src.is_empty() {
                     html!{
-                        <img 
-                            src={props.img_src.clone()} 
-                            alt={props.img_alt.clone()} 
+                        <img
+                            src={props.img_src.clone()}
+                            alt={props.img_alt.clone()}
                             loading={props.img_loading.clone()}
                         />
                     }
@@ -73,9 +73,9 @@ pub fn link_card(props: &LinkCardProps) -> Html {
                 }}
                 {if !props.vid_src.is_empty() {
                     html!{
-                        <video 
-                            src={props.vid_src.clone()} 
-                            controls={false} 
+                        <video
+                            src={props.vid_src.clone()}
+                            controls={false}
                             ref={video_ref}
                             muted={true}
                             loop={true}

@@ -153,11 +153,15 @@ pub fn initialize_renderer(
     );
 
     let mut u_now_link = {
-        UniformLink::new([ProgramId::FilterMovingFragments], UniformId::UNow.name(), |ctx: &UniformContext| {
-            let gl = ctx.gl();
-            let uniform_location = ctx.uniform_location();
-            gl.uniform1f(Some(uniform_location), (ctx.now() / 2000.) as f32);
-        })
+        UniformLink::new(
+            [ProgramId::FilterMovingFragments],
+            UniformId::UNow.name(),
+            |ctx: &UniformContext| {
+                let gl = ctx.gl();
+                let uniform_location = ctx.uniform_location();
+                gl.uniform1f(Some(uniform_location), (ctx.now() / 2000.) as f32);
+            },
+        )
     };
     u_now_link.set_use_init_callback_for_update(true);
 

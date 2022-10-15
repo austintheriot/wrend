@@ -83,7 +83,9 @@ pub fn menu() -> Html {
         Callback::from(move |_: MouseEvent| {
             if let Some(renderer) = &mut *app_context.renderer.borrow_mut() {
                 renderer.start_recording();
-                app_context.ui_state.dispatch(UiStateAction::SetIsRecording(true));
+                app_context
+                    .ui_state
+                    .dispatch(UiStateAction::SetIsRecording(true));
             }
         })
     };
@@ -93,7 +95,9 @@ pub fn menu() -> Html {
         Callback::from(move |_: MouseEvent| {
             if let Some(renderer) = &mut *app_context.renderer.borrow_mut() {
                 renderer.stop_recording();
-                app_context.ui_state.dispatch(UiStateAction::SetIsRecording(false));
+                app_context
+                    .ui_state
+                    .dispatch(UiStateAction::SetIsRecording(false));
             }
         })
     };

@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub enum SharedClass {
-    Button
+    Button,
 }
 
 impl From<SharedClass> for &str {

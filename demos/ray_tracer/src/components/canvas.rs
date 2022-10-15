@@ -4,7 +4,7 @@ use crate::{
 };
 
 use web_sys::HtmlCanvasElement;
-use yew::{function_component, html, use_context, use_effect_with_deps, use_mut_ref, use_node_ref};
+use yew::{function_component, html, use_context, use_effect_with_deps, use_node_ref};
 
 #[function_component(Canvas)]
 pub fn canvas() -> Html {

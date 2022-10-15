@@ -19,7 +19,10 @@ use wrend::{
     UniformContext, UniformLink,
 };
 
-use yew::{function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, classes, use_state_eq, Callback};
+use yew::{
+    classes, function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref,
+    use_state_eq, Callback,
+};
 use yew_router::prelude::*;
 
 const VERTEX_SHADER: &str = include_str!("../shaders/vertex.glsl");

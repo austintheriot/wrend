@@ -13,8 +13,8 @@ use wasm_bindgen::JsCast;
 use web_sys::{Event, HtmlSelectElement, MouseEvent};
 
 use yew::{
-    function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref, use_state_eq,
-    Callback, UseStateHandle, classes,
+    classes, function_component, html, use_effect_with_deps, use_mut_ref, use_node_ref,
+    use_state_eq, Callback, UseStateHandle,
 };
 use yew_router::prelude::*;
 
@@ -174,7 +174,7 @@ pub fn app() -> Html {
 
     let handle_clear_recorded_data = {
         let renderer_ref = Rc::clone(&renderer_ref);
-        let is_recording = is_recording.clone();
+        let _is_recording = is_recording.clone();
         Callback::from(move |_: MouseEvent| {
             if let Some(renderer) = &mut *renderer_ref.borrow_mut() {
                 renderer.clear_recorded_data();
@@ -254,12 +254,12 @@ pub fn app() -> Html {
 
                 <details>
                     <summary>{"Remove filters"}</summary>
-                    <button 
-                        onclick={handle_clear_all_filters} 
+                    <button
+                        onclick={handle_clear_all_filters}
                         class={classes!(SharedClass::Button.to_string(), "clear-all-filters-button")}>
                         {"Clear All Filters"}
                     </button>
-                
+
                     <p>{"Currently Set Filters: "}</p>
                     <div class="remove-filter-button-container">
                         {if applied_filters.is_empty() {
