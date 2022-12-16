@@ -5,7 +5,7 @@
 [Crates Version]: https://img.shields.io/crates/v/wrend.svg
 [NPM Version]: https://img.shields.io/npm/v/wrend.svg
 [Docs Image]: https://img.shields.io/badge/docs.rs-wrend-blue
-[CI Image]: https://img.shields.io/github/workflow/status/austintheriot/wrend/CI/master
+[CI Image]: https://img.shields.io/github/actions/workflow/status/austintheriot/wrend/ci.yml?branch=master
 
 [crates.io]: https://crates.io/crates/wrend
 [npm]: https://www.npmjs.com/package/wrend
